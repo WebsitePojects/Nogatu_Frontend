@@ -1,0 +1,50 @@
+.header .btn-getstarted, .header .btn-getstarted:focus {
+    background: #0A760E;
+}
+
+.contact .info-item .icon {
+    background: #37942E;
+}
+
+.scroll-top {
+    background: #37942E;
+}
+
+.contact .php-email-form button[type=submit] {
+    background: #37942E;
+}
+
+.hero .btn-get-started {
+    background: #37942E;
+}
+
+.footer {
+    background-color: #592219;
+   
+}
+
+.footer .icon {
+    color: #37942E;
+}
+
+.why-us .why-box {
+    background-color: #592219;
+}
+
+.why-us .icon-box:hover i {
+    background-color: #592219;
+}
+
+.why-us .icon-box i {
+    color: #592219;
+    background: color-mix(in srgb, #592219, transparent 95%);
+}
+
+.header .logo h1 {
+    color: #592219;
+}
+
+.navmenu a, .navmenu a:focus {
+    color: #0A760E;
+     
+ }
