@@ -31,6 +31,7 @@ import Redeem from './pages/admin/Redeem';
 import UpdateAccounts from './pages/admin/UpdateAccounts';
 import AdminGenealogy from './pages/admin/AdminGenealogy';
 import ChangePassword from './pages/admin/ChangePassword';
+import NewsManagement from './pages/admin/NewsManagement';
 
 function ProtectedMember({ children }) {
   const { user, loading } = useAuth();
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="encashment" element={<Encashment />} />
           <Route path="redeem" element={<Redeem />} />
           <Route path="genealogy" element={<AdminGenealogy />} />
+          <Route path="news" element={<NewsManagement />} />
           <Route path="change-password" element={<ChangePassword />} />
         </Route>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -25,17 +25,14 @@ const LockIcon = () => (
 
 const EyeOpenIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
   </svg>
 );
 
 const EyeClosedIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
   </svg>
 );
 
@@ -58,8 +55,16 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState({ activeMembers: null, networksBuilt: null });
   const { loginMember } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(setStats)
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,44 +79,37 @@ export default function Login() {
     }
   };
 
+  const fmt = (n) => n === null ? '—' : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
+
   return (
     <div className="min-h-screen flex">
 
-      {/* ── Left brand panel (desktop only) ─────────────────────── */}
+      {/* ── Left brand panel ─────────────────────────────────────── */}
       <div
         className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden"
         style={{ background: 'linear-gradient(145deg, #1e3a8a 0%, #1d4ed8 45%, #4338ca 100%)' }}
       >
-        {/* Decorative circles */}
+        {/* Decorative blobs */}
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-white opacity-5" />
         <div className="absolute bottom-0 right-0 w-[480px] h-[480px] rounded-full bg-indigo-300 opacity-5 translate-x-1/3 translate-y-1/3" />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full bg-blue-200 opacity-5 -translate-x-1/2 -translate-y-1/2" />
 
-        {/* Subtle grid */}
+        {/* Dot grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.07]"
           style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',
-            backgroundSize: '44px 44px',
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
           }}
         />
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center backdrop-blur">
-            <span className="text-white font-black text-sm tracking-tighter">NA</span>
-          </div>
-          <span className="text-white/90 font-semibold text-base tracking-wide">NOGATU Alliance</span>
+          <img src="/landing/img/nogatualliance-logo.png" alt="NOGATU Alliance" className="h-10 w-auto object-contain" />
         </div>
 
         {/* Hero copy */}
         <div className="relative z-10 space-y-7">
           <div>
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-white/75 text-xs font-medium tracking-wide uppercase">Member Portal</span>
-            </div>
             <h1 className="text-4xl xl:text-5xl font-bold text-white leading-snug">
               Build Your Network,<br />
               <span className="text-blue-200">Build Your Future.</span>
@@ -133,18 +131,24 @@ export default function Login() {
             ))}
           </ul>
 
-          {/* Stats */}
+          {/* Live stats */}
           <div className="flex gap-8 pt-5 border-t border-white/10">
-            {[['Active Members', '10K+'], ['Networks', '500+'], ['Uptime', '99.9%']].map(([label, val]) => (
-              <div key={label}>
-                <p className="text-white font-bold text-2xl">{val}</p>
-                <p className="text-blue-300/70 text-xs mt-0.5">{label}</p>
-              </div>
-            ))}
+            <div>
+              <p className="text-white font-bold text-2xl">{fmt(stats.activeMembers)}+</p>
+              <p className="text-blue-300/70 text-xs mt-0.5">Active Members</p>
+            </div>
+            <div>
+              <p className="text-white font-bold text-2xl">{fmt(stats.networksBuilt)}+</p>
+              <p className="text-blue-300/70 text-xs mt-0.5">Networks Built</p>
+            </div>
+            <div>
+              <p className="text-white font-bold text-2xl">99.9%</p>
+              <p className="text-blue-300/70 text-xs mt-0.5">Uptime</p>
+            </div>
           </div>
         </div>
 
-        {/* Footer note */}
+        {/* Footer */}
         <p className="relative z-10 text-blue-300/40 text-xs">
           © {new Date().getFullYear()} NOGATU Alliance. All rights reserved.
         </p>
@@ -156,13 +160,7 @@ export default function Login() {
 
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-10">
-            <div
-              className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #1d4ed8, #4338ca)' }}
-            >
-              <span className="text-white font-black text-xl">NA</span>
-            </div>
-            <h1 className="text-xl font-bold text-gray-900">NOGATU Alliance</h1>
+            <img src="/landing/img/nogatualliance-logo.png" alt="NOGATU Alliance" className="h-16 w-auto object-contain mx-auto mb-4" />
             <p className="text-gray-500 text-sm">Member Portal</p>
           </div>
 
@@ -173,7 +171,7 @@ export default function Login() {
           </div>
 
           {/* Form card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 space-y-5">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 space-y-5">
 
             {/* Username */}
             <div>
@@ -224,9 +222,7 @@ export default function Login() {
             {/* Submit */}
             <button
               type="submit"
-              form="member-login-form"
               disabled={loading}
-              onClick={handleSubmit}
               className="w-full py-2.5 px-5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
               style={{
                 background: loading
@@ -235,13 +231,9 @@ export default function Login() {
                 boxShadow: loading ? 'none' : '0 4px 14px rgba(29,78,216,0.35)',
               }}
             >
-              {loading ? (
-                <><SpinnerIcon /> Signing in...</>
-              ) : (
-                'Sign In'
-              )}
+              {loading ? <><SpinnerIcon /> Signing in...</> : 'Sign In'}
             </button>
-          </div>
+          </form>
 
           <p className="text-center text-gray-400 text-xs mt-6">
             New member?{' '}
@@ -250,9 +242,6 @@ export default function Login() {
           </p>
         </div>
       </div>
-
-      {/* Hidden actual form for accessibility */}
-      <form id="member-login-form" onSubmit={handleSubmit} className="hidden" />
     </div>
   );
 }

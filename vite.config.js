@@ -10,12 +10,24 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       {
-        name: 'portal-history-fallback',
+        name: 'spa-history-fallback',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
-            // Rewrite /portal/* paths (no file extension) to portal/index.html
+            // Portal SPA fallback
             if (req.url.startsWith('/portal') && !req.url.includes('.')) {
               req.url = '/portal/index.html';
+            }
+            // Landing SPA fallback - non-file requests to landing pages
+            else if (
+              !req.url.startsWith('/portal') &&
+              !req.url.startsWith('/api') &&
+              !req.url.startsWith('/src') &&
+              !req.url.startsWith('/node_modules') &&
+              !req.url.startsWith('/@') &&
+              !req.url.includes('.') &&
+              req.url !== '/'
+            ) {
+              req.url = '/index.html';
             }
             next();
           });
