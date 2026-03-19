@@ -6,6 +6,8 @@ const PAYOUT_OPTIONS = ['Pickup', 'Gcash', 'Remittance Center', 'Bank Deposit', 
 
 export default function AccountDetails() {
   const [data, setData] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -26,12 +28,13 @@ export default function AccountDetails() {
     try {
       await api.put('/account', {
         address: data.address,
-        password: data.password,
+        password: newPassword || '',
         payoutdetails: data.payoutdetails,
         payoutoptions: data.payoutid,
         contactnos: data.contactnos,
       });
       toast.success('Account updated successfully');
+      setNewPassword('');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Update failed');
     } finally { setSaving(false); }
@@ -54,8 +57,13 @@ export default function AccountDetails() {
             <input type="text" value={data.username || ''} className="input-field bg-gray-50" disabled />
           </div>
           <div>
-            <label className="label">Password</label>
-            <input type="text" value={data.password || ''} onChange={(e) => handleChange('password', e.target.value)} className="input-field" />
+            <label className="label">New Password <span className="text-xs text-gray-400">(leave blank to keep current)</span></label>
+            <div className="relative">
+              <input type={showPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field pr-10" placeholder="Enter new password" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
           <div>
             <label className="label">Address</label>

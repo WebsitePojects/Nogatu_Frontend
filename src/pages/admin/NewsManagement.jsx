@@ -4,9 +4,9 @@ import toast from 'react-hot-toast';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineEyeOff, HiOutlineX } from 'react-icons/hi';
 
 const TYPE_OPTS = [
-  { value: 'news', label: 'News', color: 'bg-blue-50 text-blue-600' },
+  { value: 'news', label: 'News', color: 'bg-primary-100 text-primary-700' },
   { value: 'announcement', label: 'Announcement', color: 'bg-amber-50 text-amber-600' },
-  { value: 'promo', label: 'Promo', color: 'bg-emerald-50 text-emerald-600' },
+  { value: 'promo', label: 'Promo', color: 'bg-primary-50 text-primary-600' },
 ];
 
 const EMPTY = { title: '', content: '', type: 'news', image_url: '', is_published: true };
@@ -81,7 +81,7 @@ export default function NewsManagement() {
     } catch { toast.error('Failed to toggle'); }
   }
 
-  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div></div>;
+  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
 
   return (
     <div>
@@ -90,7 +90,7 @@ export default function NewsManagement() {
           <h1 className="text-2xl font-bold text-gray-800">News & Announcements</h1>
           <p className="text-sm text-gray-500">Manage news, announcements, and promotions visible on the public site.</p>
         </div>
-        <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors cursor-pointer shadow-sm">
+        <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors cursor-pointer shadow-sm">
           <HiOutlinePlus className="w-5 h-5" />
           New Post
         </button>
@@ -136,7 +136,7 @@ export default function NewsManagement() {
                         <button
                           onClick={() => handleToggle(post.id)}
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-                            post.is_published ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                            post.is_published ? 'bg-primary-50 text-primary-700 hover:bg-primary-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
                           }`}
                         >
                           {post.is_published ? <HiOutlineEye className="w-3.5 h-3.5" /> : <HiOutlineEyeOff className="w-3.5 h-3.5" />}
@@ -227,7 +227,7 @@ export default function NewsManagement() {
                   type="checkbox"
                   checked={form.is_published}
                   onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
                 <label htmlFor="post-published" className="text-sm text-gray-700 font-medium">Publish immediately</label>
               </div>

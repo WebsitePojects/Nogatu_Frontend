@@ -39,12 +39,12 @@ export default function EWallet() {
   if (!data) return <p>Failed to load wallet data.</p>;
 
   const incomeItems = [
-    { label: 'Direct Referral', value: data.directReferral, color: 'text-blue-600' },
-    { label: 'Binary Pairing', value: data.pairing, color: 'text-purple-600' },
-    { label: 'Leadership Bonus', value: data.leadership, color: 'text-pink-600' },
+    { label: 'Direct Referral', value: data.directReferral, color: 'text-brand-gold-dark' },
+    { label: 'Binary Pairing', value: data.pairing, color: 'text-brand-brown' },
+    { label: 'Leadership Bonus', value: data.leadership, color: 'text-amber-700' },
     { label: 'Uni-Level', value: data.unilevel, color: 'text-amber-600' },
-    { label: 'Hi-Five Bonus', value: data.hifive, color: 'text-indigo-600' },
-    { label: 'LPC (Ranking)', value: data.lpc, color: 'text-teal-600' },
+    { label: 'Hi-Five Bonus', value: data.hifive, color: 'text-brand-brown-light' },
+    { label: 'LPC (Ranking)', value: data.lpc, color: 'text-yellow-700' },
   ];
 
   return (
@@ -52,10 +52,13 @@ export default function EWallet() {
       <h1 className="text-2xl font-bold text-gray-800 mb-6">E-Wallet</h1>
 
       {/* Balance Card */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-6 text-white mb-6">
-        <p className="text-primary-200 text-sm">Available Balance</p>
-        <p className="text-4xl font-bold mt-1">₱{fmt(data.cashBalance)}</p>
-        <p className="text-primary-200 text-sm mt-2">Total Income: ₱{fmt(data.totalIncome)}</p>
+      <div className="rounded-2xl p-6 text-white mb-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #3A1000 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, rgba(212,165,40,0.06) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+        <div className="relative z-10">
+          <p className="text-brand-gold-light/70 text-sm">Available Balance</p>
+          <p className="text-4xl font-bold mt-1">₱{fmt(data.cashBalance)}</p>
+          <p className="text-brand-gold-light/50 text-sm mt-2">Total Income: ₱{fmt(data.totalIncome)}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

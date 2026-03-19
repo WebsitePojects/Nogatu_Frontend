@@ -4,17 +4,20 @@ import toast from 'react-hot-toast';
 
 export default function ChangePassword() {
   const [adminAccount, setAdminAccount] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!adminAccount || !password) return toast.error('All fields required');
+    if (!adminAccount || !password || !oldPassword) return toast.error('All fields required');
+    if (password.length < 6) return toast.error('New password must be at least 6 characters');
     setSaving(true);
     try {
-      await api.post('/admin/accounts/change-password', { adminAccount, password });
+      await api.post('/admin/accounts/change-password', { adminAccount, password, oldPassword });
       toast.success('Password changed successfully');
       setPassword('');
+      setOldPassword('');
     } catch (err) { toast.error(err.response?.data?.error || 'Failed'); } finally { setSaving(false); }
   }
 
@@ -31,6 +34,10 @@ export default function ChangePassword() {
               <option value="cashier">Cashier</option>
               <option value="bod">BOD</option>
             </select>
+          </div>
+          <div>
+            <label className="label">Current Password</label>
+            <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} className="input-field" required />
           </div>
           <div>
             <label className="label">New Password</label>

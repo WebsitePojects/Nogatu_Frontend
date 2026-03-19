@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -55,25 +55,22 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({ activeMembers: null, networksBuilt: null });
+  const stats = { activeMembers: 5900, networksBuilt: 5900 };
   const { loginMember } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch('/api/stats')
-      .then(r => r.json())
-      .then(setStats)
-      .catch(() => {});
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const toastId = toast.loading('Signing in...');
     try {
       await loginMember(username, password);
+      toast.success('Welcome back!', { id: toastId });
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed. Please check your credentials.');
+      const msg = err.response?.data?.error || 'Invalid username or password.';
+      console.error('[Login Error]', err);
+      toast.error(msg, { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -84,27 +81,33 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
 
-      {/* ── Left brand panel ─────────────────────────────────────── */}
+      {/* ── Left brand panel — Gold-Brown gradient ─────────────── */}
       <div
         className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #1e3a8a 0%, #1d4ed8 45%, #4338ca 100%)' }}
+        style={{ background: 'linear-gradient(145deg, #3A1000 0%, #592219 45%, #6d3028 100%)' }}
       >
         {/* Decorative blobs */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-white opacity-5" />
-        <div className="absolute bottom-0 right-0 w-[480px] h-[480px] rounded-full bg-indigo-300 opacity-5 translate-x-1/3 translate-y-1/3" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #D4A528, transparent)' }} />
+        <div className="absolute bottom-0 right-0 w-[480px] h-[480px] rounded-full opacity-5 translate-x-1/3 translate-y-1/3" style={{ background: 'radial-gradient(circle, #E7C679, transparent)' }} />
 
         {/* Dot grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.06]"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgba(212,165,40,0.8) 1px, transparent 1px)',
             backgroundSize: '28px 28px',
           }}
         />
 
+        {/* Gold accent line */}
+        <div
+          className="absolute top-0 left-0 right-0 h-0.5"
+          style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }}
+        />
+
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <img src="/landing/img/nogatualliance-logo.png" alt="NOGATU Alliance" className="h-10 w-auto object-contain" />
+          <img src="/img/nogatu_logo.jpg" alt="NOGATU Alliance" className="h-10 w-auto object-contain" />
         </div>
 
         {/* Hero copy */}
@@ -112,9 +115,9 @@ export default function Login() {
           <div>
             <h1 className="text-4xl xl:text-5xl font-bold text-white leading-snug">
               Build Your Network,<br />
-              <span className="text-blue-200">Build Your Future.</span>
+              <span className="text-brand-gold-light">Build Your Future.</span>
             </h1>
-            <p className="text-blue-200/80 text-base leading-relaxed mt-4 max-w-xs">
+            <p className="text-white/60 text-base leading-relaxed mt-4 max-w-xs">
               Access your complete dashboard to manage your downline, track earnings, and grow your business.
             </p>
           </div>
@@ -123,10 +126,10 @@ export default function Login() {
           <ul className="space-y-3">
             {features.map((f) => (
               <li key={f} className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-500/40">
+                <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 shadow-md" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)', boxShadow: '0 4px 12px rgba(184,134,11,0.35)' }}>
                   <CheckIcon />
                 </span>
-                <span className="text-blue-100/80 text-sm">{f}</span>
+                <span className="text-white/70 text-sm">{f}</span>
               </li>
             ))}
           </ul>
@@ -135,32 +138,32 @@ export default function Login() {
           <div className="flex gap-8 pt-5 border-t border-white/10">
             <div>
               <p className="text-white font-bold text-2xl">{fmt(stats.activeMembers)}+</p>
-              <p className="text-blue-300/70 text-xs mt-0.5">Active Members</p>
+              <p className="text-brand-gold/50 text-xs mt-0.5">Active Members</p>
             </div>
             <div>
               <p className="text-white font-bold text-2xl">{fmt(stats.networksBuilt)}+</p>
-              <p className="text-blue-300/70 text-xs mt-0.5">Networks Built</p>
+              <p className="text-brand-gold/50 text-xs mt-0.5">Networks Built</p>
             </div>
             <div>
               <p className="text-white font-bold text-2xl">99.9%</p>
-              <p className="text-blue-300/70 text-xs mt-0.5">Uptime</p>
+              <p className="text-brand-gold/50 text-xs mt-0.5">Uptime</p>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="relative z-10 text-blue-300/40 text-xs">
+        <p className="relative z-10 text-white/20 text-xs">
           © {new Date().getFullYear()} NOGATU Alliance. All rights reserved.
         </p>
       </div>
 
       {/* ── Right form panel ────────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-[#f8f9fc]">
+      <div className="flex-1 flex items-center justify-center px-6 py-12" style={{ background: '#FFFDF5' }}>
         <div className="w-full max-w-[400px]">
 
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-10">
-            <img src="/landing/img/nogatualliance-logo.png" alt="NOGATU Alliance" className="h-16 w-auto object-contain mx-auto mb-4" />
+            <img src="/img/nogatu_logo.jpg" alt="NOGATU Alliance" className="h-16 w-auto object-contain mx-auto mb-4" />
             <p className="text-gray-500 text-sm">Member Portal</p>
           </div>
 
@@ -171,7 +174,7 @@ export default function Login() {
           </div>
 
           {/* Form card */}
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 space-y-5">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-primary-200/40 shadow-sm p-7 space-y-5">
 
             {/* Username */}
             <div>
@@ -187,7 +190,7 @@ export default function Login() {
                   placeholder="Enter your username"
                   required
                   autoComplete="username"
-                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50/60 text-gray-900 text-sm placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition"
+                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-primary-200/60 bg-primary-50/30 text-gray-900 text-sm placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary-400/40 focus:border-transparent focus:bg-white motion-safe:transition"
                 />
               </div>
             </div>
@@ -206,13 +209,13 @@ export default function Login() {
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
-                  className="w-full pl-11 pr-11 py-2.5 rounded-xl border border-gray-200 bg-gray-50/60 text-gray-900 text-sm placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition"
+                  className="w-full pl-11 pr-11 py-2.5 rounded-xl border border-primary-200/60 bg-primary-50/30 text-gray-900 text-sm placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary-400/40 focus:border-transparent focus:bg-white motion-safe:transition"
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 motion-safe:transition"
                 >
                   {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
                 </button>
@@ -223,12 +226,12 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+              className="w-full py-2.5 px-5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 motion-safe:transition-all motion-safe:duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
               style={{
                 background: loading
-                  ? '#93c5fd'
-                  : 'linear-gradient(135deg, #1d4ed8 0%, #4338ca 100%)',
-                boxShadow: loading ? 'none' : '0 4px 14px rgba(29,78,216,0.35)',
+                  ? 'rgba(212,165,40,0.5)'
+                  : 'linear-gradient(135deg, #B8860B 0%, #D4A528 100%)',
+                boxShadow: loading ? 'none' : '0 4px 14px rgba(184,134,11,0.35)',
               }}
             >
               {loading ? <><SpinnerIcon /> Signing in...</> : 'Sign In'}
@@ -237,7 +240,7 @@ export default function Login() {
 
           <p className="text-center text-gray-400 text-xs mt-6">
             New member?{' '}
-            <span className="text-blue-600 font-medium cursor-default">Contact your upline</span>
+            <span className="text-brand-gold-dark font-medium cursor-default">Contact your upline</span>
             {' '}to get registered.
           </p>
         </div>

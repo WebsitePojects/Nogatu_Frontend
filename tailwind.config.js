@@ -4,15 +4,35 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554' },
-        sidebar: { bg: '#1c2434', hover: '#333a48', active: '#333a48' },
+        primary: {
+          50: '#FFFDF5',
+          100: '#FFF8E1',
+          200: '#FFECB3',
+          300: '#FFD54F',
+          400: '#FFCA28',
+          500: '#F59E0B',
+          600: '#D4870A',
+          700: '#B8720A',
+          800: '#8B5A08',
+          900: '#6B4506',
+          950: '#4A2F04',
+        },
+        sidebar: {
+          bg: '#1A1207',
+          hover: '#2D2010',
+          active: '#3A2A15',
+        },
         brand: {
-          green: '#37942E',
-          'green-dark': '#0A760E',
+          gold: '#D4A528',
+          'gold-light': '#E7C679',
+          'gold-dark': '#B8860B',
           brown: '#592219',
           'brown-light': '#6d3028',
-          gold: '#f59e0b',
-          red: '#ef4444',
+          'brown-dark': '#3A1000',
+          yellow: '#F5C518',
+          'yellow-light': '#FFD54F',
+          cream: '#FFFDF5',
+          ivory: '#FFF8E1',
         },
       },
       fontFamily: {
@@ -71,6 +91,10 @@ export default {
           '0%': { transform: 'scale(1)', opacity: '1' },
           '100%': { transform: 'scale(1.5)', opacity: '0' },
         },
+        'shimmer': {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.7s ease-out forwards',
@@ -86,6 +110,7 @@ export default {
         'pulse-glow': 'pulse-glow 4s ease-in-out infinite',
         'spin-slow': 'spin-slow 25s linear infinite',
         'pulsate': 'pulsate 2s infinite',
+        'shimmer': 'shimmer 3s linear infinite',
       },
     },
   },

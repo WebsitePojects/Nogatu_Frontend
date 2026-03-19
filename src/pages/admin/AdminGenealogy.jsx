@@ -7,7 +7,7 @@ function TreeNode({ node, onNavigate }) {
   if (!node) return null;
   return (
     <div className="flex flex-col items-center">
-      <div className="border-2 border-gray-300 rounded-xl p-3 min-w-[140px] text-center cursor-pointer hover:shadow-md hover:border-emerald-400 transition-all bg-white" onClick={() => onNavigate(node.uid)}>
+      <div className="border-2 border-gray-300 rounded-xl p-3 min-w-[140px] text-center cursor-pointer hover:shadow-md hover:border-primary-400 transition-all bg-white" onClick={() => onNavigate(node.uid)}>
         <p className="font-semibold text-sm text-gray-800">{node.username}</p>
         <p className="text-xs text-gray-500">{node.fullname}</p>
         <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{node.accttypeName}</span>
@@ -62,7 +62,7 @@ export default function AdminGenealogy() {
       </div>
       <div className="card overflow-x-auto">
         {loading ? (
-          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div></div>
+          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
         ) : tree ? (
           <div className="min-w-[600px] flex justify-center py-6">
             <TreeNode node={tree} onNavigate={(uid) => { setSearchParams({ id: uid }); loadTree(uid); }} />

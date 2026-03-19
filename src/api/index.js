@@ -6,11 +6,14 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Auto-redirect on 401
+// Auto-redirect on 401 (but never for the login endpoints themselves —
+// those return 401 for bad credentials and the form handles it via toast)
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const url = err.config?.url || '';
+    const isLoginCall = url.endsWith('/login');
+    if (err.response?.status === 401 && !isLoginCall) {
       const isAdmin = window.location.pathname.startsWith('/portal/admin');
       window.location.href = isAdmin ? '/portal/admin/login' : '/portal/login';
     }

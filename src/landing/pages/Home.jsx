@@ -3,152 +3,76 @@ import { NavLink } from 'react-router-dom';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
 
-/* ────────────────────────── Hero ────────────────────────── */
+/* ────────────────────────── Hero (NogatuDrop-style with BG image) ────────────────────────── */
 function Hero() {
   return (
-    <section className="relative pt-28 pb-16 lg:pt-32 lg:pb-24 overflow-hidden bg-white">
+    <section
+      className="relative min-h-screen flex items-center overflow-hidden"
+      style={{
+        backgroundImage: 'url(/img/hero-landing-bg.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Warm gold overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
 
-      {/* ── Dot-grid geometric background ── */}
-      {/* Primary dot grid — dark dots */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: 'radial-gradient(circle, #1a1a1a 1.2px, transparent 1.2px)',
-          backgroundSize: '28px 28px',
-          opacity: 0.055,
-        }}
-      />
-      {/* Soft color wash over the grid — gives a subtle warm tint */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(55,148,46,0.06) 0%, transparent 70%)',
-        }}
-      />
-
-      {/* ── Corner accent shapes ── */}
-      {/* Top-left geometric square outline */}
-      <div
-        className="absolute -top-8 -left-8 w-48 h-48 rounded-2xl rotate-12 pointer-events-none"
-        style={{ border: '1.5px solid rgba(55,148,46,0.12)' }}
-      />
-      <div
-        className="absolute top-4 left-4 w-48 h-48 rounded-2xl rotate-12 pointer-events-none"
-        style={{ border: '1.5px solid rgba(55,148,46,0.07)' }}
-      />
-      {/* Bottom-right geometric square outline */}
-      <div
-        className="absolute -bottom-10 -right-10 w-64 h-64 rounded-2xl -rotate-6 pointer-events-none"
-        style={{ border: '1.5px solid rgba(89,34,25,0.08)' }}
-      />
-      <div
-        className="absolute bottom-0 right-6 w-64 h-64 rounded-2xl -rotate-6 pointer-events-none"
-        style={{ border: '1.5px solid rgba(89,34,25,0.05)' }}
-      />
-      {/* Floating accent dot clusters */}
-      <div className="absolute top-24 right-[18%] w-3 h-3 rounded-full pointer-events-none" style={{ background: '#37942E', opacity: 0.18 }} />
-      <div className="absolute top-36 right-[16%] w-2 h-2 rounded-full pointer-events-none" style={{ background: '#37942E', opacity: 0.12 }} />
-      <div className="absolute top-20 right-[21%] w-1.5 h-1.5 rounded-full pointer-events-none" style={{ background: '#592219', opacity: 0.15 }} />
-      <div className="absolute bottom-24 left-[12%] w-3 h-3 rounded-full pointer-events-none" style={{ background: '#592219', opacity: 0.14 }} />
-      <div className="absolute bottom-16 left-[10%] w-2 h-2 rounded-full pointer-events-none" style={{ background: '#37942E', opacity: 0.1 }} />
-
-      {/* ── Content ── */}
-      <div className="section-container relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-
-          {/* Left – Text */}
-          <div className="order-2 lg:order-1 animate-fade-up">
-
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.1] tracking-tight mb-6" style={{ color: '#1a1a1a' }}>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 pb-16">
+        <div className="min-h-[68vh] flex items-end">
+          <div className="pb-6 sm:pb-10 motion-safe:animate-fade-up">
+            <h1 className="text-[clamp(2rem,4.5vw,3.6rem)] font-extrabold leading-[1.1] tracking-tight text-white mb-4 drop-shadow-lg">
               Enjoy Our Healthy<br />
-              <span
-                className="relative inline-block"
-                style={{ color: '#592219' }}
-              >
-                &amp; Wealthy Lifestyle
-                {/* Underline accent */}
-                <span
-                  className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #592219, rgba(89,34,25,0.2))' }}
-                />
-              </span>
+              <span className="text-brand-gold-light">&amp; Wealthy Lifestyle</span>
             </h1>
-
-            <p className="text-gray-500 text-lg leading-relaxed mb-8 max-w-lg">
-              Our success isn't in finding the best person but in turning into the right person.
+            <p className="mb-6 text-white/80 text-base sm:text-lg font-medium max-w-md">
+              Wellness You Can Taste, Quality You Can Trust.
             </p>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <a href="/portal/login" className="btn-landing-primary text-base px-9 py-4">
-                Be the One. Register Now!
-              </a>
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <svg className="w-4 h-4" style={{ color: '#37942E' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                FDA Approved products
-              </div>
-            </div>
-          </div>
-
-          {/* Right – Hero Image */}
-          <div className="order-1 lg:order-2 flex justify-center lg:justify-end animate-fade-up" style={{ animationDelay: '0.2s' }}>
-            {/* Decorative ring behind image */}
-            <div className="relative">
-              <div
-                className="absolute inset-0 -m-6 rounded-full"
-                style={{
-                  background: 'radial-gradient(circle, rgba(55,148,46,0.07) 0%, transparent 70%)',
-                }}
-              />
-              <div
-                className="absolute -inset-3 rounded-[40%] rotate-6"
-                style={{ border: '1.5px dashed rgba(55,148,46,0.15)' }}
-              />
-              <img
-                src="/landing/assets/img/hero-img.png"
-                alt="NOGATU Alliance Products"
-                className="relative max-w-full w-auto max-h-[420px] lg:max-h-[500px] object-contain animate-float-slow drop-shadow-2xl"
-              />
+            <a
+              href="/portal/login"
+              className="inline-block px-7 sm:px-10 py-2.5 sm:py-3 text-white text-[clamp(1.1rem,1.8vw,1.6rem)] font-semibold rounded-full motion-safe:transition-all motion-safe:duration-300 border border-brand-gold-dark shadow-lg shadow-amber-900/30 leading-none hover:scale-105 hover:shadow-xl"
+              style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
+            >
+              Be the One. Register Now!
+            </a>
+            <div className="mt-5 flex items-center gap-2 text-white/70">
+              <svg className="w-5 h-5 text-brand-gold-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-[clamp(1rem,1.5vw,1.25rem)] font-medium leading-none">FDA Approved Products</span>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Bottom fade to next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none" />
     </section>
   );
 }
 
-/* ────────────────────────── Stats Bar (live from DB) ───── */
+/* ────────────────────────── Stats Bar ───────────────────── */
 function StatsBar() {
-  const [stats, setStats] = useState({ activeMembers: 5000, networksBuilt: 5000 });
-  useEffect(() => {
-    fetch('/api/stats').then(r => r.json()).then(setStats).catch(() => {});
-  }, []);
-  const membersRef = useCountUp(stats.activeMembers, 2000);
-  const networksRef = useCountUp(stats.networksBuilt, 2000);
+  const membersRef = useCountUp(5900, 2000);
+  const networksRef = useCountUp(5900, 2000);
 
   const ref = useScrollReveal();
   return (
-    <section className="py-14 bg-white border-y border-gray-100">
-      <div ref={ref} className="reveal section-container grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+    <section className="py-14 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 50%, #592219 100%)' }}>
+      {/* Diagonal line pattern */}
+      <div className="absolute inset-0 pointer-events-none bg-diagonal-lines" />
+      <div ref={ref} className="reveal section-container grid grid-cols-2 lg:grid-cols-4 gap-8 text-center relative z-10">
         <div>
-          <p className="text-3xl lg:text-4xl font-extrabold" style={{ color: '#37942E' }}><span ref={membersRef}>0</span>+</p>
-          <p className="text-sm text-gray-500 mt-1 font-medium">Active Members</p>
+          <p className="text-3xl lg:text-4xl font-extrabold text-brand-gold-light"><span ref={membersRef}>0</span>+</p>
+          <p className="text-sm text-white/60 mt-1 font-medium">Active Members</p>
         </div>
         <div>
-          <p className="text-3xl lg:text-4xl font-extrabold" style={{ color: '#37942E' }}><span ref={networksRef}>0</span>+</p>
-          <p className="text-sm text-gray-500 mt-1 font-medium">Networks Built</p>
+          <p className="text-3xl lg:text-4xl font-extrabold text-brand-gold-light"><span ref={networksRef}>0</span>+</p>
+          <p className="text-sm text-white/60 mt-1 font-medium">Networks Built</p>
         </div>
         <div>
-          <p className="text-3xl lg:text-4xl font-extrabold" style={{ color: '#592219' }}>6</p>
-          <p className="text-sm text-gray-500 mt-1 font-medium">Product Lines</p>
+          <p className="text-3xl lg:text-4xl font-extrabold text-brand-yellow-light">6</p>
+          <p className="text-sm text-white/60 mt-1 font-medium">Product Lines</p>
         </div>
         <div>
-          <p className="text-3xl lg:text-4xl font-extrabold" style={{ color: '#592219' }}>99%</p>
-          <p className="text-sm text-gray-500 mt-1 font-medium">Member Satisfaction</p>
+          <p className="text-3xl lg:text-4xl font-extrabold text-brand-yellow-light">99%</p>
+          <p className="text-sm text-white/60 mt-1 font-medium">Member Satisfaction</p>
         </div>
       </div>
     </section>
@@ -162,32 +86,40 @@ function AboutPreview() {
   const lightbox = useLightbox();
 
   return (
-    <section className="section-padding bg-white">
-      <div className="section-container">
+    <section className="section-padding relative overflow-hidden" style={{ background: '#FFFDF5' }}>
+      {/* Geo pattern bg */}
+      <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
+      <div className="section-container relative z-10">
         <SectionHeader badge="About Us" title="Learn More About Us" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div ref={ref1} className="reveal-left">
-            <img
-              src="/landing/assets/img/about.jpg"
-              alt="About NOGATU Alliance"
-              className="rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl transition-shadow duration-300"
-              onClick={() => lightbox.open('/landing/assets/img/about.jpg')}
-              loading="lazy"
-            />
+            <div className="relative">
+              <img
+                src="/landing/assets/img/about.jpg"
+                alt="About NOGATU Alliance"
+                className="rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30"
+                onClick={() => lightbox.open('/landing/assets/img/about.jpg')}
+                loading="lazy"
+              />
+              {/* Accent badge */}
+              <div className="absolute -bottom-4 -right-4 rounded-2xl px-5 py-3 shadow-xl" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
+                <div className="text-white font-black text-xl">10+</div>
+                <div className="text-white/80 text-xs font-semibold uppercase tracking-wide">Products</div>
+              </div>
+            </div>
           </div>
           <div ref={ref2} className="reveal-right">
-            <p className="text-gray-500 leading-relaxed mb-6">
+            <p className="text-gray-600 leading-relaxed mb-6">
               Nogatu Alliance is a supplier and distributor of exclusively manufactured health food supplements as well as skin care products. It is committed to helping empower people in building a sustainable livelihood through marketing and selling of high-quality products that promote improved health and wellness.
             </p>
             <p className="text-gray-500 leading-relaxed mb-8">
               It also provides its members with competitive marketing incentives.
             </p>
-            {/* Video play button over secondary image */}
             <div className="relative inline-block">
               <img
                 src="/landing/img/about-2.jpg"
                 alt="NOGATU Products"
-                className="rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer"
+                className="rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer border border-primary-200/30"
                 onClick={() => lightbox.open('/landing/img/about-2.jpg')}
                 loading="lazy"
               />
@@ -210,23 +142,31 @@ function WhyUs() {
   ];
 
   return (
-    <section className="section-padding" style={{ backgroundColor: '#f2f2f2' }}>
-      <div className="section-container">
+    <section className="section-padding relative overflow-hidden" style={{ background: '#FFF8E1' }}>
+      {/* Dot grid bg */}
+      <div className="absolute inset-0 pointer-events-none bg-dot-grid" style={{ opacity: 0.06 }} />
+      <div className="section-container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Why box */}
           <div ref={ref} className="reveal lg:col-span-4">
-            <div className="h-full rounded-2xl p-8 lg:p-10 text-white" style={{ backgroundColor: '#592219' }}>
-              <h3 className="text-2xl font-bold mb-4">Why Choose NOGATU?</h3>
-              <p className="text-white/70 leading-relaxed mb-6">
-                At Nogatu Alliance, we don't just sell products, we build partnerships. When you choose us, you become our valued partner, working alongside us to achieve your success.
-              </p>
-              <p className="text-white/70 leading-relaxed mb-6">
-                You are not alone in this journey. Our exceptional customer support team is dedicated to your success.
-              </p>
-              <NavLink to="/about" className="inline-flex items-center gap-2 text-white/90 hover:text-white font-medium text-sm transition-colors">
-                Learn More
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </NavLink>
+            <div className="h-full rounded-2xl p-8 lg:p-10 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
+              {/* Subtle diagonal overlay */}
+              <div className="absolute inset-0 pointer-events-none" style={{
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(212,165,40,0.04) 10px, rgba(212,165,40,0.04) 11px)',
+              }} />
+              <div className="relative z-10">
+                <h3 className="text-2xl font-bold mb-4">Why Choose <span className="text-brand-gold-light">NOGATU?</span></h3>
+                <p className="text-white/70 leading-relaxed mb-6">
+                  At Nogatu Alliance, we don't just sell products, we build partnerships. When you choose us, you become our valued partner, working alongside us to achieve your success.
+                </p>
+                <p className="text-white/70 leading-relaxed mb-6">
+                  You are not alone in this journey. Our exceptional customer support team is dedicated to your success.
+                </p>
+                <NavLink to="/about" className="inline-flex items-center gap-2 text-brand-gold-light hover:text-brand-yellow-light font-medium text-sm motion-safe:transition-colors">
+                  Learn More
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </NavLink>
+              </div>
             </div>
           </div>
 
@@ -235,9 +175,12 @@ function WhyUs() {
             {features.map((f, i) => {
               const cardRef = useScrollReveal({ delay: i * 100 });
               return (
-                <div key={f.title} ref={cardRef} className="reveal group bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                  <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center transition-colors duration-300" style={{ color: '#592219', backgroundColor: 'rgba(89,34,25,0.06)' }}>
-                    <svg className="w-7 h-7 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ stroke: 'currentColor' }}>
+                <div key={f.title} ref={cardRef} className="reveal group bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                  <div
+                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110"
+                    style={{ color: '#B8860B', backgroundColor: 'rgba(212,165,40,0.08)' }}
+                  >
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={f.icon} />
                     </svg>
                   </div>
@@ -266,8 +209,10 @@ function Products() {
   ];
 
   return (
-    <section className="section-padding bg-white">
-      <div className="section-container">
+    <section className="section-padding relative overflow-hidden" style={{ background: '#FFFDF5' }}>
+      {/* Geo pattern */}
+      <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
+      <div className="section-container relative z-10">
         <SectionHeader badge="Our Products" title="Healthy & Wealthy Options" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((p, i) => {
@@ -275,25 +220,25 @@ function Products() {
             return (
               <div key={p.name} ref={ref} className="reveal group text-center">
                 <div
-                  className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 flex items-center justify-center h-56 mb-4 cursor-pointer"
+                  className="relative overflow-hidden rounded-2xl p-8 flex items-center justify-center h-56 mb-4 cursor-pointer border border-primary-200/30 motion-safe:transition-all motion-safe:duration-300 group-hover:shadow-lg"
+                  style={{ background: 'linear-gradient(135deg, #FFFDF5, #FFF8E1)' }}
                   onClick={() => lightbox.open(p.imgLg)}
                 >
                   <img
                     src={p.imgLg}
                     alt={p.name}
-                    className="max-h-44 object-contain group-hover:scale-110 transition-transform duration-500"
+                    className="max-h-44 object-contain group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500"
                     loading="lazy"
                   />
-                  {/* Zoom icon overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 motion-safe:transition-colors motion-safe:duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-300 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-md">
+                      <svg className="w-5 h-5 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                     </div>
                   </div>
                 </div>
                 <h4 className="font-semibold text-gray-900 mb-1">{p.name}</h4>
                 <p className="text-sm text-gray-500 mb-1">{p.desc}</p>
-                <p className="text-lg font-bold" style={{ color: '#592219' }}>Php {p.price}</p>
+                <p className="text-lg font-bold text-brand-gold-dark">Php {p.price}</p>
               </div>
             );
           })}
@@ -308,16 +253,23 @@ function Products() {
 function BusinessPreview() {
   const ref = useScrollReveal();
   return (
-    <section className="section-padding relative overflow-hidden" style={{ backgroundColor: '#592219' }}>
-      <div className="absolute top-10 left-10 w-32 h-32 border border-white/5 rounded-2xl rotate-12 animate-float-slow" />
-      <div className="absolute bottom-10 right-10 w-24 h-24 border border-white/5 rounded-xl -rotate-6 animate-float-reverse" />
+    <section className="section-padding relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #3A1000 0%, #592219 50%, #3A1000 100%)' }}>
+      {/* Floating shapes */}
+      <div className="absolute top-10 left-10 w-32 h-32 border border-brand-gold/10 rounded-2xl rotate-12 motion-safe:animate-float-slow pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-24 h-24 border border-brand-gold/10 rounded-xl -rotate-6 motion-safe:animate-float-reverse pointer-events-none" />
+      <div className="absolute top-1/2 left-1/4 w-16 h-16 border border-brand-gold/5 rounded-full motion-safe:animate-float pointer-events-none" />
+      {/* Dot pattern */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        backgroundImage: 'radial-gradient(circle, rgba(212,165,40,0.06) 1px, transparent 1px)',
+        backgroundSize: '28px 28px',
+      }} />
 
       <div ref={ref} className="reveal section-container text-center relative z-10">
-        <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white/70 text-xs font-semibold tracking-wider uppercase mb-4">Business Opportunities</span>
+        <span className="inline-block px-4 py-1.5 rounded-full bg-brand-gold/15 text-brand-gold-light text-xs font-semibold tracking-wider uppercase mb-4 border border-brand-gold/20">Business Opportunities</span>
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
-          Ready to Start Your Journey?
+          Ready to Start Your <span className="text-brand-gold-light">Journey?</span>
         </h2>
-        <p className="text-white/60 text-lg max-w-xl mx-auto mb-10">
+        <p className="text-white/50 text-lg max-w-xl mx-auto mb-10">
           Join thousands of members building healthier lives and sustainable income with NOGATU Alliance.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -325,7 +277,7 @@ function BusinessPreview() {
             Join Now
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </a>
-          <NavLink to="/opportunities" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
+          <NavLink to="/opportunities" className="text-white/50 hover:text-brand-gold-light text-sm font-medium motion-safe:transition-colors">
             View Business Plans &rarr;
           </NavLink>
         </div>
@@ -340,13 +292,14 @@ function SectionHeader({ badge, title }) {
   return (
     <div ref={ref} className="reveal text-center mb-14 lg:mb-16">
       {badge && (
-        <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4" style={{ backgroundColor: 'rgba(55,148,46,0.08)', color: '#37942E' }}>
+        <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4" style={{ backgroundColor: 'rgba(212,165,40,0.1)', color: '#B8860B' }}>
           {badge}
         </span>
       )}
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance" style={{ color: '#37373f' }}>
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance text-gray-900">
         {title}
       </h2>
+      <div className="mt-4 w-16 h-1 rounded-full mx-auto" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
     </div>
   );
 }

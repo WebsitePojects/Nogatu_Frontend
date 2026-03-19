@@ -9,6 +9,7 @@ export default function UpdateAccounts() {
   const { uid } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -24,14 +25,14 @@ export default function UpdateAccounts() {
     try {
       await api.put(`/admin/accounts/${uid}`, {
         firstname: data.firstname, lastname: data.lastname, middlename: data.middlename,
-        address: data.address, password: data.password,
+        address: data.address, password: newPassword || '',
         payoutdetails: data.payoutdetails, payoutoptions: data.payoutid, contactnos: data.contactnos,
       });
       toast.success('Account updated successfully');
     } catch (err) { toast.error('Update failed'); } finally { setSaving(false); }
   }
 
-  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div></div>;
+  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
   if (!data) return <p>Account not found.</p>;
 
   return (
@@ -48,7 +49,7 @@ export default function UpdateAccounts() {
             <div><label className="label">Middle Name</label><input type="text" value={data.middlename || ''} onChange={(e) => handleChange('middlename', e.target.value)} className="input-field" /></div>
           </div>
           <div><label className="label">Username</label><input type="text" value={data.username || ''} className="input-field bg-gray-50" disabled /></div>
-          <div><label className="label">Password</label><input type="text" value={data.password || ''} onChange={(e) => handleChange('password', e.target.value)} className="input-field" /></div>
+          <div><label className="label">New Password <span className="text-xs text-gray-400">(leave blank to keep current)</span></label><input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field" placeholder="Enter new password" /></div>
           <div><label className="label">Address</label><input type="text" value={data.address || ''} onChange={(e) => handleChange('address', e.target.value)} className="input-field" /></div>
           <div><label className="label">Contact Numbers</label><input type="text" value={data.contactnos || ''} onChange={(e) => handleChange('contactnos', e.target.value)} className="input-field" /></div>
           <div>

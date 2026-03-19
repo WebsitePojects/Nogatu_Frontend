@@ -6,15 +6,15 @@ import { HiOutlineCash, HiOutlineUsers, HiOutlineChartBar, HiOutlineTrendingUp, 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const CARD_THEMES = [
-  { bg: 'bg-gradient-to-br from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
-  { bg: 'bg-gradient-to-br from-blue-500 to-blue-600', shadow: 'shadow-blue-500/20' },
-  { bg: 'bg-gradient-to-br from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
-  { bg: 'bg-gradient-to-br from-amber-500 to-amber-600', shadow: 'shadow-amber-500/20' },
-  { bg: 'bg-gradient-to-br from-pink-500 to-pink-600', shadow: 'shadow-pink-500/20' },
-  { bg: 'bg-gradient-to-br from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20' },
-  { bg: 'bg-gradient-to-br from-teal-500 to-teal-600', shadow: 'shadow-teal-500/20' },
-  { bg: 'bg-gradient-to-br from-cyan-500 to-cyan-600', shadow: 'shadow-cyan-500/20' },
-  { bg: 'bg-gradient-to-br from-orange-500 to-orange-600', shadow: 'shadow-orange-500/20' },
+  { bg: 'linear-gradient(135deg, #B8860B, #D4A528)', shadow: 'shadow-amber-500/20' },
+  { bg: 'linear-gradient(135deg, #592219, #6d3028)', shadow: 'shadow-red-900/15' },
+  { bg: 'linear-gradient(135deg, #8B5A08, #B8720A)', shadow: 'shadow-amber-700/20' },
+  { bg: 'linear-gradient(135deg, #D4A528, #E7C679)', shadow: 'shadow-yellow-500/20' },
+  { bg: 'linear-gradient(135deg, #6d3028, #8B4513)', shadow: 'shadow-red-800/15' },
+  { bg: 'linear-gradient(135deg, #4A2F04, #6B4506)', shadow: 'shadow-amber-900/20' },
+  { bg: 'linear-gradient(135deg, #B8720A, #D4870A)', shadow: 'shadow-orange-600/15' },
+  { bg: 'linear-gradient(135deg, #3A1000, #592219)', shadow: 'shadow-red-900/20' },
+  { bg: 'linear-gradient(135deg, #A07608, #C4951F)', shadow: 'shadow-amber-600/15' },
 ];
 
 export default function Dashboard() {
@@ -59,7 +59,7 @@ export default function Dashboard() {
       {/* Greeting */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {user?.shortname}
+          Welcome back, <span className="text-brand-gold-dark">{user?.shortname}</span>
         </h1>
         <p className="text-sm text-gray-500 mt-1">Here's an overview of your account performance.</p>
       </div>
@@ -71,10 +71,10 @@ export default function Dashboard() {
           return (
             <div
               key={i}
-              className="group bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              className="group bg-white rounded-2xl border border-primary-100/50 p-5 hover:shadow-lg hover:-translate-y-0.5 motion-safe:transition-all motion-safe:duration-300"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className={`w-11 h-11 rounded-xl ${theme.bg} ${theme.shadow} shadow-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`w-11 h-11 rounded-xl ${theme.shadow} shadow-lg flex items-center justify-center text-white group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300`} style={{ background: theme.bg }}>
                   <card.icon className="w-5 h-5" />
                 </div>
               </div>
@@ -88,16 +88,16 @@ export default function Dashboard() {
       {/* Bottom Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Direct Referrals Breakdown */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl border border-primary-100/50 p-6">
           <h3 className="font-semibold text-gray-900 mb-5">Direct Referrals by Package</h3>
           <div className="space-y-3">
             {Object.entries(data.directReferrals || {}).map(([type, count]) => (
-              <div key={type} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+              <div key={type} className="flex items-center justify-between py-3 border-b border-primary-100/30 last:border-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary-500" />
+                  <div className="w-2 h-2 rounded-full" style={{ background: '#D4A528' }} />
                   <span className="text-sm text-gray-600">{type}</span>
                 </div>
-                <span className="text-sm font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded-lg">
+                <span className="text-sm font-bold text-gray-900 px-3 py-1 rounded-lg" style={{ background: 'rgba(212,165,40,0.08)' }}>
                   {count} {count === 1 ? 'Acct' : 'Accts'}
                 </span>
               </div>
@@ -112,15 +112,19 @@ export default function Dashboard() {
         </div>
 
         {/* Monthly Maintenance */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl border border-primary-100/50 p-6">
           <h3 className="font-semibold text-gray-900 mb-5">Monthly Maintenance</h3>
           <div className="flex items-center gap-5 mb-6">
             <div
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white text-sm font-bold shadow-lg ${
-                data.maintenanceStatus === 'Active'
-                  ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25'
-                  : 'bg-gradient-to-br from-red-400 to-red-500 shadow-red-400/25'
-              }`}
+              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-sm font-bold shadow-lg"
+              style={{
+                background: data.maintenanceStatus === 'Active'
+                  ? 'linear-gradient(135deg, #B8860B, #D4A528)'
+                  : 'linear-gradient(135deg, #dc2626, #ef4444)',
+                boxShadow: data.maintenanceStatus === 'Active'
+                  ? '0 8px 20px rgba(184,134,11,0.25)'
+                  : '0 8px 20px rgba(239,68,68,0.25)',
+              }}
             >
               {data.maintenanceStatus === 'Active' ? (
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
@@ -135,16 +139,17 @@ export default function Dashboard() {
           </div>
           {/* Progress bar */}
           <div className="relative">
-            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div className="w-full rounded-full h-3 overflow-hidden" style={{ background: 'rgba(212,165,40,0.1)' }}>
               <div
-                className={`h-3 rounded-full transition-all duration-700 ease-out ${
-                  maintenancePct >= 100
-                    ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                className="h-3 rounded-full motion-safe:transition-all motion-safe:duration-700 ease-out"
+                style={{
+                  width: `${maintenancePct}%`,
+                  background: maintenancePct >= 100
+                    ? 'linear-gradient(90deg, #B8860B, #D4A528)'
                     : maintenancePct >= 50
-                    ? 'bg-gradient-to-r from-amber-400 to-amber-500'
-                    : 'bg-gradient-to-r from-red-400 to-red-500'
-                }`}
-                style={{ width: `${maintenancePct}%` }}
+                    ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
+                    : 'linear-gradient(90deg, #dc2626, #ef4444)',
+                }}
               />
             </div>
             <div className="flex justify-between mt-2">

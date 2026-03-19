@@ -10,8 +10,8 @@
     @apply text-gray-800 overflow-x-hidden;
   }
   ::selection {
-    background-color: rgba(55, 148, 46, 0.15);
-    color: #1a3a12;
+    background-color: rgba(212, 165, 40, 0.18);
+    color: #4A2F04;
   }
 }
 
@@ -25,18 +25,22 @@
   .section-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
+
+  /* ─── Gold primary button ─── */
   .btn-landing-primary {
-    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-white font-semibold text-sm
            transition-all duration-300 cursor-pointer;
-    background: linear-gradient(135deg, #0A760E 0%, #37942E 100%);
-    box-shadow: 0 4px 20px rgba(55, 148, 46, 0.3);
+    background: linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%);
+    box-shadow: 0 4px 20px rgba(184, 134, 11, 0.35);
   }
   .btn-landing-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(55, 148, 46, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(184, 134, 11, 0.45);
   }
+
+  /* ─── Brown secondary button ─── */
   .btn-landing-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-semibold text-sm
            transition-all duration-300 cursor-pointer;
     color: #592219;
     border: 2px solid #592219;
@@ -46,8 +50,10 @@
     color: #fff;
     transform: translateY(-2px);
   }
+
+  /* ─── Brown gradient button ─── */
   .btn-landing-brown {
-    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-white font-semibold text-sm
            transition-all duration-300 cursor-pointer;
     background: linear-gradient(135deg, #592219 0%, #6d3028 100%);
     box-shadow: 0 4px 20px rgba(89, 34, 25, 0.3);
@@ -57,7 +63,33 @@
     box-shadow: 0 8px 30px rgba(89, 34, 25, 0.4);
   }
 
-  /* Scroll reveal utility */
+  /* ─── Subtle background patterns (CSS only) ─── */
+  /* NOTE: opacity is baked into rgba values — never set opacity on the element itself
+     as that would make all children invisible */
+  .bg-dot-grid {
+    background-image: radial-gradient(circle, rgba(212, 165, 40, 0.18) 0.8px, transparent 0.8px);
+    background-size: 24px 24px;
+  }
+  .bg-diagonal-lines {
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(184, 134, 11, 0.05) 10px,
+      rgba(184, 134, 11, 0.05) 11px
+    );
+  }
+  .bg-geo-pattern {
+    background-image:
+      linear-gradient(30deg, rgba(184, 134, 11, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(184, 134, 11, 0.05) 87.5%),
+      linear-gradient(150deg, rgba(184, 134, 11, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(184, 134, 11, 0.05) 87.5%),
+      linear-gradient(30deg, rgba(184, 134, 11, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(184, 134, 11, 0.05) 87.5%),
+      linear-gradient(150deg, rgba(184, 134, 11, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(184, 134, 11, 0.05) 87.5%);
+    background-size: 80px 140px;
+    background-position: 0 0, 0 0, 40px 70px, 40px 70px;
+  }
+
+  /* ─── Scroll reveal utilities ─── */
   .reveal {
     opacity: 0;
     transform: translateY(40px);
@@ -95,7 +127,7 @@
     transform: scale(1);
   }
 
-  /* Pulsating play button */
+  /* ─── Play button (pulsating) ─── */
   .play-btn {
     @apply relative w-20 h-20 rounded-full flex items-center justify-center cursor-pointer;
     background: radial-gradient(#592219 50%, rgba(89, 34, 25, 0.25) 52%);

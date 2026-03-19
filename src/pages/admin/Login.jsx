@@ -1,14 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-
-const ShieldCheckIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-  </svg>
-);
 
 const CheckIcon = () => (
   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,25 +55,22 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({ activeMembers: null, networksBuilt: null });
+  const stats = { activeMembers: 5900, networksBuilt: 5900 };
   const { loginAdmin } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch('/api/stats')
-      .then(r => r.json())
-      .then(setStats)
-      .catch(() => {});
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const toastId = toast.loading('Authenticating...');
     try {
       await loginAdmin(username, password);
+      toast.success('Access granted', { id: toastId });
       navigate('/admin/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed. Please check your credentials.');
+      const msg = err.response?.data?.error || 'Invalid credentials.';
+      console.error('[Admin Login Error]', err);
+      toast.error(msg, { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -91,22 +81,22 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen flex">
 
-      {/* ── Left admin panel ─────────────────────────────────────── */}
+      {/* ── Left admin panel — Dark Brown ──────────────────────── */}
       <div
         className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #0a0f1e 0%, #0d1b30 50%, #0f2040 100%)' }}
+        style={{ background: 'linear-gradient(145deg, #1A1207 0%, #2D2010 50%, #1A1207 100%)' }}
       >
         {/* Decorative blobs */}
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #10b981, transparent)' }} />
+          style={{ background: 'radial-gradient(circle, #D4A528, transparent)' }} />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-5"
-          style={{ background: 'radial-gradient(circle, #6366f1, transparent)' }} />
+          style={{ background: 'radial-gradient(circle, #592219, transparent)' }} />
 
         {/* Dot grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.06]"
+          className="absolute inset-0 opacity-[0.05]"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgba(212,165,40,0.8) 1px, transparent 1px)',
             backgroundSize: '28px 28px',
           }}
         />
@@ -114,13 +104,13 @@ export default function AdminLogin() {
         {/* Top accent line */}
         <div
           className="absolute top-0 left-0 right-0 h-0.5"
-          style={{ background: 'linear-gradient(90deg, transparent, #10b981 50%, transparent)' }}
+          style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }}
         />
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <img src="/landing/img/nogatualliance-logo.png" alt="NOGATU Alliance" className="h-10 w-auto object-contain" />
-          <span className="text-emerald-500/60 text-xs tracking-widest uppercase">Admin Console</span>
+          <img src="/img/nogatu_logo.jpg" alt="NOGATU Alliance" className="h-10 w-auto object-contain" />
+          <span className="text-brand-gold/50 text-xs tracking-widest uppercase">Admin Console</span>
         </div>
 
         {/* Hero copy */}
@@ -128,14 +118,14 @@ export default function AdminLogin() {
           <div>
             <div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-5"
-              style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}
+              style={{ background: 'rgba(212,165,40,0.1)', border: '1px solid rgba(212,165,40,0.2)' }}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-emerald-400/80 text-xs font-medium tracking-wide uppercase">Secure Admin Access</span>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#D4A528' }} />
+              <span className="text-xs font-medium tracking-wide uppercase" style={{ color: 'rgba(212,165,40,0.7)' }}>Secure Admin Access</span>
             </div>
             <h1 className="text-4xl xl:text-5xl font-bold text-white leading-snug">
               Command Your<br />
-              <span className="text-emerald-400">Alliance Network.</span>
+              <span className="text-brand-gold-light">Alliance Network.</span>
             </h1>
             <p className="text-gray-400 text-base leading-relaxed mt-4 max-w-xs">
               Full control over members, earnings, genealogy, and platform content from one secure panel.
@@ -148,7 +138,7 @@ export default function AdminLogin() {
               <li key={f} className="flex items-center gap-3">
                 <span
                   className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: '#10b981', boxShadow: '0 4px 12px rgba(16,185,129,0.35)' }}
+                  style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)', boxShadow: '0 4px 12px rgba(184,134,11,0.3)' }}
                 >
                   <CheckIcon />
                 </span>
@@ -158,7 +148,7 @@ export default function AdminLogin() {
           </ul>
 
           {/* Live stats */}
-          <div className="flex gap-8 pt-5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex gap-8 pt-5" style={{ borderTop: '1px solid rgba(212,165,40,0.1)' }}>
             <div>
               <p className="text-white font-bold text-2xl">{fmt(stats.activeMembers)}+</p>
               <p className="text-gray-600 text-xs mt-0.5">Active Members</p>
@@ -181,12 +171,12 @@ export default function AdminLogin() {
       </div>
 
       {/* ── Right form panel ────────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-[#f8f9fc]">
+      <div className="flex-1 flex items-center justify-center px-6 py-12" style={{ background: '#FFFDF5' }}>
         <div className="w-full max-w-[400px]">
 
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-10">
-            <img src="/landing/img/nogatualliance-logo.png" alt="NOGATU Alliance" className="h-16 w-auto object-contain mx-auto mb-4" />
+            <img src="/img/nogatu_logo.jpg" alt="NOGATU Alliance" className="h-16 w-auto object-contain mx-auto mb-4" />
             <p className="text-gray-500 text-sm">Admin Console</p>
           </div>
 
@@ -197,7 +187,7 @@ export default function AdminLogin() {
           </div>
 
           {/* Form card */}
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 space-y-5">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-primary-200/40 shadow-sm p-7 space-y-5">
 
             {/* Username */}
             <div>
@@ -213,10 +203,7 @@ export default function AdminLogin() {
                   placeholder="Enter your username"
                   required
                   autoComplete="username"
-                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50/60 text-gray-900 text-sm placeholder-gray-400 outline-none transition"
-                  style={{ '--tw-ring-color': '#10b981' }}
-                  onFocus={e => { e.target.style.borderColor = '#10b981'; e.target.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.12)'; e.target.style.background = '#fff'; }}
-                  onBlur={e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; e.target.style.background = ''; }}
+                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-primary-200/60 bg-primary-50/30 text-gray-900 text-sm placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary-400/40 focus:border-transparent focus:bg-white motion-safe:transition"
                 />
               </div>
             </div>
@@ -228,10 +215,7 @@ export default function AdminLogin() {
                 <button
                   type="button"
                   onClick={() => toast('Password reset is handled by your system administrator.', { icon: '🔒' })}
-                  className="text-xs font-medium transition-colors"
-                  style={{ color: '#10b981' }}
-                  onMouseEnter={e => e.target.style.color = '#059669'}
-                  onMouseLeave={e => e.target.style.color = '#10b981'}
+                  className="text-xs font-medium text-brand-gold-dark hover:text-brand-brown motion-safe:transition-colors"
                 >
                   Forgot password?
                 </button>
@@ -247,15 +231,13 @@ export default function AdminLogin() {
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
-                  className="w-full pl-11 pr-11 py-2.5 rounded-xl border border-gray-200 bg-gray-50/60 text-gray-900 text-sm placeholder-gray-400 outline-none transition"
-                  onFocus={e => { e.target.style.borderColor = '#10b981'; e.target.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.12)'; e.target.style.background = '#fff'; }}
-                  onBlur={e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; e.target.style.background = ''; }}
+                  className="w-full pl-11 pr-11 py-2.5 rounded-xl border border-primary-200/60 bg-primary-50/30 text-gray-900 text-sm placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary-400/40 focus:border-transparent focus:bg-white motion-safe:transition"
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 motion-safe:transition"
                 >
                   {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
                 </button>
@@ -266,12 +248,12 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+              className="w-full py-2.5 px-5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 motion-safe:transition-all motion-safe:duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
               style={{
                 background: loading
-                  ? 'rgba(16,185,129,0.5)'
-                  : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                boxShadow: loading ? 'none' : '0 4px 14px rgba(16,185,129,0.35)',
+                  ? 'rgba(89,34,25,0.5)'
+                  : 'linear-gradient(135deg, #592219 0%, #6d3028 100%)',
+                boxShadow: loading ? 'none' : '0 4px 14px rgba(89,34,25,0.35)',
               }}
             >
               {loading ? <><SpinnerIcon /> Authenticating...</> : 'Sign In'}
@@ -281,13 +263,13 @@ export default function AdminLogin() {
           {/* Security note */}
           <div
             className="mt-5 rounded-xl px-4 py-3 flex items-start gap-3"
-            style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}
+            style={{ background: 'rgba(212,165,40,0.06)', border: '1px solid rgba(212,165,40,0.15)' }}
           >
-            <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
-            <p className="text-amber-700/70 text-xs leading-relaxed">
+            <p className="text-brand-brown/60 text-xs leading-relaxed">
               Restricted to authorized administrators only. All access is logged.
             </p>
           </div>

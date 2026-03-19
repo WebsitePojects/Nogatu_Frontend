@@ -57,7 +57,7 @@ export default function Encashment() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div></div>
+          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
