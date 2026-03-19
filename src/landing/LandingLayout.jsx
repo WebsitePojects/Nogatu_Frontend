@@ -39,9 +39,9 @@ function Navbar() {
           {/* Logo */}
           <NavLink to="/" className="flex items-center gap-2.5 group">
             <img
-              src="/img/nogatu_logo.jpg"
+              src="/img/nogatu_logo.png"
               alt="NOGATU Alliance"
-              className="h-9 w-9 rounded-full object-contain border border-brand-gold/40 motion-safe:transition-transform motion-safe:duration-300 group-hover:scale-105"
+              className="h-12 w-12 rounded-full object-contain border border-brand-gold/40 motion-safe:transition-transform motion-safe:duration-300 group-hover:scale-105"
             />
             <span className="font-semibold text-sm sm:text-base tracking-wide text-brand-brown">
               Nogatu Alliance
@@ -139,7 +139,7 @@ function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
-              <img src="/img/nogatu_logo.jpg" alt="NOGATU Alliance" className="w-10 h-10 rounded-lg border border-brand-gold/30" />
+              <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="w-12 h-12 rounded-lg border border-brand-gold/30" />
               <span className="text-white font-bold text-lg">NOGATU Alliance</span>
             </div>
             <p className="text-sm leading-relaxed mb-6 text-white/50">

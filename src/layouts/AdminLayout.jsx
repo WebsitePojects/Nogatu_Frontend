@@ -64,7 +64,7 @@ export default function AdminLayout() {
       <aside className={`fixed inset-y-0 left-0 z-50 w-[272px] bg-sidebar-bg transform motion-safe:transition-transform motion-safe:duration-300 ease-out lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Logo area */}
         <div className="flex items-center gap-3 px-6 py-5 border-b border-brand-gold/10">
-          <img src="/img/nogatu_logo.jpg" alt="NOGATU Alliance" className="w-10 h-10 rounded-xl object-contain border border-brand-gold/30 bg-white" />
+          <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="w-12 h-12 rounded-xl object-contain border border-brand-gold/30 bg-white" />
           <div>
             <h1 className="text-white font-semibold text-sm tracking-tight">NOGATU Alliance</h1>
             <p className="text-[11px] text-brand-gold/50 font-medium">Admin Panel</p>

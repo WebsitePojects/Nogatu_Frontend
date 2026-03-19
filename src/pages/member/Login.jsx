@@ -107,7 +107,7 @@ export default function Login() {
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <img src="/img/nogatu_logo.jpg" alt="NOGATU Alliance" className="h-10 w-auto object-contain" />
+          <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="h-14 w-auto object-contain" />
         </div>
 
         {/* Hero copy */}
@@ -163,7 +163,7 @@ export default function Login() {
 
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-10">
-            <img src="/img/nogatu_logo.jpg" alt="NOGATU Alliance" className="h-16 w-auto object-contain mx-auto mb-4" />
+            <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="h-20 w-auto object-contain mx-auto mb-4" />
             <p className="text-gray-500 text-sm">Member Portal</p>
           </div>
 
