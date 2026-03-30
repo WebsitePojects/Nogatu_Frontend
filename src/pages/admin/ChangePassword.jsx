@@ -23,27 +23,56 @@ export default function ChangePassword() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Change Password</h1>
-      <div className="card max-w-md">
+      <div className="mb-7">
+        <h1 className="font-display text-2xl font-bold text-white">Change Password</h1>
+        <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+      </div>
+
+      <div className="glass-card rounded-2xl p-6 max-w-md">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="label">Administrator Account</label>
-            <select value={adminAccount} onChange={(e) => setAdminAccount(e.target.value)} className="input-field">
+            <select
+              value={adminAccount}
+              onChange={(e) => setAdminAccount(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+            >
               <option value="">Select account...</option>
               <option value="admin">Nogatu Administrator</option>
               <option value="cashier">Cashier</option>
               <option value="bod">BOD</option>
             </select>
           </div>
+
           <div>
             <label className="label">Current Password</label>
-            <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} className="input-field" required />
+            <input
+              type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              required
+            />
           </div>
+
           <div>
             <label className="label">New Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" required />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              required
+            />
           </div>
-          <button type="submit" disabled={saving} className="btn-success disabled:opacity-50">{saving ? 'Changing...' : 'Change Password'}</button>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="btn-success w-full rounded-xl py-2.5 px-5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+          >
+            {saving ? 'Changing...' : 'Change Password'}
+          </button>
         </form>
       </div>
     </div>

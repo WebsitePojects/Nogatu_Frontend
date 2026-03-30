@@ -4,9 +4,9 @@ import toast from 'react-hot-toast';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineEyeOff, HiOutlineX } from 'react-icons/hi';
 
 const TYPE_OPTS = [
-  { value: 'news', label: 'News', color: 'bg-primary-100 text-primary-700' },
-  { value: 'announcement', label: 'Announcement', color: 'bg-amber-50 text-amber-600' },
-  { value: 'promo', label: 'Promo', color: 'bg-primary-50 text-primary-600' },
+  { value: 'news', label: 'News', style: { background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' } },
+  { value: 'announcement', label: 'Announcement', style: { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)' } },
+  { value: 'promo', label: 'Promo', style: { background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' } },
 ];
 
 const EMPTY = { title: '', content: '', type: 'news', image_url: '', is_published: true };
@@ -81,77 +81,126 @@ export default function NewsManagement() {
     } catch { toast.error('Failed to toggle'); }
   }
 
-  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
+  if (loading) return (
+    <div className="flex justify-center py-20">
+      <div
+        className="animate-spin rounded-full h-10 w-10 border-4"
+        style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
+      />
+    </div>
+  );
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-start justify-between mb-7">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">News & Announcements</h1>
-          <p className="text-sm text-gray-500">Manage news, announcements, and promotions visible on the public site.</p>
+          <h1 className="font-display text-2xl font-bold text-white">News &amp; Announcements</h1>
+          <div className="w-12 h-0.5 mt-2 mb-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Manage news, announcements, and promotions visible on the public site.
+          </p>
         </div>
-        <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors cursor-pointer shadow-sm">
+        <button
+          onClick={openCreate}
+          className="gold-btn inline-flex items-center gap-2 rounded-xl py-2.5 px-5 text-sm font-semibold flex-shrink-0 ml-4"
+        >
           <HiOutlinePlus className="w-5 h-5" />
           New Post
         </button>
       </div>
 
       {posts.length === 0 ? (
-        <div className="card text-center py-16">
-          <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="glass-card rounded-2xl p-6 text-center py-16">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.15)' }}
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'rgba(212,175,55,0.4)' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
             </svg>
           </div>
-          <p className="text-gray-500 text-sm">No posts yet. Create your first one!</p>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>No posts yet. Create your first one!</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="glass-card rounded-2xl p-6 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="table-header">
-                  <th className="px-5 py-3.5">Title</th>
-                  <th className="px-5 py-3.5">Type</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5">Date</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
+                <tr>
+                  {['Title', 'Type', 'Status', 'Date', 'Actions'].map((h, i) => (
+                    <th
+                      key={h}
+                      className={`table-header px-5 py-3.5 font-semibold text-xs uppercase tracking-wide ${i === 4 ? 'text-right' : 'text-left'}`}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
-                {posts.map((post) => {
+              <tbody>
+                {posts.map((post, idx) => {
                   const typeOpt = TYPE_OPTS.find((t) => t.value === post.type) || TYPE_OPTS[0];
                   return (
-                    <tr key={post.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-5 py-4">
-                        <p className="text-sm font-medium text-gray-800 truncate max-w-xs">{post.title}</p>
-                        <p className="text-xs text-gray-400 truncate max-w-xs mt-0.5">{post.content?.slice(0, 80)}</p>
+                    <tr
+                      key={post.id}
+                      className="motion-safe:transition-colors"
+                      style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,175,55,0.05)'}
+                      onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'}
+                    >
+                      <td className="px-5 py-4" style={{ borderLeft: '3px solid rgba(212,175,55,0.25)' }}>
+                        <p className="text-sm font-medium text-white/80 truncate max-w-xs">{post.title}</p>
+                        <p className="text-xs mt-0.5 truncate max-w-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                          {post.content?.slice(0, 80)}
+                        </p>
                       </td>
                       <td className="px-5 py-4">
-                        <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-semibold ${typeOpt.color}`}>
+                        <span
+                          className="inline-block px-2.5 py-1 rounded-lg text-xs font-semibold"
+                          style={typeOpt.style}
+                        >
                           {typeOpt.label}
                         </span>
                       </td>
                       <td className="px-5 py-4">
                         <button
                           onClick={() => handleToggle(post.id)}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-                            post.is_published ? 'bg-primary-50 text-primary-700 hover:bg-primary-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
-                          }`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer motion-safe:transition-colors"
+                          style={
+                            post.is_published
+                              ? { background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }
+                              : { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }
+                          }
                         >
-                          {post.is_published ? <HiOutlineEye className="w-3.5 h-3.5" /> : <HiOutlineEyeOff className="w-3.5 h-3.5" />}
+                          {post.is_published
+                            ? <HiOutlineEye className="w-3.5 h-3.5" />
+                            : <HiOutlineEyeOff className="w-3.5 h-3.5" />}
                           {post.is_published ? 'Published' : 'Draft'}
                         </button>
                       </td>
-                      <td className="px-5 py-4 text-xs text-gray-400">
+                      <td className="px-5 py-4 text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
                         {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => openEdit(post)} className="p-2 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors cursor-pointer" aria-label="Edit">
+                          <button
+                            onClick={() => openEdit(post)}
+                            className="p-2 rounded-lg motion-safe:transition-colors cursor-pointer"
+                            style={{ color: 'rgba(255,255,255,0.3)' }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#D4AF37'; e.currentTarget.style.background = 'rgba(212,175,55,0.08)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'transparent'; }}
+                            aria-label="Edit"
+                          >
                             <HiOutlinePencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => handleDelete(post.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" aria-label="Delete">
+                          <button
+                            onClick={() => handleDelete(post.id)}
+                            className="p-2 rounded-lg motion-safe:transition-colors cursor-pointer"
+                            style={{ color: 'rgba(255,255,255,0.3)' }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'transparent'; }}
+                            aria-label="Delete"
+                          >
                             <HiOutlineTrash className="w-4 h-4" />
                           </button>
                         </div>
@@ -168,11 +217,34 @@ export default function NewsManagement() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-800">{editing ? 'Edit Post' : 'Create New Post'}</h3>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer" aria-label="Close">
+          <div
+            className="fixed inset-0"
+            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            onClick={() => setShowModal(false)}
+          />
+          <div
+            className="relative rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            style={{
+              background: 'rgba(18,14,8,0.97)',
+              border: '1px solid rgba(212,175,55,0.2)',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.08)',
+            }}
+          >
+            <div
+              className="flex items-center justify-between p-6"
+              style={{ borderBottom: '1px solid rgba(212,175,55,0.1)' }}
+            >
+              <h3 className="font-display text-lg font-bold text-white">
+                {editing ? 'Edit Post' : 'Create New Post'}
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-1.5 rounded-lg motion-safe:transition-colors cursor-pointer"
+                style={{ color: 'rgba(255,255,255,0.35)' }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; e.currentTarget.style.background = 'transparent'; }}
+                aria-label="Close"
+              >
                 <HiOutlineX className="w-5 h-5" />
               </button>
             </div>
@@ -184,7 +256,7 @@ export default function NewsManagement() {
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   required
-                  className="input-field"
+                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
                   placeholder="Post title"
                 />
               </div>
@@ -194,18 +266,18 @@ export default function NewsManagement() {
                   id="post-type"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="input-field"
+                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
                 >
                   {TYPE_OPTS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </div>
               <div>
-                <label htmlFor="post-image" className="label">Image URL (optional)</label>
+                <label htmlFor="post-image" className="label">Image URL <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem' }}>(optional)</span></label>
                 <input
                   id="post-image"
                   value={form.image_url}
                   onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                  className="input-field"
+                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
@@ -217,7 +289,7 @@ export default function NewsManagement() {
                   onChange={(e) => setForm({ ...form, content: e.target.value })}
                   required
                   rows={6}
-                  className="input-field resize-none"
+                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5 resize-none"
                   placeholder="Write your post content..."
                 />
               </div>
@@ -227,13 +299,26 @@ export default function NewsManagement() {
                   type="checkbox"
                   checked={form.is_published}
                   onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="w-4 h-4 rounded"
+                  style={{ accentColor: '#D4AF37' }}
                 />
-                <label htmlFor="post-published" className="text-sm text-gray-700 font-medium">Publish immediately</label>
+                <label htmlFor="post-published" className="text-sm text-white/60 font-medium cursor-pointer">
+                  Publish immediately
+                </label>
               </div>
               <div className="flex items-center justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary cursor-pointer">Cancel</button>
-                <button type="submit" disabled={saving} className="btn-primary disabled:opacity-60 cursor-pointer">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="gold-btn-outline cursor-pointer rounded-xl py-2 px-4 text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="gold-btn disabled:opacity-60 cursor-pointer rounded-xl py-2 px-5 text-sm font-semibold"
+                >
                   {saving ? 'Saving...' : editing ? 'Update Post' : 'Create Post'}
                 </button>
               </div>

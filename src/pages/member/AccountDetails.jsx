@@ -1,15 +1,36 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLocationMarker, HiOutlinePhone, HiOutlineCreditCard } from 'react-icons/hi';
 
 const PAYOUT_OPTIONS = ['Pickup', 'Gcash', 'Remittance Center', 'Bank Deposit', 'Others'];
 
+function Spinner() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 gap-3">
+      <div className="w-10 h-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+    </div>
+  );
+}
+
+function FieldRow({ icon: Icon, label, children }) {
+  return (
+    <div>
+      <label className="label flex items-center gap-1.5">
+        <Icon className="w-3.5 h-3.5" style={{ color: 'rgba(212,175,55,0.5)' }} />
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function AccountDetails() {
-  const [data, setData] = useState(null);
+  const [data, setData]           = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading]     = useState(true);
+  const [saving, setSaving]       = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -27,11 +48,11 @@ export default function AccountDetails() {
     setSaving(true);
     try {
       await api.put('/account', {
-        address: data.address,
-        password: newPassword || '',
+        address:       data.address,
+        password:      newPassword || '',
         payoutdetails: data.payoutdetails,
         payoutoptions: data.payoutid,
-        contactnos: data.contactnos,
+        contactnos:    data.contactnos,
       });
       toast.success('Account updated successfully');
       setNewPassword('');
@@ -40,52 +61,119 @@ export default function AccountDetails() {
     } finally { setSaving(false); }
   }
 
-  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
-  if (!data) return <p>Failed to load account data.</p>;
+  if (loading) return <Spinner />;
+  if (!data)   return <p style={{ color: 'rgba(255,255,255,0.4)' }}>Failed to load account data.</p>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Account Details</h1>
-      <div className="card max-w-2xl">
+    <div className="space-y-6">
+      {/* Heading */}
+      <div>
+        <h1 className="font-display text-2xl font-bold text-white">Account Details</h1>
+        <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+      </div>
+
+      <div className="glass-card rounded-2xl p-7 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="label">Account Name</label>
-            <input type="text" value={data.fullname || ''} className="input-field bg-gray-50" disabled />
-          </div>
-          <div>
-            <label className="label">Username</label>
-            <input type="text" value={data.username || ''} className="input-field bg-gray-50" disabled />
-          </div>
-          <div>
-            <label className="label">New Password <span className="text-xs text-gray-400">(leave blank to keep current)</span></label>
+
+          {/* Read-only fields */}
+          <FieldRow icon={HiOutlineUser} label="Account Name">
+            <input
+              type="text"
+              value={data.fullname || ''}
+              className="glass-input opacity-50 cursor-not-allowed"
+              disabled
+            />
+          </FieldRow>
+
+          <FieldRow icon={HiOutlineUser} label="Username">
+            <input
+              type="text"
+              value={data.username || ''}
+              className="glass-input opacity-50 cursor-not-allowed"
+              disabled
+            />
+          </FieldRow>
+
+          {/* Password */}
+          <FieldRow icon={HiOutlineLockClosed} label={<>New Password <span className="text-xs ml-1" style={{ color: 'rgba(255,255,255,0.25)' }}>(leave blank to keep current)</span></>}>
             <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field pr-10" placeholder="Enter new password" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="glass-input pr-16"
+                placeholder="Enter new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium transition-colors px-1"
+                style={{ color: 'rgba(212,175,55,0.5)' }}
+                onMouseEnter={e => e.currentTarget.style.color = 'rgba(212,175,55,0.9)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(212,175,55,0.5)'}
+              >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
             </div>
-          </div>
-          <div>
-            <label className="label">Address</label>
-            <input type="text" value={data.address || ''} onChange={(e) => handleChange('address', e.target.value)} className="input-field" />
-          </div>
-          <div>
-            <label className="label">Contact Numbers</label>
-            <input type="text" value={data.contactnos || ''} onChange={(e) => handleChange('contactnos', e.target.value)} className="input-field" />
-          </div>
-          <div>
-            <label className="label">Payout Option</label>
-            <select value={data.payoutid || ''} onChange={(e) => handleChange('payoutid', e.target.value)} className="input-field">
-              <option value="">Select...</option>
-              {PAYOUT_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </FieldRow>
+
+          {/* Address */}
+          <FieldRow icon={HiOutlineLocationMarker} label="Address">
+            <input
+              type="text"
+              value={data.address || ''}
+              onChange={(e) => handleChange('address', e.target.value)}
+              className="glass-input"
+              placeholder="Your address"
+            />
+          </FieldRow>
+
+          {/* Contact */}
+          <FieldRow icon={HiOutlinePhone} label="Contact Numbers">
+            <input
+              type="text"
+              value={data.contactnos || ''}
+              onChange={(e) => handleChange('contactnos', e.target.value)}
+              className="glass-input"
+              placeholder="e.g. 09xxxxxxxxx"
+            />
+          </FieldRow>
+
+          {/* Payout Option */}
+          <FieldRow icon={HiOutlineCreditCard} label="Payout Option">
+            <select
+              value={data.payoutid || ''}
+              onChange={(e) => handleChange('payoutid', e.target.value)}
+              className="glass-input"
+              style={{ appearance: 'none', cursor: 'pointer' }}
+            >
+              <option value="" style={{ background: '#1A1610' }}>Select option…</option>
+              {PAYOUT_OPTIONS.map(opt => (
+                <option key={opt} value={opt} style={{ background: '#1A1610' }}>{opt}</option>
+              ))}
             </select>
-          </div>
-          <div>
-            <label className="label">Payout Details</label>
-            <input type="text" value={data.payoutdetails || ''} onChange={(e) => handleChange('payoutdetails', e.target.value)} className="input-field" placeholder="e.g. GCash 09xxxxxxxxx" />
-          </div>
-          <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
-            {saving ? 'Saving...' : 'Update Account'}
+          </FieldRow>
+
+          {/* Payout Details */}
+          <FieldRow icon={HiOutlineCreditCard} label="Payout Details">
+            <input
+              type="text"
+              value={data.payoutdetails || ''}
+              onChange={(e) => handleChange('payoutdetails', e.target.value)}
+              className="glass-input"
+              placeholder="e.g. GCash 09xxxxxxxxx"
+            />
+          </FieldRow>
+
+          {/* Divider */}
+          <div className="h-px" style={{ background: 'rgba(212,175,55,0.1)' }} />
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="gold-btn py-2.5 px-7 rounded-xl text-sm"
+          >
+            {saving ? 'Saving…' : 'Update Account'}
           </button>
         </form>
       </div>

@@ -1,10 +1,25 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { HiOutlineGift } from 'react-icons/hi';
+
+function Spinner() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 gap-3">
+      <div className="w-10 h-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+    </div>
+  );
+}
+
+/* Rotating gold colors per card */
+const CARD_ACCENTS = [
+  '#D4AF37', '#F2D06B', '#B87333', '#D4AF37', '#9A7B0A',
+  '#F2D06B', '#D4AF37', '#B87333', '#F2D06B',
+];
 
 export default function HiFiveBonus() {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => { loadData(); }, []);
 
@@ -25,28 +40,96 @@ export default function HiFiveBonus() {
     }
   }
 
-  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
+  if (loading) return <Spinner />;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Hi-Five Bonus</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.map((p) => (
-          <div key={p.key} className="card">
-            <h3 className="font-semibold text-gray-800 mb-3">{p.name}</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-500">Current Bonus:</span><span className="font-medium">{p.bonus}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Purchases:</span><span className="font-medium">{p.purchases}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Redeemable:</span><span className="font-semibold text-emerald-600">{p.redeemable}</span></div>
-            </div>
-            {p.redeemable >= 1 && (
-              <button onClick={() => handleRedeem(p.key, 1)} className="btn-success w-full mt-4 text-sm">
-                Redeem 1 Unit
-              </button>
-            )}
-          </div>
-        ))}
+    <div className="space-y-6">
+      {/* Heading */}
+      <div>
+        <h1 className="font-display text-2xl font-bold text-white">Hi-Five Bonus</h1>
+        <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+        <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          Earn product rewards for every 5 direct referrals per product tier.
+        </p>
       </div>
+
+      {/* Product grid */}
+      {products.length === 0 ? (
+        <div className="glass-card rounded-2xl p-16 text-center">
+          <HiOutlineGift className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(212,175,55,0.2)' }} />
+          <p style={{ color: 'rgba(255,255,255,0.3)' }}>No products found.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {products.map((p, idx) => {
+            const accent = CARD_ACCENTS[idx % CARD_ACCENTS.length];
+            const hasRedeemable = p.redeemable >= 1;
+            return (
+              <div
+                key={p.key}
+                className="glass-card rounded-2xl p-5 relative overflow-hidden"
+                style={{
+                  borderTop: `2px solid ${accent}40`,
+                }}
+              >
+                {/* Corner decoration */}
+                <div
+                  className="absolute top-0 right-0 w-20 h-20 rounded-bl-full pointer-events-none"
+                  style={{ background: `radial-gradient(circle at top right, ${accent}10 0%, transparent 70%)` }}
+                />
+
+                {/* Icon */}
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}
+                >
+                  <HiOutlineGift className="w-5 h-5" style={{ color: accent }} />
+                </div>
+
+                {/* Product name */}
+                <h3 className="font-semibold text-white text-sm mb-4 leading-tight">{p.name}</h3>
+
+                {/* Stats */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Current Bonus</span>
+                    <span className="text-sm font-semibold text-white">{p.bonus}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Purchases</span>
+                    <span className="text-sm text-white/70">{p.purchases}</span>
+                  </div>
+                  <div
+                    className="flex items-center justify-between pt-2.5 border-t"
+                    style={{ borderColor: 'rgba(212,175,55,0.1)' }}
+                  >
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Redeemable</span>
+                    <span
+                      className="text-sm font-bold px-2 py-0.5 rounded-lg"
+                      style={{
+                        color: hasRedeemable ? '#4ade80' : 'rgba(255,255,255,0.3)',
+                        background: hasRedeemable ? 'rgba(34,197,94,0.1)' : 'transparent',
+                        border: hasRedeemable ? '1px solid rgba(34,197,94,0.2)' : 'none',
+                      }}
+                    >
+                      {p.redeemable}
+                    </span>
+                  </div>
+                </div>
+
+                {hasRedeemable && (
+                  <button
+                    onClick={() => handleRedeem(p.key, 1)}
+                    className="btn-success w-full mt-4 text-sm py-2"
+                  >
+                    Redeem 1 Unit
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

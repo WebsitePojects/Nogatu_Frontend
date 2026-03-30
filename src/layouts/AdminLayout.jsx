@@ -60,14 +60,21 @@ export default function AdminLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden portal-bg">
-      {/* Sidebar — Dark with gold accents */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[272px] bg-sidebar-bg transform motion-safe:transition-transform motion-safe:duration-300 ease-out lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-[272px] glass-sidebar transform motion-safe:transition-transform motion-safe:duration-300 ease-out lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
         {/* Logo area */}
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-brand-gold/10">
-          <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="w-12 h-12 rounded-xl object-contain border border-brand-gold/30 bg-white" />
+        <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
+          <img
+            src="/img/nogatu_logo.png"
+            alt="NOGATU Alliance"
+            className="w-12 h-12 rounded-xl object-contain"
+            style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(255,255,255,0.05)' }}
+          />
           <div>
-            <h1 className="text-white font-semibold text-sm tracking-tight">NOGATU Alliance</h1>
-            <p className="text-[11px] text-brand-gold/50 font-medium">Admin Panel</p>
+            <h1 className="font-brand text-sm font-semibold tracking-wide" style={{ color: '#F2D06B' }}>NOGATU Alliance</h1>
+            <p className="text-[11px] font-medium" style={{ color: 'rgba(212,175,55,0.5)' }}>Admin Panel</p>
           </div>
         </div>
 
@@ -75,21 +82,19 @@ export default function AdminLayout() {
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-thin">
           {NAV_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="text-[10px] font-bold text-brand-gold/40 uppercase tracking-[0.12em] px-3 mb-2">{group.label}</p>
+              <p
+                className="text-[10px] font-bold uppercase tracking-[0.12em] px-3 mb-2"
+                style={{ color: 'rgba(212,175,55,0.35)' }}
+              >
+                {group.label}
+              </p>
               <div className="space-y-0.5">
                 {group.items.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     onClick={() => setSidebarOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium motion-safe:transition-all motion-safe:duration-200 ${
-                        isActive
-                          ? 'text-white shadow-sm'
-                          : 'text-gray-400 hover:bg-white/[0.04] hover:text-gray-200'
-                      }`
-                    }
-                    style={({ isActive }) => isActive ? { background: 'linear-gradient(135deg, rgba(184,134,11,0.25), rgba(212,165,40,0.15))' } : {}}
+                    className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
                   >
                     <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
                     {item.label}
@@ -101,17 +106,31 @@ export default function AdminLayout() {
         </nav>
 
         {/* Admin info + Sign out */}
-        <div className="border-t border-brand-gold/10 p-4">
+        <div className="p-4" style={{ borderTop: '1px solid rgba(212,175,55,0.10)' }}>
           <div className="flex items-center gap-3 px-2 py-2 mb-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-md" style={{ background: 'linear-gradient(135deg, #592219, #6d3028)' }}>
-              A
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-md"
+              style={{ background: 'linear-gradient(135deg, #7f1d1d, #991b1b)' }}
+            >
+              {admin?.name?.[0]?.toUpperCase() || 'A'}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{admin?.name || 'Admin'}</p>
-              <p className="text-[11px] text-brand-gold/40 truncate">{roleLabel}</p>
+              <span
+                className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5"
+                style={{ background: 'rgba(212,175,55,0.15)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+              >
+                {roleLabel}
+              </span>
             </div>
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium text-gray-500 hover:bg-white/[0.04] hover:text-gray-300 motion-safe:transition-colors cursor-pointer">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium motion-safe:transition-colors cursor-pointer"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
+          >
             <HiOutlineLogout className="w-[18px] h-[18px]" />
             Sign Out
           </button>
@@ -119,29 +138,58 @@ export default function AdminLayout() {
       </aside>
 
       {/* Overlay */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="backdrop-blur-xl border-b border-primary-200/40 px-4 lg:px-8 h-16 flex items-center justify-between flex-shrink-0" style={{ background: 'rgba(255,253,245,0.85)' }}>
+        <header
+          className="glass-topbar px-4 lg:px-8 h-16 flex items-center justify-between flex-shrink-0"
+        >
           <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 -ml-2 rounded-xl hover:bg-primary-50 motion-safe:transition-colors cursor-pointer" aria-label="Open menu">
-              <HiOutlineMenu className="w-5 h-5 text-brand-brown" />
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 -ml-2 rounded-xl motion-safe:transition-colors cursor-pointer"
+              style={{ color: '#D4AF37' }}
+              aria-label="Open menu"
+            >
+              <HiOutlineMenu className="w-5 h-5" />
             </button>
-            <h2 className="text-sm font-semibold text-gray-800">{currentPage?.label || 'Admin Dashboard'}</h2>
+            <h2 className="text-sm font-semibold text-white/80">{currentPage?.label || 'Admin Dashboard'}</h2>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-xl text-gray-400 hover:text-brand-gold-dark hover:bg-primary-50 motion-safe:transition-colors cursor-pointer" aria-label="Notifications">
+            <button
+              className="relative p-2 rounded-xl motion-safe:transition-colors cursor-pointer"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+              aria-label="Notifications"
+              onMouseEnter={e => e.currentTarget.style.color = '#D4AF37'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+            >
               <HiOutlineBell className="w-5 h-5" />
+              <span
+                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
+                style={{ background: '#D4AF37' }}
+              />
             </button>
-            <div className="hidden sm:flex items-center gap-3 pl-3 ml-1 border-l border-primary-200/40">
+            <div
+              className="hidden sm:flex items-center gap-3 pl-3 ml-1"
+              style={{ borderLeft: '1px solid rgba(212,175,55,0.15)' }}
+            >
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-800">{admin?.name}</p>
-                <p className="text-[11px] text-gray-400">{roleLabel}</p>
+                <p className="text-sm font-medium text-white">{admin?.name}</p>
+                <p className="text-[11px]" style={{ color: 'rgba(212,175,55,0.6)' }}>{roleLabel}</p>
               </div>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm" style={{ background: 'rgba(89,34,25,0.08)', color: '#592219' }}>
-                A
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm text-white"
+                style={{ background: 'linear-gradient(135deg, #7f1d1d, #991b1b)' }}
+              >
+                {admin?.name?.[0]?.toUpperCase() || 'A'}
               </div>
             </div>
           </div>

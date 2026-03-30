@@ -28,62 +28,125 @@ export default function AccountMasterlist() {
     loadAccounts(search);
   }
 
+  const PaginationBtn = ({ onClick, disabled, children }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+      style={{
+        background: 'rgba(212,175,55,0.08)',
+        color: 'rgba(212,175,55,0.8)',
+        border: '1px solid rgba(212,175,55,0.15)',
+      }}
+    >
+      {children}
+    </button>
+  );
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Account Masterlist</h1>
+      <div className="mb-7">
+        <h1 className="font-display text-2xl font-bold text-white">Account Masterlist</h1>
+        <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+      </div>
 
-      <div className="card mb-6">
+      {/* Search */}
+      <div className="glass-card rounded-2xl p-6 mb-6">
         <form onSubmit={handleSearch} className="flex gap-3">
-          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} className="input-field flex-1" placeholder="Search by name..." />
-          <button type="submit" className="btn-primary">Search</button>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="glass-input flex-1 rounded-xl px-4 py-2.5 text-sm"
+            placeholder="Search by name..."
+          />
+          <button
+            type="submit"
+            className="gold-btn rounded-xl py-2.5 px-5 text-sm"
+          >
+            Search
+          </button>
         </form>
       </div>
 
-      <div className="card overflow-hidden">
+      {/* Table Card */}
+      <div className="glass-card rounded-2xl p-6 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-gray-500">Accounts</p>
+          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Accounts</p>
           <div className="flex items-center gap-2">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-50">Prev</button>
-            <span className="text-sm text-gray-600">{page}/{totalPages}</span>
-            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-50">Next</button>
+            <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
+            <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
+          <div className="flex justify-center py-10">
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-4"
+              style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
+            />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="table-header">
-                  <th className="py-3 px-4">Account Name</th>
-                  <th className="py-3 px-4">Username</th>
-                  <th className="py-3 px-4">Code</th>
-                  <th className="py-3 px-4">Type</th>
-                  <th className="py-3 px-4">Entry</th>
-                  <th className="py-3 px-4">Date Reg</th>
-                  <th className="py-3 px-4">Actions</th>
+                <tr>
+                  {['Account Name', 'Username', 'Code', 'Type', 'Entry', 'Date Reg', 'Actions'].map(h => (
+                    <th key={h} className="table-header py-3 px-4 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {accounts.map((a) => (
-                  <tr key={a.uid} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{a.fullname}</td>
-                    <td className="py-3 px-4">{a.username}</td>
-                    <td className="py-3 px-4 font-mono text-xs">{a.activationcode}</td>
-                    <td className="py-3 px-4"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">{a.accttypeName}</span></td>
-                    <td className="py-3 px-4 text-xs">{a.entryType}</td>
-                    <td className="py-3 px-4 text-xs">{a.datereg}</td>
+                {accounts.map((a, idx) => (
+                  <tr
+                    key={a.uid}
+                    className="motion-safe:transition-colors"
+                    style={{
+                      background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,175,55,0.05)'}
+                    onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'}
+                  >
+                    <td className="py-3 px-4 font-medium text-white/80">{a.fullname}</td>
+                    <td className="py-3 px-4 text-white/60">{a.username}</td>
+                    <td className="py-3 px-4 font-mono text-xs text-white/60">{a.activationcode}</td>
                     <td className="py-3 px-4">
-                      <div className="flex gap-1">
-                        <button onClick={() => navigate(`/admin/accounts/${a.uid}`)} className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded hover:bg-primary-200">Edit</button>
-                        <button onClick={() => navigate(`/admin/genealogy?id=${a.uid}`)} className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded hover:bg-emerald-200">Tree</button>
+                      <span
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+                      >
+                        {a.accttypeName}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-xs text-white/40">{a.entryType}</td>
+                    <td className="py-3 px-4 text-xs text-white/40">{a.datereg}</td>
+                    <td className="py-3 px-4">
+                      <div className="flex gap-1.5">
+                        <button
+                          onClick={() => navigate(`/admin/accounts/${a.uid}`)}
+                          className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
+                          style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => navigate(`/admin/genealogy?id=${a.uid}`)}
+                          className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
+                          style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
+                        >
+                          Tree
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {accounts.length === 0 && (
-                  <tr><td colSpan="7" className="py-8 text-center text-gray-400">No accounts found.</td></tr>
+                  <tr>
+                    <td colSpan="7" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                      No accounts found.
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>

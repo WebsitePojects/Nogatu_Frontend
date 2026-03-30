@@ -45,9 +45,9 @@ const SpinnerIcon = () => (
 
 const adminFeatures = [
   'Manage all member accounts',
-  'Oversee network genealogy',
+  'Generate and release codes',
   'Process encashment requests',
-  'Post news & announcements',
+  'View system analytics',
 ];
 
 export default function AdminLogin() {
@@ -79,38 +79,44 @@ export default function AdminLogin() {
   const fmt = (n) => n === null ? '—' : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex" style={{ background: '#0D0B07' }}>
 
-      {/* ── Left admin panel — Dark Brown ──────────────────────── */}
+      {/* Left admin panel */}
       <div
         className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #1A1207 0%, #2D2010 50%, #1A1207 100%)' }}
+        style={{ background: 'linear-gradient(145deg, #1a0505 0%, #2d0a0a 50%, #1a0a00 100%)' }}
       >
         {/* Decorative blobs */}
-        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #D4A528, transparent)' }} />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-5"
-          style={{ background: 'radial-gradient(circle, #592219, transparent)' }} />
+        <div
+          className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, #D4AF37, transparent)' }}
+        />
+        <div
+          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #7f1d1d, transparent)' }}
+        />
 
         {/* Dot grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.05]"
+          className="absolute inset-0 opacity-[0.06]"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(212,165,40,0.8) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgba(212,175,55,0.8) 1px, transparent 1px)',
             backgroundSize: '28px 28px',
           }}
         />
 
         {/* Top accent line */}
         <div
-          className="absolute top-0 left-0 right-0 h-0.5"
-          style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }}
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, #D4AF37 50%, transparent)' }}
         />
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
           <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="h-14 w-auto object-contain" />
-          <span className="text-brand-gold/50 text-xs tracking-widest uppercase">Admin Console</span>
+          <span className="font-brand text-xs tracking-widest uppercase" style={{ color: 'rgba(212,175,55,0.55)' }}>
+            Admin Console
+          </span>
         </div>
 
         {/* Hero copy */}
@@ -118,16 +124,21 @@ export default function AdminLogin() {
           <div>
             <div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-5"
-              style={{ background: 'rgba(212,165,40,0.1)', border: '1px solid rgba(212,165,40,0.2)' }}
+              style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)' }}
             >
-              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#D4A528' }} />
-              <span className="text-xs font-medium tracking-wide uppercase" style={{ color: 'rgba(212,165,40,0.7)' }}>Secure Admin Access</span>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#D4AF37' }} />
+              <span
+                className="text-xs font-medium tracking-wide uppercase"
+                style={{ color: 'rgba(212,175,55,0.7)' }}
+              >
+                Secure Admin Access
+              </span>
             </div>
-            <h1 className="text-4xl xl:text-5xl font-bold text-white leading-snug">
+            <h1 className="font-display text-4xl xl:text-5xl font-bold text-white leading-snug">
               Command Your<br />
-              <span className="text-brand-gold-light">Alliance Network.</span>
+              <span className="gold-text">Alliance Network.</span>
             </h1>
-            <p className="text-gray-400 text-base leading-relaxed mt-4 max-w-xs">
+            <p className="text-base leading-relaxed mt-4 max-w-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
               Full control over members, earnings, genealogy, and platform content from one secure panel.
             </p>
           </div>
@@ -138,62 +149,71 @@ export default function AdminLogin() {
               <li key={f} className="flex items-center gap-3">
                 <span
                   className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)', boxShadow: '0 4px 12px rgba(184,134,11,0.3)' }}
+                  style={{
+                    background: 'linear-gradient(135deg, #7f1d1d, #D4AF37)',
+                    boxShadow: '0 4px 12px rgba(212,175,55,0.25)',
+                  }}
                 >
                   <CheckIcon />
                 </span>
-                <span className="text-gray-400 text-sm">{f}</span>
+                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{f}</span>
               </li>
             ))}
           </ul>
 
           {/* Live stats */}
-          <div className="flex gap-8 pt-5" style={{ borderTop: '1px solid rgba(212,165,40,0.1)' }}>
+          <div className="flex gap-8 pt-5" style={{ borderTop: '1px solid rgba(212,175,55,0.12)' }}>
             <div>
               <p className="text-white font-bold text-2xl">{fmt(stats.activeMembers)}+</p>
-              <p className="text-gray-600 text-xs mt-0.5">Active Members</p>
+              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Active Members</p>
             </div>
             <div>
               <p className="text-white font-bold text-2xl">{fmt(stats.networksBuilt)}+</p>
-              <p className="text-gray-600 text-xs mt-0.5">Networks Built</p>
+              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Networks Built</p>
             </div>
             <div>
               <p className="text-white font-bold text-2xl">99.9%</p>
-              <p className="text-gray-600 text-xs mt-0.5">Uptime</p>
+              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Uptime</p>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="relative z-10 text-gray-700 text-xs">
-          © {new Date().getFullYear()} NOGATU Alliance. All rights reserved.
+        <p className="relative z-10 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+          &copy; {new Date().getFullYear()} NOGATU Alliance. All rights reserved.
         </p>
       </div>
 
-      {/* ── Right form panel ────────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12" style={{ background: '#FFFDF5' }}>
+      {/* Right form panel */}
+      <div
+        className="flex-1 flex items-center justify-center px-6 py-12"
+        style={{ background: '#0D0B07' }}
+      >
         <div className="w-full max-w-[400px]">
 
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-10">
             <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="h-20 w-auto object-contain mx-auto mb-4" />
-            <p className="text-gray-500 text-sm">Admin Console</p>
+            <p className="text-sm" style={{ color: 'rgba(212,175,55,0.55)' }}>Admin Console</p>
           </div>
 
           {/* Heading */}
           <div className="mb-7">
-            <h2 className="text-[28px] font-bold text-gray-900 leading-tight">Welcome back</h2>
-            <p className="text-gray-500 text-sm mt-1">Sign in to access your admin account</p>
+            <h2 className="font-display text-[28px] font-bold text-white leading-tight">Welcome back</h2>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Sign in to access your admin account</p>
           </div>
 
           {/* Form card */}
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-primary-200/40 shadow-sm p-7 space-y-5">
+          <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-7 space-y-5">
 
             {/* Username */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
+              <label className="label">Username</label>
+              <div className="relative mt-1.5">
+                <span
+                  className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"
+                  style={{ color: 'rgba(212,175,55,0.5)' }}
+                >
                   <UserIcon />
                 </span>
                 <input
@@ -203,7 +223,7 @@ export default function AdminLogin() {
                   placeholder="Enter your username"
                   required
                   autoComplete="username"
-                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-primary-200/60 bg-primary-50/30 text-gray-900 text-sm placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary-400/40 focus:border-transparent focus:bg-white motion-safe:transition"
+                  className="glass-input w-full pl-11 pr-4 py-2.5 rounded-xl text-sm"
                 />
               </div>
             </div>
@@ -211,17 +231,21 @@ export default function AdminLogin() {
             {/* Password */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <label className="label">Password</label>
                 <button
                   type="button"
                   onClick={() => toast('Password reset is handled by your system administrator.', { icon: '🔒' })}
-                  className="text-xs font-medium text-brand-gold-dark hover:text-brand-brown motion-safe:transition-colors"
+                  className="text-xs font-medium motion-safe:transition-colors"
+                  style={{ color: 'rgba(212,175,55,0.6)' }}
                 >
                   Forgot password?
                 </button>
               </div>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
+                <span
+                  className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"
+                  style={{ color: 'rgba(212,175,55,0.5)' }}
+                >
                   <LockIcon />
                 </span>
                 <input
@@ -231,13 +255,14 @@ export default function AdminLogin() {
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
-                  className="w-full pl-11 pr-11 py-2.5 rounded-xl border border-primary-200/60 bg-primary-50/30 text-gray-900 text-sm placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary-400/40 focus:border-transparent focus:bg-white motion-safe:transition"
+                  className="glass-input w-full pl-11 pr-11 py-2.5 rounded-xl text-sm"
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 motion-safe:transition"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center motion-safe:transition"
+                  style={{ color: 'rgba(255,255,255,0.35)' }}
                 >
                   {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
                 </button>
@@ -248,28 +273,28 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 motion-safe:transition-all motion-safe:duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
-              style={{
-                background: loading
-                  ? 'rgba(89,34,25,0.5)'
-                  : 'linear-gradient(135deg, #592219 0%, #6d3028 100%)',
-                boxShadow: loading ? 'none' : '0 4px 14px rgba(89,34,25,0.35)',
-              }}
+              className="gold-btn w-full py-2.5 px-5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 motion-safe:transition-all motion-safe:duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
             >
-              {loading ? <><SpinnerIcon /> Authenticating...</> : 'Sign In'}
+              {loading ? <><SpinnerIcon /> Authenticating...</> : 'Sign In to Admin'}
             </button>
           </form>
 
           {/* Security note */}
           <div
             className="mt-5 rounded-xl px-4 py-3 flex items-start gap-3"
-            style={{ background: 'rgba(212,165,40,0.06)', border: '1px solid rgba(212,165,40,0.15)' }}
+            style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.12)' }}
           >
-            <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-4 h-4 mt-0.5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              style={{ color: 'rgba(212,175,55,0.6)' }}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
-            <p className="text-brand-brown/60 text-xs leading-relaxed">
+            <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.3)' }}>
               Restricted to authorized administrators only. All access is logged.
             </p>
           </div>

@@ -35,13 +35,13 @@ import NewsManagement from './pages/admin/NewsManagement';
 
 function ProtectedMember({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
+  if (loading) return <div className="flex items-center justify-center h-screen portal-bg"><div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} /></div>;
   return user ? children : <Navigate to="/login" replace />;
 }
 
 function ProtectedAdmin({ children }) {
   const { admin, loading } = useAuth();
-  if (loading) return <div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
+  if (loading) return <div className="flex items-center justify-center h-screen portal-bg"><div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} /></div>;
   return admin ? children : <Navigate to="/admin/login" replace />;
 }
 

@@ -46,61 +46,141 @@ export default function ManageCodes() {
     } catch (err) { toast.error(err.response?.data?.error || 'Transfer failed'); }
   }
 
+  const statusStyle = (status) => {
+    if (status === 0) return { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)' };
+    if (status === 1) return { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.22)' };
+    return { background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.22)' };
+  };
+
+  const PaginationBtn = ({ onClick, disabled, children }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+      style={{
+        background: 'rgba(212,175,55,0.08)',
+        color: 'rgba(212,175,55,0.8)',
+        border: '1px solid rgba(212,175,55,0.15)',
+      }}
+    >
+      {children}
+    </button>
+  );
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Manage Codes</h1>
+      <div className="mb-7">
+        <h1 className="font-display text-2xl font-bold text-white">Manage Codes</h1>
+        <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+      </div>
 
       {/* Actions Bar */}
-      <div className="card mb-6">
+      <div className="glass-card rounded-2xl p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-3 items-end">
           <div className="flex-1">
             <label className="label">Transfer to Account</label>
-            <input type="text" value={targetUsername} onChange={(e) => setTargetUsername(e.target.value)} className="input-field" placeholder="Username" />
+            <input
+              type="text"
+              value={targetUsername}
+              onChange={(e) => setTargetUsername(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              placeholder="Username"
+            />
           </div>
-          <button onClick={handleTransfer} disabled={selected.length === 0} className="btn-primary disabled:opacity-50">Transfer ({selected.length})</button>
-          <button onClick={handleRelease} disabled={selected.length === 0} className="btn-success disabled:opacity-50">Release ({selected.length})</button>
+          <button
+            onClick={handleTransfer}
+            disabled={selected.length === 0}
+            className="gold-btn rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Transfer ({selected.length})
+          </button>
+          <button
+            onClick={handleRelease}
+            disabled={selected.length === 0}
+            className="btn-success rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Release ({selected.length})
+          </button>
         </div>
       </div>
 
       {/* Codes Table */}
-      <div className="card overflow-hidden">
+      <div className="glass-card rounded-2xl p-6 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-gray-500">{selected.length} selected</p>
+          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            {selected.length > 0
+              ? <span style={{ color: '#D4AF37' }}>{selected.length} selected</span>
+              : 'Select codes below'}
+          </p>
           <div className="flex items-center gap-2">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-50">Prev</button>
-            <span className="text-sm text-gray-600">{page}/{totalPages}</span>
-            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-50">Next</button>
+            <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
+            <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
+          <div className="flex justify-center py-10">
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-4"
+              style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
+            />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="table-header">
-                  <th className="py-3 px-4"><input type="checkbox" onChange={(e) => setSelected(e.target.checked ? codes.map(c => c.code) : [])} /></th>
-                  <th className="py-3 px-4">Code</th>
-                  <th className="py-3 px-4">Product</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Generated</th>
+                <tr>
+                  <th className="table-header py-3 px-4">
+                    <input
+                      type="checkbox"
+                      onChange={(e) => setSelected(e.target.checked ? codes.map(c => c.code) : [])}
+                      className="rounded"
+                      style={{ accentColor: '#D4AF37' }}
+                    />
+                  </th>
+                  {['Code', 'Product', 'Status', 'Generated'].map(h => (
+                    <th key={h} className="table-header py-3 px-4 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {codes.map((c) => (
-                  <tr key={c.code} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4"><input type="checkbox" checked={selected.includes(c.code)} onChange={() => toggleSelect(c.code)} /></td>
-                    <td className="py-3 px-4 font-mono text-xs">{c.code}</td>
-                    <td className="py-3 px-4">{c.producttypeName}</td>
+                {codes.map((c, idx) => (
+                  <tr
+                    key={c.code}
+                    className="motion-safe:transition-colors"
+                    style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,175,55,0.05)'}
+                    onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'}
+                  >
                     <td className="py-3 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${c.codestatus === 0 ? 'bg-gray-100 text-gray-600' : c.codestatus === 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(c.code)}
+                        onChange={() => toggleSelect(c.code)}
+                        style={{ accentColor: '#D4AF37' }}
+                      />
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs" style={{ color: '#F2D06B' }}>{c.code}</td>
+                    <td className="py-3 px-4 text-white/70">{c.producttypeName}</td>
+                    <td className="py-3 px-4">
+                      <span
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                        style={statusStyle(c.codestatus)}
+                      >
                         {c.statusLabel}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-xs text-gray-500">{c.dategen}</td>
+                    <td className="py-3 px-4 text-xs text-white/40">{c.dategen}</td>
                   </tr>
                 ))}
+                {codes.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                      No codes found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

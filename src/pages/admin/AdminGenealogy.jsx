@@ -5,19 +5,60 @@ import toast from 'react-hot-toast';
 
 function TreeNode({ node, onNavigate }) {
   if (!node) return null;
+
+  const emptySlotStyle = {
+    border: '2px dashed rgba(212,175,55,0.2)',
+    borderRadius: '0.75rem',
+    padding: '0.75rem',
+    minWidth: '140px',
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.2)',
+    fontSize: '0.75rem',
+  };
+
   return (
     <div className="flex flex-col items-center">
-      <div className="border-2 border-gray-300 rounded-xl p-3 min-w-[140px] text-center cursor-pointer hover:shadow-md hover:border-primary-400 transition-all bg-white" onClick={() => onNavigate(node.uid)}>
-        <p className="font-semibold text-sm text-gray-800">{node.username}</p>
-        <p className="text-xs text-gray-500">{node.fullname}</p>
-        <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{node.accttypeName}</span>
+      <div
+        className="rounded-xl p-3 min-w-[140px] text-center cursor-pointer motion-safe:transition-all"
+        style={{
+          background: 'rgba(212,175,55,0.07)',
+          border: '1.5px solid rgba(212,175,55,0.22)',
+          backdropFilter: 'blur(12px)',
+        }}
+        onClick={() => onNavigate(node.uid)}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = 'rgba(212,175,55,0.14)';
+          e.currentTarget.style.boxShadow = '0 4px 20px rgba(212,175,55,0.15)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'rgba(212,175,55,0.07)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+      >
+        <p className="font-semibold text-sm text-white/85">{node.username}</p>
+        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{node.fullname}</p>
+        <span
+          className="inline-block mt-1.5 text-xs px-2 py-0.5 rounded-full font-medium"
+          style={{ background: 'rgba(212,175,55,0.15)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+        >
+          {node.accttypeName}
+        </span>
       </div>
-      <div className="flex gap-4 mt-4 pt-4">
+
+      <div className="flex gap-4 mt-4 pt-4" style={{ borderTop: '1px solid rgba(212,175,55,0.08)' }}>
         <div className="flex flex-col items-center min-w-[140px]">
-          {node.left ? <TreeNode node={node.left} onNavigate={onNavigate} /> : node.hasLeftSlot ? <div className="border-2 border-dashed border-gray-300 rounded-xl p-3 min-w-[140px] text-center text-gray-400 text-xs">Left (Empty)</div> : null}
+          {node.left
+            ? <TreeNode node={node.left} onNavigate={onNavigate} />
+            : node.hasLeftSlot
+              ? <div style={emptySlotStyle}>Left (Empty)</div>
+              : null}
         </div>
         <div className="flex flex-col items-center min-w-[140px]">
-          {node.right ? <TreeNode node={node.right} onNavigate={onNavigate} /> : node.hasRightSlot ? <div className="border-2 border-dashed border-gray-300 rounded-xl p-3 min-w-[140px] text-center text-gray-400 text-xs">Right (Empty)</div> : null}
+          {node.right
+            ? <TreeNode node={node.right} onNavigate={onNavigate} />
+            : node.hasRightSlot
+              ? <div style={emptySlotStyle}>Right (Empty)</div>
+              : null}
         </div>
       </div>
     </div>
@@ -53,22 +94,50 @@ export default function AdminGenealogy() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Account Genealogy</h1>
-      <div className="card mb-6">
+      <div className="mb-7">
+        <h1 className="font-display text-2xl font-bold text-white">Account Genealogy</h1>
+        <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+      </div>
+
+      {/* Search */}
+      <div className="glass-card rounded-2xl p-6 mb-6">
         <form onSubmit={handleSearch} className="flex gap-3">
-          <input type="text" value={searchUsername} onChange={(e) => setSearchUsername(e.target.value)} className="input-field flex-1" placeholder="Enter username to view tree" />
-          <button type="submit" className="btn-primary">View Tree</button>
+          <input
+            type="text"
+            value={searchUsername}
+            onChange={(e) => setSearchUsername(e.target.value)}
+            className="glass-input flex-1 rounded-xl px-4 py-2.5 text-sm"
+            placeholder="Enter username to view tree"
+          />
+          <button type="submit" className="gold-btn rounded-xl py-2.5 px-5 text-sm">
+            View Tree
+          </button>
         </form>
       </div>
-      <div className="card overflow-x-auto">
+
+      {/* Tree Display */}
+      <div className="glass-card rounded-2xl p-6 overflow-x-auto">
         {loading ? (
-          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
+          <div className="flex justify-center py-10">
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-4"
+              style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
+            />
+          </div>
         ) : tree ? (
           <div className="min-w-[600px] flex justify-center py-6">
-            <TreeNode node={tree} onNavigate={(uid) => { setSearchParams({ id: uid }); loadTree(uid); }} />
+            <TreeNode
+              node={tree}
+              onNavigate={(uid) => { setSearchParams({ id: uid }); loadTree(uid); }}
+            />
           </div>
         ) : (
-          <p className="text-center py-8 text-gray-400">Search for an account to view its genealogy tree.</p>
+          <div className="flex flex-col items-center py-14" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            <svg className="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'rgba(212,175,55,0.3)' }}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            <p className="text-sm">Search for an account to view its genealogy tree.</p>
+          </div>
         )}
       </div>
     </div>

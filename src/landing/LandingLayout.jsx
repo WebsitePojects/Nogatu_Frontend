@@ -4,9 +4,9 @@ import { HiOutlineMenu, HiOutlineX } from 'react-icons/hi';
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
-  { to: '/about', label: 'About NOGATU Alliance' },
-  { to: '/opportunities', label: 'Our Products' },
-  { to: '/news', label: 'Business Opportunities' },
+  { to: '/about', label: 'About Us' },
+  { to: '/products', label: 'Our Products' },
+  { to: '/news', label: 'News & Updates' },
   { to: '/contact', label: 'Contact Us' },
 ];
 
@@ -30,11 +30,10 @@ function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className={`mt-3 rounded-2xl border px-4 sm:px-5 flex items-center justify-between h-16 transition-all duration-500 ${
-            scrolled
-              ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-black/[0.04] border-primary-200/50'
-              : 'bg-[#FFFDF5]/85 border-primary-200/30'
-          }`}
+          className={`mt-3 rounded-2xl border px-4 sm:px-5 flex items-center justify-between h-16 transition-all duration-500 ${scrolled
+            ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-black/[0.04] border-primary-200/50'
+            : 'bg-[#FFFDF5]/85 border-primary-200/30'
+            }`}
         >
           {/* Logo */}
           <NavLink to="/" className="flex items-center gap-2.5 group">
@@ -56,10 +55,9 @@ function Navbar() {
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium motion-safe:transition-all motion-safe:duration-200 ${
-                    isActive
-                      ? 'text-brand-gold-dark bg-primary-100/60'
-                      : 'text-gray-500 hover:text-brand-gold-dark hover:bg-primary-50'
+                  `px-4 py-2 rounded-lg text-sm font-medium motion-safe:transition-all motion-safe:duration-200 ${isActive
+                    ? 'text-brand-gold-dark bg-primary-100/60'
+                    : 'text-gray-500 hover:text-brand-gold-dark hover:bg-primary-50'
                   }`
                 }
               >
@@ -90,9 +88,8 @@ function Navbar() {
 
       {/* Mobile menu */}
       <div
-        className={`lg:hidden transition-all duration-300 overflow-hidden ${
-          mobileOpen ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`lg:hidden transition-all duration-300 overflow-hidden ${mobileOpen ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
       >
         <div className="mx-4 sm:mx-6 lg:mx-8 mt-1 bg-white/95 backdrop-blur-xl border border-primary-200/40 rounded-2xl px-4 py-4 space-y-1 shadow-xl">
           {NAV_LINKS.map((link) => (
@@ -101,8 +98,7 @@ function Navbar() {
               to={link.to}
               end={link.to === '/'}
               className={({ isActive }) =>
-                `block px-4 py-3 rounded-xl text-sm font-medium motion-safe:transition-colors ${
-                  isActive ? 'text-brand-gold-dark bg-primary-100/60' : 'text-gray-700 hover:bg-primary-50'
+                `block px-4 py-3 rounded-xl text-sm font-medium motion-safe:transition-colors ${isActive ? 'text-brand-gold-dark bg-primary-100/60' : 'text-gray-700 hover:bg-primary-50'
                 }`
               }
             >
