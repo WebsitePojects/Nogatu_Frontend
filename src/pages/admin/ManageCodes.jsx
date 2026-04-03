@@ -8,14 +8,20 @@ export default function ManageCodes() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState([]);
+  const [codeSearch, setCodeSearch] = useState('');
   const [targetUsername, setTargetUsername] = useState('');
+  const [taggedAccount, setTaggedAccount] = useState(null);
 
   useEffect(() => { loadCodes(); }, [page]);
 
   async function loadCodes() {
     setLoading(true);
     try {
-      const res = await api.get(`/admin/codes?page=${page}`);
+      const q = codeSearch.trim();
+      const url = q
+        ? `/admin/codes?page=${page}&q=${encodeURIComponent(q)}`
+        : `/admin/codes?page=${page}`;
+      const res = await api.get(url);
       setCodes(res.data.codes);
       setTotalPages(res.data.totalPages);
     } catch { } finally { setLoading(false); }
@@ -36,14 +42,36 @@ export default function ManageCodes() {
   }
 
   async function handleTransfer() {
-    if (!targetUsername || selected.length === 0) return toast.error('Enter username and select codes');
+    const transferTo = taggedAccount?.username || targetUsername.trim();
+    if (!transferTo || selected.length === 0) return toast.error('Tag an account and select codes');
     try {
-      const res = await api.post('/admin/codes/transfer', { targetUsername, codes: selected });
+      const res = await api.post('/admin/codes/transfer', { targetUsername: transferTo, codes: selected });
       toast.success(`${res.data.transferred} code(s) transferred`);
       setSelected([]);
       setTargetUsername('');
+      setTaggedAccount(null);
       loadCodes();
     } catch (err) { toast.error(err.response?.data?.error || 'Transfer failed'); }
+  }
+
+  async function handleTagAccount() {
+    const username = targetUsername.trim();
+    if (!username) return toast.error('Enter username to search');
+
+    try {
+      const res = await api.get(`/admin/codes/lookup-account?username=${encodeURIComponent(username)}`);
+      setTaggedAccount(res.data.account);
+      setTargetUsername(res.data.account.username);
+      toast.success(`Tagged account: ${res.data.account.username}`);
+    } catch (err) {
+      setTaggedAccount(null);
+      toast.error(err.response?.data?.error || 'Account not found');
+    }
+  }
+
+  function clearTag() {
+    setTaggedAccount(null);
+    setTargetUsername('');
   }
 
   const statusStyle = (status) => {
@@ -76,6 +104,36 @@ export default function ManageCodes() {
 
       {/* Actions Bar */}
       <div className="glass-card rounded-2xl p-6 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 items-end mb-4">
+          <div className="flex-1">
+            <label className="label">Search Code</label>
+            <input
+              type="text"
+              value={codeSearch}
+              onChange={(e) => setCodeSearch(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              placeholder="Enter code"
+            />
+          </div>
+          <button
+            onClick={() => { setPage(1); loadCodes(); }}
+            className="gold-btn rounded-xl py-2.5 px-5 text-sm"
+          >
+            Search
+          </button>
+          <button
+            onClick={() => {
+              setCodeSearch('');
+              setPage(1);
+              setTimeout(() => loadCodes(), 0);
+            }}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
+          >
+            Clear
+          </button>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-3 items-end">
           <div className="flex-1">
             <label className="label">Transfer to Account</label>
@@ -87,6 +145,20 @@ export default function ManageCodes() {
               placeholder="Username"
             />
           </div>
+          <button
+            onClick={handleTagAccount}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
+            style={{ borderColor: 'rgba(59,130,246,0.35)', color: '#93c5fd', background: 'rgba(59,130,246,0.1)' }}
+          >
+            Search Account
+          </button>
+          <button
+            onClick={clearTag}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
+          >
+            Clear Tag
+          </button>
           <button
             onClick={handleTransfer}
             disabled={selected.length === 0}
@@ -102,6 +174,15 @@ export default function ManageCodes() {
             Release ({selected.length})
           </button>
         </div>
+
+        {taggedAccount && (
+          <div
+            className="mt-4 rounded-xl px-4 py-3 text-sm"
+            style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', color: '#a7f3d0' }}
+          >
+            Tagged account: <strong>{taggedAccount.username}</strong> ({taggedAccount.fullname})
+          </div>
+        )}
       </div>
 
       {/* Codes Table */}

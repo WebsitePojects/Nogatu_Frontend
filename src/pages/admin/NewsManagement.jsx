@@ -218,31 +218,21 @@ export default function NewsManagement() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0"
-            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowModal(false)}
           />
           <div
-            className="relative rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-            style={{
-              background: 'rgba(18,14,8,0.97)',
-              border: '1px solid rgba(212,175,55,0.2)',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.08)',
-            }}
+            className="relative rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto bg-surface-1 border border-border shadow-2xl"
           >
             <div
-              className="flex items-center justify-between p-6"
-              style={{ borderBottom: '1px solid rgba(212,175,55,0.1)' }}
+              className="flex items-center justify-between p-6 border-b border-border"
             >
-              <h3 className="font-display text-lg font-bold text-white">
+              <h3 className="font-display text-lg font-bold text-content">
                 {editing ? 'Edit Post' : 'Create New Post'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1.5 rounded-lg motion-safe:transition-colors cursor-pointer"
-                style={{ color: 'rgba(255,255,255,0.35)' }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; e.currentTarget.style.background = 'transparent'; }}
+                className="p-1.5 rounded-lg motion-safe:transition-colors cursor-pointer text-muted hover:text-content hover:bg-surface-2"
                 aria-label="Close"
               >
                 <HiOutlineX className="w-5 h-5" />
@@ -272,7 +262,7 @@ export default function NewsManagement() {
                 </select>
               </div>
               <div>
-                <label htmlFor="post-image" className="label">Image URL <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem' }}>(optional)</span></label>
+                <label htmlFor="post-image" className="label">Image URL <span className="text-muted text-[0.7rem]">(optional)</span></label>
                 <input
                   id="post-image"
                   value={form.image_url}
@@ -299,10 +289,9 @@ export default function NewsManagement() {
                   type="checkbox"
                   checked={form.is_published}
                   onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
-                  className="w-4 h-4 rounded"
-                  style={{ accentColor: '#D4AF37' }}
+                  className="w-4 h-4 rounded text-brand-500 bg-surface-2 border-border focus:ring-brand-500"
                 />
-                <label htmlFor="post-published" className="text-sm text-white/60 font-medium cursor-pointer">
+                <label htmlFor="post-published" className="text-sm text-content-muted font-medium cursor-pointer">
                   Publish immediately
                 </label>
               </div>

@@ -19,6 +19,7 @@ import HiFiveBonus from './pages/member/HiFiveBonus';
 import Transactions from './pages/member/Transactions';
 import UpgradeAccount from './pages/member/UpgradeAccount';
 import Registration from './pages/member/Registration';
+import SupportContact from './pages/member/SupportContact';
 
 // Admin Pages
 import AdminLogin from './pages/admin/Login';
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="transactions" element={<Transactions />} />
           <Route path="upgrade" element={<UpgradeAccount />} />
           <Route path="register" element={<Registration />} />
+          <Route path="support" element={<SupportContact />} />
         </Route>
 
         {/* Admin Panel */}

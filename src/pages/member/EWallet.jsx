@@ -105,8 +105,17 @@ export default function EWallet() {
           }}
         />
 
-        {/* 3D ASSET PLACEHOLDER ─────────────────── */}
-        {/* <!-- 3D SCROLL ASSET: floating gold coin/wallet sphere, ~200×200px, transparent bg, place top-right --> */}
+        {/* 3D ASSET: floating gold coin */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 pointer-events-none opacity-90 mix-blend-screen">
+          <video 
+            src="/img/goldcoin3dvid.mp4" 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="w-full h-full object-contain"
+          />
+        </div>
 
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-5">

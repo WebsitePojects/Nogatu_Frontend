@@ -7,11 +7,11 @@ import { HiOutlineHome } from 'react-icons/hi';
 /* Package colors → gold-tinted dark palette */
 const TYPE_STYLES = {
   Bronze:   { border: '#CD7F32', bg: 'rgba(205,127,50,0.1)',  text: '#CD7F32' },
-  Silver:   { border: '#C0C0C0', bg: 'rgba(192,192,192,0.1)', text: '#C0C0C0' },
-  Gold:     { border: '#FFD700', bg: 'rgba(255,215,0,0.12)',  text: '#FFD700' },
-  Platinum: { border: '#D4D4D4', bg: 'rgba(212,212,212,0.1)', text: '#D4D4D4' },
-  Garnet:   { border: '#9B4444', bg: 'rgba(155,68,68,0.15)',  text: '#C86464' },
-  Diamond:  { border: '#B9F2FF', bg: 'rgba(185,242,255,0.1)', text: '#B9F2FF' },
+  Silver:   { border: '#A8A9AD', bg: 'rgba(168,169,173,0.1)', text: '#A8A9AD' },
+  Gold:     { border: '#DAA520', bg: 'rgba(218,165,32,0.12)', text: '#DAA520' },
+  Platinum: { border: '#6C757D', bg: 'rgba(108,117,125,0.1)', text: '#6C757D' },
+  Garnet:   { border: '#9B2335', bg: 'rgba(155,35,53,0.15)',  text: '#9B2335' },
+  Diamond:  { border: '#4FC3F7', bg: 'rgba(79,195,247,0.1)',  text: '#4FC3F7' },
 };
 
 function ConnectorLines({ hasLeft, hasRight }) {

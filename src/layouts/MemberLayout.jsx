@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   HiOutlineHome, HiOutlineCreditCard, HiOutlineUser, HiOutlineKey,
   HiOutlineUsers, HiOutlineChartBar, HiOutlineGift, HiOutlineDocumentText,
   HiOutlineArrowUp, HiOutlineUserAdd, HiOutlineLogout, HiOutlineMenu,
-  HiOutlineX, HiOutlineBell,
+  HiOutlineX, HiOutlineBell, HiOutlineSun, HiOutlineMoon,
+  HiOutlineSupport,
 } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
 
@@ -34,6 +36,7 @@ const NAV_GROUPS = [
       { to: '/register',     label: 'Register Account', icon: HiOutlineUserAdd },
       { to: '/transactions', label: 'Transactions',     icon: HiOutlineDocumentText },
       { to: '/account',      label: 'Account Details',  icon: HiOutlineUser },
+      { to: '/support',      label: 'Issue or Concern', icon: HiOutlineSupport },
     ],
   },
 ];
@@ -54,6 +57,7 @@ const GoldOrb = ({ size, top, left, opacity }) => (
 
 export default function MemberLayout() {
   const { user, logoutMember } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -156,7 +160,7 @@ export default function MemberLayout() {
           {/* User row */}
           <div className="flex items-center gap-3 px-2 py-2 mb-1">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#080604] font-bold text-sm flex-shrink-0"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-always-white font-bold text-sm flex-shrink-0"
               style={{
                 background: 'linear-gradient(135deg, #9A7B0A 0%, #D4AF37 50%, #F2D06B 100%)',
                 boxShadow: '0 4px 12px rgba(212,175,55,0.3)',
@@ -165,7 +169,7 @@ export default function MemberLayout() {
               {acctInitial}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{user?.shortname || 'Member'}</p>
+              <p className="text-sm font-semibold text-white text-always-white truncate">{user?.shortname || 'Member'}</p>
               <p className="text-[10.5px] truncate" style={{ color: 'rgba(212,175,55,0.45)' }}>
                 {user?.caccttype} Account
               </p>
@@ -220,6 +224,15 @@ export default function MemberLayout() {
 
           {/* Right: bell + user */}
           <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl text-white/35 hover:text-gold-300 transition-colors"
+              title="Toggle Theme"
+            >
+              {isDarkMode ? <HiOutlineSun className="w-[18px] h-[18px]" /> : <HiOutlineMoon className="w-[18px] h-[18px]" />}
+            </button>
+            
             {/* Notification bell */}
             <button
               className="relative p-2 rounded-xl text-white/35 hover:text-gold-300 transition-colors"
@@ -236,11 +249,11 @@ export default function MemberLayout() {
             {/* User chip */}
             <div className="hidden sm:flex items-center gap-2.5 pl-3 ml-1 border-l" style={{ borderColor: 'rgba(212,175,55,0.1)' }}>
               <div className="text-right">
-                <p className="text-[13px] font-semibold text-white/85 leading-none">{user?.accountname}</p>
+                <p className="text-[13px] font-semibold text-white/85 text-always-white leading-none">{user?.accountname}</p>
                 <p className="text-[10.5px] mt-0.5" style={{ color: 'rgba(212,175,55,0.45)' }}>{user?.caccttype}</p>
               </div>
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-[#080604]"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-always-white"
                 style={{
                   background: 'linear-gradient(135deg, #9A7B0A, #D4AF37)',
                   boxShadow: '0 2px 8px rgba(212,175,55,0.25)',

@@ -52,11 +52,11 @@ function StatCard({ card, idx }) {
 /* Package color map */
 const PKG_COLORS = {
   Bronze:   '#CD7F32',
-  Silver:   '#C0C0C0',
-  Gold:     '#FFD700',
-  Platinum: '#E5E4E2',
-  Garnet:   '#733635',
-  Diamond:  '#B9F2FF',
+  Silver:   '#A8A9AD',
+  Gold:     '#DAA520',
+  Platinum: '#6C757D',
+  Garnet:   '#9B2335',
+  Diamond:  '#4FC3F7',
 };
 
 export default function Dashboard() {
@@ -110,25 +110,32 @@ export default function Dashboard() {
     <div className="space-y-7">
 
       {/* ── GREETING ──────────────────────────────────────────── */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-white leading-tight">
+      <div className="relative flex items-start justify-between rounded-3xl overflow-hidden p-6 sm:p-8 mb-2">
+        {/* Background Images */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="/img/dashboard_img_light.png" alt="Dashboard Hero" className="w-full h-full object-cover dark:hidden" />
+          <img src="/img/dashboard_img_dark.png" alt="Dashboard Hero" className="hidden w-full h-full object-cover dark:block" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent dark:from-black/90 dark:via-black/60"></div>
+        </div>
+
+        <div className="relative z-10">
+          <h1 className="font-display text-2xl md:text-3xl font-bold text-white leading-tight drop-shadow-md">
             Welcome back,{' '}
             <span className="gold-text">{user?.shortname}</span>
           </h1>
-          <p className="text-sm mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <p className="text-sm mt-1.5 drop-shadow" style={{ color: 'rgba(255,255,255,0.8)' }}>
             Here's your account performance overview.
           </p>
           {/* Gold underline accent */}
-          <div className="w-14 h-0.5 mt-3 rounded-full" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
+          <div className="w-14 h-1 mt-3 rounded-full" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
         </div>
 
         {/* Account type badge */}
         <div
-          className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl"
+          className="relative z-10 hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl shadow-lg backdrop-blur-sm"
           style={{
-            background: 'rgba(212,175,55,0.08)',
-            border: '1px solid rgba(212,175,55,0.2)',
+            background: 'rgba(0,0,0,0.4)',
+            border: '1px solid rgba(212,175,55,0.3)',
           }}
         >
           <div className="w-2 h-2 rounded-full" style={{ background: '#D4AF37', boxShadow: '0 0 6px rgba(212,175,55,0.8)' }} />
@@ -234,7 +241,7 @@ export default function Dashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-7 h-7 text-white text-always-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               )}

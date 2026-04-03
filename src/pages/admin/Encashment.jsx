@@ -11,6 +11,7 @@ export default function Encashment() {
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [keyword, setKeyword] = useState('');
 
   useEffect(() => { loadData(); }, [page]);
 
@@ -20,6 +21,7 @@ export default function Encashment() {
       let url = `/admin/encashment?page=${page}`;
       if (startDate) url += `&startDate=${startDate}`;
       if (endDate) url += `&endDate=${endDate}`;
+      if (keyword.trim()) url += `&q=${encodeURIComponent(keyword.trim())}`;
       const res = await api.get(url);
       setRecords(res.data.records);
       setTotalPages(res.data.totalPages);
@@ -59,6 +61,16 @@ export default function Encashment() {
       {/* Filter */}
       <div className="glass-card rounded-2xl p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-3 items-end">
+          <div className="sm:min-w-[240px]">
+            <label className="label">Account Search</label>
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="Username or account name"
+              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5"
+            />
+          </div>
           <div>
             <label className="label">Start Date</label>
             <input
@@ -82,6 +94,19 @@ export default function Encashment() {
             className="gold-btn rounded-xl py-2.5 px-5 text-sm"
           >
             Filter
+          </button>
+          <button
+            onClick={() => {
+              setKeyword('');
+              setStartDate('');
+              setEndDate('');
+              setPage(1);
+              setTimeout(() => loadData(), 0);
+            }}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
+          >
+            Clear
           </button>
         </div>
       </div>
