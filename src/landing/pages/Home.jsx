@@ -249,6 +249,56 @@ function Products() {
   );
 }
 
+/* ────────────────────── Organizations Preview ───────────── */
+function OrganizationsPreview() {
+  const ref = useScrollReveal();
+  return (
+    <section className="section-padding relative overflow-hidden bg-white">
+      {/* Minimalist Backgound Pattern */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
+         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,1)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      </div>
+
+      <div className="section-container relative z-10">
+        <SectionHeader badge="Organizations" title="Our Network Structure" />
+        
+        <div ref={ref} className="reveal max-w-4xl mx-auto text-center">
+          <p className="text-gray-600 leading-relaxed mb-12">
+            A minimalist approach to a powerful network. See how our leadership, regional centers, and product suppliers connect to deliver unparalleled success.
+          </p>
+
+          <div className="relative p-8 md:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
+            {/* Minimalist Org Chart Abstract */}
+            <div className="flex flex-col items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
+               {/* Top Node */}
+               <div className="w-16 h-16 rounded-full bg-brand-gold-dark/10 border border-brand-gold-dark flex items-center justify-center mb-6 relative">
+                 <div className="w-8 h-8 rounded-full bg-brand-gold-dark" />
+                 <div className="absolute w-px h-8 bg-gray-300 -bottom-8" />
+               </div>
+
+               {/* Connector Line */}
+               <div className="w-48 h-px bg-gray-300 mb-8 relative">
+                 <div className="absolute w-px h-6 bg-gray-300 left-0 top-0" />
+                 <div className="absolute w-px h-6 bg-gray-300 right-0 top-0" />
+                 {/* Bottom Nodes */}
+                 <div className="absolute -left-6 top-6 w-12 h-12 rounded-xl bg-primary-50 border border-primary-200" />
+                 <div className="absolute -right-6 top-6 w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200" />
+               </div>
+               
+               <div className="mt-8">
+                 <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
+                   View Full Organization
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                 </NavLink>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ────────────────────── Business Opps Preview ────────────── */
 function BusinessPreview() {
   const ref = useScrollReveal();
@@ -313,6 +363,7 @@ export default function Home() {
       <AboutPreview />
       <WhyUs />
       <Products />
+      <OrganizationsPreview />
       <BusinessPreview />
     </>
   );
