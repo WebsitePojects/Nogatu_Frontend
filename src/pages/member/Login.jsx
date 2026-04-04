@@ -165,7 +165,7 @@ export default function Login() {
         </div>
 
         {/* Footer */}
-        <p className="relative z-10 text-[11px] font-medium text-gray-600 dark:text-gray-400">
+        <p className="relative z-10 text-[11px] font-medium text-gray-600 dark:text-gray-300">
           © {new Date().getFullYear()} NOGATU Alliance. All rights reserved.
         </p>
       </div>

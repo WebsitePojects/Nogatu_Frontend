@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import html2canvas from 'html2canvas';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -14,6 +15,9 @@ export default function Encashment() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [activeDetails, setActiveDetails] = useState(null);
+  const receiptRef = useRef(null);
 
   useEffect(() => { loadData(); }, [page]);
 
@@ -35,7 +39,38 @@ export default function Encashment() {
       await api.put(`/admin/encashment/${pid}/process`, { uid });
       toast.success('Encashment marked as processed');
       loadData();
-    } catch (err) { toast.error('Failed to process'); }
+      return true;
+    } catch (err) {
+      toast.error('Failed to process');
+      return false;
+    }
+  }
+
+  async function openDetails(record) {
+    setDetailsLoading(true);
+    try {
+      const res = await api.get(`/admin/encashment/${record.pid}/details?uid=${record.uid}`);
+      setActiveDetails(res.data);
+    } catch {
+      toast.error('Failed to load encashment details');
+    } finally {
+      setDetailsLoading(false);
+    }
+  }
+
+  async function handleDownloadDetails() {
+    if (!receiptRef.current) return;
+
+    const canvas = await html2canvas(receiptRef.current, {
+      backgroundColor: '#141008',
+      scale: 2,
+      useCORS: true,
+    });
+
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `admin-encashment-${activeDetails?.pid || 'nogatu'}.png`;
+    link.click();
   }
 
   const PaginationBtn = ({ onClick, disabled, children }) => (
@@ -61,7 +96,17 @@ export default function Encashment() {
       </div>
 
       {/* Filter */}
-      <div className="glass-card rounded-2xl p-6 mb-6">
+      <div className="glass-card rounded-2xl p-6 mb-6 relative overflow-hidden">
+        <div className="absolute top-2 right-2 w-24 h-24 opacity-80 pointer-events-none">
+          <video
+            src="/img/goldcoin3dvid.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-contain"
+          />
+        </div>
         <div className="flex flex-col sm:flex-row gap-3 items-end">
           <div className="sm:min-w-[240px]">
             <label className="label">Account Search</label>
@@ -164,6 +209,13 @@ export default function Encashment() {
                         >
                           View Details
                         </button>
+                        <button
+                          onClick={() => openDetails(r)}
+                          className="text-[11px] px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
+                          style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+                        >
+                          Encashment Slip
+                        </button>
                         {r.canViewCdDetails && (
                           <button
                             onClick={() => navigate(`/admin/accounts/${r.uid}/cd`)}
@@ -213,6 +265,115 @@ export default function Encashment() {
           </div>
         )}
       </div>
+
+      {(detailsLoading || activeDetails) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+          <div className="w-full max-w-2xl rounded-2xl p-7 shadow-2xl" style={{ background: '#141008', border: '1px solid rgba(212,175,55,0.25)' }}>
+            {detailsLoading ? (
+              <div className="flex justify-center py-10">
+                <div className="animate-spin rounded-full h-8 w-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
+              </div>
+            ) : (
+              <>
+                <div ref={receiptRef}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h2 className="font-display text-xl font-bold text-white">Encashment Details</h2>
+                      <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Ref #{activeDetails?.pid}</p>
+                    </div>
+                    <span
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                      style={
+                        Number(activeDetails?.status) === 1
+                          ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
+                          : { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.25)' }
+                      }
+                    >
+                      {activeDetails?.statusLabel}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                    <p><strong>Member:</strong> {activeDetails?.fullname} ({activeDetails?.username})</p>
+                    <p><strong>Package:</strong> {activeDetails?.packageType}</p>
+                    <p><strong>Date:</strong> {activeDetails?.transdate || activeDetails?.cashtransdate || '-'}</p>
+                    <p><strong>Beginning Balance:</strong> ₱{fmt(activeDetails?.beginningBalance)}</p>
+                    <p><strong>Ending Balance:</strong> ₱{fmt(activeDetails?.endingBalance)}</p>
+                  </div>
+
+                  <div className="mt-4 text-sm space-y-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    <p className="font-semibold text-white">Income Breakdown</p>
+                    <p>Direct Referral: ₱{fmt(activeDetails?.income?.directReferral)}</p>
+                    <p>Pairing: ₱{fmt(activeDetails?.income?.pairing)}</p>
+                    <p>Leadership: ₱{fmt(activeDetails?.income?.leadership)}</p>
+                    <p>Hi-Five: ₱{fmt(activeDetails?.income?.hifive)}</p>
+                    <p>LPC: ₱{fmt(activeDetails?.income?.lpc)}</p>
+                  </div>
+
+                  <div className="mt-4 text-sm space-y-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    <p className="font-semibold text-white">Encashment Deductions</p>
+                    <p>Gross Encashment: ₱{fmt(activeDetails?.grossEncashment)}</p>
+                    <p>Tax (10%): -₱{fmt(activeDetails?.deductions?.tax)}</p>
+                    <p>Fee: -₱{fmt(activeDetails?.deductions?.fee)}</p>
+                    <p>CD Deduction: -₱{fmt(activeDetails?.deductions?.cdDeduction)}</p>
+                    <p className="pt-1 border-t" style={{ borderColor: 'rgba(212,175,55,0.2)', color: '#D4AF37', fontWeight: 700 }}>
+                      Net Receivable: ₱{fmt(activeDetails?.netReceivable)}
+                    </p>
+                    <p className="text-xs">Payment: {activeDetails?.paymentOption || 'N/A'}{activeDetails?.paymentDetails ? ` / ${activeDetails.paymentDetails}` : ''}</p>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    onClick={() => navigate(`/admin/accounts/${activeDetails?.uid}/income`)}
+                    className="text-xs px-3 py-2 rounded-lg font-medium"
+                    style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}
+                  >
+                    View Income Details
+                  </button>
+                  {Number(activeDetails?.deductions?.cdDeduction || 0) > 0 && (
+                    <button
+                      onClick={() => navigate(`/admin/accounts/${activeDetails?.uid}/cd`)}
+                      className="text-xs px-3 py-2 rounded-lg font-medium"
+                      style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)' }}
+                    >
+                      CD Details
+                    </button>
+                  )}
+                  {Number(activeDetails?.status) !== 1 && (
+                    <button
+                      onClick={async () => {
+                        const ok = await handleProcess(activeDetails.pid, activeDetails.uid);
+                        if (ok) {
+                          setActiveDetails({ ...activeDetails, status: 1, statusLabel: 'Paid' });
+                        }
+                      }}
+                      className="text-xs px-3 py-2 rounded-lg font-medium"
+                      style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
+                    >
+                      Set As Paid
+                    </button>
+                  )}
+                  <button
+                    onClick={handleDownloadDetails}
+                    className="text-xs px-3 py-2 rounded-lg font-medium"
+                    style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+                  >
+                    Download PNG
+                  </button>
+                  <button
+                    onClick={() => setActiveDetails(null)}
+                    className="text-xs px-3 py-2 rounded-lg font-medium"
+                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
