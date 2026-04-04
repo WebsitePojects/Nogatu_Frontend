@@ -34,6 +34,7 @@ const NAV_GROUPS = [
     label: 'Content',
     items: [
       { to: '/admin/news', label: 'News & Posts', icon: HiOutlineNewspaper },
+      { to: '/admin/messages', label: 'Messages', icon: HiOutlineBell },
     ],
   },
   {

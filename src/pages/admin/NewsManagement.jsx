@@ -17,9 +17,24 @@ export default function NewsManagement() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { loadPosts(); }, []);
+
+  useEffect(() => {
+    if (imageFile) {
+      const objectUrl = URL.createObjectURL(imageFile);
+      setPreviewUrl(objectUrl);
+      return () => {
+        URL.revokeObjectURL(objectUrl);
+      };
+    }
+
+    setPreviewUrl(form.image_url || '');
+    return undefined;
+  }, [imageFile, form.image_url]);
 
   async function loadPosts() {
     try {
@@ -32,6 +47,7 @@ export default function NewsManagement() {
   function openCreate() {
     setEditing(null);
     setForm(EMPTY);
+    setImageFile(null);
     setShowModal(true);
   }
 
@@ -44,6 +60,7 @@ export default function NewsManagement() {
       image_url: post.image_url || '',
       is_published: !!post.is_published,
     });
+    setImageFile(null);
     setShowModal(true);
   }
 
@@ -51,11 +68,25 @@ export default function NewsManagement() {
     e.preventDefault();
     setSaving(true);
     try {
+      const payload = new FormData();
+      payload.append('title', form.title || '');
+      payload.append('content', form.content || '');
+      payload.append('type', form.type || 'news');
+      payload.append('image_url', form.image_url || '');
+      payload.append('is_published', form.is_published ? '1' : '0');
+      if (imageFile) {
+        payload.append('image', imageFile);
+      }
+
       if (editing) {
-        await api.put(`/admin/news/${editing}`, form);
+        await api.put(`/admin/news/${editing}`, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         toast.success('Post updated');
       } else {
-        await api.post('/admin/news', form);
+        await api.post('/admin/news', payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         toast.success('Post created');
       }
       setShowModal(false);
@@ -270,6 +301,23 @@ export default function NewsManagement() {
                   className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
                   placeholder="https://example.com/image.jpg"
                 />
+                <label htmlFor="post-image-file" className="label mt-3 block">Upload Image <span className="text-muted text-[0.7rem]">(optional)</span></label>
+                <input
+                  id="post-image-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                />
+                {previewUrl && (
+                  <div className="mt-3 rounded-xl overflow-hidden border" style={{ borderColor: 'rgba(212,175,55,0.2)' }}>
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-44 object-cover"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label htmlFor="post-content" className="label">Content</label>

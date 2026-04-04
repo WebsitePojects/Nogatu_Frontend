@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import html2canvas from 'html2canvas';
 import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -24,12 +26,75 @@ function SpinnerIcon() {
   );
 }
 
+function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
+  if (!data) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+      <div className="w-full max-w-lg rounded-2xl p-7 shadow-2xl" style={{ background: '#141008', border: '1px solid rgba(212,175,55,0.25)' }}>
+        <div ref={receiptRef}>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h3 className="font-display text-xl font-bold text-white">Encashment Receipt</h3>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Ref #{data.refNumber}</p>
+            </div>
+            <span className="text-xs px-2.5 py-1 rounded-full" style={{ color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }}>
+              Submitted
+            </span>
+          </div>
+
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.8)' }}><span>Encash Amount</span><span>₱{fmt(data.encashAmount)}</span></div>
+            <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>Withholding Tax (10%)</span><span>- ₱{fmt(data.tax)}</span></div>
+            <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>Processing Fee</span><span>- ₱{fmt(data.fee)}</span></div>
+            {Number(data.cdDeduction || 0) > 0 && (
+              <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>CD Deduction</span><span>- ₱{fmt(data.cdDeduction)}</span></div>
+            )}
+            <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'rgba(212,175,55,0.2)', color: '#D4AF37', fontWeight: 700 }}>
+              <span>Net Receivable</span>
+              <span>₱{fmt(data.netReceivable)}</span>
+            </div>
+            <div className="pt-3 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              <p>Beginning Balance: ₱{fmt(data.beginBalance)}</p>
+              <p>Ending Balance: ₱{fmt(data.endBalance)}</p>
+              <p>Payment Option: {data.paymentOption || 'N/A'}</p>
+              <p>Payment Details: {data.paymentDetails || 'N/A'}</p>
+              <p>Payout Date: {data.payoutDate || 'Next Friday'}</p>
+              <p>Processed At: {data.processedAt}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <button
+            onClick={onDownload}
+            className="text-xs px-3 py-2 rounded-lg font-medium"
+            style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+          >
+            Download PNG
+          </button>
+          <button
+            onClick={onClose}
+            className="text-xs px-3 py-2 rounded-lg font-medium"
+            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.14)' }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EWallet() {
   const [data, setData]             = useState(null);
   const [globalBonus, setGlobalBonus] = useState(null);
   const [loading, setLoading]       = useState(true);
   const [encashAmount, setEncashAmount] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [receiptData, setReceiptData] = useState(null);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const receiptRef = useRef(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -66,13 +131,43 @@ export default function EWallet() {
     if (amount > (data?.cashBalance || 0)) return toast.error('Insufficient balance');
     setProcessing(true);
     try {
-      await api.post('/wallet/encash', { amount });
+      const res = await api.post('/wallet/encash', { amount });
       toast.success(`Encashment of ₱${fmt(amount)} processed successfully`);
+      setReceiptData({
+        refNumber: res.data.pid || 'N/A',
+        encashAmount: amount,
+        tax: Number(res.data.tax || amount * 0.10),
+        fee: Number(res.data.fee || 50),
+        cdDeduction: Number(res.data.cdDeduction || 0),
+        netReceivable: Number(res.data.netReceivable || 0),
+        beginBalance: Number(data?.cashBalance || 0),
+        endBalance: Number(res.data.newBalance || 0),
+        paymentOption: res.data.paymentOption || data?.payoutOption,
+        paymentDetails: res.data.paymentDetails || data?.payoutDetails,
+        processedAt: new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' }),
+        payoutDate: res.data.payoutDate || 'Next Friday',
+      });
+      setShowReceipt(true);
       setEncashAmount('');
       loadData();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Encashment failed');
     } finally { setProcessing(false); }
+  }
+
+  async function handleDownloadReceipt() {
+    if (!receiptRef.current) return;
+
+    const canvas = await html2canvas(receiptRef.current, {
+      backgroundColor: '#141008',
+      scale: 2,
+      useCORS: true,
+    });
+
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `encashment-receipt-${receiptData?.refNumber || 'nogatu'}.png`;
+    link.click();
   }
 
   /* Estimated deductions preview */
@@ -276,17 +371,27 @@ export default function EWallet() {
             <h3 className="font-display text-base font-semibold text-white mb-1">Global Bonus</h3>
             <div className="w-8 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
           </div>
-          <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
-            style={
-              globalBonus?.eligible
-                ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
-                : { background: 'rgba(148,163,184,0.12)', color: '#cbd5e1', border: '1px solid rgba(148,163,184,0.25)' }
-            }
-          >
-            <HiOutlineSparkles className="w-3.5 h-3.5" />
-            {globalBonus?.eligible ? 'Eligible' : 'Not Eligible'}
-          </span>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/leaderboard"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+              style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+            >
+              <HiOutlineTrendingUp className="w-3.5 h-3.5" />
+              View Leaderboard
+            </Link>
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
+              style={
+                globalBonus?.eligible
+                  ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
+                  : { background: 'rgba(148,163,184,0.12)', color: '#cbd5e1', border: '1px solid rgba(148,163,184,0.25)' }
+              }
+            >
+              <HiOutlineSparkles className="w-3.5 h-3.5" />
+              {globalBonus?.eligible ? 'Eligible' : 'Not Eligible'}
+            </span>
+          </div>
         </div>
 
         {globalBonus ? (
@@ -325,6 +430,15 @@ export default function EWallet() {
           </div>
         )}
       </div>
+
+      {showReceipt && (
+        <ReceiptModal
+          data={receiptData}
+          receiptRef={receiptRef}
+          onDownload={handleDownloadReceipt}
+          onClose={() => setShowReceipt(false)}
+        />
+      )}
     </div>
   );
 }

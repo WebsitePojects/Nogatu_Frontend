@@ -17,6 +17,7 @@ import GenealogyTree from './pages/member/GenealogyTree';
 import PairingReports from './pages/member/PairingReports';
 import HiFiveBonus from './pages/member/HiFiveBonus';
 import RankingProgress from './pages/member/RankingProgress';
+import Leaderboard from './pages/member/Leaderboard';
 import Transactions from './pages/member/Transactions';
 import UpgradeAccount from './pages/member/UpgradeAccount';
 import Registration from './pages/member/Registration';
@@ -36,6 +37,7 @@ import CDPaymentDetails from './pages/admin/CDPaymentDetails';
 import AdminGenealogy from './pages/admin/AdminGenealogy';
 import ChangePassword from './pages/admin/ChangePassword';
 import NewsManagement from './pages/admin/NewsManagement';
+import Messages from './pages/admin/Messages';
 import Rankings from './pages/admin/Rankings';
 import GlobalBonus from './pages/admin/GlobalBonus';
 
@@ -84,6 +86,7 @@ export default function App() {
           <Route path="pairing" element={<PairingReports />} />
           <Route path="hifive" element={<HiFiveBonus />} />
           <Route path="ranking" element={<RankingProgress />} />
+          <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="upgrade" element={<UpgradeAccount />} />
           <Route path="register" element={<Registration />} />
@@ -106,6 +109,7 @@ export default function App() {
           <Route path="global-bonus" element={<GlobalBonus />} />
           <Route path="genealogy" element={<AdminGenealogy />} />
           <Route path="news" element={<NewsManagement />} />
+          <Route path="messages" element={<Messages />} />
           <Route path="change-password" element={<ChangePassword />} />
         </Route>
 
