@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import { HiOutlineKey, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
+import { useAuth } from '../../contexts/AuthContext';
 
 const STATUS_STYLES = {
   0: { label: 'Unreleased', bg: 'rgba(100,116,139,0.1)', color: '#64748b', border: 'rgba(100,116,139,0.2)' },
@@ -18,6 +19,7 @@ function Spinner() {
 }
 
 export default function ActivationCodes() {
+  const { user } = useAuth();
   const [codes, setCodes]           = useState([]);
   const [total, setTotal]           = useState(0);
   const [page, setPage]             = useState(1);
@@ -75,6 +77,8 @@ export default function ActivationCodes() {
       toast.error(err.response?.data?.error || 'Upgrade failed');
     }
   }
+
+  const currentAccttype = Number(user?.currentaccttype || 0);
 
   return (
     <div className="space-y-6">
@@ -212,7 +216,7 @@ export default function ActivationCodes() {
                             </button>
                           </div>
                         )}
-                        {c.codestatus === 1 && c.producttype < 100 && (
+                        {c.codestatus === 1 && c.producttype < 100 && Number(c.producttype) > currentAccttype && (
                           <button
                             onClick={() => handleUpgrade(c.code)}
                             className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"

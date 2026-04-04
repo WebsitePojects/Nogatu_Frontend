@@ -21,14 +21,28 @@ const SUMMARY_CARDS = (counts) => [
 
 export default function PairingReports() {
   const [data, setData]     = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/pairing')
-      .then(res => setData(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    let cancelled = false;
+    async function loadData() {
+      setLoading(true);
+      try {
+        const res = await api.get(`/pairing?page=${page}`);
+        if (cancelled) return;
+        setData(res.data);
+        setTotalPages(res.data.totalPages || 1);
+      } catch {
+        if (!cancelled) setData(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    loadData();
+    return () => { cancelled = true; };
+  }, [page]);
 
   if (loading) return <Spinner />;
   if (!data)   return <p style={{ color: 'rgba(255,255,255,0.4)' }}>Failed to load pairing data.</p>;
@@ -44,12 +58,11 @@ export default function PairingReports() {
       </div>
 
       {/* Summary cards — horizontal scroll on mobile */}
-      <div className="snap-scroll-x sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:snap-none" style={{ gap: '1rem' }}>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map((card, i) => (
           <div
             key={i}
-            className="glass-card rounded-2xl p-5 flex-shrink-0"
-            style={{ minWidth: '180px' }}
+            className="glass-card rounded-2xl p-5 flex-shrink-0 w-full"
           >
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
@@ -65,10 +78,29 @@ export default function PairingReports() {
 
       {/* Pairing history table */}
       <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
           <h3 className="font-display text-base font-semibold text-white">Pairing History</h3>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="text-xs py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
+              style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
+            >
+              Prev
+            </button>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="text-xs py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
+              style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
+            >
+              Next
+            </button>
+          </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden sm:block">
           <table className="w-full text-sm min-w-[700px]">
             <thead>
               <tr>
@@ -110,6 +142,22 @@ export default function PairingReports() {
               )}
             </tbody>
           </table>
+        </div>
+        <div className="sm:hidden p-4 space-y-3">
+          {(data.reports || []).map((r, i) => (
+            <div key={i} className="glass-card rounded-2xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-white/80">{r.transdate || '—'}</span>
+                <span className="text-xs font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(r.totalbpay)}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                <div>Left: {r.totalleft} / {fmt(r.totalpointsleft)}</div>
+                <div>Right: {r.totalright} / {fmt(r.totalpointsright)}</div>
+                <div>Pair: {fmt(r.totalpoints)}</div>
+                <div>Total: {fmt(r.totalbpay)}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

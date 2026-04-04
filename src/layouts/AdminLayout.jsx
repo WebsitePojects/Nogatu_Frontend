@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon } from 'react-icons/hi';
+import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
 
 const NAV_GROUPS = [
@@ -26,6 +26,8 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin/encashment', label: 'Encashment', icon: HiOutlineCash },
       { to: '/admin/redeem', label: 'Hi-Five Redeem', icon: HiOutlineGift },
+      { to: '/admin/rankings', label: 'Rankings', icon: HiOutlineShieldCheck },
+      { to: '/admin/global-bonus', label: 'Global Bonus', icon: HiOutlineSparkles },
     ],
   },
   {
@@ -68,14 +70,16 @@ export default function AdminLayout() {
       >
         {/* Logo area */}
         <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
-          <img
-            src="/img/nogatu_logo.png"
-            alt="NOGATU Alliance"
-            className="w-12 h-12 rounded-xl object-contain"
-            style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(255,255,255,0.05)' }}
-          />
+          <Link to="/admin/login" title="Admin Portal">
+            <img
+              src="/img/nogatu_logo.png"
+              alt="NOGATU Alliance"
+              className="w-12 h-12 rounded-xl object-contain"
+              style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(255,255,255,0.05)' }}
+            />
+          </Link>
           <div>
-            <h1 className="font-brand text-sm font-semibold tracking-wide" style={{ color: '#F2D06B' }}>NOGATU Alliance</h1>
+            <h1 className="font-brand text-sm font-semibold tracking-wide" style={{ color: 'var(--brand-gold)' }}>NOGATU Alliance</h1>
             <p className="text-[11px] font-medium" style={{ color: 'rgba(212,175,55,0.5)' }}>Admin Panel</p>
           </div>
         </div>
@@ -86,7 +90,7 @@ export default function AdminLayout() {
             <div key={group.label}>
               <p
                 className="text-[10px] font-bold uppercase tracking-[0.12em] px-3 mb-2"
-                style={{ color: 'rgba(212,175,55,0.35)' }}
+                style={{ color: 'var(--brand-gold)' }}
               >
                 {group.label}
               </p>
@@ -120,7 +124,7 @@ export default function AdminLayout() {
               <p className="text-sm font-medium text-white text-always-white truncate">{admin?.name || 'Admin'}</p>
               <span
                 className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5"
-                style={{ background: 'rgba(212,175,55,0.15)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+                style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.25)' }}
               >
                 {roleLabel}
               </span>
@@ -192,7 +196,7 @@ export default function AdminLayout() {
             >
               <div className="text-right">
                 <p className="text-sm font-medium text-white text-always-white">{admin?.name}</p>
-                <p className="text-[11px]" style={{ color: 'rgba(212,175,55,0.6)' }}>{roleLabel}</p>
+                <p className="text-[11px]" style={{ color: 'var(--brand-gold)' }}>{roleLabel}</p>
               </div>
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm text-white text-always-white"

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
-import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineShieldCheck } from 'react-icons/hi';
+import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const INCOME_ITEMS = [
   { key: 'directReferral', label: 'Direct Referral',  icon: HiOutlineUsers,       color: '#D4AF37' },
@@ -11,7 +12,7 @@ const INCOME_ITEMS = [
   { key: 'leadership',     label: 'Leadership Bonus', icon: HiOutlineStar,        color: '#B8960C' },
   { key: 'unilevel',       label: 'Uni-Level',        icon: HiOutlineTrendingUp,  color: '#D4AF37' },
   { key: 'hifive',         label: 'Hi-Five Bonus',    icon: HiOutlineGift,        color: '#F2D06B' },
-  { key: 'lpc',            label: 'LPC (Ranking)',    icon: HiOutlineShieldCheck, color: '#9A7B0A' },
+  { key: 'lpc',            label: 'Leader Performance Commission', icon: HiOutlineShieldCheck, color: '#9A7B0A' },
 ];
 
 function SpinnerIcon() {
@@ -25,23 +26,43 @@ function SpinnerIcon() {
 
 export default function EWallet() {
   const [data, setData]             = useState(null);
+  const [globalBonus, setGlobalBonus] = useState(null);
   const [loading, setLoading]       = useState(true);
   const [encashAmount, setEncashAmount] = useState('');
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
+  useEffect(() => {
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   async function loadData() {
     try {
-      const res = await api.get('/wallet');
-      setData(res.data);
+      const [walletRes, globalBonusRes] = await Promise.allSettled([
+        api.get('/wallet'),
+        api.get('/global-bonus'),
+      ]);
+
+      if (walletRes.status === 'fulfilled') {
+        setData(walletRes.value.data);
+      } else {
+        setData(null);
+      }
+
+      if (globalBonusRes.status === 'fulfilled') {
+        setGlobalBonus(globalBonusRes.value.data);
+      } else {
+        setGlobalBonus(null);
+      }
     } catch { } finally { setLoading(false); }
   }
 
   async function handleEncash(e) {
     e.preventDefault();
     const amount = Number(encashAmount);
-    if (amount < 500) return toast.error('Minimum encashment is ₱500');
+    if (!amount || amount <= 0) return toast.error('Please enter a valid amount greater than zero');
     if (amount > (data?.cashBalance || 0)) return toast.error('Insufficient balance');
     setProcessing(true);
     try {
@@ -57,8 +78,11 @@ export default function EWallet() {
   /* Estimated deductions preview */
   const previewAmount = Number(encashAmount) || 0;
   const previewTax    = previewAmount * 0.10;
-  const previewFee    = previewAmount >= 500 ? 50 : 0;
+  const previewFee    = previewAmount > 0 ? 50 : 0;
   const previewNet    = previewAmount - previewTax - previewFee;
+  const bonusMonthIdx = Math.max(0, Math.min(11, Number(globalBonus?.month || 1) - 1));
+  const bonusPeriodLabel = globalBonus ? `${MONTHS[bonusMonthIdx]} ${globalBonus.year || ''}`.trim() : 'N/A';
+  const hasDistributedShare = Number(globalBonus?.distributedShare || 0) > 0;
 
   if (loading) {
     return (
@@ -84,12 +108,7 @@ export default function EWallet() {
 
       {/* ── BALANCE HERO CARD ──────────────────────────────────── */}
       <div
-        className="relative rounded-2xl p-7 overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #0D0B07 0%, #1C1610 50%, #241D0D 100%)',
-          border: '1px solid rgba(212,175,55,0.22)',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.15)',
-        }}
+        className="ewallet-balance-card relative rounded-2xl p-7 overflow-hidden"
       >
         {/* Background orb */}
         <div
@@ -120,10 +139,10 @@ export default function EWallet() {
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-5">
             <div>
-              <p className="text-xs font-medium tracking-wider uppercase mb-1" style={{ color: 'rgba(212,175,55,0.5)' }}>
+              <p className="text-xs font-medium tracking-wider uppercase mb-1 text-yellow-800 dark:text-yellow-200/50">
                 Available Balance
               </p>
-              <p className="font-display text-[42px] font-bold text-white leading-none tracking-tight">
+              <p className="font-display text-[42px] font-bold text-gray-900 dark:text-white leading-none tracking-tight">
                 ₱{fmt(data.cashBalance)}
               </p>
             </div>
@@ -144,8 +163,8 @@ export default function EWallet() {
             className="flex items-center gap-2 pt-4 border-t"
             style={{ borderColor: 'rgba(212,175,55,0.1)' }}
           >
-            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Total Income Earned:</span>
-            <span className="text-sm font-semibold" style={{ color: 'rgba(242,208,107,0.8)' }}>₱{fmt(data.totalIncome)}</span>
+            <span className="text-xs text-gray-500 dark:text-white/35">Total Income Earned:</span>
+            <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300/80">₱{fmt(data.totalIncome)}</span>
           </div>
         </div>
       </div>
@@ -197,7 +216,7 @@ export default function EWallet() {
             }}
           >
             <span style={{ color: '#D4AF37', fontSize: '14px', lineHeight: 1 }}>ℹ</span>
-            <span>Minimum ₱500 · 10% withholding tax · ₱50 processing fee · Payout every Friday</span>
+            <span>No fixed minimum amount · 10% withholding tax · ₱50 processing fee · Payout every Friday</span>
           </div>
 
           <form onSubmit={handleEncash} className="space-y-4">
@@ -208,15 +227,15 @@ export default function EWallet() {
                 value={encashAmount}
                 onChange={(e) => setEncashAmount(e.target.value)}
                 className="glass-input"
-                placeholder="Enter amount (min ₱500)"
-                min="500"
+                placeholder="Enter amount"
+                min="1"
                 step="1"
                 required
               />
             </div>
 
             {/* Deduction preview */}
-            {previewAmount >= 500 && (
+            {previewAmount > 0 && (
               <div
                 className="space-y-2 p-3.5 rounded-xl text-xs"
                 style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.12)' }}
@@ -248,6 +267,63 @@ export default function EWallet() {
             </button>
           </form>
         </div>
+      </div>
+
+      {/* Global Bonus */}
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <div>
+            <h3 className="font-display text-base font-semibold text-white mb-1">Global Bonus</h3>
+            <div className="w-8 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+          </div>
+          <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
+            style={
+              globalBonus?.eligible
+                ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
+                : { background: 'rgba(148,163,184,0.12)', color: '#cbd5e1', border: '1px solid rgba(148,163,184,0.25)' }
+            }
+          >
+            <HiOutlineSparkles className="w-3.5 h-3.5" />
+            {globalBonus?.eligible ? 'Eligible' : 'Not Eligible'}
+          </span>
+        </div>
+
+        {globalBonus ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+            <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
+              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Period</p>
+              <p className="text-sm font-semibold text-white mt-1">{bonusPeriodLabel}</p>
+            </div>
+            <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
+              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Member Type</p>
+              <p className="text-sm font-semibold text-white mt-1">{globalBonus.memberType || 'N/A'}</p>
+            </div>
+            <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
+              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Portions</p>
+              <p className="text-sm font-semibold text-white mt-1">{Number(globalBonus.portions || 0)}</p>
+            </div>
+            <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
+              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>
+                {hasDistributedShare ? 'Distributed Share' : 'Projected Share'}
+              </p>
+              <p className="text-sm font-semibold mt-1" style={{ color: '#D4AF37' }}>
+                ₱{fmt(hasDistributedShare ? globalBonus.distributedShare : globalBonus.projectedShare)}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            Global bonus details are currently unavailable.
+          </p>
+        )}
+
+        {globalBonus?.latestShare && (
+          <div className="mt-4 rounded-xl p-3.5 text-xs" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)', color: 'rgba(255,255,255,0.6)' }}>
+            Latest distributed share: <span style={{ color: '#D4AF37', fontWeight: 700 }}>₱{fmt(globalBonus.latestShare.shareAmount)}</span>
+            {' '}({MONTHS[Math.max(0, Math.min(11, Number(globalBonus.latestShare.month || 1) - 1))]} {globalBonus.latestShare.year})
+          </div>
+        )}
       </div>
     </div>
   );

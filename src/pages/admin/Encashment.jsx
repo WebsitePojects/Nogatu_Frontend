@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function Encashment() {
+  const navigate = useNavigate();
   const [records, setRecords] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -134,7 +136,7 @@ export default function Encashment() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Name', 'Username', 'Amount', 'Tax', 'Fee', 'Payout', 'Status', 'Date', 'Action'].map(h => (
+                  {['Name', 'Username', 'Date', 'Amount', 'Deductions', 'Income Details', 'Payout Details', 'Status', 'Actions'].map(h => (
                     <th key={h} className="table-header py-3 px-3 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
@@ -150,15 +152,35 @@ export default function Encashment() {
                   >
                     <td className="py-3 px-3 font-medium text-white/80">{r.fullname}</td>
                     <td className="py-3 px-3 text-white/60">{r.username}</td>
+                    <td className="py-3 px-3 text-xs text-white/40">{r.cashtransdate || '-'}</td>
                     <td className="py-3 px-3 text-white/80 font-medium">&#8369;{fmt(r.encashment)}</td>
-                    <td className="py-3 px-3 text-white/60">&#8369;{fmt(r.tax)}</td>
-                    <td className="py-3 px-3 text-white/60">&#8369;{fmt(r.fee)}</td>
-                    <td className="py-3 px-3 text-white/60">{r.payoutDetails}</td>
+                    <td className="py-3 px-3 text-white/60">&#8369;{fmt(r.deductions)}</td>
+                    <td className="py-3 px-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        <button
+                          onClick={() => navigate(`/admin/accounts/${r.uid}/income`)}
+                          className="text-[11px] px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
+                          style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}
+                        >
+                          View Details
+                        </button>
+                        {r.canViewCdDetails && (
+                          <button
+                            onClick={() => navigate(`/admin/accounts/${r.uid}/cd`)}
+                            className="text-[11px] px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
+                            style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)' }}
+                          >
+                            CD Details
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-white/60">{r.payoutDetails || 'N/A'}</td>
                     <td className="py-3 px-3">
                       <span
                         className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                         style={
-                          r.cashStatus === 1
+                          Number(r.cashStatus) === 1
                             ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.22)' }
                             : { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.22)' }
                         }
@@ -166,15 +188,14 @@ export default function Encashment() {
                         {r.cashStatusLabel}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-xs text-white/40">{r.cashtransdate}</td>
                     <td className="py-3 px-3">
-                      {r.cashStatus !== 1 && (
+                      {Number(r.cashStatus) !== 1 && (
                         <button
                           onClick={() => handleProcess(r.pid, r.uid)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                           style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
                         >
-                          Process
+                          Set As Paid
                         </button>
                       )}
                     </td>

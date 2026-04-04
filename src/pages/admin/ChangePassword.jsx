@@ -38,9 +38,9 @@ export default function ChangePassword() {
               className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             >
               <option value="">Select account...</option>
-              <option value="admin">Nogatu Administrator</option>
-              <option value="cashier">Cashier</option>
-              <option value="bod">BOD</option>
+              <option value="nogatuadmin">Nogatu Administrator</option>
+              <option value="nogatucashier">Cashier</option>
+              <option value="nogatubod">BOD</option>
             </select>
           </div>
 

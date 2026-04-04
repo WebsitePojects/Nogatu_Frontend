@@ -17,13 +17,19 @@ const TYPE_STYLES = {
 function ConnectorLines({ hasLeft, hasRight }) {
   if (!hasLeft && !hasRight) return null;
   return (
-    <div className="relative h-6 w-full flex items-start justify-center">
-      {/* Vertical stem */}
-      <div className="absolute top-0 left-1/2 -translate-x-0.5 w-px h-full" style={{ background: 'rgba(212,175,55,0.25)' }} />
-      {/* Horizontal bar */}
-      {hasLeft && hasRight && (
-        <div className="absolute top-0 left-1/4 right-1/4 h-px" style={{ background: 'rgba(212,175,55,0.25)' }} />
-      )}
+    <div className="relative w-full" style={{ height: '36px' }}>
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 36" preserveAspectRatio="none">
+        <line x1="100" y1="0" x2="100" y2="18" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+        {hasLeft && hasRight ? (
+          <>
+            <line x1="50" y1="18" x2="150" y2="18" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+            <line x1="50" y1="18" x2="50" y2="36" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+            <line x1="150" y1="18" x2="150" y2="36" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+          </>
+        ) : (
+          <line x1="100" y1="18" x2="100" y2="36" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+        )}
+      </svg>
     </div>
   );
 }
@@ -74,8 +80,6 @@ function TreeNode({ node, onNavigate, onRegister }) {
           <div className="flex gap-6 mt-0 relative">
             {/* Left subtree */}
             <div className="flex flex-col items-center min-w-[148px]">
-              {/* Vertical drop from horizontal bar */}
-              <div className="w-px h-5" style={{ background: 'rgba(212,175,55,0.22)' }} />
               {node.left ? (
                 <TreeNode node={node.left} onNavigate={onNavigate} onRegister={onRegister} />
               ) : node.hasLeftSlot ? (
@@ -97,7 +101,6 @@ function TreeNode({ node, onNavigate, onRegister }) {
 
             {/* Right subtree */}
             <div className="flex flex-col items-center min-w-[148px]">
-              <div className="w-px h-5" style={{ background: 'rgba(212,175,55,0.22)' }} />
               {node.right ? (
                 <TreeNode node={node.right} onNavigate={onNavigate} onRegister={onRegister} />
               ) : node.hasRightSlot ? (
