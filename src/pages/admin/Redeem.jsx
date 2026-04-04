@@ -139,7 +139,7 @@ export default function Redeem() {
                     </td>
                     <td className="py-3 px-4 text-xs text-white/40">{r.redeemdate}</td>
                     <td className="py-3 px-4">
-                      {r.redeemStatus !== 1 && (
+                      {r.redeemStatus !== 1 ? (
                         <button
                           onClick={() => handleProcess(r.pid, r.uid)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
@@ -147,6 +147,10 @@ export default function Redeem() {
                         >
                           Mark Redeemed
                         </button>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}>
+                          Completed
+                        </span>
                       )}
                     </td>
                   </tr>

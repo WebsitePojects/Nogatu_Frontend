@@ -119,18 +119,18 @@ export default function Login() {
           />
           <div>
             <h1 className="font-brand text-xl font-semibold tracking-widest text-[#D4AF37]">NOGATU</h1>
-            <p className="text-[11px] tracking-wider uppercase text-gray-800 font-bold">Alliance</p>
+            <p className="text-[11px] tracking-wider uppercase text-gray-800 dark:text-white font-bold">Alliance</p>
           </div>
         </div>
 
           {/* ── Hero copy ── */}
           <div className="relative z-10 space-y-8">
             <div>
-              <h2 className="font-display text-4xl xl:text-5xl font-bold text-gray-900 leading-snug">
+              <h2 className="font-display text-4xl xl:text-5xl font-bold text-gray-900 dark:text-white leading-snug">
                 Build Your Network,<br />
                 <span className="gold-text">Build Your Future.</span>
               </h2>
-              <p className="text-sm leading-relaxed mt-4 max-w-sm text-gray-700">
+              <p className="text-sm leading-relaxed mt-4 max-w-sm text-gray-700 dark:text-white/75">
                 Access your complete dashboard to manage your downline, track earnings, and grow your business.
               </p>
             </div>
@@ -148,18 +148,16 @@ export default function Login() {
                 >
                   <CheckIcon />
                 </span>
-                <span className="text-sm text-gray-800 font-medium">{f}</span>
+                <span className="text-sm text-gray-800 dark:text-white/80 font-medium">{f}</span>
               </li>
             ))}
           </ul>
 
           {/* Stats row */}
-          <div
-            className="flex gap-8 pt-6 border-t border-gray-300"
-          >
+          <div className="flex gap-8 pt-6 border-t border-gray-300 dark:border-white/10">
             {stats.map((s) => (
               <div key={s.label}>
-                <p className="text-gray-900 font-bold text-2xl">{s.value}</p>
+                <p className="text-gray-900 dark:text-white font-bold text-2xl">{s.value}</p>
                 <p className="text-xs mt-0.5 font-bold" style={{ color: '#D4AF37' }}>{s.label}</p>
               </div>
             ))}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
-import { HiOutlineUsers, HiOutlineCash, HiOutlineShoppingCart, HiOutlineSparkles } from 'react-icons/hi';
+import { HiOutlineUsers, HiOutlineCash, HiOutlineShoppingCart, HiOutlineSparkles, HiOutlineClock, HiOutlineBadgeCheck, HiOutlineReceiptTax, HiOutlineCalendar } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -38,9 +38,9 @@ export default function AdminDashboard() {
       accentText: '#D4AF37',
     },
     {
-      label: 'Total Encashment',
-      value: `\u20B1${fmt(data.totalEncashment)}`,
-      sub: 'Lifetime processed',
+      label: 'Processed Encashments',
+      value: `\u20B1${fmt(data.totalIncomePaidOut)}`,
+      sub: 'Lifetime paid out',
       icon: HiOutlineCash,
       iconGradient: 'linear-gradient(135deg, #7f1d1d, #991b1b)',
       iconShadow: '0 8px 24px rgba(127,29,29,0.45)',
@@ -67,6 +67,36 @@ export default function AdminDashboard() {
       accentColor: 'rgba(242,208,107,0.10)',
       accentText: '#FFD700',
     },
+    {
+      label: 'Pending Encashments',
+      value: data.pendingEncashments,
+      sub: 'Awaiting processing',
+      icon: HiOutlineClock,
+      iconGradient: 'linear-gradient(135deg, #92400e, #f59e0b)',
+      iconShadow: '0 8px 24px rgba(245,158,11,0.28)',
+      accentColor: 'rgba(245,158,11,0.12)',
+      accentText: '#fbbf24',
+    },
+    {
+      label: 'Active CD Accounts',
+      value: data.activeCdAccounts,
+      sub: 'Still paying CD',
+      icon: HiOutlineBadgeCheck,
+      iconGradient: 'linear-gradient(135deg, #0f766e, #14b8a6)',
+      iconShadow: '0 8px 24px rgba(20,184,166,0.28)',
+      accentColor: 'rgba(20,184,166,0.12)',
+      accentText: '#2dd4bf',
+    },
+    {
+      label: 'Monthly Registrations',
+      value: data.newRegistrationsMonth,
+      sub: 'This calendar month',
+      icon: HiOutlineCalendar,
+      iconGradient: 'linear-gradient(135deg, #4f46e5, #818cf8)',
+      iconShadow: '0 8px 24px rgba(79,70,229,0.28)',
+      accentColor: 'rgba(79,70,229,0.12)',
+      accentText: '#a5b4fc',
+    },
   ];
 
   return (
@@ -77,13 +107,14 @@ export default function AdminDashboard() {
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img src="/img/dashboard_img_light.png" alt="Admin Dashboard Hero" className="w-full h-full object-cover dark:hidden" />
           <img src="/img/dashboard_img_dark.png" alt="Admin Dashboard Hero" className="hidden w-full h-full object-cover dark:block" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent dark:from-black/90 dark:via-black/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-transparent dark:hidden"></div>
+          <div className="absolute inset-0 hidden dark:block bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
         </div>
 
         <div className="relative z-10">
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-white drop-shadow-md">Admin Dashboard</h1>
+          <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900 dark:text-white drop-shadow-md">Admin Dashboard</h1>
           <div className="w-12 h-1 mt-2 mb-3" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
-          <p className="text-sm drop-shadow" style={{ color: 'rgba(255,255,255,0.8)' }}>
+          <p className="text-sm drop-shadow text-gray-700 dark:text-white/80">
             Welcome back,{' '}
             <span style={{ color: '#D4AF37', fontWeight: 600 }}>{admin?.name}</span>.
             {' '}Here&apos;s your system overview.
@@ -92,11 +123,11 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stat Cards — horizontal snap-scroll on mobile */}
-      <div className="snap-scroll-x lg:grid lg:grid-cols-4 lg:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         {cards.map((card, i) => (
           <div
             key={i}
-            className="glass-card rounded-2xl p-6 snap-start flex-shrink-0 w-64 lg:w-auto group"
+            className="glass-card rounded-2xl p-6 group"
           >
             <div className="flex items-center justify-between mb-5">
               <div

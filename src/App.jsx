@@ -16,6 +16,7 @@ import DirectReferrals from './pages/member/DirectReferrals';
 import GenealogyTree from './pages/member/GenealogyTree';
 import PairingReports from './pages/member/PairingReports';
 import HiFiveBonus from './pages/member/HiFiveBonus';
+import RankingProgress from './pages/member/RankingProgress';
 import Transactions from './pages/member/Transactions';
 import UpgradeAccount from './pages/member/UpgradeAccount';
 import Registration from './pages/member/Registration';
@@ -30,19 +31,35 @@ import ManageCodes from './pages/admin/ManageCodes';
 import Encashment from './pages/admin/Encashment';
 import Redeem from './pages/admin/Redeem';
 import UpdateAccounts from './pages/admin/UpdateAccounts';
+import IncomeDetails from './pages/admin/IncomeDetails';
+import CDPaymentDetails from './pages/admin/CDPaymentDetails';
 import AdminGenealogy from './pages/admin/AdminGenealogy';
 import ChangePassword from './pages/admin/ChangePassword';
 import NewsManagement from './pages/admin/NewsManagement';
+import Rankings from './pages/admin/Rankings';
+import GlobalBonus from './pages/admin/GlobalBonus';
 
 function ProtectedMember({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="flex items-center justify-center h-screen portal-bg"><div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} /></div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen portal-bg">
+        <div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+      </div>
+    );
+  }
   return user ? children : <Navigate to="/login" replace />;
 }
 
 function ProtectedAdmin({ children }) {
   const { admin, loading } = useAuth();
-  if (loading) return <div className="flex items-center justify-center h-screen portal-bg"><div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} /></div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen portal-bg">
+        <div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+      </div>
+    );
+  }
   return admin ? children : <Navigate to="/admin/login" replace />;
 }
 
@@ -66,6 +83,7 @@ export default function App() {
           <Route path="genealogy" element={<GenealogyTree />} />
           <Route path="pairing" element={<PairingReports />} />
           <Route path="hifive" element={<HiFiveBonus />} />
+          <Route path="ranking" element={<RankingProgress />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="upgrade" element={<UpgradeAccount />} />
           <Route path="register" element={<Registration />} />
@@ -78,10 +96,14 @@ export default function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="accounts" element={<AccountMasterlist />} />
           <Route path="accounts/:uid" element={<UpdateAccounts />} />
+          <Route path="accounts/:uid/income" element={<IncomeDetails />} />
+          <Route path="accounts/:uid/cd" element={<CDPaymentDetails />} />
           <Route path="generate-codes" element={<GenerateCodes />} />
           <Route path="manage-codes" element={<ManageCodes />} />
           <Route path="encashment" element={<Encashment />} />
           <Route path="redeem" element={<Redeem />} />
+          <Route path="rankings" element={<Rankings />} />
+          <Route path="global-bonus" element={<GlobalBonus />} />
           <Route path="genealogy" element={<AdminGenealogy />} />
           <Route path="news" element={<NewsManagement />} />
           <Route path="change-password" element={<ChangePassword />} />

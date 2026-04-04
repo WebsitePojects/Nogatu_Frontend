@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ManageCodes() {
+  const { admin } = useAuth();
   const [codes, setCodes] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState([]);
+  const [selectMode, setSelectMode] = useState(false);
   const [codeSearch, setCodeSearch] = useState('');
   const [targetUsername, setTargetUsername] = useState('');
   const [taggedAccount, setTaggedAccount] = useState(null);
+  const canRelease = Number(admin?.rights) === 1 || Number(admin?.rights) === 3;
 
   useEffect(() => { loadCodes(); }, [page]);
 
@@ -31,7 +35,14 @@ export default function ManageCodes() {
     setSelected(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
   }
 
+  function toggleSelectAllCurrentPage() {
+    const pageCodes = codes.map(c => c.code);
+    const allSelected = pageCodes.every(code => selected.includes(code));
+    setSelected(allSelected ? selected.filter(code => !pageCodes.includes(code)) : Array.from(new Set([...selected, ...pageCodes])));
+  }
+
   async function handleRelease() {
+    if (!canRelease) return toast.error('Release is restricted to Administrator and BOD');
     if (selected.length === 0) return toast.error('Select codes to release');
     try {
       const res = await api.post('/admin/codes/release', { codes: selected });
@@ -102,8 +113,29 @@ export default function ManageCodes() {
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
+      {!canRelease && (
+        <div
+          className="glass-card rounded-2xl p-4 mb-6 text-sm"
+          style={{ border: '1px solid rgba(59,130,246,0.2)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
+        >
+          Cashier mode: transfer-only access is enabled. Code release is disabled for this role.
+        </div>
+      )}
+
       {/* Actions Bar */}
       <div className="glass-card rounded-2xl p-6 mb-6">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            {selected.length > 0 ? <span style={{ color: '#D4AF37' }}>{selected.length} codes selected</span> : 'Select codes below'}
+          </div>
+          <button
+            onClick={() => setSelectMode(v => !v)}
+            className="text-sm py-1.5 px-3 rounded-lg font-medium"
+            style={{ background: selectMode ? 'rgba(212,175,55,0.14)' : 'rgba(255,255,255,0.05)', color: selectMode ? '#F2D06B' : 'rgba(255,255,255,0.65)', border: '1px solid rgba(212,175,55,0.15)' }}
+          >
+            {selectMode ? 'Exit Selection Mode' : 'Select Multiple'}
+          </button>
+        </div>
         <div className="flex flex-col sm:flex-row gap-3 items-end mb-4">
           <div className="flex-1">
             <label className="label">Search Code</label>
@@ -167,12 +199,21 @@ export default function ManageCodes() {
             Transfer ({selected.length})
           </button>
           <button
-            onClick={handleRelease}
-            disabled={selected.length === 0}
-            className="btn-success rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={toggleSelectAllCurrentPage}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
+            style={{ borderColor: 'rgba(212,175,55,0.18)', color: 'rgba(212,175,55,0.85)' }}
           >
-            Release ({selected.length})
+            Select All Page
           </button>
+          {canRelease && (
+            <button
+              onClick={handleRelease}
+              disabled={selected.length === 0}
+              className="btn-success rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Release ({selected.length})
+            </button>
+          )}
         </div>
 
         {taggedAccount && (
@@ -230,9 +271,10 @@ export default function ManageCodes() {
                   <tr
                     key={c.code}
                     className="motion-safe:transition-colors"
-                    style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,175,55,0.05)'}
-                    onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'}
+                    style={{ background: selected.includes(c.code) ? 'rgba(212,175,55,0.12)' : idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent', cursor: selectMode ? 'pointer' : 'default' }}
+                    onClick={() => { if (selectMode) toggleSelect(c.code); }}
+                    onMouseEnter={e => { if (!selected.includes(c.code)) e.currentTarget.style.background = 'rgba(212,175,55,0.05)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = selected.includes(c.code) ? 'rgba(212,175,55,0.12)' : idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'; }}
                   >
                     <td className="py-3 px-4">
                       <input

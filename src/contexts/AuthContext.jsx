@@ -31,6 +31,20 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function refreshUser() {
+    try {
+      const memberRes = await api.get('/auth/session');
+      if (memberRes.data.authenticated) {
+        setUser(memberRes.data.user);
+        return memberRes.data.user;
+      }
+      setUser(null);
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
   async function loginMember(username, password) {
     const res = await api.post('/auth/login', { username, password });
     setUser(res.data.user);
@@ -56,7 +70,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user, admin, loading,
-      loginMember, logoutMember, loginAdmin, logoutAdmin, checkSession,
+      loginMember, logoutMember, loginAdmin, logoutAdmin, checkSession, refreshUser,
     }}>
       {children}
     </AuthContext.Provider>

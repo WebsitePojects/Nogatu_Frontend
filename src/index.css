@@ -26,6 +26,10 @@
   --text-primary: #111827;
   --text-secondary: #374151;
   --text-muted: #6b7280;
+  --brand-gold: #7A5C08;
+  --brand-gold-light: #7A5C08;
+  --brand-gold-dark: #D4AF37;
+  --table-header-color: #8B6914;
   --surface-1: rgba(255, 255, 255, 0.88);
   --surface-2: rgba(255, 255, 255, 0.78);
   --surface-border: rgba(148, 163, 184, 0.35);
@@ -39,6 +43,8 @@ html.dark {
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.76);
   --text-muted: rgba(255, 255, 255, 0.48);
+  --brand-gold: #D4AF37;
+  --table-header-color: rgba(212,175,55,0.7);
   --surface-1: rgba(27, 22, 15, 0.85);
   --surface-2: rgba(14, 12, 9, 0.8);
   --surface-border: rgba(212, 175, 55, 0.2);
@@ -434,11 +440,22 @@ html:not(.dark) .label {
     text-align: left;
     font-size: 0.6875rem;
     font-weight: 600;
-    color: rgba(212, 175, 55, 0.5);
+    color: var(--table-header-color);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 0.875rem 1rem;
     background: rgba(212, 175, 55, 0.04);
+  }
+
+  .ewallet-balance-card {
+    background: linear-gradient(135deg, #FFFDF5 0%, #FFF9E6 50%, #FFF4CC 100%);
+    border: 1px solid rgba(212,175,55,0.35);
+    box-shadow: 0 8px 40px rgba(212,175,55,0.15), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  html.dark .ewallet-balance-card {
+    background: linear-gradient(135deg, #0D0B07 0%, #1C1610 50%, #241D0D 100%);
+    border: 1px solid rgba(212,175,55,0.22);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.15);
   }
 
   .stat-card {

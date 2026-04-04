@@ -13,7 +13,7 @@ function Spinner() {
 }
 
 export default function UpgradeAccount() {
-  const { user, checkSession } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [codes, setCodes]           = useState([]);
   const [loading, setLoading]       = useState(true);
   const [targetUsername, setTargetUsername] = useState('');
@@ -58,7 +58,7 @@ export default function UpgradeAccount() {
     try {
       const res = await api.post('/codes/upgrade', { code });
       toast.success(`Upgraded to ${res.data.newAccountTypeName}!`);
-      await checkSession();
+      await refreshUser();
       loadCodes();
     } catch (err) { toast.error(err.response?.data?.error || 'Upgrade failed'); }
   }
@@ -66,7 +66,8 @@ export default function UpgradeAccount() {
   const toggleSelect = (code) =>
     setSelected(prev => prev.includes(code) ? prev.filter(x => x !== code) : [...prev, code]);
 
-  const accountCodes     = codes.filter(c => c.producttype < 100);
+  const currentAccttype = Number(user?.currentaccttype || 0);
+  const accountCodes     = codes.filter(c => c.producttype < 100 && Number(c.producttype) > currentAccttype);
   const maintenanceCodes = codes.filter(c => c.producttype >= 100);
 
   if (loading) return <Spinner />;
