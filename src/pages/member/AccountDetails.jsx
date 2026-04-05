@@ -59,7 +59,7 @@ export default function AccountDetails() {
         payoutdetails: data.payoutdetails,
         payoutoptions: Number(data.payoutid) || '',
         contactnos:    data.contactnos,
-        tinno:         data.tinno || '',
+        tin:           data.tin || data.tinno || '',
       });
       toast.success('Account updated successfully');
       setNewPassword('');
@@ -101,12 +101,17 @@ export default function AccountDetails() {
             />
           </FieldRow>
 
-          <FieldRow icon={HiOutlineCreditCard} label="TIN (Tax Identification Number)">
+          <FieldRow icon={HiOutlineCreditCard} label="TIN No.">
             <input
               type="text"
-              value={data.tin || 'Not available'}
-              className="glass-input opacity-50 cursor-not-allowed"
-              disabled
+              value={data.tin || data.tinno || ''}
+              onChange={(e) => {
+                const nextTin = e.target.value;
+                handleChange('tin', nextTin);
+                handleChange('tinno', nextTin);
+              }}
+              className="glass-input"
+              placeholder="e.g. 123-456-789-000"
             />
           </FieldRow>
 
@@ -152,17 +157,6 @@ export default function AccountDetails() {
               onChange={(e) => handleChange('contactnos', e.target.value)}
               className="glass-input"
               placeholder="e.g. 09xxxxxxxxx"
-            />
-          </FieldRow>
-
-          {/* TIN No */}
-          <FieldRow icon={HiOutlineCreditCard} label="TIN No.">
-            <input
-              type="text"
-              value={data.tinno || ''}
-              onChange={(e) => handleChange('tinno', e.target.value)}
-              className="glass-input"
-              placeholder="e.g. 123-456-789-000"
             />
           </FieldRow>
 

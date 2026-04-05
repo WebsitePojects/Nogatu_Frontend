@@ -27,7 +27,7 @@ export default function Registration() {
     firstname:      '',
     lastname:       '',
     middlename:     '',
-    tinno:          '',
+    tin:            '',
     position:       searchParams.get('position') || '1',
     placementUid:   searchParams.get('placement') || '',
   });
@@ -160,10 +160,11 @@ export default function Registration() {
             <label className="label">TIN No.</label>
             <input
               type="text"
-              value={form.tinno}
-              onChange={(e) => handleChange('tinno', e.target.value)}
+              value={form.tin}
+              onChange={(e) => handleChange('tin', e.target.value)}
               className="glass-input"
               placeholder="e.g. 123-456-789-000"
+              required
             />
           </div>
 

@@ -26,11 +26,13 @@ export default function UpdateAccounts() {
     e.preventDefault();
     setSaving(true);
     try {
+      const normalizedTin = data.tin ?? data.tinno ?? '';
       await api.put(`/admin/accounts/${uid}`, {
         firstname: data.firstname, lastname: data.lastname, middlename: data.middlename,
         address: data.address, password: newPassword || '',
         payoutdetails: data.payoutdetails, payoutoptions: data.payoutid, contactnos: data.contactnos,
-        tinno: data.tinno,
+        tin: normalizedTin,
+        tinno: normalizedTin,
       });
       toast.success('Account updated successfully');
     } catch (err) { toast.error('Update failed'); } finally { setSaving(false); }
@@ -150,8 +152,12 @@ export default function UpdateAccounts() {
             <label className="label">TIN No.</label>
             <input
               type="text"
-              value={data.tinno || ''}
-              onChange={(e) => handleChange('tinno', e.target.value)}
+              value={data.tin ?? data.tinno ?? ''}
+              onChange={(e) => {
+                const nextTin = e.target.value;
+                handleChange('tin', nextTin);
+                handleChange('tinno', nextTin);
+              }}
               className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
               placeholder="Enter TIN number"
             />
