@@ -7,6 +7,7 @@ const TYPE_OPTS = [
   { value: 'news', label: 'News', style: { background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' } },
   { value: 'announcement', label: 'Announcement', style: { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)' } },
   { value: 'promo', label: 'Promo', style: { background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' } },
+  { value: 'memo', label: 'Memo', style: { background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' } },
 ];
 
 const EMPTY = { title: '', content: '', type: 'news', image_url: '', is_published: true };
@@ -17,9 +18,24 @@ export default function NewsManagement() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { loadPosts(); }, []);
+
+  useEffect(() => {
+    if (imageFile) {
+      const objectUrl = URL.createObjectURL(imageFile);
+      setPreviewUrl(objectUrl);
+      return () => {
+        URL.revokeObjectURL(objectUrl);
+      };
+    }
+
+    setPreviewUrl(form.image_url || '');
+    return undefined;
+  }, [imageFile, form.image_url]);
 
   async function loadPosts() {
     try {
@@ -32,6 +48,7 @@ export default function NewsManagement() {
   function openCreate() {
     setEditing(null);
     setForm(EMPTY);
+    setImageFile(null);
     setShowModal(true);
   }
 
@@ -44,6 +61,7 @@ export default function NewsManagement() {
       image_url: post.image_url || '',
       is_published: !!post.is_published,
     });
+    setImageFile(null);
     setShowModal(true);
   }
 
@@ -51,11 +69,25 @@ export default function NewsManagement() {
     e.preventDefault();
     setSaving(true);
     try {
+      const payload = new FormData();
+      payload.append('title', form.title || '');
+      payload.append('content', form.content || '');
+      payload.append('type', form.type || 'news');
+      payload.append('image_url', form.image_url || '');
+      payload.append('is_published', form.is_published ? '1' : '0');
+      if (imageFile) {
+        payload.append('image', imageFile);
+      }
+
       if (editing) {
-        await api.put(`/admin/news/${editing}`, form);
+        await api.put(`/admin/news/${editing}`, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         toast.success('Post updated');
       } else {
-        await api.post('/admin/news', form);
+        await api.post('/admin/news', payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         toast.success('Post created');
       }
       setShowModal(false);
@@ -97,7 +129,7 @@ export default function NewsManagement() {
           <h1 className="font-display text-2xl font-bold text-white">News &amp; Announcements</h1>
           <div className="w-12 h-0.5 mt-2 mb-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Manage news, announcements, and promotions visible on the public site.
+            Manage news, announcements, memos, and promotions visible on the public site.
           </p>
         </div>
         <button
@@ -218,36 +250,39 @@ export default function NewsManagement() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0"
-            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowModal(false)}
           />
           <div
-            className="relative rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            className="relative rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
             style={{
-              background: 'rgba(18,14,8,0.97)',
-              border: '1px solid rgba(212,175,55,0.2)',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.08)',
+              background: 'var(--surface-1)',
+              border: '1px solid var(--surface-border)',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
             }}
           >
             <div
               className="flex items-center justify-between p-6"
-              style={{ borderBottom: '1px solid rgba(212,175,55,0.1)' }}
+              style={{
+                borderBottom: '1px solid rgba(212,175,55,0.2)',
+                background: 'linear-gradient(135deg, rgba(212,175,55,0.14), rgba(212,175,55,0.04))',
+              }}
             >
-              <h3 className="font-display text-lg font-bold text-white">
+              <h3 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                 {editing ? 'Edit Post' : 'Create New Post'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
                 className="p-1.5 rounded-lg motion-safe:transition-colors cursor-pointer"
-                style={{ color: 'rgba(255,255,255,0.35)' }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; e.currentTarget.style.background = 'transparent'; }}
+                style={{ color: 'var(--text-muted)' }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'rgba(148,163,184,0.2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                 aria-label="Close"
               >
                 <HiOutlineX className="w-5 h-5" />
               </button>
             </div>
+            <div className="w-14 h-0.5 ml-6 mt-3" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
             <form onSubmit={handleSave} className="p-6 space-y-5">
               <div>
                 <label htmlFor="post-title" className="label">Title</label>
@@ -256,7 +291,12 @@ export default function NewsManagement() {
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   required
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                   placeholder="Post title"
                 />
               </div>
@@ -266,20 +306,52 @@ export default function NewsManagement() {
                   id="post-type"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                 >
                   {TYPE_OPTS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </div>
               <div>
-                <label htmlFor="post-image" className="label">Image URL <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem' }}>(optional)</span></label>
+                <label htmlFor="post-image" className="label">Image URL <span className="text-muted text-[0.7rem]">(optional)</span></label>
                 <input
                   id="post-image"
                   value={form.image_url}
                   onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                   placeholder="https://example.com/image.jpg"
                 />
+                <label htmlFor="post-image-file" className="label mt-3 block">Upload Image <span className="text-muted text-[0.7rem]">(optional)</span></label>
+                <input
+                  id="post-image-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
+                />
+                {previewUrl && (
+                  <div className="mt-3 rounded-xl overflow-hidden border" style={{ borderColor: 'rgba(212,175,55,0.2)' }}>
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-44 object-cover"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label htmlFor="post-content" className="label">Content</label>
@@ -289,20 +361,32 @@ export default function NewsManagement() {
                   onChange={(e) => setForm({ ...form, content: e.target.value })}
                   required
                   rows={6}
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5 resize-none"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5 resize-none"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                   placeholder="Write your post content..."
                 />
               </div>
-              <div className="flex items-center gap-3">
+              <div
+                className="flex items-center gap-3 rounded-lg px-3 py-2"
+                style={{ background: 'rgba(148,163,184,0.12)', border: '1px solid rgba(148,163,184,0.22)' }}
+              >
                 <input
                   id="post-published"
                   type="checkbox"
                   checked={form.is_published}
                   onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
-                  className="w-4 h-4 rounded"
-                  style={{ accentColor: '#D4AF37' }}
+                  className="w-4 h-4 rounded cursor-pointer"
+                  style={{
+                    accentColor: '#B8860B',
+                    borderColor: 'rgba(148,163,184,0.5)',
+                    backgroundColor: 'var(--surface-2)',
+                  }}
                 />
-                <label htmlFor="post-published" className="text-sm text-white/60 font-medium cursor-pointer">
+                <label htmlFor="post-published" className="text-sm font-medium cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
                   Publish immediately
                 </label>
               </div>
@@ -310,7 +394,12 @@ export default function NewsManagement() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="gold-btn-outline cursor-pointer rounded-xl py-2 px-4 text-sm"
+                  className="cursor-pointer rounded-xl py-2 px-4 text-sm font-semibold motion-safe:transition-colors"
+                  style={{
+                    background: 'rgba(148,163,184,0.16)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid rgba(148,163,184,0.35)',
+                  }}
                 >
                   Cancel
                 </button>

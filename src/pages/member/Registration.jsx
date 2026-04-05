@@ -27,6 +27,7 @@ export default function Registration() {
     firstname:      '',
     lastname:       '',
     middlename:     '',
+    tin:            '',
     position:       searchParams.get('position') || '1',
     placementUid:   searchParams.get('placement') || '',
   });
@@ -152,6 +153,19 @@ export default function Registration() {
               <label className="label">Middle Name</label>
               <input type="text" value={form.middlename} onChange={(e) => handleChange('middlename', e.target.value)} className="glass-input" />
             </div>
+          </div>
+
+          {/* TIN No */}
+          <div>
+            <label className="label">TIN No.</label>
+            <input
+              type="text"
+              value={form.tin}
+              onChange={(e) => handleChange('tin', e.target.value)}
+              className="glass-input"
+              placeholder="e.g. 123-456-789-000"
+              required
+            />
           </div>
 
           {/* Username */}

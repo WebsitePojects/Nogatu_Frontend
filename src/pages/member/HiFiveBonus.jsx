@@ -17,6 +17,18 @@ const CARD_ACCENTS = [
   '#F2D06B', '#D4AF37', '#B87333', '#F2D06B',
 ];
 
+const PRODUCT_IMAGES = {
+  bl: '/legacy-img/barley_01.png',
+  gl: '/legacy-img/gluta.png',
+  glc: '/legacy-img/collagen.png',
+  cm: '/legacy-img/coffeemix.png',
+  cd: '/legacy-img/choco.png',
+  mgt: '/legacy-img/mangosteen.png',
+  vz: '/legacy-img/vitamin-zinc.png',
+  cmm: '/legacy-img/max-fuel-coffee.png',
+  bkc: '/legacy-img/black-coffee.png',
+};
+
 export default function HiFiveBonus() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading]   = useState(true);
@@ -89,6 +101,17 @@ export default function HiFiveBonus() {
                 {/* Product name */}
                 <h3 className="font-semibold text-white text-sm mb-4 leading-tight">{p.name}</h3>
 
+                {/* Legacy product visual */}
+                {PRODUCT_IMAGES[p.key] && (
+                  <img
+                    src={PRODUCT_IMAGES[p.key]}
+                    alt={p.name}
+                    className="w-full h-32 object-contain rounded-xl mb-4"
+                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.08)' }}
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                )}
+
                 {/* Stats */}
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
@@ -119,10 +142,10 @@ export default function HiFiveBonus() {
 
                 {hasRedeemable && (
                   <button
-                    onClick={() => handleRedeem(p.key, 1)}
+                    onClick={() => handleRedeem(p.key, p.redeemable)}
                     className="btn-success w-full mt-4 text-sm py-2"
                   >
-                    Redeem 1 Unit
+                    Redeem Bonus ({p.redeemable})
                   </button>
                 )}
               </div>

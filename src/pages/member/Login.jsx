@@ -22,14 +22,14 @@ const LockIcon = () => (
   </svg>
 );
 const EyeOpenIcon = () => (
-  <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  <svg className="w-5 h-5" fill="none" stroke="#6B7280" viewBox="0 0 24 24" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
   </svg>
 );
 const EyeClosedIcon = () => (
-  <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+  <svg className="w-5 h-5" fill="none" stroke="#6B7280" viewBox="0 0 24 24" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
   </svg>
 );
 const SpinnerIcon = () => (
@@ -77,12 +77,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#080604' }}>
+    <div className="min-h-screen flex bg-cover bg-center bg-no-repeat bg-[url('/img/portalBG_light.png')] dark:bg-[url('/img/portalBG_dark.png')]">
 
       {/* ── LEFT BRAND PANEL ─────────────────────────────────── */}
       <div
-        className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #080604 0%, #141009 40%, #1C1205 100%)' }}
+        className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden bg-white/10 dark:bg-black/60 backdrop-blur-md border-r border-white/10 dark:border-white/10"
       >
         {/* Large gold orb — top left */}
         <div
@@ -119,29 +118,29 @@ export default function Login() {
             style={{ filter: 'drop-shadow(0 4px 16px rgba(212,175,55,0.3))' }}
           />
           <div>
-            <h1 className="font-brand text-xl font-semibold tracking-widest" style={{ color: '#D4AF37' }}>NOGATU</h1>
-            <p className="text-[11px] tracking-wider uppercase" style={{ color: 'rgba(212,175,55,0.4)' }}>Alliance</p>
+            <h1 className="font-brand text-xl font-semibold tracking-widest text-[#D4AF37]">NOGATU</h1>
+            <p className="text-[11px] tracking-wider uppercase text-gray-800 dark:text-white font-bold">Alliance</p>
           </div>
         </div>
 
-        {/* ── Hero copy ── */}
-        <div className="relative z-10 space-y-8">
-          <div>
-            <h2 className="font-display text-4xl xl:text-5xl font-bold text-white leading-snug">
-              Build Your Network,<br />
-              <span className="gold-text">Build Your Future.</span>
-            </h2>
-            <p className="text-sm leading-relaxed mt-4 max-w-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              Access your complete dashboard to manage your downline, track earnings, and grow your business.
-            </p>
-          </div>
+          {/* ── Hero copy ── */}
+          <div className="relative z-10 space-y-8">
+            <div>
+              <h2 className="font-display text-4xl xl:text-5xl font-bold text-gray-900 dark:text-white leading-snug">
+                Build Your Network,<br />
+                <span className="gold-text">Build Your Future.</span>
+              </h2>
+              <p className="text-sm leading-relaxed mt-4 max-w-sm text-gray-700 dark:text-white/75">
+                Access your complete dashboard to manage your downline, track earnings, and grow your business.
+              </p>
+            </div>
 
           {/* Feature list */}
           <ul className="space-y-3">
             {features.map((f) => (
               <li key={f} className="flex items-center gap-3.5">
                 <span
-                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[#080604]"
+                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white"
                   style={{
                     background: 'linear-gradient(135deg, #9A7B0A, #D4AF37)',
                     boxShadow: '0 4px 12px rgba(212,175,55,0.4)',
@@ -149,35 +148,31 @@ export default function Login() {
                 >
                   <CheckIcon />
                 </span>
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{f}</span>
+                <span className="text-sm text-gray-800 dark:text-white/80 font-medium">{f}</span>
               </li>
             ))}
           </ul>
 
           {/* Stats row */}
-          <div
-            className="flex gap-8 pt-6 border-t"
-            style={{ borderColor: 'rgba(212,175,55,0.12)' }}
-          >
+          <div className="flex gap-8 pt-6 border-t border-gray-300 dark:border-white/10">
             {stats.map((s) => (
               <div key={s.label}>
-                <p className="text-white font-bold text-2xl">{s.value}</p>
-                <p className="text-xs mt-0.5" style={{ color: 'rgba(212,175,55,0.4)' }}>{s.label}</p>
+                <p className="text-gray-900 dark:text-white font-bold text-2xl">{s.value}</p>
+                <p className="text-xs mt-0.5 font-bold" style={{ color: '#D4AF37' }}>{s.label}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Footer */}
-        <p className="relative z-10 text-[11px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
+        <p className="relative z-10 text-[11px] font-medium text-gray-600 dark:text-gray-300">
           © {new Date().getFullYear()} NOGATU Alliance. All rights reserved.
         </p>
       </div>
 
       {/* ── RIGHT FORM PANEL ─────────────────────────────────── */}
       <div
-        className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden"
-        style={{ background: '#0D0B07' }}
+        className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden bg-transparent"
       >
         {/* Subtle orb */}
         <div
@@ -200,8 +195,8 @@ export default function Login() {
 
           {/* Heading */}
           <div className="mb-7">
-            <h2 className="font-display text-[26px] font-bold text-white leading-tight">Welcome back</h2>
-            <p className="text-sm mt-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <h2 className="font-display text-[26px] font-bold text-gray-900 dark:text-white leading-tight">Welcome back</h2>
+            <p className="text-sm mt-1.5 text-gray-600 dark:text-gray-400">
               Sign in to access your member account
             </p>
             <div className="w-12 h-0.5 mt-3 rounded-full" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
@@ -215,10 +210,7 @@ export default function Login() {
             {/* Username */}
             <div>
               <label className="label">Username</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none" style={{ color: 'rgba(212,175,55,0.4)' }}>
-                  <UserIcon />
-                </span>
+              <div className="relative mt-1">
                 <input
                   type="text"
                   value={username}
@@ -226,7 +218,7 @@ export default function Login() {
                   placeholder="Enter your username"
                   required
                   autoComplete="username"
-                  className="glass-input pl-10"
+                  className="glass-input px-4"
                 />
               </div>
             </div>
@@ -234,10 +226,7 @@ export default function Login() {
             {/* Password */}
             <div>
               <label className="label">Password</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none" style={{ color: 'rgba(212,175,55,0.4)' }}>
-                  <LockIcon />
-                </span>
+              <div className="relative mt-1">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -245,16 +234,14 @@ export default function Login() {
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
-                  className="glass-input pl-10 pr-11"
+                  className="glass-input pl-4 pr-11"
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center transition-colors"
-                  style={{ color: 'rgba(255,255,255,0.3)' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(212,175,55,0.7)'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 pr-3.5 flex items-center z-20"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
                 </button>
@@ -271,9 +258,9 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-xs mt-5" style={{ color: 'rgba(255,255,255,0.25)' }}>
+          <p className="text-center text-xs mt-5 text-gray-600 dark:text-gray-400">
             New member?{' '}
-            <span className="cursor-default" style={{ color: 'rgba(212,175,55,0.6)' }}>
+            <span className="cursor-default text-brand-gold">
               Contact your upline to get registered.
             </span>
           </p>

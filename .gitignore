@@ -5,3 +5,4 @@ dist/
 .env.prod
 *.log
 npm-debug.log*
+*.zip

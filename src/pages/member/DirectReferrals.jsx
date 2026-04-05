@@ -3,8 +3,8 @@ import api from '../../api';
 import { HiOutlineUsers } from 'react-icons/hi';
 
 const PKG_COLORS = {
-  Bronze: '#CD7F32', Silver: '#C0C0C0', Gold: '#FFD700',
-  Platinum: '#E5E4E2', Garnet: '#9B4444', Diamond: '#B9F2FF',
+  Bronze: '#CD7F32', Silver: '#A8A9AD', Gold: '#DAA520',
+  Platinum: '#6C757D', Garnet: '#9B2335', Diamond: '#4FC3F7',
 };
 
 const CODE_LABELS = { 1: 'PD', 2: 'FS', 3: 'CD' };

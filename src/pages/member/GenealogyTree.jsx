@@ -7,23 +7,29 @@ import { HiOutlineHome } from 'react-icons/hi';
 /* Package colors → gold-tinted dark palette */
 const TYPE_STYLES = {
   Bronze:   { border: '#CD7F32', bg: 'rgba(205,127,50,0.1)',  text: '#CD7F32' },
-  Silver:   { border: '#C0C0C0', bg: 'rgba(192,192,192,0.1)', text: '#C0C0C0' },
-  Gold:     { border: '#FFD700', bg: 'rgba(255,215,0,0.12)',  text: '#FFD700' },
-  Platinum: { border: '#D4D4D4', bg: 'rgba(212,212,212,0.1)', text: '#D4D4D4' },
-  Garnet:   { border: '#9B4444', bg: 'rgba(155,68,68,0.15)',  text: '#C86464' },
-  Diamond:  { border: '#B9F2FF', bg: 'rgba(185,242,255,0.1)', text: '#B9F2FF' },
+  Silver:   { border: '#A8A9AD', bg: 'rgba(168,169,173,0.1)', text: '#A8A9AD' },
+  Gold:     { border: '#DAA520', bg: 'rgba(218,165,32,0.12)', text: '#DAA520' },
+  Platinum: { border: '#6C757D', bg: 'rgba(108,117,125,0.1)', text: '#6C757D' },
+  Garnet:   { border: '#9B2335', bg: 'rgba(155,35,53,0.15)',  text: '#9B2335' },
+  Diamond:  { border: '#4FC3F7', bg: 'rgba(79,195,247,0.1)',  text: '#4FC3F7' },
 };
 
 function ConnectorLines({ hasLeft, hasRight }) {
   if (!hasLeft && !hasRight) return null;
   return (
-    <div className="relative h-6 w-full flex items-start justify-center">
-      {/* Vertical stem */}
-      <div className="absolute top-0 left-1/2 -translate-x-0.5 w-px h-full" style={{ background: 'rgba(212,175,55,0.25)' }} />
-      {/* Horizontal bar */}
-      {hasLeft && hasRight && (
-        <div className="absolute top-0 left-1/4 right-1/4 h-px" style={{ background: 'rgba(212,175,55,0.25)' }} />
-      )}
+    <div className="relative w-full" style={{ height: '36px' }}>
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 36" preserveAspectRatio="none">
+        <line x1="100" y1="0" x2="100" y2="18" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+        {hasLeft && hasRight ? (
+          <>
+            <line x1="50" y1="18" x2="150" y2="18" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+            <line x1="50" y1="18" x2="50" y2="36" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+            <line x1="150" y1="18" x2="150" y2="36" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+          </>
+        ) : (
+          <line x1="100" y1="18" x2="100" y2="36" stroke="rgba(212,175,55,0.25)" strokeWidth="1.5" />
+        )}
+      </svg>
     </div>
   );
 }
@@ -74,8 +80,6 @@ function TreeNode({ node, onNavigate, onRegister }) {
           <div className="flex gap-6 mt-0 relative">
             {/* Left subtree */}
             <div className="flex flex-col items-center min-w-[148px]">
-              {/* Vertical drop from horizontal bar */}
-              <div className="w-px h-5" style={{ background: 'rgba(212,175,55,0.22)' }} />
               {node.left ? (
                 <TreeNode node={node.left} onNavigate={onNavigate} onRegister={onRegister} />
               ) : node.hasLeftSlot ? (
@@ -97,7 +101,6 @@ function TreeNode({ node, onNavigate, onRegister }) {
 
             {/* Right subtree */}
             <div className="flex flex-col items-center min-w-[148px]">
-              <div className="w-px h-5" style={{ background: 'rgba(212,175,55,0.22)' }} />
               {node.right ? (
                 <TreeNode node={node.right} onNavigate={onNavigate} onRegister={onRegister} />
               ) : node.hasRightSlot ? (

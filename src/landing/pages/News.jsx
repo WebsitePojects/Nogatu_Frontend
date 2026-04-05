@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
 
-const TYPE_LABELS = { news: 'News', announcement: 'Announcement', promo: 'Promo' };
+const TYPE_LABELS = { news: 'News', announcement: 'Announcement', promo: 'Promo', memo: 'Memo' };
 const TYPE_COLORS = {
   news: { bg: 'rgba(184,134,11,0.1)', color: '#B8860B' },
   announcement: { bg: 'rgba(212,165,40,0.1)', color: '#D4A528' },
   promo: { bg: 'rgba(89,34,25,0.08)', color: '#592219' },
+  memo: { bg: 'rgba(16,185,129,0.12)', color: '#0f766e' },
 };
 
 function PageHero({ title, subtitle }) {
@@ -89,7 +90,7 @@ export default function News() {
 
           {/* Filter tabs */}
           <div ref={ref1} className="reveal flex flex-wrap items-center justify-center gap-2 mb-12 mt-8">
-            {['all', 'news', 'announcement', 'promo'].map(f => (
+            {['all', 'news', 'announcement', 'promo', 'memo'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}

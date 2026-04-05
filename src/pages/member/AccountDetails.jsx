@@ -3,7 +3,13 @@ import api from '../../api';
 import toast from 'react-hot-toast';
 import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLocationMarker, HiOutlinePhone, HiOutlineCreditCard } from 'react-icons/hi';
 
-const PAYOUT_OPTIONS = ['Pickup', 'Gcash', 'Remittance Center', 'Bank Deposit', 'Others'];
+const PAYOUT_OPTIONS = [
+  { id: 1, label: 'Pickup' },
+  { id: 2, label: 'GCash' },
+  { id: 3, label: 'Remittance Center' },
+  { id: 4, label: 'Bank Deposit' },
+  { id: 5, label: 'Others' },
+];
 
 function Spinner() {
   return (
@@ -51,8 +57,9 @@ export default function AccountDetails() {
         address:       data.address,
         password:      newPassword || '',
         payoutdetails: data.payoutdetails,
-        payoutoptions: data.payoutid,
+        payoutoptions: Number(data.payoutid) || '',
         contactnos:    data.contactnos,
+        tin:           data.tin || data.tinno || '',
       });
       toast.success('Account updated successfully');
       setNewPassword('');
@@ -91,6 +98,20 @@ export default function AccountDetails() {
               value={data.username || ''}
               className="glass-input opacity-50 cursor-not-allowed"
               disabled
+            />
+          </FieldRow>
+
+          <FieldRow icon={HiOutlineCreditCard} label="TIN No.">
+            <input
+              type="text"
+              value={data.tin || data.tinno || ''}
+              onChange={(e) => {
+                const nextTin = e.target.value;
+                handleChange('tin', nextTin);
+                handleChange('tinno', nextTin);
+              }}
+              className="glass-input"
+              placeholder="e.g. 123-456-789-000"
             />
           </FieldRow>
 
@@ -143,27 +164,31 @@ export default function AccountDetails() {
           <FieldRow icon={HiOutlineCreditCard} label="Payout Option">
             <select
               value={data.payoutid || ''}
-              onChange={(e) => handleChange('payoutid', e.target.value)}
+              onChange={(e) => handleChange('payoutid', Number(e.target.value) || '')}
               className="glass-input"
               style={{ appearance: 'none', cursor: 'pointer' }}
             >
               <option value="" style={{ background: '#1A1610' }}>Select option…</option>
               {PAYOUT_OPTIONS.map(opt => (
-                <option key={opt} value={opt} style={{ background: '#1A1610' }}>{opt}</option>
+                <option key={opt.id} value={opt.id} style={{ background: '#1A1610' }}>{opt.label}</option>
               ))}
             </select>
           </FieldRow>
 
           {/* Payout Details */}
-          <FieldRow icon={HiOutlineCreditCard} label="Payout Details">
-            <input
-              type="text"
-              value={data.payoutdetails || ''}
-              onChange={(e) => handleChange('payoutdetails', e.target.value)}
-              className="glass-input"
-              placeholder="e.g. GCash 09xxxxxxxxx"
-            />
-          </FieldRow>
+          {Number(data.payoutid) === 1 ? (
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Pickup - bring valid ID on payout day (Friday).</p>
+          ) : (
+            <FieldRow icon={HiOutlineCreditCard} label="Payout Details">
+              <input
+                type="text"
+                value={data.payoutdetails || ''}
+                onChange={(e) => handleChange('payoutdetails', e.target.value)}
+                className="glass-input"
+                placeholder="e.g. GCash 09xxxxxxxxx"
+              />
+            </FieldRow>
+          )}
 
           {/* Divider */}
           <div className="h-px" style={{ background: 'rgba(212,175,55,0.1)' }} />

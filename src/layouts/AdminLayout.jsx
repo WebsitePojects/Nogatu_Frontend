@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell } from 'react-icons/hi';
+import { useTheme } from '../contexts/ThemeContext';
+import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
 
 const NAV_GROUPS = [
@@ -25,12 +26,15 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin/encashment', label: 'Encashment', icon: HiOutlineCash },
       { to: '/admin/redeem', label: 'Hi-Five Redeem', icon: HiOutlineGift },
+      { to: '/admin/rankings', label: 'Rankings', icon: HiOutlineShieldCheck },
+      { to: '/admin/global-bonus', label: 'Global Bonus', icon: HiOutlineSparkles },
     ],
   },
   {
     label: 'Content',
     items: [
       { to: '/admin/news', label: 'News & Posts', icon: HiOutlineNewspaper },
+      { to: '/admin/messages', label: 'Messages', icon: HiOutlineBell },
     ],
   },
   {
@@ -46,6 +50,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     await logoutAdmin();
@@ -66,15 +71,17 @@ export default function AdminLayout() {
       >
         {/* Logo area */}
         <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
-          <img
-            src="/img/nogatu_logo.png"
-            alt="NOGATU Alliance"
-            className="w-12 h-12 rounded-xl object-contain"
-            style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(255,255,255,0.05)' }}
-          />
+          <Link to="/admin/login" title="Admin Portal">
+            <img
+              src="/img/nogatu_logo.png"
+              alt="NOGATU Alliance"
+              className="w-12 h-12 rounded-xl object-contain"
+              style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(255,255,255,0.05)' }}
+            />
+          </Link>
           <div>
-            <h1 className="font-brand text-sm font-semibold tracking-wide" style={{ color: '#F2D06B' }}>NOGATU Alliance</h1>
-            <p className="text-[11px] font-medium" style={{ color: 'rgba(212,175,55,0.5)' }}>Admin Panel</p>
+            <h1 className="font-brand text-sm font-semibold tracking-wide" style={{ color: 'var(--brand-gold)' }}>NOGATU Alliance</h1>
+            <p className="sidebar-brand-subtitle text-[11px] font-medium">Admin Panel</p>
           </div>
         </div>
 
@@ -84,7 +91,7 @@ export default function AdminLayout() {
             <div key={group.label}>
               <p
                 className="text-[10px] font-bold uppercase tracking-[0.12em] px-3 mb-2"
-                style={{ color: 'rgba(212,175,55,0.35)' }}
+                style={{ color: 'var(--brand-gold)' }}
               >
                 {group.label}
               </p>
@@ -109,16 +116,16 @@ export default function AdminLayout() {
         <div className="p-4" style={{ borderTop: '1px solid rgba(212,175,55,0.10)' }}>
           <div className="flex items-center gap-3 px-2 py-2 mb-2">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-md"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-always-white font-bold text-xs shadow-md"
               style={{ background: 'linear-gradient(135deg, #7f1d1d, #991b1b)' }}
             >
               {admin?.name?.[0]?.toUpperCase() || 'A'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{admin?.name || 'Admin'}</p>
+              <p className="admin-profile-name text-sm font-medium truncate">{admin?.name || 'Admin'}</p>
               <span
-                className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5"
-                style={{ background: 'rgba(212,175,55,0.15)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+                className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5 admin-profile-tier"
+                style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.25)' }}
               >
                 {roleLabel}
               </span>
@@ -165,6 +172,13 @@ export default function AdminLayout() {
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl transition-colors text-white/40 hover:text-brand-gold"
+              title="Toggle Theme"
+            >
+              {isDarkMode ? <HiOutlineSun className="w-5 h-5" /> : <HiOutlineMoon className="w-5 h-5" />}
+            </button>
+            <button
               className="relative p-2 rounded-xl motion-safe:transition-colors cursor-pointer"
               style={{ color: 'rgba(255,255,255,0.4)' }}
               aria-label="Notifications"
@@ -182,11 +196,11 @@ export default function AdminLayout() {
               style={{ borderLeft: '1px solid rgba(212,175,55,0.15)' }}
             >
               <div className="text-right">
-                <p className="text-sm font-medium text-white">{admin?.name}</p>
-                <p className="text-[11px]" style={{ color: 'rgba(212,175,55,0.6)' }}>{roleLabel}</p>
+                <p className="admin-profile-name text-sm font-medium">{admin?.name}</p>
+                <p className="topbar-account-tier text-[11px]">{roleLabel}</p>
               </div>
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm text-white"
+                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm text-white text-always-white"
                 style={{ background: 'linear-gradient(135deg, #7f1d1d, #991b1b)' }}
               >
                 {admin?.name?.[0]?.toUpperCase() || 'A'}

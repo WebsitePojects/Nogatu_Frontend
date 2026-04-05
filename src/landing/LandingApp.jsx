@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Products from './pages/Products';
 import News from './pages/News';
+import Organizations from './pages/Organizations';
 import Contact from './pages/Contact';
 
 export default function LandingApp() {
@@ -14,6 +15,7 @@ export default function LandingApp() {
         <Route path="/about" element={<About />} />
         <Route path="/products" element={<Products />} />
         <Route path="/news" element={<News />} />
+        <Route path="/organizations" element={<Organizations />} />
         <Route path="/contact" element={<Contact />} />
       </Route>
       <Route path="*" element={<Home />} />
