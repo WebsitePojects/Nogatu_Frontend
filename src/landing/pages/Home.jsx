@@ -7,9 +7,9 @@ import Lightbox, { useLightbox } from '../components/Lightbox';
 function Hero() {
   return (
     <section
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen overflow-hidden"
       style={{
-        backgroundImage: 'url(/img/hero-landing-bg.png)',
+        backgroundImage: 'url(/img/landing-bg-clean.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -17,28 +17,40 @@ function Hero() {
       {/* Warm gold overlay for readability */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 pb-16">
-        <div className="min-h-[68vh] flex items-end">
-          <div className="pb-6 sm:pb-10 motion-safe:animate-fade-up">
-            <h1 className="text-[clamp(2rem,4.5vw,3.6rem)] font-extrabold leading-[1.1] tracking-tight text-white mb-4 drop-shadow-lg">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-16 sm:pt-24 pb-8 sm:pb-12">
+        <div className="min-h-[75vh] lg:min-h-[80vh] flex flex-col lg:flex-row gap-8 lg:gap-0 items-center justify-between">
+          <div className="order-2 lg:order-1 w-full lg:w-5/12 pb-6 lg:pb-0 motion-safe:animate-fade-up text-center lg:text-left z-20">
+            <h1 className="text-[clamp(2.5rem,5vw,4.5rem)] font-extrabold leading-[1.05] tracking-tight text-white mb-5 drop-shadow-2xl">
               Enjoy Our Healthy<br />
-              <span className="text-brand-gold-light">&amp; Wealthy Lifestyle</span>
+              <span className="text-brand-gold-light drop-shadow-lg">&amp; Wealthy Lifestyle</span>
             </h1>
-            <p className="mb-6 text-white/80 text-base sm:text-lg font-medium max-w-md">
+            <p className="mb-8 text-white/90 text-lg sm:text-xl font-medium max-w-md mx-auto lg:mx-0 drop-shadow-md">
               Wellness You Can Taste, Quality You Can Trust.
             </p>
             <a
               href="/portal/login"
-              className="inline-block px-7 sm:px-10 py-2.5 sm:py-3 text-white text-[clamp(1.1rem,1.8vw,1.6rem)] font-semibold rounded-full motion-safe:transition-all motion-safe:duration-300 border border-brand-gold-dark shadow-lg shadow-amber-900/30 leading-none hover:scale-105 hover:shadow-xl"
+              className="inline-block px-10 sm:px-12 py-3.5 sm:py-4 text-white text-[clamp(1.2rem,2vw,1.8rem)] font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-none hover:scale-105 hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
               style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
             >
               Be the One. Register Now!
             </a>
-            <div className="mt-5 flex items-center gap-2 text-white/70">
-              <svg className="w-5 h-5 text-brand-gold-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="mt-8 flex items-center justify-center lg:justify-start gap-3 text-white/80">
+              <svg className="w-6 h-6 text-brand-gold-light drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-[clamp(1rem,1.5vw,1.25rem)] font-medium leading-none">FDA Approved Products</span>
+              <span className="text-[clamp(1.1rem,1.8vw,1.4rem)] font-semibold leading-none drop-shadow">FDA Approved Products</span>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2 w-full lg:w-7/12 flex justify-center motion-safe:animate-fade-up z-10 mt-8 lg:mt-0">
+            <div className="relative w-[120%] sm:w-[130%] lg:w-[140%] xl:w-[160%] max-w-[600px] sm:max-w-[800px] lg:max-w-[1000px] xl:max-w-[1200px] -ml-6 sm:-ml-10 lg:ml-0 lg:-mr-16 xl:-mr-32">
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-3/4 h-1/3 rounded-full blur-[80px] bg-brand-gold/60 motion-safe:animate-pulse-glow" />
+              <div className="absolute inset-x-10 bottom-4 h-12 rounded-full bg-black/40 blur-[40px]" />
+              <img
+                src="/img/product-landing.png"
+                alt="Nogatu Alliance Products"
+                className="relative z-10 w-full h-auto object-contain motion-safe:animate-float-slow drop-shadow-[0_45px_100px_rgba(0,0,0,0.7)] scale-[1.15] sm:scale-[1.25] lg:scale-[1.3] xl:scale-[1.4] origin-bottom lg:origin-center"
+              />
             </div>
           </div>
         </div>
@@ -213,7 +225,7 @@ function Products() {
       {/* Geo pattern */}
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
       <div className="section-container relative z-10">
-        <SectionHeader badge="Our Products" title="Healthy & Wealthy Options" />
+        <SectionHeader badge="Products" title="Our Line-up" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((p, i) => {
             const ref = useScrollReveal({ delay: i * 80 });
