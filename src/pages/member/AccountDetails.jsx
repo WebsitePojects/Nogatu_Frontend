@@ -59,6 +59,7 @@ export default function AccountDetails() {
         payoutdetails: data.payoutdetails,
         payoutoptions: Number(data.payoutid) || '',
         contactnos:    data.contactnos,
+        tinno:         data.tinno || '',
       });
       toast.success('Account updated successfully');
       setNewPassword('');
@@ -142,6 +143,17 @@ export default function AccountDetails() {
               onChange={(e) => handleChange('contactnos', e.target.value)}
               className="glass-input"
               placeholder="e.g. 09xxxxxxxxx"
+            />
+          </FieldRow>
+
+          {/* TIN No */}
+          <FieldRow icon={HiOutlineCreditCard} label="TIN No.">
+            <input
+              type="text"
+              value={data.tinno || ''}
+              onChange={(e) => handleChange('tinno', e.target.value)}
+              className="glass-input"
+              placeholder="e.g. 123-456-789-000"
             />
           </FieldRow>
 

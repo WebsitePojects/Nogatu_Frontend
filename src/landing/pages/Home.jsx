@@ -7,9 +7,9 @@ import Lightbox, { useLightbox } from '../components/Lightbox';
 function Hero() {
   return (
     <section
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen overflow-hidden"
       style={{
-        backgroundImage: 'url(/img/hero-landing-bg.png)',
+        backgroundImage: 'url(/img/landing-bg-clean.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -17,28 +17,40 @@ function Hero() {
       {/* Warm gold overlay for readability */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 pb-16">
-        <div className="min-h-[68vh] flex items-end">
-          <div className="pb-6 sm:pb-10 motion-safe:animate-fade-up">
-            <h1 className="text-[clamp(2rem,4.5vw,3.6rem)] font-extrabold leading-[1.1] tracking-tight text-white mb-4 drop-shadow-lg">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-20 sm:pt-20 pb-6 sm:pb-10">
+        <div className="min-h-[calc(100vh-104px)] lg:min-h-[74vh] flex flex-col lg:flex-row gap-6 lg:gap-0 items-center justify-between">
+          <div className="order-2 lg:order-1 w-full lg:w-5/12 pb-4 lg:pb-0 mt-auto motion-safe:animate-fade-up text-left z-20 flex flex-col items-start">
+            <h1 className="text-[clamp(2rem,4.2vw,3.8rem)] font-extrabold leading-[1.08] tracking-tight text-white mb-5 drop-shadow-2xl">
               Enjoy Our Healthy<br />
-              <span className="text-brand-gold-light">&amp; Wealthy Lifestyle</span>
+              <span className="text-brand-gold-light drop-shadow-lg">&amp; Wealthy Lifestyle</span>
             </h1>
-            <p className="mb-6 text-white/80 text-base sm:text-lg font-medium max-w-md">
+            <p className="mb-6 text-white/90 text-base sm:text-lg font-medium max-w-md drop-shadow-md">
               Wellness You Can Taste, Quality You Can Trust.
             </p>
             <a
               href="/portal/login"
-              className="inline-block px-7 sm:px-10 py-2.5 sm:py-3 text-white text-[clamp(1.1rem,1.8vw,1.6rem)] font-semibold rounded-full motion-safe:transition-all motion-safe:duration-300 border border-brand-gold-dark shadow-lg shadow-amber-900/30 leading-none hover:scale-105 hover:shadow-xl"
+              className="inline-block px-8 sm:px-10 py-3 sm:py-3.5 text-white text-[clamp(1rem,1.6vw,1.25rem)] font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-none hover:scale-105 hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
               style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
             >
               Be the One. Register Now!
             </a>
-            <div className="mt-5 flex items-center gap-2 text-white/70">
-              <svg className="w-5 h-5 text-brand-gold-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="mt-5 flex items-center justify-start gap-3 text-white/90">
+              <svg className="w-6 h-6 text-brand-gold-light drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-[clamp(1rem,1.5vw,1.25rem)] font-medium leading-none">FDA Approved Products</span>
+              <span className="text-[clamp(0.95rem,1.4vw,1.15rem)] font-semibold leading-none drop-shadow">FDA Approved Products</span>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2 w-full lg:w-6/12 flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-10 sm:mt-12 lg:mt-0">
+            <div className="relative w-[84%] sm:w-[74%] lg:w-full max-w-[320px] sm:max-w-[430px] lg:max-w-[620px] xl:max-w-[700px] mx-auto lg:mx-0">
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-3/4 h-1/3 rounded-full blur-[60px] bg-brand-gold/55 motion-safe:animate-pulse-glow" />
+              <div className="absolute inset-x-10 bottom-4 h-10 rounded-full bg-black/35 blur-[32px]" />
+              <img
+                src="/img/product-landing.png"
+                alt="Nogatu Alliance Products"
+                className="relative z-10 w-full h-auto object-contain motion-safe:animate-float-slow drop-shadow-[0_28px_60px_rgba(0,0,0,0.55)] origin-bottom lg:origin-center"
+              />
             </div>
           </div>
         </div>
@@ -213,7 +225,7 @@ function Products() {
       {/* Geo pattern */}
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
       <div className="section-container relative z-10">
-        <SectionHeader badge="Our Products" title="Healthy & Wealthy Options" />
+        <SectionHeader badge="Products" title="Our Line-up" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((p, i) => {
             const ref = useScrollReveal({ delay: i * 80 });
@@ -249,37 +261,92 @@ function Products() {
   );
 }
 
+/* ────────────────────── Organizations Preview ───────────── */
+function OrganizationsPreview() {
+  const ref = useScrollReveal();
+  return (
+    <section className="section-padding relative overflow-hidden bg-white">
+      {/* Minimalist Backgound Pattern */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
+         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,1)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      </div>
+
+      <div className="section-container relative z-10">
+        <SectionHeader badge="Organizations" title="Our Network Structure" />
+        
+        <div ref={ref} className="reveal max-w-4xl mx-auto text-center">
+          <p className="text-gray-600 leading-relaxed mb-12">
+            A minimalist approach to a powerful network. See how our leadership, regional centers, and product suppliers connect to deliver unparalleled success.
+          </p>
+
+          <div className="relative p-8 md:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
+            {/* Minimalist Org Chart Abstract */}
+            <div className="flex flex-col items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
+               {/* Top Node */}
+               <div className="w-16 h-16 rounded-full bg-brand-gold-dark/10 border border-brand-gold-dark flex items-center justify-center mb-6 relative">
+                 <div className="w-8 h-8 rounded-full bg-brand-gold-dark" />
+                 <div className="absolute w-px h-8 bg-gray-300 -bottom-8" />
+               </div>
+
+               {/* Connector Line */}
+               <div className="w-48 h-px bg-gray-300 mb-8 relative">
+                 <div className="absolute w-px h-6 bg-gray-300 left-0 top-0" />
+                 <div className="absolute w-px h-6 bg-gray-300 right-0 top-0" />
+                 {/* Bottom Nodes */}
+                 <div className="absolute -left-6 top-6 w-12 h-12 rounded-xl bg-primary-50 border border-primary-200" />
+                 <div className="absolute -right-6 top-6 w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200" />
+               </div>
+               
+               <div className="mt-8">
+                 <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
+                   View Full Organization
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                 </NavLink>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ────────────────────── Business Opps Preview ────────────── */
 function BusinessPreview() {
   const ref = useScrollReveal();
   return (
-    <section className="section-padding relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #3A1000 0%, #592219 50%, #3A1000 100%)' }}>
-      {/* Floating shapes */}
-      <div className="absolute top-10 left-10 w-32 h-32 border border-brand-gold/10 rounded-2xl rotate-12 motion-safe:animate-float-slow pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-24 h-24 border border-brand-gold/10 rounded-xl -rotate-6 motion-safe:animate-float-reverse pointer-events-none" />
-      <div className="absolute top-1/2 left-1/4 w-16 h-16 border border-brand-gold/5 rounded-full motion-safe:animate-float pointer-events-none" />
-      {/* Dot pattern */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        backgroundImage: 'radial-gradient(circle, rgba(212,165,40,0.06) 1px, transparent 1px)',
-        backgroundSize: '28px 28px',
-      }} />
-
-      <div ref={ref} className="reveal section-container text-center relative z-10">
-        <span className="inline-block px-4 py-1.5 rounded-full bg-brand-gold/15 text-brand-gold-light text-xs font-semibold tracking-wider uppercase mb-4 border border-brand-gold/20">Business Opportunities</span>
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
-          Ready to Start Your <span className="text-brand-gold-light">Journey?</span>
-        </h2>
-        <p className="text-white/50 text-lg max-w-xl mx-auto mb-10">
-          Join thousands of members building healthier lives and sustainable income with NOGATU Alliance.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="/portal/login" className="btn-landing-primary text-base px-9 py-4">
-            Join Now
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-          </a>
-          <NavLink to="/opportunities" className="text-white/50 hover:text-brand-gold-light text-sm font-medium motion-safe:transition-colors">
-            View Business Plans &rarr;
-          </NavLink>
+    <section className="section-padding relative overflow-hidden bg-center bg-cover" style={{ backgroundImage: 'linear-gradient(rgba(255, 253, 245, 0.95), rgba(255, 253, 245, 0.95)), url(/img/landing-bg-clean.png)' }}>
+      {/* Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-[#D4A528] to-transparent opacity-50" />
+      <div className="absolute top-10 left-10 w-32 h-32 border-[3px] border-[#D4A528]/20 rounded-full border-dashed rotate-12 motion-safe:animate-spin-slow pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-24 h-24 border-[3px] border-[#B8860B]/20 rounded-full border-dashed -rotate-6 motion-safe:animate-spin-slow pointer-events-none" />
+      
+      <div ref={ref} className="reveal section-container text-center relative z-10 max-w-[1000px] mx-auto">
+        <div className="bg-white rounded-[2.5rem] p-10 md:p-16 shadow-[0_20px_50px_rgba(184,134,11,0.15)] border border-[#D4A528]/20 relative overflow-hidden group">
+          {/* Inner card gradient highlight */}
+          <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-[#D4A528] to-transparent opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-opacity duration-700 group-hover:opacity-20" />
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-[#B8860B] to-transparent opacity-5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none transition-opacity duration-700 group-hover:opacity-15" />
+          
+          <div className="relative z-10">
+            <span className="inline-block px-5 py-2 rounded-full bg-[#FFF8E1] text-[#B8860B] border border-[#B8860B]/20 text-xs md:text-sm font-bold tracking-widest uppercase mb-6 shadow-sm">
+              Business Opportunities
+            </span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#3A1000] tracking-tight mb-6 leading-tight">
+              Ready to Start Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B8860B] to-[#D4A528] drop-shadow-sm">Journey?</span>
+            </h2>
+            <p className="text-[#6d3028] text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+              Join thousands of members building healthier lives and sustainable income with NOGATU Alliance.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+              <a href="/portal/login" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 rounded-xl text-white font-bold text-lg hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_20px_rgba(184,134,11,0.4)] hover:shadow-[0_12px_25px_rgba(184,134,11,0.6)]" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
+                Join Now
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              </a>
+              <NavLink to="/opportunities" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl text-[#B8860B] font-bold text-lg border-2 border-[#D4A528]/30 hover:border-[#D4A528] hover:bg-[#FFF8E1] transition-all duration-300">
+                View Business Plans &rarr;
+              </NavLink>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -313,6 +380,7 @@ export default function Home() {
       <AboutPreview />
       <WhyUs />
       <Products />
+      <OrganizationsPreview />
       <BusinessPreview />
     </>
   );

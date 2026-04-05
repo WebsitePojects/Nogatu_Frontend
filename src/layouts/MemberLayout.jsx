@@ -122,7 +122,7 @@ export default function MemberLayout() {
             <h1 className="font-brand text-[13px] font-semibold tracking-wide" style={{ color: 'var(--brand-gold)' }}>
               NOGATU
             </h1>
-            <p className="text-[10px] font-medium tracking-wider uppercase" style={{ color: 'rgba(212,175,55,0.4)' }}>
+            <p className="sidebar-brand-subtitle text-[10px] font-medium tracking-wider uppercase">
               Member Portal
             </p>
           </div>
@@ -173,8 +173,8 @@ export default function MemberLayout() {
               {acctInitial}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white text-always-white truncate">{user?.shortname || 'Member'}</p>
-              <p className="text-[10.5px] truncate" style={{ color: 'var(--brand-gold)' }}>
+              <p className="sidebar-user-name text-sm font-semibold truncate">{user?.shortname || 'Member'}</p>
+              <p className="sidebar-user-type text-[10.5px] truncate">
                 {user?.caccttype} Account
               </p>
             </div>
@@ -220,7 +220,7 @@ export default function MemberLayout() {
             </button>
             <div>
               <p className="text-sm font-semibold text-white/90 leading-none">{currentPage?.label || 'Dashboard'}</p>
-              <p className="text-[11px] mt-0.5 hidden sm:block" style={{ color: 'rgba(212,175,55,0.45)' }}>
+              <p className="hero-welcome-subtitle text-[11px] mt-0.5 hidden sm:block">
                 Welcome back, {user?.shortname}
               </p>
             </div>
@@ -254,7 +254,7 @@ export default function MemberLayout() {
             <div className="hidden sm:flex items-center gap-2.5 pl-3 ml-1 border-l" style={{ borderColor: 'rgba(212,175,55,0.1)' }}>
               <div className="text-right">
                 <p className="text-[13px] font-semibold text-white/85 text-always-white leading-none">{user?.accountname}</p>
-                <p className="text-[10.5px] mt-0.5" style={{ color: 'rgba(212,175,55,0.45)' }}>{user?.caccttype}</p>
+                <p className="topbar-account-tier text-[10.5px] mt-0.5">{user?.caccttype}</p>
               </div>
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-always-white"

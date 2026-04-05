@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { to: '/about', label: 'About Us' },
   { to: '/products', label: 'Our Products' },
   { to: '/news', label: 'News & Updates' },
+  { to: '/organizations', label: 'Organizations' },
   { to: '/contact', label: 'Contact Us' },
 ];
 
@@ -27,60 +28,75 @@ function Navbar() {
   }, [location.pathname]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 pt-3">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className={`mt-3 rounded-2xl border px-4 sm:px-5 flex items-center justify-between h-16 transition-all duration-500 ${scrolled
-            ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-black/[0.04] border-primary-200/50'
-            : 'bg-[#FFFDF5]/85 border-primary-200/30'
+          className={`relative rounded-3xl overflow-hidden flex items-center justify-between h-[72px] px-4 sm:px-6 transition-all duration-500 border ${scrolled
+            ? 'bg-white/70 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border-white/50'
+            : 'bg-white/40 backdrop-blur-lg border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:bg-white/60'
             }`}
         >
+          {/* Subtle animated gradient border effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-primary-400/10 opacity-50 pointer-events-none mix-blend-overlay"></div>
+
           {/* Logo */}
-          <NavLink to="/" className="flex items-center gap-2.5 group">
-            <img
-              src="/img/nogatu_logo.png"
-              alt="NOGATU Alliance"
-              className="h-12 w-12 rounded-full object-contain border border-brand-gold/40 motion-safe:transition-transform motion-safe:duration-300 group-hover:scale-105"
-            />
-            <span className="font-semibold text-sm sm:text-base tracking-wide text-brand-brown">
-              Nogatu Alliance
+          <NavLink to="/" className="relative flex items-center gap-3 group z-10 w-[200px]">
+            <div className="relative">
+              <div className="absolute inset-0 bg-brand-gold blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-500 rounded-full"></div>
+              <img
+                src="/img/nogatu_logo.png"
+                alt="NOGATU Alliance"
+                className="relative h-11 w-11 rounded-full object-contain border border-white/60 shadow-sm motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-105 group-hover:rotate-3"
+              />
+            </div>
+            <span className="font-extrabold text-sm sm:text-base tracking-tight text-brand-brown bg-clip-text">
+              NOGATU <span className="text-brand-gold-dark font-medium">Alliance</span>
             </span>
           </NavLink>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center justify-center gap-1.5 z-10 flex-1">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium motion-safe:transition-all motion-safe:duration-200 ${isActive
-                    ? 'text-brand-gold-dark bg-primary-100/60'
-                    : 'text-gray-500 hover:text-brand-gold-dark hover:bg-primary-50'
+                  `relative px-4 py-2 rounded-xl text-[15px] font-semibold motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${isActive
+                    ? 'text-brand-gold-dark'
+                    : 'text-gray-600 hover:text-brand-brown'
                   }`
                 }
               >
-                {link.label}
+                {({ isActive }) => (
+                  <>
+                    <span className="relative z-10">{link.label}</span>
+                    {isActive && (
+                      <div className="absolute inset-0 bg-brand-gold/10 rounded-xl"></div>
+                    )}
+                    <div className="absolute inset-0 bg-white/40 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-xl"></div>
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
 
           {/* CTA + Mobile toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end gap-3 z-10 w-[200px]">
             <a
               href="/portal/login"
-              className="hidden sm:inline-flex items-center gap-2 px-6 py-2 rounded-full text-white text-sm font-semibold motion-safe:transition-all motion-safe:duration-300 cursor-pointer shadow-md shadow-amber-900/20 border border-brand-gold-dark"
+              className="relative hidden sm:inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
             >
-              Members Login
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out"></div>
+              <span className="relative z-10 drop-shadow-sm">Members Area</span>
             </a>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2 rounded-lg text-brand-brown hover:bg-primary-50 motion-safe:transition-colors cursor-pointer"
+              className="lg:hidden relative p-2.5 rounded-xl text-brand-brown bg-white/50 hover:bg-white border border-white/50 motion-safe:transition-all shadow-sm cursor-pointer z-10"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
-              {mobileOpen ? <HiOutlineX className="w-6 h-6" /> : <HiOutlineMenu className="w-6 h-6" />}
+              {mobileOpen ? <HiOutlineX className="w-5 h-5" /> : <HiOutlineMenu className="w-5 h-5" />}
             </button>
           </div>
         </div>

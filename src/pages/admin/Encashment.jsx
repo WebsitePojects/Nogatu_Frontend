@@ -97,16 +97,6 @@ export default function Encashment() {
 
       {/* Filter */}
       <div className="glass-card rounded-2xl p-6 mb-6 relative overflow-hidden">
-        <div className="absolute top-2 right-2 w-24 h-24 opacity-80 pointer-events-none">
-          <video
-            src="/img/goldcoin3dvid.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-contain"
-          />
-        </div>
         <div className="flex flex-col sm:flex-row gap-3 items-end">
           <div className="sm:min-w-[240px]">
             <label className="label">Account Search</label>
@@ -268,7 +258,14 @@ export default function Encashment() {
 
       {(detailsLoading || activeDetails) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
-          <div className="w-full max-w-2xl rounded-2xl p-7 shadow-2xl" style={{ background: '#141008', border: '1px solid rgba(212,175,55,0.25)' }}>
+          <div
+            className="w-full max-w-2xl rounded-2xl p-7 shadow-2xl"
+            style={{
+              background: 'var(--surface-1)',
+              border: '1px solid var(--surface-border)',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
+            }}
+          >
             {detailsLoading ? (
               <div className="flex justify-center py-10">
                 <div className="animate-spin rounded-full h-8 w-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
@@ -276,33 +273,49 @@ export default function Encashment() {
             ) : (
               <>
                 <div ref={receiptRef}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h2 className="font-display text-xl font-bold text-white">Encashment Details</h2>
-                      <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Ref #{activeDetails?.pid}</p>
+                  <div
+                    className="rounded-2xl p-4 mb-4"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(212,175,55,0.14), rgba(212,175,55,0.04))',
+                      border: '1px solid rgba(212,175,55,0.22)',
+                    }}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h2 className="font-display text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Encashment Details</h2>
+                        <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Ref #{activeDetails?.pid}</p>
+                      </div>
+                      <span
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                        style={
+                          Number(activeDetails?.status) === 1
+                            ? { background: 'rgba(16,185,129,0.12)', color: '#059669', border: '1px solid rgba(16,185,129,0.25)' }
+                            : { background: 'rgba(245,158,11,0.12)', color: '#d97706', border: '1px solid rgba(245,158,11,0.25)' }
+                        }
+                      >
+                        {activeDetails?.statusLabel}
+                      </span>
                     </div>
-                    <span
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                      style={
-                        Number(activeDetails?.status) === 1
-                          ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
-                          : { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.25)' }
-                      }
-                    >
-                      {activeDetails?.statusLabel}
-                    </span>
+                    <div className="w-14 h-0.5 mt-3" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
                   </div>
 
-                  <div className="space-y-2 text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
                     <p><strong>Member:</strong> {activeDetails?.fullname} ({activeDetails?.username})</p>
                     <p><strong>Package:</strong> {activeDetails?.packageType}</p>
                     <p><strong>Date:</strong> {activeDetails?.transdate || activeDetails?.cashtransdate || '-'}</p>
-                    <p><strong>Beginning Balance:</strong> ₱{fmt(activeDetails?.beginningBalance)}</p>
-                    <p><strong>Ending Balance:</strong> ₱{fmt(activeDetails?.endingBalance)}</p>
+                    <p><strong>Payment:</strong> {activeDetails?.paymentOption || 'N/A'}{activeDetails?.paymentDetails ? ` / ${activeDetails.paymentDetails}` : ''}</p>
                   </div>
 
-                  <div className="mt-4 text-sm space-y-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
-                    <p className="font-semibold text-white">Income Breakdown</p>
+                  <div className="rounded-xl p-3 mb-4" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.18)' }}>
+                    <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Balance Window</p>
+                    <div className="grid grid-cols-2 gap-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      <p><strong>Beginning Balance:</strong> ₱{fmt(activeDetails?.beginningBalance)}</p>
+                      <p><strong>Ending Balance:</strong> ₱{fmt(activeDetails?.endingBalance)}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 text-sm space-y-1 rounded-xl p-3" style={{ color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(148,163,184,0.2)' }}>
+                    <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>Income Breakdown</p>
                     <p>Direct Referral: ₱{fmt(activeDetails?.income?.directReferral)}</p>
                     <p>Pairing: ₱{fmt(activeDetails?.income?.pairing)}</p>
                     <p>Leadership: ₱{fmt(activeDetails?.income?.leadership)}</p>
@@ -310,8 +323,8 @@ export default function Encashment() {
                     <p>LPC: ₱{fmt(activeDetails?.income?.lpc)}</p>
                   </div>
 
-                  <div className="mt-4 text-sm space-y-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
-                    <p className="font-semibold text-white">Encashment Deductions</p>
+                  <div className="mt-4 text-sm space-y-1 rounded-xl p-3" style={{ color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(148,163,184,0.2)' }}>
+                    <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>Encashment Deductions</p>
                     <p>Gross Encashment: ₱{fmt(activeDetails?.grossEncashment)}</p>
                     <p>Tax (10%): -₱{fmt(activeDetails?.deductions?.tax)}</p>
                     <p>Fee: -₱{fmt(activeDetails?.deductions?.fee)}</p>
@@ -319,7 +332,6 @@ export default function Encashment() {
                     <p className="pt-1 border-t" style={{ borderColor: 'rgba(212,175,55,0.2)', color: '#D4AF37', fontWeight: 700 }}>
                       Net Receivable: ₱{fmt(activeDetails?.netReceivable)}
                     </p>
-                    <p className="text-xs">Payment: {activeDetails?.paymentOption || 'N/A'}{activeDetails?.paymentDetails ? ` / ${activeDetails.paymentDetails}` : ''}</p>
                   </div>
                 </div>
 
