@@ -27,6 +27,7 @@ export default function Registration() {
     firstname:      '',
     lastname:       '',
     middlename:     '',
+    tin:            '',
     position:       searchParams.get('position') || '1',
     placementUid:   searchParams.get('placement') || '',
   });
@@ -152,6 +153,21 @@ export default function Registration() {
               <label className="label">Middle Name</label>
               <input type="text" value={form.middlename} onChange={(e) => handleChange('middlename', e.target.value)} className="glass-input" />
             </div>
+          </div>
+
+          <div>
+            <label className="label">TIN (Tax Identification Number)</label>
+            <input
+              type="text"
+              value={form.tin}
+              onChange={(e) => handleChange('tin', e.target.value)}
+              className="glass-input"
+              placeholder="e.g. 123-456-789-000"
+              required
+            />
+            <p className="text-xs mt-1" style={{ color: 'rgba(212,175,55,0.6)' }}>
+              Required. We use this for payout and compliance records.
+            </p>
           </div>
 
           {/* Username */}

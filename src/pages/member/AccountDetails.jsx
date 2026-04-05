@@ -100,6 +100,15 @@ export default function AccountDetails() {
             />
           </FieldRow>
 
+          <FieldRow icon={HiOutlineCreditCard} label="TIN (Tax Identification Number)">
+            <input
+              type="text"
+              value={data.tin || 'Not available'}
+              className="glass-input opacity-50 cursor-not-allowed"
+              disabled
+            />
+          </FieldRow>
+
           {/* Password */}
           <FieldRow icon={HiOutlineLockClosed} label={<>New Password <span className="text-xs ml-1" style={{ color: 'rgba(255,255,255,0.25)' }}>(leave blank to keep current)</span></>}>
             <div className="relative">

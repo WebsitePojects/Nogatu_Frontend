@@ -37,6 +37,7 @@ const NAV_GROUPS = [
       { to: '/upgrade',      label: 'Upgrade Account',  icon: HiOutlineArrowUp },
       { to: '/register',     label: 'Register Account', icon: HiOutlineUserAdd },
       { to: '/transactions', label: 'Transactions',     icon: HiOutlineDocumentText },
+      { to: '/vouchers',     label: 'Vouchers',         icon: HiOutlineGift },
       { to: '/account',      label: 'Account Details',  icon: HiOutlineUser },
       { to: '/support',      label: 'Issue or Concern', icon: HiOutlineSupport },
     ],

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 function PageHero({ title, subtitle }) {
   return (
     <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
@@ -35,11 +37,33 @@ export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setSending(true);
-    setTimeout(() => { setSending(false); setSent(true); setForm({ name: '', email: '', subject: '', message: '' }); setTimeout(() => setSent(false), 5000); }, 1500);
+
+    try {
+      const response = await fetch(`${API_BASE}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || 'Unable to send your message right now');
+      }
+
+      setSent(true);
+      setForm({ name: '', email: '', subject: '', message: '' });
+      setTimeout(() => setSent(false), 5000);
+    } catch (err) {
+      setError(String(err.message || 'Unable to send your message right now'));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -90,6 +114,9 @@ export default function Contact() {
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: '#592219' }}>Your Email</label>
                     <input id="email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2 motion-safe:transition" style={{ borderColor: 'rgba(184,134,11,0.2)', backgroundColor: '#FFFDF5', color: '#3A1000', '--tw-ring-color': '#D4A528' }} placeholder="john@example.com" />
+                    <p className="mt-1.5 text-xs" style={{ color: '#8B6914' }}>
+                      We will reply using the email you fill out in this form.
+                    </p>
                   </div>
                 </div>
                 <div className="mb-5">
@@ -112,6 +139,11 @@ export default function Contact() {
                     <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Message Sent!</>
                   ) : 'Send Message'}
                 </button>
+                {error && (
+                  <p className="mt-3 text-sm" style={{ color: '#B91C1C' }}>
+                    {error}
+                  </p>
+                )}
               </form>
             </div>
           </div>

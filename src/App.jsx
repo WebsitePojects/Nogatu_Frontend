@@ -18,6 +18,7 @@ import PairingReports from './pages/member/PairingReports';
 import HiFiveBonus from './pages/member/HiFiveBonus';
 import RankingProgress from './pages/member/RankingProgress';
 import Leaderboard from './pages/member/Leaderboard';
+import Vouchers from './pages/member/Vouchers';
 import Transactions from './pages/member/Transactions';
 import UpgradeAccount from './pages/member/UpgradeAccount';
 import Registration from './pages/member/Registration';
@@ -87,6 +88,7 @@ export default function App() {
           <Route path="hifive" element={<HiFiveBonus />} />
           <Route path="ranking" element={<RankingProgress />} />
           <Route path="leaderboard" element={<Leaderboard />} />
+          <Route path="vouchers" element={<Vouchers />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="upgrade" element={<UpgradeAccount />} />
           <Route path="register" element={<Registration />} />

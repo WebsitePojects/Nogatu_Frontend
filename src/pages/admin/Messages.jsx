@@ -6,7 +6,8 @@ const FILTERS = [
   { key: 'all', label: 'All' },
   { key: 'unread', label: 'Unread' },
   { key: 'read', label: 'Read' },
-  { key: 'resolved', label: 'Resolved' },
+  { key: 'done', label: 'Done' },
+  { key: 'blocked', label: 'Blocked' },
 ];
 
 export default function Messages() {
@@ -15,7 +16,7 @@ export default function Messages() {
   const [status, setStatus] = useState('all');
   const [rows, setRows] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
-  const [counts, setCounts] = useState({ all: 0, unread: 0, read: 0, resolved: 0 });
+  const [counts, setCounts] = useState({ all: 0, unread: 0, read: 0, done: 0, blocked: 0 });
   const [active, setActive] = useState(null);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function Messages() {
       const res = await api.get(`/admin/messages?page=${page}&status=${status}`);
       setRows(res.data.messages || []);
       setPagination(res.data.pagination || { page: 1, totalPages: 1 });
-      setCounts(res.data.counts || { all: 0, unread: 0, read: 0, resolved: 0 });
+      setCounts(res.data.counts || { all: 0, unread: 0, read: 0, done: 0, blocked: 0 });
     } catch {
       setRows([]);
     } finally {
@@ -49,16 +50,42 @@ export default function Messages() {
     }
   }
 
-  async function markResolved(id) {
+  async function markDone(id) {
     try {
-      await api.put(`/admin/messages/${id}/resolve`);
-      toast.success('Message marked as resolved');
+      await api.put(`/admin/messages/${id}/done`);
+      toast.success('Feedback marked as done');
       loadData();
       if (active?.id === id) {
-        setActive({ ...active, status: 2, statusLabel: 'Resolved' });
+        setActive({ ...active, status: 2, statusLabel: 'Done' });
       }
     } catch {
-      toast.error('Failed to mark as resolved');
+      toast.error('Failed to mark as done');
+    }
+  }
+
+  async function deleteMessage(id) {
+    try {
+      await api.delete(`/admin/messages/${id}`);
+      toast.success('Message deleted');
+      if (active?.id === id) {
+        setActive(null);
+      }
+      loadData();
+    } catch {
+      toast.error('Failed to delete message');
+    }
+  }
+
+  async function blockUser(id) {
+    try {
+      await api.put(`/admin/messages/${id}/block`, { reason: 'Blocked from admin messages panel' });
+      toast.success('Sender blocked');
+      loadData();
+      if (active?.id === id) {
+        setActive({ ...active, status: 3, statusLabel: 'Blocked' });
+      }
+    } catch {
+      toast.error('Failed to block sender');
     }
   }
 
@@ -114,7 +141,9 @@ export default function Messages() {
                       <span
                         className="inline-block text-xs px-2.5 py-0.5 rounded-full"
                         style={
-                          Number(r.status) === 2
+                          Number(r.status) === 3
+                            ? { color: '#f87171', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' }
+                            : Number(r.status) === 2
                             ? { color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }
                             : Number(r.status) === 1
                               ? { color: '#93c5fd', background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)' }
@@ -178,6 +207,7 @@ export default function Messages() {
             <div className="mt-4 space-y-2 text-sm">
               <p style={{ color: 'rgba(255,255,255,0.75)' }}><strong>Name:</strong> {active.name}</p>
               <p style={{ color: 'rgba(255,255,255,0.75)' }}><strong>Email:</strong> {active.email || 'N/A'}</p>
+              <p style={{ color: 'rgba(212,175,55,0.75)' }}><strong>Reply note:</strong> We will reply using this email address.</p>
               <p style={{ color: 'rgba(255,255,255,0.75)' }}><strong>Subject:</strong> {active.subject || 'No subject'}</p>
               <p style={{ color: 'rgba(255,255,255,0.75)' }}><strong>Date:</strong> {active.submittedAt}</p>
               <p className="pt-2" style={{ color: 'rgba(255,255,255,0.8)' }}>{active.message}</p>
@@ -191,11 +221,25 @@ export default function Messages() {
                 Mark Read
               </button>
               <button
-                onClick={() => markResolved(active.id)}
+                onClick={() => markDone(active.id)}
                 className="text-xs px-3 py-2 rounded-lg"
                 style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
               >
-                Mark Resolved
+                Mark Done
+              </button>
+              <button
+                onClick={() => blockUser(active.id)}
+                className="text-xs px-3 py-2 rounded-lg"
+                style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.25)' }}
+              >
+                Block User
+              </button>
+              <button
+                onClick={() => deleteMessage(active.id)}
+                className="text-xs px-3 py-2 rounded-lg"
+                style={{ background: 'rgba(255,255,255,0.1)', color: '#f3f4f6', border: '1px solid rgba(255,255,255,0.2)' }}
+              >
+                Delete
               </button>
               <a
                 href={`mailto:${active.email || ''}?subject=${encodeURIComponent(active.subject || 'NOGATU Reply')}`}
