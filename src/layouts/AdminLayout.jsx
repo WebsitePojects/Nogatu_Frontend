@@ -81,7 +81,7 @@ export default function AdminLayout() {
           </Link>
           <div>
             <h1 className="font-brand text-sm font-semibold tracking-wide" style={{ color: 'var(--brand-gold)' }}>NOGATU Alliance</h1>
-            <p className="text-[11px] font-medium" style={{ color: 'rgba(212,175,55,0.5)' }}>Admin Panel</p>
+            <p className="sidebar-brand-subtitle text-[11px] font-medium">Admin Panel</p>
           </div>
         </div>
 
@@ -122,9 +122,9 @@ export default function AdminLayout() {
               {admin?.name?.[0]?.toUpperCase() || 'A'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white text-always-white truncate">{admin?.name || 'Admin'}</p>
+              <p className="admin-profile-name text-sm font-medium truncate">{admin?.name || 'Admin'}</p>
               <span
-                className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5"
+                className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5 admin-profile-tier"
                 style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.25)' }}
               >
                 {roleLabel}
@@ -196,8 +196,8 @@ export default function AdminLayout() {
               style={{ borderLeft: '1px solid rgba(212,175,55,0.15)' }}
             >
               <div className="text-right">
-                <p className="text-sm font-medium text-white text-always-white">{admin?.name}</p>
-                <p className="text-[11px]" style={{ color: 'var(--brand-gold)' }}>{roleLabel}</p>
+                <p className="admin-profile-name text-sm font-medium">{admin?.name}</p>
+                <p className="topbar-account-tier text-[11px]">{roleLabel}</p>
               </div>
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm text-white text-always-white"

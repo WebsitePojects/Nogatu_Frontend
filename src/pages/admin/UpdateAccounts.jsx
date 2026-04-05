@@ -30,6 +30,7 @@ export default function UpdateAccounts() {
         firstname: data.firstname, lastname: data.lastname, middlename: data.middlename,
         address: data.address, password: newPassword || '',
         payoutdetails: data.payoutdetails, payoutoptions: data.payoutid, contactnos: data.contactnos,
+        tinno: data.tinno,
       });
       toast.success('Account updated successfully');
     } catch (err) { toast.error('Update failed'); } finally { setSaving(false); }
@@ -53,7 +54,7 @@ export default function UpdateAccounts() {
       <div className="flex items-center gap-4 mb-7">
         <button
           onClick={() => navigate('/admin/accounts')}
-          className="gold-btn-outline rounded-lg py-1.5 px-4 text-sm"
+          className="gold-btn rounded-lg py-1.5 px-4 text-sm"
         >
           Back
         </button>
@@ -141,6 +142,18 @@ export default function UpdateAccounts() {
               value={data.contactnos || ''}
               onChange={(e) => handleChange('contactnos', e.target.value)}
               className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+            />
+          </div>
+
+          {/* TIN No. */}
+          <div>
+            <label className="label">TIN No.</label>
+            <input
+              type="text"
+              value={data.tinno || ''}
+              onChange={(e) => handleChange('tinno', e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              placeholder="Enter TIN number"
             />
           </div>
 
