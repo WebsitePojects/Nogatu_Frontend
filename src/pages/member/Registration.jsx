@@ -177,10 +177,8 @@ export default function Registration() {
               type="text"
               value={form.tin}
               onChange={(e) => handleChange('tin', e.target.value)}
-              onBlur={(e) => handleChange('tin', normalizeTin(e.target.value))}
               className="glass-input"
               placeholder="e.g. 123-456-789-000"
-              inputMode="numeric"
               required
             />
           </div>

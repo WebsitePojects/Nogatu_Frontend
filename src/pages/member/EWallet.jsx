@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
-import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineShieldCheck } from 'react-icons/hi';
+import html2canvas from 'html2canvas';
+import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const INCOME_ITEMS = [
   { key: 'directReferral', label: 'Direct Referral',  icon: HiOutlineUsers,       color: '#D4AF37' },
@@ -11,7 +14,7 @@ const INCOME_ITEMS = [
   { key: 'leadership',     label: 'Leadership Bonus', icon: HiOutlineStar,        color: '#B8960C' },
   { key: 'unilevel',       label: 'Uni-Level',        icon: HiOutlineTrendingUp,  color: '#D4AF37' },
   { key: 'hifive',         label: 'Hi-Five Bonus',    icon: HiOutlineGift,        color: '#F2D06B' },
-  { key: 'lpc',            label: 'LPC (Ranking)',    icon: HiOutlineShieldCheck, color: '#9A7B0A' },
+  { key: 'lpc',            label: 'Leader Performance Commission', icon: HiOutlineShieldCheck, color: '#9A7B0A' },
 ];
 
 function SpinnerIcon() {
@@ -23,30 +26,128 @@ function SpinnerIcon() {
   );
 }
 
+function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
+  if (!data) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+      <div className="w-full max-w-lg rounded-2xl p-7 shadow-2xl" style={{ background: '#141008', border: '1px solid rgba(212,175,55,0.25)' }}>
+        <div ref={receiptRef}>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h3 className="font-display text-xl font-bold text-white">Encashment Receipt</h3>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Ref #{data.refNumber}</p>
+            </div>
+            <span className="text-xs px-2.5 py-1 rounded-full" style={{ color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }}>
+              Submitted
+            </span>
+          </div>
+
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.8)' }}><span>Encash Amount</span><span>₱{fmt(data.encashAmount)}</span></div>
+            <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>Withholding Tax (10%)</span><span>- ₱{fmt(data.tax)}</span></div>
+            <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>Processing Fee</span><span>- ₱{fmt(data.fee)}</span></div>
+            {Number(data.cdDeduction || 0) > 0 && (
+              <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>CD Deduction</span><span>- ₱{fmt(data.cdDeduction)}</span></div>
+            )}
+            <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'rgba(212,175,55,0.2)', color: '#D4AF37', fontWeight: 700 }}>
+              <span>Net Receivable</span>
+              <span>₱{fmt(data.netReceivable)}</span>
+            </div>
+            <div className="pt-3 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              <p>Beginning Balance: ₱{fmt(data.beginBalance)}</p>
+              <p>Ending Balance: ₱{fmt(data.endBalance)}</p>
+              <p>Payment Option: {data.paymentOption || 'N/A'}</p>
+              <p>Payment Details: {data.paymentDetails || 'N/A'}</p>
+              <p>Payout Date: {data.payoutDate || 'Next Friday'}</p>
+              <p>Processed At: {data.processedAt}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <button
+            onClick={onDownload}
+            className="text-xs px-3 py-2 rounded-lg font-medium"
+            style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+          >
+            Download PNG
+          </button>
+          <button
+            onClick={onClose}
+            className="text-xs px-3 py-2 rounded-lg font-medium"
+            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.14)' }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EWallet() {
   const [data, setData]             = useState(null);
+  const [globalBonus, setGlobalBonus] = useState(null);
   const [loading, setLoading]       = useState(true);
   const [encashAmount, setEncashAmount] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [receiptData, setReceiptData] = useState(null);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const receiptRef = useRef(null);
 
   useEffect(() => { loadData(); }, []);
 
+  useEffect(() => {
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   async function loadData() {
     try {
-      const res = await api.get('/wallet');
-      setData(res.data);
+      const [walletRes, globalBonusRes] = await Promise.allSettled([
+        api.get('/wallet'),
+        api.get('/global-bonus'),
+      ]);
+
+      if (walletRes.status === 'fulfilled') {
+        setData(walletRes.value.data);
+      } else {
+        setData(null);
+      }
+
+      if (globalBonusRes.status === 'fulfilled') {
+        setGlobalBonus(globalBonusRes.value.data);
+      } else {
+        setGlobalBonus(null);
+      }
     } catch { } finally { setLoading(false); }
   }
 
   async function handleEncash(e) {
     e.preventDefault();
     const amount = Number(encashAmount);
-    if (amount < 500) return toast.error('Minimum encashment is ₱500');
+    if (!amount || amount <= 0) return toast.error('Please enter a valid amount greater than zero');
     if (amount > (data?.cashBalance || 0)) return toast.error('Insufficient balance');
     setProcessing(true);
     try {
-      await api.post('/wallet/encash', { amount });
+      const res = await api.post('/wallet/encash', { amount });
       toast.success(`Encashment of ₱${fmt(amount)} processed successfully`);
+      setReceiptData({
+        refNumber: res.data.pid || 'N/A',
+        encashAmount: amount,
+        tax: Number(res.data.tax || amount * 0.10),
+        fee: Number(res.data.fee || 50),
+        cdDeduction: Number(res.data.cdDeduction || 0),
+        netReceivable: Number(res.data.netReceivable || 0),
+        beginBalance: Number(data?.cashBalance || 0),
+        endBalance: Number(res.data.newBalance || 0),
+        paymentOption: res.data.paymentOption || data?.payoutOption,
+        paymentDetails: res.data.paymentDetails || data?.payoutDetails,
+        processedAt: new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' }),
+        payoutDate: res.data.payoutDate || 'Next Friday',
+      });
+      setShowReceipt(true);
       setEncashAmount('');
       loadData();
     } catch (err) {
@@ -54,11 +155,29 @@ export default function EWallet() {
     } finally { setProcessing(false); }
   }
 
+  async function handleDownloadReceipt() {
+    if (!receiptRef.current) return;
+
+    const canvas = await html2canvas(receiptRef.current, {
+      backgroundColor: '#141008',
+      scale: 2,
+      useCORS: true,
+    });
+
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `encashment-receipt-${receiptData?.refNumber || 'nogatu'}.png`;
+    link.click();
+  }
+
   /* Estimated deductions preview */
   const previewAmount = Number(encashAmount) || 0;
   const previewTax    = previewAmount * 0.10;
-  const previewFee    = previewAmount >= 500 ? 50 : 0;
+  const previewFee    = previewAmount > 0 ? 50 : 0;
   const previewNet    = previewAmount - previewTax - previewFee;
+  const bonusMonthIdx = Math.max(0, Math.min(11, Number(globalBonus?.month || 1) - 1));
+  const bonusPeriodLabel = globalBonus ? `${MONTHS[bonusMonthIdx]} ${globalBonus.year || ''}`.trim() : 'N/A';
+  const hasDistributedShare = Number(globalBonus?.distributedShare || 0) > 0;
 
   if (loading) {
     return (
@@ -84,12 +203,7 @@ export default function EWallet() {
 
       {/* ── BALANCE HERO CARD ──────────────────────────────────── */}
       <div
-        className="relative rounded-2xl p-7 overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #0D0B07 0%, #1C1610 50%, #241D0D 100%)',
-          border: '1px solid rgba(212,175,55,0.22)',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.15)',
-        }}
+        className="ewallet-balance-card relative rounded-2xl p-7 overflow-hidden"
       >
         {/* Background orb */}
         <div
@@ -105,16 +219,25 @@ export default function EWallet() {
           }}
         />
 
-        {/* 3D ASSET PLACEHOLDER ─────────────────── */}
-        {/* <!-- 3D SCROLL ASSET: floating gold coin/wallet sphere, ~200×200px, transparent bg, place top-right --> */}
+        {/* 3D ASSET: floating gold coin */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 pointer-events-none opacity-90 mix-blend-screen">
+          <video 
+            src="/img/goldcoin3dvid.mp4" 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="w-full h-full object-contain"
+          />
+        </div>
 
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-5">
             <div>
-              <p className="text-xs font-medium tracking-wider uppercase mb-1" style={{ color: 'rgba(212,175,55,0.5)' }}>
+              <p className="text-xs font-medium tracking-wider uppercase mb-1 text-yellow-800 dark:text-yellow-200/50">
                 Available Balance
               </p>
-              <p className="font-display text-[42px] font-bold text-white leading-none tracking-tight">
+              <p className="font-display text-[42px] font-bold text-gray-900 dark:text-white leading-none tracking-tight">
                 ₱{fmt(data.cashBalance)}
               </p>
             </div>
@@ -135,8 +258,8 @@ export default function EWallet() {
             className="flex items-center gap-2 pt-4 border-t"
             style={{ borderColor: 'rgba(212,175,55,0.1)' }}
           >
-            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Total Income Earned:</span>
-            <span className="text-sm font-semibold" style={{ color: 'rgba(242,208,107,0.8)' }}>₱{fmt(data.totalIncome)}</span>
+            <span className="text-xs text-gray-500 dark:text-white/35">Total Income Earned:</span>
+            <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300/80">₱{fmt(data.totalIncome)}</span>
           </div>
         </div>
       </div>
@@ -188,7 +311,7 @@ export default function EWallet() {
             }}
           >
             <span style={{ color: '#D4AF37', fontSize: '14px', lineHeight: 1 }}>ℹ</span>
-            <span>Minimum ₱500 · 10% withholding tax · ₱50 processing fee · Payout every Friday</span>
+            <span>No fixed minimum amount · 10% withholding tax · ₱50 processing fee · Payout every Friday</span>
           </div>
 
           <form onSubmit={handleEncash} className="space-y-4">
@@ -199,15 +322,15 @@ export default function EWallet() {
                 value={encashAmount}
                 onChange={(e) => setEncashAmount(e.target.value)}
                 className="glass-input"
-                placeholder="Enter amount (min ₱500)"
-                min="500"
+                placeholder="Enter amount"
+                min="1"
                 step="1"
                 required
               />
             </div>
 
             {/* Deduction preview */}
-            {previewAmount >= 500 && (
+            {previewAmount > 0 && (
               <div
                 className="space-y-2 p-3.5 rounded-xl text-xs"
                 style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.12)' }}
@@ -240,6 +363,82 @@ export default function EWallet() {
           </form>
         </div>
       </div>
+
+      {/* Global Bonus */}
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <div>
+            <h3 className="font-display text-base font-semibold text-white mb-1">Global Bonus</h3>
+            <div className="w-8 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/leaderboard"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+              style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+            >
+              <HiOutlineTrendingUp className="w-3.5 h-3.5" />
+              View Leaderboard
+            </Link>
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
+              style={
+                globalBonus?.eligible
+                  ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
+                  : { background: 'rgba(148,163,184,0.12)', color: '#cbd5e1', border: '1px solid rgba(148,163,184,0.25)' }
+              }
+            >
+              <HiOutlineSparkles className="w-3.5 h-3.5" />
+              {globalBonus?.eligible ? 'Eligible' : 'Not Eligible'}
+            </span>
+          </div>
+        </div>
+
+        {globalBonus ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+            <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
+              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Period</p>
+              <p className="text-sm font-semibold text-white mt-1">{bonusPeriodLabel}</p>
+            </div>
+            <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
+              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Member Type</p>
+              <p className="text-sm font-semibold text-white mt-1">{globalBonus.memberType || 'N/A'}</p>
+            </div>
+            <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
+              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Portions</p>
+              <p className="text-sm font-semibold text-white mt-1">{Number(globalBonus.portions || 0)}</p>
+            </div>
+            <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
+              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>
+                {hasDistributedShare ? 'Distributed Share' : 'Projected Share'}
+              </p>
+              <p className="text-sm font-semibold mt-1" style={{ color: '#D4AF37' }}>
+                ₱{fmt(hasDistributedShare ? globalBonus.distributedShare : globalBonus.projectedShare)}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            Global bonus details are currently unavailable.
+          </p>
+        )}
+
+        {globalBonus?.latestShare && (
+          <div className="mt-4 rounded-xl p-3.5 text-xs" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)', color: 'rgba(255,255,255,0.6)' }}>
+            Latest distributed share: <span style={{ color: '#D4AF37', fontWeight: 700 }}>₱{fmt(globalBonus.latestShare.shareAmount)}</span>
+            {' '}({MONTHS[Math.max(0, Math.min(11, Number(globalBonus.latestShare.month || 1) - 1))]} {globalBonus.latestShare.year})
+          </div>
+        )}
+      </div>
+
+      {showReceipt && (
+        <ReceiptModal
+          data={receiptData}
+          receiptRef={receiptRef}
+          onDownload={handleDownloadReceipt}
+          onClose={() => setShowReceipt(false)}
+        />
+      )}
     </div>
   );
 }

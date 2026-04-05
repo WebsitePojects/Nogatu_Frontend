@@ -84,39 +84,40 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
     >
       <div
         className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl"
-        style={{ background: '#0e1117', border: '1px solid rgba(212,175,55,0.15)' }}
+        style={{ background: 'var(--surface-1)', border: '1px solid var(--surface-border)', boxShadow: '0 22px 48px rgba(0,0,0,0.34)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="px-6 py-5" style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05))', borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
-          <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(212,175,55,0.5)' }}>Income Credit</p>
-          <p className="text-lg font-bold text-white">Transaction #{tx.pid}</p>
-          <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--brand-gold)' }}>Income Credit</p>
+          <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Transaction #{tx.pid}</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             {new Date(tx.transdate).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
+          <div className="w-12 h-0.5 mt-3" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
         </div>
 
         <div className="px-6 py-5">
           {/* Balance movement */}
-          <div className="flex items-center justify-between gap-2 rounded-xl px-4 py-3 mb-5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center justify-between gap-2 rounded-xl px-4 py-3 mb-5" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)' }}>
             <div className="text-center">
-              <p className="text-[9px] uppercase tracking-wider text-white/30 mb-1">Beginning</p>
-              <p className="text-sm font-bold text-white/60">₱{fmt(tx.beginningbalance)}</p>
+              <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>Beginning</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>₱{fmt(tx.beginningbalance)}</p>
             </div>
             <span style={{ color: 'rgba(74,222,128,0.5)', fontSize: 18 }}>→</span>
             <div className="text-center">
-              <p className="text-[9px] uppercase tracking-wider text-white/30 mb-1">Income Added</p>
+              <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>Income Added</p>
               <p className="text-sm font-bold" style={{ color: '#4ade80' }}>+₱{fmt(tx.total)}</p>
             </div>
             <span style={{ color: 'rgba(96,165,250,0.5)', fontSize: 18 }}>→</span>
             <div className="text-center">
-              <p className="text-[9px] uppercase tracking-wider text-white/30 mb-1">Ending</p>
-              <p className="text-sm font-bold text-white/80">₱{fmt(tx.endingbalance)}</p>
+              <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>Ending</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>₱{fmt(tx.endingbalance)}</p>
             </div>
           </div>
 
           {/* Income breakdown */}
-          <p className="text-[9px] font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(212,175,55,0.4)' }}>Income Breakdown</p>
+          <p className="text-[9px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brand-gold)' }}>Income Breakdown</p>
           {incomeRow('Direct Referral Bonus', 'Fixed % of new recruit package value.', tx.income1, '#4ade80')}
           {incomeRow('Pairing Bonus', 'Per completed left-right binary pair match.', tx.income2, '#fb923c')}
           {incomeRow('Leadership Bonus', 'Generational override from downline income.', tx.income3, '#c084fc')}
@@ -124,7 +125,7 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
           {incomeRow('Hi-Five Product Bonus', 'Earned per 5 direct referrals of same package.', tx.income5, '#fbbf24')}
 
           {/* Total row */}
-          <div className="flex justify-between items-center rounded-xl px-4 py-3 mt-1" style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)' }}>
+          <div className="flex justify-between items-center rounded-xl px-4 py-3 mt-1" style={{ background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.28)' }}>
             <span className="text-sm font-bold" style={{ color: '#4ade80' }}>Total Income Credited</span>
             <span className="text-base font-bold" style={{ color: '#4ade80' }}>₱{fmt(tx.total)}</span>
           </div>
@@ -132,7 +133,7 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
           {/* Binary pair children */}
           {binaryChildren.length > 0 && (
             <div className="mt-5">
-              <p className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(212,175,55,0.4)' }}>Binary Leg Children</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--brand-gold)' }}>Binary Leg Children</p>
               <div className="flex gap-3">
                 {binaryChildren.map(pairCard)}
               </div>
@@ -142,13 +143,13 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
           {/* Direct referrals summary */}
           {directReferrals.length > 0 && (
             <div className="mt-5">
-              <p className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(212,175,55,0.4)' }}>Direct Referrals ({directReferrals.length})</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--brand-gold)' }}>Direct Referrals ({directReferrals.length})</p>
               <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
                 {directReferrals.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 px-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div key={i} className="flex items-center justify-between py-1.5 px-3 rounded-lg" style={{ background: 'rgba(148,163,184,0.12)' }}>
                     <div>
-                      <span className="text-xs text-white/70">{d.name}</span>
-                      <span className="text-xs font-mono ml-2" style={{ color: 'rgba(255,255,255,0.3)' }}>{d.username}</span>
+                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{d.name}</span>
+                      <span className="text-xs font-mono ml-2" style={{ color: 'var(--text-muted)' }}>{d.username}</span>
                     </div>
                     {d.pkg && <PkgBadge pkg={d.pkg} />}
                   </div>
@@ -162,7 +163,7 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
           <button
             onClick={onClose}
             className="px-5 py-2 rounded-xl text-sm font-semibold cursor-pointer"
-            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}
+            style={{ background: 'rgba(148,163,184,0.14)', color: 'var(--text-secondary)', border: '1px solid rgba(148,163,184,0.26)' }}
           >
             Close
           </button>

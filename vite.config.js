@@ -5,8 +5,20 @@ import { resolve } from 'path';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:5000';
+  const reactPath = resolve(__dirname, 'node_modules/react');
+  const reactDomPath = resolve(__dirname, 'node_modules/react-dom');
 
   return {
+    resolve: {
+      alias: {
+        react: reactPath,
+        'react-dom': reactDomPath,
+      },
+      dedupe: ['react', 'react-dom'],
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-hot-toast'],
+    },
     plugins: [
       react(),
       {
@@ -46,6 +58,10 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       proxy: {
         '/api': {
+          target: apiProxyTarget,
+          changeOrigin: true,
+        },
+        '/legacy-img': {
           target: apiProxyTarget,
           changeOrigin: true,
         },

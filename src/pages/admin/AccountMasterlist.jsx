@@ -122,7 +122,7 @@ export default function AccountMasterlist() {
                     <td className="py-3 px-4 text-xs text-white/40">{a.entryType}</td>
                     <td className="py-3 px-4 text-xs text-white/40">{a.datereg}</td>
                     <td className="py-3 px-4">
-                      <div className="flex gap-1.5">
+                      <div className="flex gap-1.5 flex-wrap">
                         <button
                           onClick={() => navigate(`/admin/accounts/${a.uid}`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
@@ -136,6 +136,20 @@ export default function AccountMasterlist() {
                           style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
                         >
                           Tree
+                        </button>
+                        <button
+                          onClick={() => navigate(`/admin/accounts/${a.uid}/income`)}
+                          className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
+                          style={{ background: 'rgba(59,130,246,0.1)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
+                        >
+                          Income
+                        </button>
+                        <button
+                          onClick={() => navigate(`/admin/accounts/${a.uid}/cd`)}
+                          className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
+                          style={{ background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.25)' }}
+                        >
+                          CD
                         </button>
                       </div>
                     </td>

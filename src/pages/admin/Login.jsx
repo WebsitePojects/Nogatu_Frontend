@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const CheckIcon = () => (
-  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
   </svg>
 );
@@ -79,12 +79,11 @@ export default function AdminLogin() {
   const fmt = (n) => n === null ? '—' : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#0D0B07' }}>
+    <div className="min-h-screen flex bg-cover bg-center bg-no-repeat bg-[url('/img/portalBG_light.png')] dark:bg-[url('/img/portalBG_dark.png')]">
 
       {/* Left admin panel */}
       <div
-        className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #1a0505 0%, #2d0a0a 50%, #1a0a00 100%)' }}
+        className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden bg-white/10 dark:bg-black/60 backdrop-blur-md border-r border-white/10 dark:border-white/10"
       >
         {/* Decorative blobs */}
         <div
@@ -114,7 +113,7 @@ export default function AdminLogin() {
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
           <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="h-14 w-auto object-contain" />
-          <span className="font-brand text-xs tracking-widest uppercase" style={{ color: 'rgba(212,175,55,0.55)' }}>
+          <span className="font-brand text-xs tracking-widest uppercase text-gray-800 font-bold">
             Admin Console
           </span>
         </div>
@@ -129,16 +128,16 @@ export default function AdminLogin() {
               <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#D4AF37' }} />
               <span
                 className="text-xs font-medium tracking-wide uppercase"
-                style={{ color: 'rgba(212,175,55,0.7)' }}
+                style={{ color: '#D4AF37' }}
               >
                 Secure Admin Access
               </span>
             </div>
-            <h1 className="font-display text-4xl xl:text-5xl font-bold text-white leading-snug">
+            <h1 className="font-display text-4xl xl:text-5xl font-bold text-gray-900 dark:text-white leading-snug">
               Command Your<br />
               <span className="gold-text">Alliance Network.</span>
             </h1>
-            <p className="text-base leading-relaxed mt-4 max-w-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="text-base leading-relaxed mt-4 max-w-xs text-gray-600 dark:text-gray-400">
               Full control over members, earnings, genealogy, and platform content from one secure panel.
             </p>
           </div>
@@ -148,7 +147,7 @@ export default function AdminLogin() {
             {adminFeatures.map((f) => (
               <li key={f} className="flex items-center gap-3">
                 <span
-                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-gray-900 dark:text-white"
                   style={{
                     background: 'linear-gradient(135deg, #7f1d1d, #D4AF37)',
                     boxShadow: '0 4px 12px rgba(212,175,55,0.25)',
@@ -156,38 +155,37 @@ export default function AdminLogin() {
                 >
                   <CheckIcon />
                 </span>
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{f}</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{f}</span>
               </li>
             ))}
           </ul>
 
           {/* Live stats */}
-          <div className="flex gap-8 pt-5" style={{ borderTop: '1px solid rgba(212,175,55,0.12)' }}>
+          <div className="flex gap-8 pt-5 border-t border-gray-300">
             <div>
-              <p className="text-white font-bold text-2xl">{fmt(stats.activeMembers)}+</p>
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Active Members</p>
+              <p className="text-gray-900 font-bold text-2xl">{fmt(stats.activeMembers)}+</p>
+              <p className="text-xs mt-0.5 text-gray-600 font-medium">Active Members</p>
             </div>
             <div>
-              <p className="text-white font-bold text-2xl">{fmt(stats.networksBuilt)}+</p>
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Networks Built</p>
+              <p className="text-gray-900 font-bold text-2xl">{fmt(stats.networksBuilt)}+</p>
+              <p className="text-xs mt-0.5 text-gray-600 font-medium">Networks Built</p>
             </div>
             <div>
-              <p className="text-white font-bold text-2xl">99.9%</p>
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Uptime</p>
+              <p className="text-gray-900 font-bold text-2xl">99.9%</p>
+              <p className="text-xs mt-0.5 text-gray-600 font-medium">Uptime</p>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="relative z-10 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+        <p className="relative z-10 text-xs font-medium text-gray-600 dark:text-gray-400">
           &copy; {new Date().getFullYear()} NOGATU Alliance. All rights reserved.
         </p>
       </div>
 
       {/* Right form panel */}
       <div
-        className="flex-1 flex items-center justify-center px-6 py-12"
-        style={{ background: '#0D0B07' }}
+        className="flex-1 flex items-center justify-center px-6 py-12 bg-transparent"
       >
         <div className="w-full max-w-[400px]">
 
@@ -199,8 +197,8 @@ export default function AdminLogin() {
 
           {/* Heading */}
           <div className="mb-7">
-            <h2 className="font-display text-[28px] font-bold text-white leading-tight">Welcome back</h2>
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Sign in to access your admin account</p>
+            <h2 className="font-display text-[28px] font-bold text-gray-900 dark:text-white leading-tight">Welcome back</h2>
+            <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">Sign in to access your admin account</p>
           </div>
 
           {/* Form card */}
@@ -261,8 +259,7 @@ export default function AdminLogin() {
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center motion-safe:transition"
-                  style={{ color: 'rgba(255,255,255,0.35)' }}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center motion-safe:transition text-gray-400 hover:text-brand-gold dark:text-gray-500 dark:hover:text-brand-gold"
                 >
                   {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
                 </button>
@@ -294,7 +291,7 @@ export default function AdminLogin() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
-            <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
               Restricted to authorized administrators only. All access is logged.
             </p>
           </div>

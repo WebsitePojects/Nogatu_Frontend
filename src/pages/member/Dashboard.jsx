@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -8,6 +8,7 @@ import {
 } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
 /* Card icon gradient configs — gold spectrum */
 const CARD_ICONS = [
@@ -26,8 +27,7 @@ function StatCard({ card, idx }) {
   const theme = CARD_ICONS[idx % CARD_ICONS.length];
   return (
     <div
-      className="glass-card rounded-2xl p-5 group cursor-default"
-      style={{ minWidth: '220px' }}
+      className="glass-card rounded-2xl p-5 group cursor-default w-full"
     >
       {/* Icon */}
       <div
@@ -52,20 +52,24 @@ function StatCard({ card, idx }) {
 /* Package color map */
 const PKG_COLORS = {
   Bronze:   '#CD7F32',
-  Silver:   '#C0C0C0',
-  Gold:     '#FFD700',
-  Platinum: '#E5E4E2',
-  Garnet:   '#733635',
-  Diamond:  '#B9F2FF',
+  Silver:   '#A8A9AD',
+  Gold:     '#DAA520',
+  Platinum: '#6C757D',
+  Garnet:   '#9B2335',
+  Diamond:  '#4FC3F7',
 };
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const scrollRef = useRef(null);
 
   useEffect(() => { loadData(); }, []);
+
+  useEffect(() => {
+    const interval = setInterval(loadData, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   async function loadData() {
     try {
@@ -73,11 +77,6 @@ export default function Dashboard() {
       setData(res.data);
     } catch { } finally { setLoading(false); }
   }
-
-  /* Horizontal scroll helpers */
-  const scrollBy = (dir) => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: dir * 240, behavior: 'smooth' });
-  };
 
   if (loading) {
     return (
@@ -94,14 +93,16 @@ export default function Dashboard() {
 
   const cards = [
     { label: 'Total Cash Incentives', value: `₱${fmt(data.totalCashIncome)}`,  icon: HiOutlineCash },
+    { label: 'Current Cash Balance',  value: `₱${fmt(data.cashBalance)}`,      icon: HiOutlineCash },
     { label: 'Direct Referral',        value: `₱${fmt(data.directReferral)}`,   icon: HiOutlineUsers },
     { label: 'Sales Volume (Pairing)', value: `₱${fmt(data.salesVolume)}`,      icon: HiOutlineChartBar },
+    { label: 'Pairing Balance',        value: fmtInt(data.pairingBalance),      icon: HiOutlineChartBar },
     { label: 'Uni-Level',              value: `₱${fmt(data.uniLevel)}`,          icon: HiOutlineTrendingUp },
     { label: 'Leadership Bonus',       value: `₱${fmt(data.leadershipBonus)}`,  icon: HiOutlineStar },
     { label: 'Hi-Five Bonus',          value: `₱${fmt(data.hiFiveBonus)}`,      icon: HiOutlineGift },
     { label: 'Ranking Bonus (LPC)',    value: `₱${fmt(data.rankingBonus)}`,     icon: HiOutlineShieldCheck },
-    { label: 'Left Accounts',          value: String(data.leftAccounts ?? 0),   icon: HiOutlineArrowLeft },
-    { label: 'Right Accounts',         value: String(data.rightAccounts ?? 0),  icon: HiOutlineArrowRight },
+    { label: 'Left Accounts',          value: `${fmtInt(data.leftAccounts)} | ${fmtInt(data.leftPoints)} pts`,   icon: HiOutlineArrowLeft },
+    { label: 'Right Accounts',         value: `${fmtInt(data.rightAccounts)} | ${fmtInt(data.rightPoints)} pts`, icon: HiOutlineArrowRight },
   ];
 
   const maintenancePct = Math.min(100, (data.maintenancePoints / 200) * 100);
@@ -110,25 +111,33 @@ export default function Dashboard() {
     <div className="space-y-7">
 
       {/* ── GREETING ──────────────────────────────────────────── */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-white leading-tight">
+      <div className="relative flex items-start justify-between rounded-3xl overflow-hidden p-6 sm:p-8 mb-2">
+        {/* Background Images */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="/img/dashboard_img_light.png" alt="Dashboard Hero" className="w-full h-full object-cover dark:hidden" />
+          <img src="/img/dashboard_img_dark.png" alt="Dashboard Hero" className="hidden w-full h-full object-cover dark:block" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-transparent dark:hidden"></div>
+          <div className="absolute inset-0 hidden dark:block bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
+        </div>
+
+        <div className="relative z-10">
+          <h1 className="hero-welcome-title font-display text-2xl md:text-3xl font-bold leading-tight">
             Welcome back,{' '}
-            <span className="gold-text">{user?.shortname}</span>
+            <span className="hero-welcome-name">{user?.shortname}</span>
           </h1>
-          <p className="text-sm mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <p className="text-sm mt-1.5 drop-shadow" style={{ color: 'rgba(255,255,255,0.8)' }}>
             Here's your account performance overview.
           </p>
           {/* Gold underline accent */}
-          <div className="w-14 h-0.5 mt-3 rounded-full" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
+          <div className="w-14 h-1 mt-3 rounded-full" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
         </div>
 
         {/* Account type badge */}
         <div
-          className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl"
+          className="relative z-10 hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl shadow-lg backdrop-blur-sm"
           style={{
-            background: 'rgba(212,175,55,0.08)',
-            border: '1px solid rgba(212,175,55,0.2)',
+            background: 'rgba(0,0,0,0.4)',
+            border: '1px solid rgba(212,175,55,0.3)',
           }}
         >
           <div className="w-2 h-2 rounded-full" style={{ background: '#D4AF37', boxShadow: '0 0 6px rgba(212,175,55,0.8)' }} />
@@ -137,37 +146,14 @@ export default function Dashboard() {
       </div>
 
       {/* ── STAT CARDS — horizontal scroll on mobile, grid on lg ─ */}
-      <div className="relative">
-        {/* Scroll arrows — desktop */}
-        <button
-          onClick={() => scrollBy(-1)}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 hidden xl:flex w-8 h-8 items-center justify-center rounded-full glass text-white/50 hover:text-white transition-colors"
-          aria-label="Scroll left"
-        >
-          <HiOutlineArrowLeft className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => scrollBy(1)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 hidden xl:flex w-8 h-8 items-center justify-center rounded-full glass text-white/50 hover:text-white transition-colors"
-          aria-label="Scroll right"
-        >
-          <HiOutlineArrowRight className="w-4 h-4" />
-        </button>
-
-        {/* Snap scroll on mobile, css grid on lg+ */}
-        <div
-          ref={scrollRef}
-          className="snap-scroll-x lg:grid lg:grid-cols-3 lg:overflow-visible xl:grid-cols-3"
-          style={{ gap: '1rem' }}
-        >
-          {cards.map((card, i) => (
-            <StatCard key={i} card={card} idx={i} />
-          ))}
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+        {cards.map((card, i) => (
+          <StatCard key={i} card={card} idx={i} />
+        ))}
       </div>
 
       {/* ── BOTTOM GRID ───────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5">
 
         {/* Direct Referrals by Package */}
         <div className="glass-card rounded-2xl p-6">
@@ -209,92 +195,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Monthly Maintenance */}
-        <div className="glass-card rounded-2xl p-6">
-          <div className="pb-4">
-            <h3 className="font-display text-base font-semibold text-white">Monthly Maintenance</h3>
-            <div className="w-8 h-0.5 mt-1.5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
-          </div>
-
-          {/* Status indicator */}
-          <div className="flex items-center gap-4 mb-6">
-            <div
-              className="w-[60px] h-[60px] rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{
-                background: data.maintenanceStatus === 'Active'
-                  ? 'linear-gradient(135deg, #9A7B0A, #D4AF37)'
-                  : 'linear-gradient(135deg, #7f1d1d, #dc2626)',
-                boxShadow: data.maintenanceStatus === 'Active'
-                  ? '0 8px 24px rgba(212,175,55,0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
-                  : '0 8px 24px rgba(220,38,38,0.3)',
-              }}
-            >
-              {data.maintenanceStatus === 'Active' ? (
-                <svg className="w-7 h-7 text-[#080604]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </div>
-            <div>
-              <p
-                className="text-lg font-bold"
-                style={{ color: data.maintenanceStatus === 'Active' ? '#D4AF37' : '#ef4444' }}
-              >
-                {data.maintenanceStatus}
-              </p>
-              <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                {data.maintenancePoints} / 200 pts this month
-              </p>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div>
-            <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(212,175,55,0.08)' }}>
-              <div
-                className="h-full rounded-full motion-safe:transition-all motion-safe:duration-700 ease-out"
-                style={{
-                  width: `${maintenancePct}%`,
-                  background: maintenancePct >= 100
-                    ? 'linear-gradient(90deg, #9A7B0A, #D4AF37, #F2D06B)'
-                    : maintenancePct >= 50
-                    ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
-                    : 'linear-gradient(90deg, #7f1d1d, #ef4444)',
-                  boxShadow: maintenancePct >= 100
-                    ? '0 0 12px rgba(212,175,55,0.5)'
-                    : 'none',
-                }}
-              />
-            </div>
-            <div className="flex justify-between mt-2">
-              <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.25)' }}>0</span>
-              <span className="text-[11px] font-semibold" style={{ color: 'rgba(212,175,55,0.7)' }}>
-                {Math.round(maintenancePct)}%
-              </span>
-              <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.25)' }}>200</span>
-            </div>
-          </div>
-
-          {/* Unilevel qualification hint */}
-          <div
-            className="mt-4 px-3.5 py-2.5 rounded-xl text-xs"
-            style={{
-              background: maintenancePct >= 100
-                ? 'rgba(212,175,55,0.08)'
-                : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${maintenancePct >= 100 ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)'}`,
-              color: maintenancePct >= 100 ? 'rgba(242,208,107,0.8)' : 'rgba(255,255,255,0.3)',
-            }}
-          >
-            {maintenancePct >= 100
-              ? '✓ You qualify for Uni-Level income this month.'
-              : 'Reach 200 pts to qualify for Uni-Level income.'}
-          </div>
-        </div>
+        {/* MONTHLY MAINTENANCE CARD — re-enable when Unilevel is activated by management */}
       </div>
     </div>
   );

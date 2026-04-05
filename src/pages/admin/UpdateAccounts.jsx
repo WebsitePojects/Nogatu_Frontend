@@ -32,13 +32,11 @@ export default function UpdateAccounts() {
     e.preventDefault();
     setSaving(true);
     try {
-      const normalizedTin = String(data.tin || data.tinno || '').trim();
+      const normalizedTin = data.tin ?? data.tinno ?? '';
       await api.put(`/admin/accounts/${uid}`, {
         firstname: data.firstname, lastname: data.lastname, middlename: data.middlename,
         address: data.address, password: newPassword || '',
-        payoutdetails: data.payoutdetails,
-        payoutoptions: Number(data.payoutid) || '',
-        contactnos: data.contactnos,
+        payoutdetails: data.payoutdetails, payoutoptions: data.payoutid, contactnos: data.contactnos,
         tin: normalizedTin,
         tinno: normalizedTin,
       });
@@ -64,7 +62,7 @@ export default function UpdateAccounts() {
       <div className="flex items-center gap-4 mb-7">
         <button
           onClick={() => navigate('/admin/accounts')}
-          className="gold-btn-outline rounded-lg py-1.5 px-4 text-sm"
+          className="gold-btn rounded-lg py-1.5 px-4 text-sm"
         >
           Back
         </button>
@@ -160,14 +158,14 @@ export default function UpdateAccounts() {
             <label className="label">TIN No.</label>
             <input
               type="text"
-              value={data.tin || data.tinno || ''}
+              value={data.tin ?? data.tinno ?? ''}
               onChange={(e) => {
                 const nextTin = e.target.value;
                 handleChange('tin', nextTin);
                 handleChange('tinno', nextTin);
               }}
               className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
-              placeholder="e.g. 123-456-789-000"
+              placeholder="Enter TIN number"
             />
           </div>
 
