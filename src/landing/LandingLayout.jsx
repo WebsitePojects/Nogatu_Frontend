@@ -40,7 +40,7 @@ function Navbar() {
           <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-primary-400/10 opacity-50 pointer-events-none mix-blend-overlay"></div>
 
           {/* Logo */}
-          <NavLink to="/" className="relative flex items-center gap-3 group z-10 w-[200px]">
+          <a href="/portal/admin/login" className="relative flex items-center gap-3 group z-10 w-[200px]" title="Admin Portal Login">
             <div className="relative">
               <div className="absolute inset-0 bg-brand-gold blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-500 rounded-full"></div>
               <img
@@ -52,7 +52,7 @@ function Navbar() {
             <span className="font-extrabold text-sm sm:text-base tracking-tight text-brand-brown bg-clip-text">
               NOGATU <span className="text-brand-gold-dark font-medium">Alliance</span>
             </span>
-          </NavLink>
+          </a>
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center justify-center gap-1.5 z-10 flex-1">
@@ -83,6 +83,13 @@ function Navbar() {
 
           {/* CTA + Mobile toggle */}
           <div className="flex items-center justify-end gap-3 z-10 w-[200px]">
+            <a
+              href="/portal/admin/login"
+              className="relative hidden sm:inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold motion-safe:transition-all motion-safe:duration-300 border border-white/30 group overflow-hidden text-gray-700 hover:text-brand-brown bg-white/50 hover:bg-white/80"
+              title="Admin Portal"
+            >
+              <span className="relative z-10 drop-shadow-sm">Admin</span>
+            </a>
             <a
               href="/portal/login"
               className="relative hidden sm:inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden"
@@ -122,8 +129,14 @@ function Navbar() {
             </NavLink>
           ))}
           <a
+            href="/portal/admin/login"
+            className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-700 text-center mt-2 cursor-pointer border border-gray-300 bg-white/60 hover:bg-white"
+          >
+            Admin Portal
+          </a>
+          <a
             href="/portal/login"
-            className="block px-4 py-3 rounded-full text-sm font-semibold text-white text-center mt-2 cursor-pointer border border-brand-gold-dark"
+            className="block px-4 py-3 rounded-full text-sm font-semibold text-white text-center mt-1 cursor-pointer border border-brand-gold-dark"
             style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 100%)' }}
           >
             Members Login

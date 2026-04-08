@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
 import { HiOutlineUsers, HiOutlineCash, HiOutlineShoppingCart, HiOutlineSparkles, HiOutlineClock, HiOutlineBadgeCheck, HiOutlineReceiptTax, HiOutlineCalendar } from 'react-icons/hi';
@@ -7,6 +8,7 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigit
 
 export default function AdminDashboard() {
   const { admin } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +37,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
       iconShadow: '0 10px 24px rgba(37,99,235,0.3)',
       accentClass: 'bg-blue-100/90 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200',
+      link: '/admin/accounts',
     },
     {
       label: 'Processed Encashments',
@@ -44,6 +47,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #7f1d1d, #991b1b)',
       iconShadow: '0 10px 24px rgba(127,29,29,0.35)',
       accentClass: 'bg-rose-100/90 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200',
+      link: '/admin/encashment',
     },
     {
       label: 'Hi-Five Purchases',
@@ -53,6 +57,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #0f766e, #14b8a6)',
       iconShadow: '0 10px 24px rgba(13,148,136,0.32)',
       accentClass: 'bg-teal-100/90 text-teal-800 dark:bg-teal-500/20 dark:text-teal-200',
+      link: '/admin/redeem',
     },
     {
       label: 'Weekly Activations',
@@ -62,6 +67,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
       iconShadow: '0 10px 24px rgba(124,58,237,0.3)',
       accentClass: 'bg-violet-100/90 text-violet-800 dark:bg-violet-500/20 dark:text-violet-200',
+      link: '/admin/accounts',
     },
     {
       label: 'Pending Encashments',
@@ -71,6 +77,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #b45309, #f59e0b)',
       iconShadow: '0 10px 24px rgba(217,119,6,0.28)',
       accentClass: 'bg-amber-100/90 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200',
+      link: '/admin/encashment',
     },
     {
       label: 'Active CD Accounts',
@@ -80,6 +87,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #0f766e, #14b8a6)',
       iconShadow: '0 10px 24px rgba(20,184,166,0.28)',
       accentClass: 'bg-emerald-100/90 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200',
+      link: '/admin/cd-accounts',
     },
     {
       label: 'Monthly Registrations',
@@ -89,6 +97,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #4f46e5, #818cf8)',
       iconShadow: '0 10px 24px rgba(79,70,229,0.28)',
       accentClass: 'bg-indigo-100/90 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-200',
+      link: '/admin/accounts',
     },
   ];
 
@@ -101,7 +110,6 @@ export default function AdminDashboard() {
           <img src="/img/dashboard_img_light.png" alt="Admin Dashboard Hero" className="w-full h-full object-cover dark:hidden" />
           <img src="/img/dashboard_img_dark.png" alt="Admin Dashboard Hero" className="hidden w-full h-full object-cover dark:block" />
           <div className="absolute inset-0 bg-gradient-to-r from-white/65 via-white/25 to-transparent dark:hidden"></div>
-          <div className="absolute inset-0 hidden dark:block bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-transparent"></div>
         </div>
 
         <div className="relative z-10">
@@ -120,7 +128,8 @@ export default function AdminDashboard() {
         {cards.map((card, i) => (
           <div
             key={i}
-            className="glass-card rounded-2xl p-6 group"
+            className="glass-card rounded-2xl p-6 group cursor-pointer hover:ring-1 hover:ring-amber-400/30 motion-safe:transition-all"
+            onClick={() => card.link && navigate(card.link)}
           >
             <div className="flex items-center justify-between mb-5">
               <div

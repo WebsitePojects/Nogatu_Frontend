@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import {
@@ -104,7 +104,6 @@ export default function MemberLayout() {
         {/* Logo area */}
         <div className="relative flex items-center gap-3.5 px-5 py-5 border-b" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
           <div className="relative flex-shrink-0">
-            <Link to="/admin/login" title="Admin Portal">
               <img
                 src="/img/nogatu_logo.png"
                 alt="NOGATU Alliance"
@@ -115,7 +114,6 @@ export default function MemberLayout() {
                   boxShadow: '0 4px 16px rgba(212,175,55,0.15)',
                 }}
               />
-            </Link>
             {/* Online indicator */}
             <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-obsidian-900" style={{ background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,0.6)' }} />
           </div>

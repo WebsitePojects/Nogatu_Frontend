@@ -1,47 +1,61 @@
-import { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
+import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck, HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
 
+/**
+ * Role-based access:
+ *   rights=1 (Admin): all pages
+ *   rights=2 (Cashier): manage-codes, voucher-management only (per legacy PHP)
+ *   rights=3 (BOD): same as admin
+ *
+ * Each nav item can have a `roles` array. If omitted, all roles can see it.
+ */
 const NAV_GROUPS = [
   {
     label: 'Overview',
     items: [
-      { to: '/admin/dashboard', label: 'Dashboard', icon: HiOutlineHome },
+      { to: '/admin/dashboard', label: 'Dashboard', icon: HiOutlineHome, roles: [1, 3] },
     ],
   },
   {
     label: 'Management',
     items: [
-      { to: '/admin/accounts', label: 'Account Masterlist', icon: HiOutlineUsers },
-      { to: '/admin/genealogy', label: 'Account Genealogy', icon: FaSitemap },
-      { to: '/admin/generate-codes', label: 'Generate Codes', icon: HiOutlineKey },
+      { to: '/admin/accounts', label: 'Account Masterlist', icon: HiOutlineUsers, roles: [1, 3] },
+      { to: '/admin/genealogy', label: 'Account Genealogy', icon: FaSitemap, roles: [1, 3] },
+      { to: '/admin/generate-codes', label: 'Generate Codes', icon: HiOutlineKey, roles: [1, 3] },
       { to: '/admin/manage-codes', label: 'Manage Codes', icon: HiOutlineCog },
     ],
   },
   {
     label: 'Finance',
     items: [
-      { to: '/admin/encashment', label: 'Encashment', icon: HiOutlineCash },
-      { to: '/admin/redeem', label: 'Hi-Five Redeem', icon: HiOutlineGift },
-      { to: '/admin/rankings', label: 'Rankings', icon: HiOutlineShieldCheck },
-      { to: '/admin/global-bonus', label: 'Global Bonus', icon: HiOutlineSparkles },
+      { to: '/admin/encashment', label: 'Encashment', icon: HiOutlineCash, roles: [1, 3] },
+      { to: '/admin/redeem', label: 'Hi-Five Redeem', icon: HiOutlineGift, roles: [1, 3] },
+      { to: '/admin/rankings', label: 'Rankings', icon: HiOutlineShieldCheck, roles: [1, 3] },
+      { to: '/admin/global-bonus', label: 'Global Bonus', icon: HiOutlineSparkles, roles: [1, 3] },
+      { to: '/admin/cd-accounts', label: 'CD Accounts', icon: HiOutlineBadgeCheck, roles: [1, 3] },
+    ],
+  },
+  {
+    label: 'Vouchers',
+    items: [
+      { to: '/admin/voucher-management', label: 'Voucher Management', icon: HiOutlineTicket },
     ],
   },
   {
     label: 'Content',
     items: [
-      { to: '/admin/messages', label: 'Contact Messages', icon: HiOutlineBell },
-      { to: '/admin/news', label: 'News & Posts', icon: HiOutlineNewspaper },
-      { to: '/admin/messages', label: 'Messages', icon: HiOutlineBell },
+      { to: '/admin/messages', label: 'Contact Messages', icon: HiOutlineBell, roles: [1, 3] },
+      { to: '/admin/news', label: 'News & Posts', icon: HiOutlineNewspaper, roles: [1, 3] },
     ],
   },
   {
     label: 'Settings',
     items: [
-      { to: '/admin/change-password', label: 'Change Password', icon: HiOutlineLockClosed },
+      { to: '/admin/change-password', label: 'Change Password', icon: HiOutlineLockClosed, roles: [1, 3] },
     ],
   },
 ];
@@ -53,16 +67,28 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
 
+  const rights = Number(admin?.rights || 0);
+
+  // Filter nav groups based on role
+  const filteredGroups = useMemo(() => {
+    return NAV_GROUPS
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) => !item.roles || item.roles.includes(rights)),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [rights]);
+
   const handleLogout = async () => {
     await logoutAdmin();
     navigate('/admin/login');
   };
 
-  const currentPage = NAV_GROUPS.flatMap(g => g.items).find(
+  const currentPage = filteredGroups.flatMap(g => g.items).find(
     i => location.pathname.startsWith(i.to)
   );
 
-  const roleLabel = admin?.rights === 1 ? 'Administrator' : admin?.rights === 2 ? 'Cashier' : 'BOD';
+  const roleLabel = rights === 1 ? 'Administrator' : rights === 2 ? 'Cashier' : 'BOD';
 
   return (
     <div className="flex h-screen overflow-hidden portal-bg">
@@ -72,14 +98,12 @@ export default function AdminLayout() {
       >
         {/* Logo area */}
         <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
-          <Link to="/admin/login" title="Admin Portal">
-            <img
-              src="/img/nogatu_logo.png"
-              alt="NOGATU Alliance"
-              className="w-12 h-12 rounded-xl object-contain"
-              style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(255,255,255,0.05)' }}
-            />
-          </Link>
+          <img
+            src="/img/nogatu_logo.png"
+            alt="NOGATU Alliance"
+            className="w-12 h-12 rounded-xl object-contain"
+            style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(255,255,255,0.05)' }}
+          />
           <div>
             <h1 className="font-brand text-sm font-semibold tracking-wide" style={{ color: 'var(--brand-gold)' }}>NOGATU Alliance</h1>
             <p className="sidebar-brand-subtitle text-[11px] font-medium">Admin Panel</p>
@@ -88,7 +112,7 @@ export default function AdminLayout() {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-thin">
-          {NAV_GROUPS.map((group) => (
+          {filteredGroups.map((group) => (
             <div key={group.label}>
               <p
                 className="text-[10px] font-bold uppercase tracking-[0.12em] px-3 mb-2"

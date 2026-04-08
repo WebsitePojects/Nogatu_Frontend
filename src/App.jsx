@@ -41,6 +41,9 @@ import NewsManagement from './pages/admin/NewsManagement';
 import Messages from './pages/admin/Messages';
 import Rankings from './pages/admin/Rankings';
 import GlobalBonus from './pages/admin/GlobalBonus';
+import CDAccounts from './pages/admin/CDAccounts';
+import VoucherManagement from './pages/admin/VoucherManagement';
+import VoucherGrant from './pages/admin/VoucherGrant';
 
 function ProtectedMember({ children }) {
   const { user, loading } = useAuth();
@@ -64,6 +67,30 @@ function ProtectedAdmin({ children }) {
     );
   }
   return admin ? children : <Navigate to="/admin/login" replace />;
+}
+
+function ProtectedAdminRoles({ allowed, children }) {
+  const { admin, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen portal-bg">
+        <div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+      </div>
+    );
+  }
+
+  if (!admin) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  const rights = Number(admin.rights || 0);
+  if (!allowed.includes(rights)) {
+    const fallback = rights === 2 ? '/admin/manage-codes' : '/admin/dashboard';
+    return <Navigate to={fallback} replace />;
+  }
+
+  return children;
 }
 
 export default function App() {
@@ -97,22 +124,82 @@ export default function App() {
 
         {/* Admin Panel */}
         <Route path="/admin" element={<ProtectedAdmin><AdminLayout /></ProtectedAdmin>}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="accounts" element={<AccountMasterlist />} />
-          <Route path="accounts/:uid" element={<UpdateAccounts />} />
-          <Route path="accounts/:uid/income" element={<IncomeDetails />} />
-          <Route path="accounts/:uid/cd" element={<CDPaymentDetails />} />
-          <Route path="generate-codes" element={<GenerateCodes />} />
-          <Route path="manage-codes" element={<ManageCodes />} />
-          <Route path="encashment" element={<Encashment />} />
-          <Route path="redeem" element={<Redeem />} />
-          <Route path="rankings" element={<Rankings />} />
-          <Route path="global-bonus" element={<GlobalBonus />} />
-          <Route path="genealogy" element={<AdminGenealogy />} />
-          <Route path="news" element={<NewsManagement />} />
-          <Route path="messages" element={<Messages />} />
-          <Route path="change-password" element={<ChangePassword />} />
+          <Route
+            index
+            element={<ProtectedAdminRoles allowed={[1, 3]}><AdminDashboard /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="dashboard"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><AdminDashboard /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="accounts"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><AccountMasterlist /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="accounts/:uid"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><UpdateAccounts /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="accounts/:uid/income"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><IncomeDetails /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="accounts/:uid/cd"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><CDPaymentDetails /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="generate-codes"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><GenerateCodes /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="manage-codes"
+            element={<ProtectedAdminRoles allowed={[1, 2, 3]}><ManageCodes /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="voucher-management"
+            element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherManagement /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="voucher-management/grant"
+            element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherGrant /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="encashment"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><Encashment /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="redeem"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><Redeem /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="rankings"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><Rankings /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="global-bonus"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><GlobalBonus /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="cd-accounts"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><CDAccounts /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="genealogy"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><AdminGenealogy /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="news"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><NewsManagement /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="messages"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><Messages /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="change-password"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><ChangePassword /></ProtectedAdminRoles>}
+          />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

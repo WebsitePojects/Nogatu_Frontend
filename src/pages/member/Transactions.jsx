@@ -48,25 +48,87 @@ export default function Transactions() {
 
   const txAmount = (t) => {
     if (t.transactionType === 10) return Number(t.encashment || 0);
+    if (t.transactionType === 11) return Number(t.totalProductValue || 0);
     return Number(t.directReferral || 0) + Number(t.pairing || 0) + Number(t.leadership || 0) +
            Number(t.unilevel || 0) + Number(t.hifive || 0) + Number(t.lpc || 0);
   };
 
-  const txDeductions = (t) => Number(t.tax || 0) + Number(t.fee || 0) + Number(t.cdDeduction || 0);
+  const txDeductions = (t) => {
+    if (t.transactionType === 11) return Number(t.voucherUsed || 0);
+    return Number(t.tax || 0) + Number(t.fee || 0) + Number(t.cdDeduction || 0);
+  };
 
   const openPrintReceipt = (tx) => {
     if (!tx) return;
 
     const isEncashment = tx.transactionType === 10;
+    const isVoucher = tx.transactionType === 11;
     const totalIncome = txAmount(tx);
     const totalDeductions = txDeductions(tx);
     const netReceivable = Number(tx.encashment || 0) - totalDeductions;
-    const receiptTitle = isEncashment ? 'Encashment Details' : 'Transaction Receipt';
+    const receiptTitle = isEncashment ? 'Encashment Details' : isVoucher ? 'Voucher Receipt' : 'Transaction Receipt';
     const transId = tx.pid || 'N/A';
     const transDate = tx.transdate || 'N/A';
     const transactionTypeName = tx.transactionTypeName || 'Transaction';
     const beginningBalance = Number(tx.beginningBalance || 0);
     const endingBalance = Number(tx.endingBalance || 0);
+
+    if (isVoucher) {
+      const html = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(receiptTitle)} #${escapeHtml(transId)}</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; padding: 24px; color: #111827; }
+    .paper { max-width: 760px; margin: 0 auto; background: #fff; border: 1px solid #d1d5db; border-radius: 10px; padding: 26px; }
+    .header { text-align: center; border-bottom: 2px solid #1f2937; padding-bottom: 10px; margin-bottom: 16px; }
+    .header h1 { margin: 0; font-size: 30px; letter-spacing: 1px; }
+    .header p { margin: 3px 0 0; color: #4b5563; }
+    .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #d1d5db; }
+    .label { color: #4b5563; }
+    .value { font-weight: 600; }
+    .amount-add { color: #15803d; font-weight: 700; }
+    .amount-deduct { color: #dc2626; font-weight: 700; }
+    .summary { margin-top: 8px; border-top: 1px solid #111827; border-bottom: 1px solid #111827; background: #ecfdf3; padding: 8px 0; }
+    .muted { color: #6b7280; font-size: 12px; text-align: center; margin-top: 16px; }
+    .actions { text-align: center; margin-top: 18px; }
+    .print-btn { border: 0; border-radius: 6px; padding: 10px 16px; background: #374151; color: #fff; font-weight: 700; cursor: pointer; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .paper { border: 0; border-radius: 0; max-width: 100%; }
+      .actions { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="paper">
+    <div class="header">
+      <h1>NOGATU ALLIANCE WORLDWIDE, INC.</h1>
+      <p>${escapeHtml(receiptTitle)}</p>
+    </div>
+    <div class="row"><span class="label">Transaction ID</span><span class="value">#${escapeHtml(transId)}</span></div>
+    <div class="row"><span class="label">Type</span><span class="value">${escapeHtml(transactionTypeName)}</span></div>
+    <div class="row"><span class="label">Date</span><span class="value">${escapeHtml(transDate)}</span></div>
+    <div class="row"><span class="label">Voucher ID</span><span class="value">#${escapeHtml(tx.voucherId || 'N/A')}</span></div>
+    <div class="row"><span class="label">Cash Paid</span><span class="amount-add">+ PhP ${escapeHtml(fmt(tx.cashPaid || 0))}</span></div>
+    <div class="row"><span class="label">Voucher Used</span><span class="amount-deduct">- PhP ${escapeHtml(fmt(tx.voucherUsed || 0))}</span></div>
+    <div class="row summary"><span class="value">Total Product Value</span><span class="amount-add">PhP ${escapeHtml(fmt(tx.totalProductValue || 0))}</span></div>
+    <div class="actions">
+      <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <div class="muted">System-generated receipt. Printed ${escapeHtml(new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' }))}</div>
+  </div>
+</body>
+</html>`;
+
+      const printWindow = window.open('', '_blank', 'width=900,height=900');
+      if (!printWindow) return;
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+      return;
+    }
 
     const html = `<!doctype html>
 <html>
@@ -222,7 +284,11 @@ export default function Transactions() {
                         style={
                           t.transactionType === 1
                             ? { background: 'rgba(34,197,94,0.1)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }
-                            : { background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }
+                            : t.transactionType === 10
+                              ? { background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }
+                              : t.transactionType === 11
+                                ? { background: 'rgba(212,175,55,0.14)', color: '#F2D06B', border: '1px solid rgba(212,175,55,0.3)' }
+                                : { background: 'rgba(148,163,184,0.1)', color: '#cbd5e1', border: '1px solid rgba(148,163,184,0.2)' }
                         }
                       >
                         {t.transactionTypeName}
@@ -231,7 +297,7 @@ export default function Transactions() {
                     <td className="py-3 px-3 whitespace-nowrap text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{t.transdate || '—'}</td>
                     <td className="py-3 px-3 text-sm font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(txAmount(t))}</td>
                     <td className="py-3 px-3 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                      {t.transactionType === 10 ? `₱${fmt(txDeductions(t))}` : '-'}
+                      {t.transactionType === 10 || t.transactionType === 11 ? `₱${fmt(txDeductions(t))}` : '-'}
                     </td>
                     <td className="py-3 px-3 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>{t.transactionTypeName}</td>
                     <td className="py-3 px-3">
@@ -286,17 +352,29 @@ export default function Transactions() {
               <div className="flex justify-between"><span>Beginning Balance</span><span>₱{fmt(selectedTx.beginningBalance)}</span></div>
               <div className="flex justify-between"><span>Ending Balance</span><span>₱{fmt(selectedTx.endingBalance)}</span></div>
 
-              <div className="pt-2 mt-2 border-t border-dashed border-slate-200 dark:border-[rgba(255,255,255,0.15)]">
-                <p className="text-xs uppercase tracking-wide mb-2 text-amber-700 dark:text-[rgba(212,175,55,0.7)]">Income Breakdown</p>
-                <div className="grid grid-cols-2 gap-y-1.5 gap-x-3 text-slate-700 dark:text-[rgba(255,255,255,0.68)]">
-                  <span>Direct Referral</span><span className={`text-right ${moneyColor(selectedTx.directReferral)}`}>+ ₱{fmt(selectedTx.directReferral)}</span>
-                  <span>Pairing</span><span className={`text-right ${moneyColor(selectedTx.pairing)}`}>+ ₱{fmt(selectedTx.pairing)}</span>
-                  <span>Leadership</span><span className={`text-right ${moneyColor(selectedTx.leadership)}`}>+ ₱{fmt(selectedTx.leadership)}</span>
-                  <span>Unilevel</span><span className={`text-right ${moneyColor(selectedTx.unilevel)}`}>+ ₱{fmt(selectedTx.unilevel)}</span>
-                  <span>Hi-Five</span><span className={`text-right ${moneyColor(selectedTx.hifive)}`}>+ ₱{fmt(selectedTx.hifive)}</span>
-                  <span>LPC</span><span className={`text-right ${moneyColor(selectedTx.lpc)}`}>+ ₱{fmt(selectedTx.lpc)}</span>
+              {selectedTx.transactionType === 11 ? (
+                <div className="pt-2 mt-2 border-t border-dashed border-slate-200 dark:border-[rgba(255,255,255,0.15)]">
+                  <p className="text-xs uppercase tracking-wide mb-2 text-amber-700 dark:text-[rgba(212,175,55,0.7)]">Voucher Breakdown</p>
+                  <div className="grid grid-cols-2 gap-y-1.5 gap-x-3 text-slate-700 dark:text-[rgba(255,255,255,0.68)]">
+                    <span>Voucher ID</span><span className="text-right">#{selectedTx.voucherId || 'N/A'}</span>
+                    <span>Cash Paid</span><span className={`text-right ${moneyColor(selectedTx.cashPaid)}`}>+ ₱{fmt(selectedTx.cashPaid)}</span>
+                    <span>Voucher Used</span><span className={`text-right ${deductionColor(selectedTx.voucherUsed)}`}>- ₱{fmt(selectedTx.voucherUsed)}</span>
+                    <span className="font-semibold">Total Product Value</span><span className={`text-right font-semibold ${moneyColor(selectedTx.totalProductValue)}`}>₱{fmt(selectedTx.totalProductValue)}</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="pt-2 mt-2 border-t border-dashed border-slate-200 dark:border-[rgba(255,255,255,0.15)]">
+                  <p className="text-xs uppercase tracking-wide mb-2 text-amber-700 dark:text-[rgba(212,175,55,0.7)]">Income Breakdown</p>
+                  <div className="grid grid-cols-2 gap-y-1.5 gap-x-3 text-slate-700 dark:text-[rgba(255,255,255,0.68)]">
+                    <span>Direct Referral</span><span className={`text-right ${moneyColor(selectedTx.directReferral)}`}>+ ₱{fmt(selectedTx.directReferral)}</span>
+                    <span>Pairing</span><span className={`text-right ${moneyColor(selectedTx.pairing)}`}>+ ₱{fmt(selectedTx.pairing)}</span>
+                    <span>Leadership</span><span className={`text-right ${moneyColor(selectedTx.leadership)}`}>+ ₱{fmt(selectedTx.leadership)}</span>
+                    <span>Unilevel</span><span className={`text-right ${moneyColor(selectedTx.unilevel)}`}>+ ₱{fmt(selectedTx.unilevel)}</span>
+                    <span>Hi-Five</span><span className={`text-right ${moneyColor(selectedTx.hifive)}`}>+ ₱{fmt(selectedTx.hifive)}</span>
+                    <span>LPC</span><span className={`text-right ${moneyColor(selectedTx.lpc)}`}>+ ₱{fmt(selectedTx.lpc)}</span>
+                  </div>
+                </div>
+              )}
 
               {selectedTx.transactionType === 10 && (
                 <div className="pt-2 mt-2 border-t border-dashed border-slate-200 dark:border-[rgba(255,255,255,0.15)]">
