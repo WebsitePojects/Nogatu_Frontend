@@ -113,7 +113,7 @@ export default function AdminLogin() {
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
           <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="h-14 w-auto object-contain" />
-          <span className="font-brand text-xs tracking-widest uppercase text-gray-800 font-bold">
+          <span className="font-brand text-xs tracking-widest uppercase text-gray-900 dark:text-white font-bold">
             Admin Console
           </span>
         </div>
@@ -163,16 +163,16 @@ export default function AdminLogin() {
           {/* Live stats */}
           <div className="flex gap-8 pt-5 border-t border-gray-300">
             <div>
-              <p className="text-gray-900 font-bold text-2xl">{fmt(stats.activeMembers)}+</p>
-              <p className="text-xs mt-0.5 text-gray-600 font-medium">Active Members</p>
+              <p className="text-gray-900 dark:text-white font-bold text-2xl">{fmt(stats.activeMembers)}+</p>
+              <p className="text-xs mt-0.5 text-gray-600 dark:text-white font-medium">Active Members</p>
             </div>
             <div>
-              <p className="text-gray-900 font-bold text-2xl">{fmt(stats.networksBuilt)}+</p>
-              <p className="text-xs mt-0.5 text-gray-600 font-medium">Networks Built</p>
+              <p className="text-gray-900 dark:text-white font-bold text-2xl">{fmt(stats.networksBuilt)}+</p>
+              <p className="text-xs mt-0.5 text-gray-600 dark:text-white font-medium">Networks Built</p>
             </div>
             <div>
-              <p className="text-gray-900 font-bold text-2xl">99.9%</p>
-              <p className="text-xs mt-0.5 text-gray-600 font-medium">Uptime</p>
+              <p className="text-gray-900 dark:text-white font-bold text-2xl">99.9%</p>
+              <p className="text-xs mt-0.5 text-gray-600 dark:text-white font-medium">Uptime</p>
             </div>
           </div>
         </div>

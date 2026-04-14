@@ -84,13 +84,6 @@ function Navbar() {
           {/* CTA + Mobile toggle */}
           <div className="flex items-center justify-end gap-3 z-10 w-[200px]">
             <a
-              href="/portal/admin/login"
-              className="relative hidden sm:inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold motion-safe:transition-all motion-safe:duration-300 border border-white/30 group overflow-hidden text-gray-700 hover:text-brand-brown bg-white/50 hover:bg-white/80"
-              title="Admin Portal"
-            >
-              <span className="relative z-10 drop-shadow-sm">Admin</span>
-            </a>
-            <a
               href="/portal/login"
               className="relative hidden sm:inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
