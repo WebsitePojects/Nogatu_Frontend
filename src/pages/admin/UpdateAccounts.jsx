@@ -3,7 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
 
-const PAYOUT_OPTIONS = ['Pickup', 'Gcash', 'Remittance Center', 'Bank Deposit', 'Others'];
+const PAYOUT_OPTIONS = [
+  { id: 1, label: 'Pickup' },
+  { id: 2, label: 'GCash' },
+  { id: 3, label: 'Remittance Center' },
+  { id: 4, label: 'Bank Deposit' },
+  { id: 5, label: 'Others' },
+];
 
 export default function UpdateAccounts() {
   const { uid } = useParams();
@@ -26,10 +32,13 @@ export default function UpdateAccounts() {
     e.preventDefault();
     setSaving(true);
     try {
+      const normalizedTin = data.tin ?? data.tinno ?? '';
       await api.put(`/admin/accounts/${uid}`, {
         firstname: data.firstname, lastname: data.lastname, middlename: data.middlename,
         address: data.address, password: newPassword || '',
         payoutdetails: data.payoutdetails, payoutoptions: data.payoutid, contactnos: data.contactnos,
+        tin: normalizedTin,
+        tinno: normalizedTin,
       });
       toast.success('Account updated successfully');
     } catch (err) { toast.error('Update failed'); } finally { setSaving(false); }
@@ -53,7 +62,7 @@ export default function UpdateAccounts() {
       <div className="flex items-center gap-4 mb-7">
         <button
           onClick={() => navigate('/admin/accounts')}
-          className="gold-btn-outline rounded-lg py-1.5 px-4 text-sm"
+          className="gold-btn rounded-lg py-1.5 px-4 text-sm"
         >
           Back
         </button>
@@ -144,16 +153,32 @@ export default function UpdateAccounts() {
             />
           </div>
 
+          {/* TIN No. */}
+          <div>
+            <label className="label">TIN No.</label>
+            <input
+              type="text"
+              value={data.tin ?? data.tinno ?? ''}
+              onChange={(e) => {
+                const nextTin = e.target.value;
+                handleChange('tin', nextTin);
+                handleChange('tinno', nextTin);
+              }}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              placeholder="Enter TIN number"
+            />
+          </div>
+
           {/* Payout Option */}
           <div>
             <label className="label">Payout Option</label>
             <select
               value={data.payoutid || ''}
-              onChange={(e) => handleChange('payoutid', e.target.value)}
+              onChange={(e) => handleChange('payoutid', Number(e.target.value) || '')}
               className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             >
               <option value="">Select...</option>
-              {PAYOUT_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+              {PAYOUT_OPTIONS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
             </select>
           </div>
 

@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { to: '/products', label: 'Our Products' },
   { to: '/news', label: 'News & Updates' },
   { to: '/organizations', label: 'Organizations' },
+  { to: '/organizations', label: 'Organizations' },
   { to: '/contact', label: 'Contact Us' },
 ];
 
@@ -29,13 +30,20 @@ function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 pt-3">
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 pt-3">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className={`relative rounded-3xl overflow-hidden flex items-center justify-between h-[72px] px-4 sm:px-6 transition-all duration-500 border ${scrolled
             ? 'bg-white/70 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border-white/50'
             : 'bg-white/40 backdrop-blur-lg border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:bg-white/60'
+          className={`relative rounded-3xl overflow-hidden flex items-center justify-between h-[72px] px-4 sm:px-6 transition-all duration-500 border ${scrolled
+            ? 'bg-white/70 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border-white/50'
+            : 'bg-white/40 backdrop-blur-lg border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:bg-white/60'
             }`}
         >
+          {/* Subtle animated gradient border effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-primary-400/10 opacity-50 pointer-events-none mix-blend-overlay"></div>
+
           {/* Subtle animated gradient border effect */}
           <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-primary-400/10 opacity-50 pointer-events-none mix-blend-overlay"></div>
 
@@ -52,9 +60,10 @@ function Navbar() {
             <span className="font-extrabold text-sm sm:text-base tracking-tight text-brand-brown bg-clip-text">
               NOGATU <span className="text-brand-gold-dark font-medium">Alliance</span>
             </span>
-          </NavLink>
+          </a>
 
           {/* Desktop nav */}
+          <div className="hidden lg:flex items-center justify-center gap-1.5 z-10 flex-1">
           <div className="hidden lg:flex items-center justify-center gap-1.5 z-10 flex-1">
             {NAV_LINKS.map((link) => (
               <NavLink
@@ -62,6 +71,9 @@ function Navbar() {
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
+                  `relative px-4 py-2 rounded-xl text-[15px] font-semibold motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${isActive
+                    ? 'text-brand-gold-dark'
+                    : 'text-gray-600 hover:text-brand-brown'
                   `relative px-4 py-2 rounded-xl text-[15px] font-semibold motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${isActive
                     ? 'text-brand-gold-dark'
                     : 'text-gray-600 hover:text-brand-brown'
@@ -77,25 +89,40 @@ function Navbar() {
                     <div className="absolute inset-0 bg-white/40 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-xl"></div>
                   </>
                 )}
+                {({ isActive }) => (
+                  <>
+                    <span className="relative z-10">{link.label}</span>
+                    {isActive && (
+                      <div className="absolute inset-0 bg-brand-gold/10 rounded-xl"></div>
+                    )}
+                    <div className="absolute inset-0 bg-white/40 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-xl"></div>
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
 
           {/* CTA + Mobile toggle */}
           <div className="flex items-center justify-end gap-3 z-10 w-[200px]">
+          <div className="flex items-center justify-end gap-3 z-10 w-[200px]">
             <a
               href="/portal/login"
               className="relative hidden sm:inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden"
+              className="relative hidden sm:inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
             >
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out"></div>
+              <span className="relative z-10 drop-shadow-sm">Members Area</span>
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out"></div>
               <span className="relative z-10 drop-shadow-sm">Members Area</span>
             </a>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="lg:hidden relative p-2.5 rounded-xl text-brand-brown bg-white/50 hover:bg-white border border-white/50 motion-safe:transition-all shadow-sm cursor-pointer z-10"
+              className="lg:hidden relative p-2.5 rounded-xl text-brand-brown bg-white/50 hover:bg-white border border-white/50 motion-safe:transition-all shadow-sm cursor-pointer z-10"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
+              {mobileOpen ? <HiOutlineX className="w-5 h-5" /> : <HiOutlineMenu className="w-5 h-5" />}
               {mobileOpen ? <HiOutlineX className="w-5 h-5" /> : <HiOutlineMenu className="w-5 h-5" />}
             </button>
           </div>
@@ -122,8 +149,14 @@ function Navbar() {
             </NavLink>
           ))}
           <a
+            href="/portal/admin/login"
+            className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-700 text-center mt-2 cursor-pointer border border-gray-300 bg-white/60 hover:bg-white"
+          >
+            Admin Portal
+          </a>
+          <a
             href="/portal/login"
-            className="block px-4 py-3 rounded-full text-sm font-semibold text-white text-center mt-2 cursor-pointer border border-brand-gold-dark"
+            className="block px-4 py-3 rounded-full text-sm font-semibold text-white text-center mt-1 cursor-pointer border border-brand-gold-dark"
             style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 100%)' }}
           >
             Members Login

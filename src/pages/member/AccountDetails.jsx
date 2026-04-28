@@ -59,6 +59,7 @@ export default function AccountDetails() {
         payoutdetails: data.payoutdetails,
         payoutoptions: Number(data.payoutid) || '',
         contactnos:    data.contactnos,
+        tin:           data.tin || data.tinno || '',
       });
       toast.success('Account updated successfully');
       setNewPassword('');
@@ -97,6 +98,20 @@ export default function AccountDetails() {
               value={data.username || ''}
               className="glass-input opacity-50 cursor-not-allowed"
               disabled
+            />
+          </FieldRow>
+
+          <FieldRow icon={HiOutlineCreditCard} label="TIN No.">
+            <input
+              type="text"
+              value={data.tin || data.tinno || ''}
+              onChange={(e) => {
+                const nextTin = e.target.value;
+                handleChange('tin', nextTin);
+                handleChange('tinno', nextTin);
+              }}
+              className="glass-input"
+              placeholder="e.g. 123-456-789-000"
             />
           </FieldRow>
 

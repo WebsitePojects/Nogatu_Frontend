@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function ManageCodes() {
   const { admin } = useAuth();
+  const { isDarkMode } = useTheme();
   const [codes, setCodes] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -15,6 +17,16 @@ export default function ManageCodes() {
   const [targetUsername, setTargetUsername] = useState('');
   const [taggedAccount, setTaggedAccount] = useState(null);
   const canRelease = Number(admin?.rights) === 1 || Number(admin?.rights) === 3;
+
+  const headingColor = isDarkMode ? '#ffffff' : '#111827';
+  const textMuted = isDarkMode ? 'rgba(255,255,255,0.45)' : 'rgba(71,85,105,0.9)';
+  const textSubtle = isDarkMode ? 'rgba(255,255,255,0.65)' : 'rgba(51,65,85,0.82)';
+  const subtleBorder = isDarkMode ? 'rgba(255,255,255,0.12)' : 'rgba(148,163,184,0.35)';
+  const subtleButtonBg = isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(248,250,252,0.9)';
+  const rowAlt = isDarkMode ? 'rgba(255,255,255,0.02)' : 'rgba(148,163,184,0.08)';
+  const rowHover = isDarkMode ? 'rgba(212,175,55,0.05)' : 'rgba(212,175,55,0.11)';
+  const rowSelected = isDarkMode ? 'rgba(212,175,55,0.12)' : 'rgba(212,175,55,0.2)';
+  const dateColor = isDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(71,85,105,0.82)';
 
   useEffect(() => { loadCodes(); }, [page]);
 
@@ -86,9 +98,19 @@ export default function ManageCodes() {
   }
 
   const statusStyle = (status) => {
-    if (status === 0) return { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)' };
-    if (status === 1) return { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.22)' };
-    return { background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.22)' };
+    if (status === 0) {
+      return isDarkMode
+        ? { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)' }
+        : { background: 'rgba(148,163,184,0.16)', color: '#475569', border: '1px solid rgba(148,163,184,0.35)' };
+    }
+    if (status === 1) {
+      return isDarkMode
+        ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.22)' }
+        : { background: 'rgba(16,185,129,0.15)', color: '#047857', border: '1px solid rgba(16,185,129,0.32)' };
+    }
+    return isDarkMode
+      ? { background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.22)' }
+      : { background: 'rgba(99,102,241,0.14)', color: '#4338ca', border: '1px solid rgba(99,102,241,0.32)' };
   };
 
   const PaginationBtn = ({ onClick, disabled, children }) => (
@@ -97,9 +119,9 @@ export default function ManageCodes() {
       disabled={disabled}
       className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
       style={{
-        background: 'rgba(212,175,55,0.08)',
-        color: 'rgba(212,175,55,0.8)',
-        border: '1px solid rgba(212,175,55,0.15)',
+        background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)',
+        color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08',
+        border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)',
       }}
     >
       {children}
@@ -109,7 +131,7 @@ export default function ManageCodes() {
   return (
     <div>
       <div className="mb-7">
-        <h1 className="font-display text-2xl font-bold text-white">Manage Codes</h1>
+        <h1 className="font-display text-2xl font-bold" style={{ color: headingColor }}>Manage Codes</h1>
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
@@ -125,13 +147,17 @@ export default function ManageCodes() {
       {/* Actions Bar */}
       <div className="glass-card rounded-2xl p-6 mb-6">
         <div className="flex items-center justify-between gap-3 mb-4">
-          <div className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <div className="text-sm font-medium" style={{ color: textMuted }}>
             {selected.length > 0 ? <span style={{ color: '#D4AF37' }}>{selected.length} codes selected</span> : 'Select codes below'}
           </div>
           <button
             onClick={() => setSelectMode(v => !v)}
             className="text-sm py-1.5 px-3 rounded-lg font-medium"
-            style={{ background: selectMode ? 'rgba(212,175,55,0.14)' : 'rgba(255,255,255,0.05)', color: selectMode ? '#F2D06B' : 'rgba(255,255,255,0.65)', border: '1px solid rgba(212,175,55,0.15)' }}
+            style={{
+              background: selectMode ? 'rgba(212,175,55,0.14)' : subtleButtonBg,
+              color: selectMode ? '#F2D06B' : textSubtle,
+              border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(148,163,184,0.35)',
+            }}
           >
             {selectMode ? 'Exit Selection Mode' : 'Select Multiple'}
           </button>
@@ -160,7 +186,7 @@ export default function ManageCodes() {
               setTimeout(() => loadCodes(), 0);
             }}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
+            style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
           >
             Clear
           </button>
@@ -187,7 +213,7 @@ export default function ManageCodes() {
           <button
             onClick={clearTag}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
+            style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
           >
             Clear Tag
           </button>
@@ -229,7 +255,7 @@ export default function ManageCodes() {
       {/* Codes Table */}
       <div className="glass-card rounded-2xl p-6 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <p className="text-sm font-medium" style={{ color: textMuted }}>
             {selected.length > 0
               ? <span style={{ color: '#D4AF37' }}>{selected.length} selected</span>
               : 'Select codes below'}
@@ -271,10 +297,10 @@ export default function ManageCodes() {
                   <tr
                     key={c.code}
                     className="motion-safe:transition-colors"
-                    style={{ background: selected.includes(c.code) ? 'rgba(212,175,55,0.12)' : idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent', cursor: selectMode ? 'pointer' : 'default' }}
+                    style={{ background: selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent', cursor: selectMode ? 'pointer' : 'default' }}
                     onClick={() => { if (selectMode) toggleSelect(c.code); }}
-                    onMouseEnter={e => { if (!selected.includes(c.code)) e.currentTarget.style.background = 'rgba(212,175,55,0.05)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = selected.includes(c.code) ? 'rgba(212,175,55,0.12)' : idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'; }}
+                    onMouseEnter={e => { if (!selected.includes(c.code)) e.currentTarget.style.background = rowHover; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent'; }}
                   >
                     <td className="py-3 px-4">
                       <input
@@ -294,12 +320,12 @@ export default function ManageCodes() {
                         {c.statusLabel}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-xs text-white/40">{c.dategen}</td>
+                    <td className="py-3 px-4 text-xs" style={{ color: dateColor }}>{c.dategen}</td>
                   </tr>
                 ))}
                 {codes.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    <td colSpan="5" className="py-12 text-center" style={{ color: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(71,85,105,0.7)' }}>
                       No codes found.
                     </td>
                   </tr>

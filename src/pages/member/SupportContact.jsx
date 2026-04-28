@@ -56,6 +56,40 @@ export default function SupportContact() {
           </a>
         </div>
 
+        {/* Landing contact feedback form */}
+        <div className="glass-card rounded-2xl p-6 mb-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.28)' }}
+            >
+              <HiOutlineMail className="w-5 h-5" style={{ color: '#34d399' }} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Send a Message Form</p>
+              <p className="text-xs" style={{ color: 'rgba(52,211,153,0.75)' }}>
+                We will reply using the email address you submit in the form.
+              </p>
+            </div>
+          </div>
+          <a
+            href="/contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-colors"
+            style={{
+              background: 'rgba(16,185,129,0.14)',
+              color: '#34d399',
+              border: '1px solid rgba(16,185,129,0.3)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.22)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.14)'; }}
+          >
+            Open Feedback Form
+            <HiOutlineExternalLink className="w-3.5 h-3.5 opacity-70" />
+          </a>
+        </div>
+
         {/* Email */}
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">

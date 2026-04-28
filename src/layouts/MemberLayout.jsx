@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import {
@@ -37,6 +37,7 @@ const NAV_GROUPS = [
       { to: '/upgrade',      label: 'Upgrade Account',  icon: HiOutlineArrowUp },
       { to: '/register',     label: 'Register Account', icon: HiOutlineUserAdd },
       { to: '/transactions', label: 'Transactions',     icon: HiOutlineDocumentText },
+      { to: '/vouchers',     label: 'Vouchers',         icon: HiOutlineGift },
       { to: '/account',      label: 'Account Details',  icon: HiOutlineUser },
       { to: '/support',      label: 'Issue or Concern', icon: HiOutlineSupport },
     ],
@@ -103,7 +104,6 @@ export default function MemberLayout() {
         {/* Logo area */}
         <div className="relative flex items-center gap-3.5 px-5 py-5 border-b" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
           <div className="relative flex-shrink-0">
-            <Link to="/admin/login" title="Admin Portal">
               <img
                 src="/img/nogatu_logo.png"
                 alt="NOGATU Alliance"
@@ -114,7 +114,6 @@ export default function MemberLayout() {
                   boxShadow: '0 4px 16px rgba(212,175,55,0.15)',
                 }}
               />
-            </Link>
             {/* Online indicator */}
             <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-obsidian-900" style={{ background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,0.6)' }} />
           </div>
@@ -122,7 +121,7 @@ export default function MemberLayout() {
             <h1 className="font-brand text-[13px] font-semibold tracking-wide" style={{ color: 'var(--brand-gold)' }}>
               NOGATU
             </h1>
-            <p className="text-[10px] font-medium tracking-wider uppercase" style={{ color: 'rgba(212,175,55,0.4)' }}>
+            <p className="sidebar-brand-subtitle text-[10px] font-medium tracking-wider uppercase">
               Member Portal
             </p>
           </div>
@@ -173,8 +172,8 @@ export default function MemberLayout() {
               {acctInitial}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white text-always-white truncate">{user?.shortname || 'Member'}</p>
-              <p className="text-[10.5px] truncate" style={{ color: 'var(--brand-gold)' }}>
+              <p className="sidebar-user-name text-sm font-semibold truncate">{user?.shortname || 'Member'}</p>
+              <p className="sidebar-user-type text-[10.5px] truncate">
                 {user?.caccttype} Account
               </p>
             </div>
@@ -220,7 +219,7 @@ export default function MemberLayout() {
             </button>
             <div>
               <p className="text-sm font-semibold text-white/90 leading-none">{currentPage?.label || 'Dashboard'}</p>
-              <p className="text-[11px] mt-0.5 hidden sm:block" style={{ color: 'rgba(212,175,55,0.45)' }}>
+              <p className="hero-welcome-subtitle text-[11px] mt-0.5 hidden sm:block">
                 Welcome back, {user?.shortname}
               </p>
             </div>
@@ -254,7 +253,7 @@ export default function MemberLayout() {
             <div className="hidden sm:flex items-center gap-2.5 pl-3 ml-1 border-l" style={{ borderColor: 'rgba(212,175,55,0.1)' }}>
               <div className="text-right">
                 <p className="text-[13px] font-semibold text-white/85 text-always-white leading-none">{user?.accountname}</p>
-                <p className="text-[10.5px] mt-0.5" style={{ color: 'rgba(212,175,55,0.45)' }}>{user?.caccttype}</p>
+                <p className="topbar-account-tier text-[10.5px] mt-0.5">{user?.caccttype}</p>
               </div>
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-always-white"

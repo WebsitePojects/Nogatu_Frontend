@@ -121,9 +121,9 @@ export default function Dashboard() {
         </div>
 
         <div className="relative z-10">
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-white leading-tight drop-shadow-md">
+          <h1 className="hero-welcome-title font-display text-2xl md:text-3xl font-bold leading-tight">
             Welcome back,{' '}
-            <span className="gold-text">{user?.shortname}</span>
+            <span className="hero-welcome-name">{user?.shortname}</span>
           </h1>
           <p className="text-sm mt-1.5 drop-shadow" style={{ color: 'rgba(255,255,255,0.8)' }}>
             Here's your account performance overview.

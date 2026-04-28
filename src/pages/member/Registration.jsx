@@ -5,6 +5,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi';
 
+const TIN_REGEX = /^[0-9-]{9,30}$/;
+
+function normalizeTin(value) {
+  return String(value || '').trim();
+}
+
 function Spinner() {
   return <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>;
 }
@@ -27,6 +33,7 @@ export default function Registration() {
     firstname:      '',
     lastname:       '',
     middlename:     '',
+    tin:            '',
     position:       searchParams.get('position') || '1',
     placementUid:   searchParams.get('placement') || '',
   });
@@ -58,9 +65,18 @@ export default function Registration() {
     e.preventDefault();
     if (codeValid === false)     return toast.error('Invalid activation code');
     if (usernameValid === false)  return toast.error('Username already taken');
+
+    const normalizedTin = normalizeTin(form.tin);
+    if (!TIN_REGEX.test(normalizedTin)) {
+      return toast.error('TIN must be 9-30 characters using digits and dashes only');
+    }
+
     setSubmitting(true);
     try {
-      await api.post('/registration/register', form);
+      await api.post('/registration/register', {
+        ...form,
+        tin: normalizedTin,
+      });
       toast.success('Account registered successfully!');
       navigate(`/genealogy?id=${form.placementUid}`);
     } catch (err) {
@@ -154,6 +170,19 @@ export default function Registration() {
             </div>
           </div>
 
+          {/* TIN No */}
+          <div>
+            <label className="label">TIN No.</label>
+            <input
+              type="text"
+              value={form.tin}
+              onChange={(e) => handleChange('tin', e.target.value)}
+              className="glass-input"
+              placeholder="e.g. 123-456-789-000"
+              required
+            />
+          </div>
+
           {/* Username */}
           <div>
             <label className="label">Username</label>
@@ -177,7 +206,7 @@ export default function Registration() {
           <div>
             <label className="label">Password</label>
             <input
-              type="text"
+              type="password"
               value={form.password}
               onChange={(e) => handleChange('password', e.target.value)}
               className="glass-input"

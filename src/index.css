@@ -528,6 +528,106 @@ html:not(.dark) .text-always-white {
   color: #ffffff !important;
 }
 
+.hero-welcome-title {
+  color: #f8fafc;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hero-welcome-name {
+  color: #f2d06b;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.hero-welcome-subtitle {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.sidebar-brand-subtitle {
+  color: rgba(212, 175, 55, 0.72);
+}
+
+.sidebar-user-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-user-type {
+  color: rgba(242, 208, 107, 0.86);
+}
+
+.topbar-account-tier {
+  color: rgba(242, 208, 107, 0.88);
+}
+
+.admin-profile-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.admin-profile-tier {
+  color: var(--brand-gold) !important;
+}
+
+html:not(.dark) .hero-welcome-title {
+  color: #1f2937;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+html:not(.dark) .hero-welcome-name {
+  color: #7a5c08;
+  text-shadow: none;
+}
+
+html:not(.dark) .hero-welcome-subtitle {
+  color: #7a5c08;
+}
+
+html:not(.dark) .sidebar-brand-subtitle {
+  color: #6b4f06;
+}
+
+html:not(.dark) .sidebar-user-name {
+  color: #1f2937;
+}
+
+html:not(.dark) .sidebar-user-type {
+  color: #7a5c08;
+}
+
+html:not(.dark) .topbar-account-tier {
+  color: #6b4f06;
+}
+
+html:not(.dark) .admin-profile-name {
+  color: #1f2937;
+}
+
+html:not(.dark) .admin-profile-tier {
+  color: #6b4f06 !important;
+}
+
+html:not(.dark) [style*='color: #D4AF37'],
+html:not(.dark) [style*='color:#D4AF37'],
+html:not(.dark) [style*='color: #F2D06B'],
+html:not(.dark) [style*='color:#F2D06B'],
+html:not(.dark) [style*='color: #FFD700'],
+html:not(.dark) [style*='color:#FFD700'] {
+  color: #6b4f06 !important;
+}
+
+html:not(.dark) [style*='color: rgba(212,175,55'],
+html:not(.dark) [style*='color: rgba(212, 175, 55'],
+html:not(.dark) [style*='color: rgba(242,208,107'],
+html:not(.dark) [style*='color: rgba(242, 208, 107'],
+html:not(.dark) [style*='color: rgba(255,215,0'],
+html:not(.dark) [style*='color: rgba(255, 215, 0'] {
+  color: rgba(107, 79, 6, 0.92) !important;
+}
+
+html:not(.dark) [class*='text-[#D4AF37]'],
+html:not(.dark) [class*='text-[#F2D06B]'],
+html:not(.dark) [class*='text-[#FFD700]'] {
+  color: #6b4f06 !important;
+}
+
 html:not(.dark) .text-white:not(.text-always-white),
 html:not(.dark) [class*=' text-white']:not(.text-always-white),
 html:not(.dark) [class^='text-white']:not(.text-always-white) {

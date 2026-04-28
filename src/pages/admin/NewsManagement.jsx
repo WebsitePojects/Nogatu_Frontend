@@ -7,6 +7,7 @@ const TYPE_OPTS = [
   { value: 'news', label: 'News', style: { background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' } },
   { value: 'announcement', label: 'Announcement', style: { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)' } },
   { value: 'promo', label: 'Promo', style: { background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' } },
+  { value: 'memo', label: 'Memo', style: { background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' } },
 ];
 
 const EMPTY = { title: '', content: '', type: 'news', image_url: '', is_published: true };
@@ -128,7 +129,7 @@ export default function NewsManagement() {
           <h1 className="font-display text-2xl font-bold text-white">News &amp; Announcements</h1>
           <div className="w-12 h-0.5 mt-2 mb-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Manage news, announcements, and promotions visible on the public site.
+            Manage news, announcements, memos, and promotions visible on the public site.
           </p>
         </div>
         <button
@@ -253,22 +254,35 @@ export default function NewsManagement() {
             onClick={() => setShowModal(false)}
           />
           <div
-            className="relative rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto bg-surface-1 border border-border shadow-2xl"
+            className="relative rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
+            style={{
+              background: 'var(--surface-1)',
+              border: '1px solid var(--surface-border)',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
+            }}
           >
             <div
-              className="flex items-center justify-between p-6 border-b border-border"
+              className="flex items-center justify-between p-6"
+              style={{
+                borderBottom: '1px solid rgba(212,175,55,0.2)',
+                background: 'linear-gradient(135deg, rgba(212,175,55,0.14), rgba(212,175,55,0.04))',
+              }}
             >
-              <h3 className="font-display text-lg font-bold text-content">
+              <h3 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                 {editing ? 'Edit Post' : 'Create New Post'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1.5 rounded-lg motion-safe:transition-colors cursor-pointer text-muted hover:text-content hover:bg-surface-2"
+                className="p-1.5 rounded-lg motion-safe:transition-colors cursor-pointer"
+                style={{ color: 'var(--text-muted)' }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'rgba(148,163,184,0.2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                 aria-label="Close"
               >
                 <HiOutlineX className="w-5 h-5" />
               </button>
             </div>
+            <div className="w-14 h-0.5 ml-6 mt-3" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
             <form onSubmit={handleSave} className="p-6 space-y-5">
               <div>
                 <label htmlFor="post-title" className="label">Title</label>
@@ -277,7 +291,12 @@ export default function NewsManagement() {
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   required
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                   placeholder="Post title"
                 />
               </div>
@@ -287,7 +306,12 @@ export default function NewsManagement() {
                   id="post-type"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                 >
                   {TYPE_OPTS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
@@ -298,7 +322,12 @@ export default function NewsManagement() {
                   id="post-image"
                   value={form.image_url}
                   onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                   placeholder="https://example.com/image.jpg"
                 />
                 <label htmlFor="post-image-file" className="label mt-3 block">Upload Image <span className="text-muted text-[0.7rem]">(optional)</span></label>
@@ -307,7 +336,12 @@ export default function NewsManagement() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                 />
                 {previewUrl && (
                   <div className="mt-3 rounded-xl overflow-hidden border" style={{ borderColor: 'rgba(212,175,55,0.2)' }}>
@@ -327,19 +361,32 @@ export default function NewsManagement() {
                   onChange={(e) => setForm({ ...form, content: e.target.value })}
                   required
                   rows={6}
-                  className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5 resize-none"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm mt-1.5 resize-none"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    border: '1px solid rgba(148,163,184,0.4)',
+                    color: '#0f172a',
+                  }}
                   placeholder="Write your post content..."
                 />
               </div>
-              <div className="flex items-center gap-3">
+              <div
+                className="flex items-center gap-3 rounded-lg px-3 py-2"
+                style={{ background: 'rgba(148,163,184,0.12)', border: '1px solid rgba(148,163,184,0.22)' }}
+              >
                 <input
                   id="post-published"
                   type="checkbox"
                   checked={form.is_published}
                   onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
-                  className="w-4 h-4 rounded text-brand-500 bg-surface-2 border-border focus:ring-brand-500"
+                  className="w-4 h-4 rounded cursor-pointer"
+                  style={{
+                    accentColor: '#B8860B',
+                    borderColor: 'rgba(148,163,184,0.5)',
+                    backgroundColor: 'var(--surface-2)',
+                  }}
                 />
-                <label htmlFor="post-published" className="text-sm text-content-muted font-medium cursor-pointer">
+                <label htmlFor="post-published" className="text-sm font-medium cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
                   Publish immediately
                 </label>
               </div>
@@ -347,7 +394,12 @@ export default function NewsManagement() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="gold-btn-outline cursor-pointer rounded-xl py-2 px-4 text-sm"
+                  className="cursor-pointer rounded-xl py-2 px-4 text-sm font-semibold motion-safe:transition-colors"
+                  style={{
+                    background: 'rgba(148,163,184,0.16)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid rgba(148,163,184,0.35)',
+                  }}
                 >
                   Cancel
                 </button>

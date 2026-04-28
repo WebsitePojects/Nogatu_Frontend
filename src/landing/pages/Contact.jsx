@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 function PageHero({ title, subtitle }) {
   return (
     <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
@@ -32,14 +34,37 @@ const INFO_ITEMS = [
 export default function Contact() {
   const ref1 = useScrollReveal();
   const ref2 = useScrollReveal({ delay: 100 });
+  const ref3 = useScrollReveal({ delay: 200 });
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setSending(true);
-    setTimeout(() => { setSending(false); setSent(true); setForm({ name: '', email: '', subject: '', message: '' }); setTimeout(() => setSent(false), 5000); }, 1500);
+
+    try {
+      const response = await fetch(`${API_BASE}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || 'Unable to send your message right now');
+      }
+
+      setSent(true);
+      setForm({ name: '', email: '', subject: '', message: '' });
+      setTimeout(() => setSent(false), 5000);
+    } catch (err) {
+      setError(String(err.message || 'Unable to send your message right now'));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -48,70 +73,86 @@ export default function Contact() {
 
       <section className="section-padding bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
         <div className="section-container">
-          <div ref={ref1} className="reveal mb-16 rounded-2xl overflow-hidden shadow-xl" style={{ border: '2px solid rgba(184,134,11,0.2)' }}>
-            <iframe title="NOGATU Alliance Location" className="w-full h-80 lg:h-96" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15434.165296844101!2d121.04096931858975!3d14.738505023977073!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b1188e0f3527%3A0xc254c53128e33cca!2sMaligaya%20park!5e0!3m2!1sfil!2sph!4v1753781291095!5m2!1sfil!2sph" loading="lazy" referrerPolicy="no-referrer-when-downgrade" style={{ border: 0 }} />
+          <div ref={ref1} className="reveal mb-20 rounded-3xl overflow-hidden shadow-2xl relative" style={{ border: '1px solid rgba(184,134,11,0.15)' }}>
+            <iframe title="NOGATU Alliance Location" className="w-full h-80 lg:h-[450px]" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15434.165296844101!2d121.04096931858975!3d14.738505023977073!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b1188e0f3527%3A0xc254c53128e33cca!2sMaligaya%20park!5e0!3m2!1sfil!2sph!4v1753781291095!5m2!1sfil!2sph" loading="lazy" referrerPolicy="no-referrer-when-downgrade" style={{ border: 0 }} />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
-            <div ref={ref2} className="reveal-left lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-24 items-start">
+            <div ref={ref2} className="reveal-left space-y-8 mb-12 lg:mb-0">
               <div>
-                <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>Get in Touch</span>
-                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2" style={{ color: '#3A1000' }}>Contact Information</h2>
-                <div className="w-16 h-1 rounded-full mb-4" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
-                <p className="text-sm" style={{ color: '#6d3028' }}>Feel free to reach out through any of the channels below.</p>
+                <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-4 shadow-sm" style={{ backgroundColor: '#FFF8E1', color: '#B8860B', border: '1px solid rgba(184,134,11,0.2)' }}>Get in Touch</span>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4" style={{ color: '#3A1000' }}>Contact Information</h2>
+                <div className="w-20 h-1.5 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
+                <p className="text-base leading-relaxed" style={{ color: '#6d3028' }}>Feel free to reach out through any of the channels below. We are here to answer your queries and provide support.</p>
               </div>
-              <div className="space-y-5">
+              <div className="space-y-8">
                 {INFO_ITEMS.map(item => (
-                  <div key={item.label} className="flex gap-4 group">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 motion-safe:transition-colors motion-safe:duration-300" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div key={item.label} className="flex gap-5 group items-start">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm motion-safe:transition-all motion-safe:duration-300 group-hover:-translate-y-1" style={{ backgroundColor: '#FFF8E1', color: '#B8860B', border: '1px solid rgba(184,134,11,0.15)' }}>
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.iconD} />
                         {item.iconD2 && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.iconD2} />}
                       </svg>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color: '#3A1000' }}>{item.label}</p>
-                      <p className="text-sm" style={{ color: '#6d3028' }}>{item.value}</p>
+                    <div className="pt-1">
+                      <p className="text-base font-bold mb-1" style={{ color: '#3A1000' }}>{item.label}</p>
+                      <p className="text-sm leading-relaxed" style={{ color: '#6d3028' }}>{item.value}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="lg:col-span-3">
-              <form onSubmit={handleSubmit} className="rounded-2xl p-8 lg:p-10" style={{ backgroundColor: '#FFF8E1', border: '1px solid rgba(184,134,11,0.15)' }}>
-                <h3 className="text-xl font-bold mb-2" style={{ color: '#3A1000' }}>Send us a message</h3>
-                <div className="w-10 h-0.5 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-1.5" style={{ color: '#592219' }}>Your Name</label>
-                    <input id="name" type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2 motion-safe:transition" style={{ borderColor: 'rgba(184,134,11,0.2)', backgroundColor: '#FFFDF5', color: '#3A1000', '--tw-ring-color': '#D4A528' }} placeholder="John Doe" />
+            <div ref={ref3} className="reveal-right">
+              <form onSubmit={handleSubmit} className="relative bg-white rounded-3xl p-8 sm:p-10 shadow-2xl overflow-hidden group" style={{ border: '1px solid rgba(184,134,11,0.15)' }}>
+                {/* Decorative background elements */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#D4A528] to-transparent opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-opacity group-hover:opacity-10" />
+                
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-extrabold mb-3" style={{ color: '#3A1000' }}>Send us a message</h3>
+                  <p className="text-sm mb-8" style={{ color: '#6d3028' }}>Fill out the form below and we'll get back to you shortly.</p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-semibold mb-2" style={{ color: '#592219' }}>Your Name</label>
+                      <input id="name" type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required className="w-full px-5 py-3.5 rounded-xl border text-sm outline-none focus:ring-2 focus:border-transparent motion-safe:transition-all shadow-sm bg-gray-50/50 hover:bg-gray-50 focus:bg-white" style={{ borderColor: 'rgba(184,134,11,0.2)', color: '#3A1000', '--tw-ring-color': '#D4A528', '--tw-ring-offset-width': '2px' }} placeholder="John Doe" />
+                    </div>
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-semibold mb-2" style={{ color: '#592219' }}>Your Email</label>
+                      <input id="email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required className="w-full px-5 py-3.5 rounded-xl border text-sm outline-none focus:ring-2 focus:border-transparent motion-safe:transition-all shadow-sm bg-gray-50/50 hover:bg-gray-50 focus:bg-white" style={{ borderColor: 'rgba(184,134,11,0.2)', color: '#3A1000', '--tw-ring-color': '#D4A528', '--tw-ring-offset-width': '2px' }} placeholder="john@example.com" />
+                    </div>
                   </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: '#592219' }}>Your Email</label>
-                    <input id="email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2 motion-safe:transition" style={{ borderColor: 'rgba(184,134,11,0.2)', backgroundColor: '#FFFDF5', color: '#3A1000', '--tw-ring-color': '#D4A528' }} placeholder="john@example.com" />
+                  <div className="mb-6">
+                    <label htmlFor="subject" className="block text-sm font-semibold mb-2" style={{ color: '#592219' }}>Subject</label>
+                    <input id="subject" type="text" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} required className="w-full px-5 py-3.5 rounded-xl border text-sm outline-none focus:ring-2 focus:border-transparent motion-safe:transition-all shadow-sm bg-gray-50/50 hover:bg-gray-50 focus:bg-white" style={{ borderColor: 'rgba(184,134,11,0.2)', color: '#3A1000', '--tw-ring-color': '#D4A528', '--tw-ring-offset-width': '2px' }} placeholder="How can we help?" />
+                    <p className="mt-1.5 text-xs" style={{ color: '#8B6914' }}>
+                      We will reply using the email you fill out in this form.
+                    </p>
                   </div>
+                  <div className="mb-8">
+                    <label htmlFor="message" className="block text-sm font-semibold mb-2" style={{ color: '#592219' }}>Message</label>
+                    <textarea id="message" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} required rows={5} className="w-full px-5 py-3.5 rounded-xl border text-sm outline-none focus:ring-2 focus:border-transparent resize-none motion-safe:transition-all shadow-sm bg-gray-50/50 hover:bg-gray-50 focus:bg-white" style={{ borderColor: 'rgba(184,134,11,0.2)', color: '#3A1000', '--tw-ring-color': '#D4A528', '--tw-ring-offset-width': '2px' }} placeholder="Write your context here..." />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    className="w-full py-4 rounded-xl text-base font-bold text-white disabled:opacity-70 disabled:cursor-not-allowed motion-safe:transition-all motion-safe:duration-300 cursor-pointer flex items-center justify-center gap-3 hover:shadow-lg hover:-translate-y-0.5"
+                    style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)', boxShadow: '0 8px 20px -6px rgba(184,134,11,0.5)' }}
+                  >
+                    {sending ? (
+                      <><svg className="motion-safe:animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Sending Message...</>
+                    ) : sent ? (
+                      <><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Message Sent Successfully!</>
+                    ) : (
+                      <>Send Message <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg></>
+                    )}
+                  </button>
                 </div>
-                <div className="mb-5">
-                  <label htmlFor="subject" className="block text-sm font-medium mb-1.5" style={{ color: '#592219' }}>Subject</label>
-                  <input id="subject" type="text" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} required className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2 motion-safe:transition" style={{ borderColor: 'rgba(184,134,11,0.2)', backgroundColor: '#FFFDF5', color: '#3A1000', '--tw-ring-color': '#D4A528' }} placeholder="How can we help?" />
-                </div>
-                <div className="mb-6">
-                  <label htmlFor="message" className="block text-sm font-medium mb-1.5" style={{ color: '#592219' }}>Message</label>
-                  <textarea id="message" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} required rows={5} className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2 resize-none motion-safe:transition" style={{ borderColor: 'rgba(184,134,11,0.2)', backgroundColor: '#FFFDF5', color: '#3A1000', '--tw-ring-color': '#D4A528' }} placeholder="Your message..." />
-                </div>
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed motion-safe:transition-all motion-safe:duration-200 cursor-pointer flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)', boxShadow: '0 4px 14px rgba(184,134,11,0.3)' }}
-                >
-                  {sending ? (
-                    <><svg className="motion-safe:animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Sending...</>
-                  ) : sent ? (
-                    <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Message Sent!</>
-                  ) : 'Send Message'}
-                </button>
+                {error && (
+                  <p className="mt-3 text-sm" style={{ color: '#B91C1C' }}>
+                    {error}
+                  </p>
+                )}
               </form>
             </div>
           </div>
