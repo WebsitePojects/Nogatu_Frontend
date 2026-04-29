@@ -1,100 +1,87 @@
-import React from 'react';
+const LEADERS = [
+  { name: 'Harold M. Tugano', role: 'Chairman' },
+  { name: 'Sherwin Catera', role: 'CEO' },
+  { name: 'Yoren Abihay', role: 'President' },
+  { name: 'Cecilia Haspe', role: 'Vice President' },
+  { name: 'Dino S. Erfe', role: 'Manager' },
+];
 
 export default function Organizations() {
   return (
-    <div className="pt-32 pb-20 min-h-screen bg-[#FFFDF5] relative overflow-hidden">
-      {/* Minimalist Background Pattern */}
-      <div className="absolute inset-0 pointer-events-none opacity-30">
-        <div className="absolute top-0 right-[-10%] w-[50%] h-[50%] rounded-full bg-primary-100 blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-brand-gold/10 blur-[120px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:40px_40px]" />
-      </div>
+    <div className="pt-28 sm:pt-32 pb-14 sm:pb-20 min-h-screen bg-[#FFFDF5] relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header Section */}
-        <div className="text-center mb-16 max-w-3xl mx-auto">
+      <div className="section-container relative z-10">
+        <div className="text-center mb-10 sm:mb-16 max-w-3xl mx-auto">
           <span className="inline-block px-4 py-1.5 rounded-full bg-brand-gold/10 text-brand-gold-dark font-medium text-sm mb-4 border border-brand-gold/20">
-            Our Structure
+            Leadership
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-brand-brown mb-6">
-            Organizations
+          <h1 className="text-3xl md:text-5xl font-bold text-brand-brown mb-4 sm:mb-6">
+            People Behind the Company
           </h1>
-          <p className="text-lg text-gray-600 leading-relaxed">
-            Discover the network of leaders and organizations driving success within the NOGATU Alliance.
+          <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+            Meet the important people of NOGATU Alliance, the leaders guiding the company, supporting the network, and inspiring the community forward.
           </p>
         </div>
 
-        {/* Minimalist Organizational Structure Template */}
-        <div className="relative mt-20">
-          <div className="bg-white/80 backdrop-blur-md border border-gray-100 shadow-2xl rounded-3xl p-8 md:p-12">
-            
-            {/* Tier 1: CEO / Founder */}
-            <div className="flex justify-center mb-12">
-              <div className="text-center relative group">
-                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-brand-gold to-amber-600 rounded-full p-1 shadow-lg group-hover:scale-105 transition-transform duration-300">
-                  <div className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-white">
-                    <img src="/img/nogatu_logo.png" alt="Founder" className="w-16 h-16 object-cover" />
+        <div className="max-w-5xl mx-auto">
+          <div className="space-y-5 sm:space-y-6">
+            {LEADERS.map((leader, index) => (
+              <div key={leader.name} className="relative">
+                {index > 0 && (
+                  <div className="hidden sm:block absolute left-1/2 -top-6 h-6 w-px bg-brand-gold/40" />
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-4 sm:gap-6 items-stretch">
+                  <div className="rounded-2xl border border-brand-gold/30 bg-white shadow-sm p-4 flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-xl bg-[#FFF8E1] border-2 border-dashed border-brand-gold/40 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-9 h-9 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                    <div>
+                      <p className="font-extrabold uppercase tracking-wide text-brand-brown leading-tight">{leader.name}</p>
+                      <p className="text-sm font-semibold uppercase text-brand-gold-dark mt-2">{leader.role}</p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-primary-200/40 bg-white/85 shadow-sm p-5 sm:p-6">
+                    <p className="text-xs font-bold uppercase tracking-wider text-brand-gold-dark mb-2">Message for NOGATU</p>
+                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                      Reserved space for {leader.name}'s company message, personal note, or motivational quote.
+                    </p>
                   </div>
                 </div>
-                <h3 className="mt-4 font-bold text-lg text-brand-brown">Leadership</h3>
-                <p className="text-sm text-gray-500">Board of Directors</p>
-                {/* Connecting Line Down */}
-                <div className="hidden md:block absolute w-px h-12 bg-gradient-to-b from-brand-gold/50 to-gray-200 left-1/2 -ml-[0.5px] -bottom-12" />
               </div>
-            </div>
-
-            {/* Horizontal Connecting Line */}
-            <div className="hidden md:block relative max-w-4xl mx-auto mb-12">
-               <div className="h-px bg-gray-200 w-full" />
-               <div className="absolute w-px h-12 bg-gray-200 left-[16.66%] top-0" />
-               <div className="absolute w-px h-12 bg-gray-200 left-1/2 top-0" />
-               <div className="absolute w-px h-12 bg-gray-200 left-[83.33%] top-0" />
-            </div>
-
-            {/* Tier 2: Departments / Teams */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 max-w-5xl mx-auto">
-              {/* Branch 1 */}
-              <div className="text-center flex flex-col items-center">
-                <div className="w-20 h-20 bg-white rounded-2xl shadow-md border border-gray-100 flex items-center justify-center mb-4 relative z-10 hover:shadow-xl hover:border-primary-300 transition-all duration-300 group">
-                   <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                   </div>
-                </div>
-                <h4 className="font-semibold text-brand-brown">Network Leaders</h4>
-                <p className="text-xs text-gray-500 mt-1 px-4">Top earning distributors and diamond executives</p>
-              </div>
-
-              {/* Branch 2 */}
-              <div className="text-center flex flex-col items-center relative">
-                <div className="w-20 h-20 bg-white rounded-2xl shadow-md border border-gray-100 flex items-center justify-center mb-4 relative z-10 hover:shadow-xl hover:border-brand-gold/50 transition-all duration-300 group">
-                   <div className="w-12 h-12 rounded-xl bg-amber-50 text-brand-gold-dark flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                   </div>
-                </div>
-                <h4 className="font-semibold text-brand-brown">Regional Centers</h4>
-                <p className="text-xs text-gray-500 mt-1 px-4">Distribution hubs and product centers</p>
-              </div>
-
-              {/* Branch 3 */}
-              <div className="text-center flex flex-col items-center relative">
-                <div className="w-20 h-20 bg-white rounded-2xl shadow-md border border-gray-100 flex items-center justify-center mb-4 relative z-10 hover:shadow-xl hover:border-emerald-300 transition-all duration-300 group">
-                   <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                   </div>
-                </div>
-                <h4 className="font-semibold text-brand-brown">Product Suppliers</h4>
-                <p className="text-xs text-gray-500 mt-1 px-4">Health, wellness, and beauty partners</p>
-              </div>
-            </div>
-
+            ))}
           </div>
         </div>
+
+        <section className="mt-14 sm:mt-20">
+          <div className="text-center mb-8 sm:mb-10">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-gold/10 text-brand-gold-dark font-medium text-sm mb-4 border border-brand-gold/20">
+              Testimonials
+            </span>
+            <h2 className="text-2xl md:text-4xl font-bold text-brand-brown">Stories from the Community</h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            <div className="rounded-2xl bg-white/85 border border-gray-100 shadow-xl p-4 sm:p-5">
+              <div className="aspect-video rounded-xl bg-[#3A1000] flex items-center justify-center text-white/70">
+                <div className="text-center">
+                  <svg className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 text-brand-gold-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.868v4.264a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <p className="text-sm font-semibold">Testimonial video placeholder</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl bg-white/85 border border-gray-100 shadow-xl p-6 sm:p-8 flex flex-col justify-center">
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                "NOGATU Alliance gave us a practical way to introduce wellness products while building a disciplined distributor community."
+              </p>
+              <div className="mt-6">
+                <p className="font-bold text-brand-brown">Distributor Testimonial</p>
+                <p className="text-sm text-gray-500">Video and full text can be uploaded here.</p>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ import Products from './pages/Products';
 import News from './pages/News';
 import Organizations from './pages/Organizations';
 import Contact from './pages/Contact';
+import Certifications from './pages/Certifications';
+import Join from './pages/Join';
 
 export default function LandingApp() {
   return (
@@ -16,7 +18,9 @@ export default function LandingApp() {
         <Route path="/products" element={<Products />} />
         <Route path="/news" element={<News />} />
         <Route path="/organizations" element={<Organizations />} />
+        <Route path="/certifications" element={<Certifications />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/join/:token" element={<Join />} />
       </Route>
       <Route path="*" element={<Home />} />
     </Routes>
