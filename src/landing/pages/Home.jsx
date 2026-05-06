@@ -222,16 +222,16 @@ function WhyUs() {
 function Products() {
   const lightbox = useLightbox();
   const products = [
-    { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/barley_01.png', imgLg: '/legacy-img/barley_01.png' },
-    { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png' },
-    { name: 'Nogatu Collagen Vitamin C', desc: 'Vitamin C with Collagen', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png' },
-    { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/Chox-Mix.png', imgLg: '/legacy-img/Chox-Mix.png' },
-    { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png', imgLg: '/legacy-img/Coffee-Mix.png' },
-    { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/Mangoosteen_1.png', imgLg: '/legacy-img/Mangoosteen_1.png' },
-    { name: 'Vitamin C', desc: 'Vitamin supplement', price: 'TBA', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png' },
+    { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/barley-mix.png', imgLg: '/legacy-img/barley-mix.png' },
+    { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/glow-pill.png', imgLg: '/legacy-img/glow-pill.png' },
+    { name: 'Nogatu Collagen Vitamin C', desc: 'Vitamin C with Collagen', price: '500.00', img: '/legacy-img/vitamin-c-collagen.png', imgLg: '/legacy-img/vitamin-c-collagen.png' },
+    { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/chox-mix.png', imgLg: '/legacy-img/chox-mix.png' },
+    { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/coffee-mix.png', imgLg: '/legacy-img/coffee-mix.png' },
+    { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/mangoosteen_1.png', imgLg: '/legacy-img/mangoosteen_1.png' },
+    { name: 'Vitamin C', desc: 'Vitamin supplement', price: 'TBA', img: '/legacy-img/vitamin-c.png', imgLg: '/legacy-img/vitamin-c.png' },
     { name: 'Black Coffee', desc: 'Premium black coffee drink mix', price: 'TBA', img: '/legacy-img/blck-coffee.png', imgLg: '/legacy-img/blck-coffee.png' },
-    { name: 'Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: 'TBA', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png' },
-    { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: 'TBA', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png' },
+    { name: 'Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: 'TBA', img: '/legacy-img/max-fuel.png', imgLg: '/legacy-img/max-fuel.png' },
+    { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: 'TBA', img: '/legacy-img/berry-nad.png', imgLg: '/legacy-img/berry-nad.png' },
   ];
 
   return (

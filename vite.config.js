@@ -61,10 +61,6 @@ export default defineConfig(({ mode }) => {
           target: apiProxyTarget,
           changeOrigin: true,
         },
-        '/legacy-img': {
-          target: apiProxyTarget,
-          changeOrigin: true,
-        },
       },
     },
   };
