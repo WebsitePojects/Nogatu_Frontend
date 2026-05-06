@@ -44,6 +44,8 @@ import GlobalBonus from './pages/admin/GlobalBonus';
 import CDAccounts from './pages/admin/CDAccounts';
 import VoucherManagement from './pages/admin/VoucherManagement';
 import VoucherGrant from './pages/admin/VoucherGrant';
+import Applications from './pages/admin/Applications';
+import ReferralInvite from './pages/member/ReferralInvite';
 
 function ProtectedMember({ children }) {
   const { user, loading } = useAuth();
@@ -119,6 +121,7 @@ export default function App() {
           <Route path="transactions" element={<Transactions />} />
           <Route path="upgrade" element={<UpgradeAccount />} />
           <Route path="register" element={<Registration />} />
+          <Route path="referral-invite" element={<ReferralInvite />} />
           <Route path="support" element={<SupportContact />} />
         </Route>
 
@@ -195,6 +198,10 @@ export default function App() {
           <Route
             path="messages"
             element={<ProtectedAdminRoles allowed={[1, 3]}><Messages /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="applications"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><Applications /></ProtectedAdminRoles>}
           />
           <Route
             path="change-password"

@@ -6,9 +6,10 @@ const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About Us' },
   { to: '/products', label: 'Our Products' },
-  { to: '/news', label: 'News & Updates' },
-  { to: '/organizations', label: 'Organizations' },
-  { to: '/contact', label: 'Contact Us' },
+  { to: '/news', label: 'News' },
+  { to: '/organizations', label: 'People Behind' },
+  { to: '/certifications', label: 'Certifications' },
+  { to: '/contact', label: 'Contact' },
 ];
 
 function Navbar() {
@@ -24,8 +25,14 @@ function Navbar() {
 
   useEffect(() => {
     setMobileOpen(false);
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
+    if (location.hash) {
+      window.setTimeout(() => {
+        document.querySelector(location.hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, location.hash]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 pt-3">
@@ -40,29 +47,29 @@ function Navbar() {
           <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-primary-400/10 opacity-50 pointer-events-none mix-blend-overlay"></div>
 
           {/* Logo */}
-          <a href="/portal/admin/login" className="relative flex items-center gap-3 group z-10 w-[200px]" title="Admin Portal Login">
+          <a href="/portal/admin/login" className="relative flex items-center gap-2 group z-10 w-[170px] flex-shrink-0" title="Admin Portal Login">
             <div className="relative">
               <div className="absolute inset-0 bg-brand-gold blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-500 rounded-full"></div>
               <img
                 src="/img/nogatu_logo.png"
                 alt="NOGATU Alliance"
-                className="relative h-11 w-11 rounded-full object-contain border border-white/60 shadow-sm motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-105 group-hover:rotate-3"
+                className="relative h-10 w-10 rounded-full object-contain border border-white/60 shadow-sm motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-105 group-hover:rotate-3"
               />
             </div>
-            <span className="font-extrabold text-sm sm:text-base tracking-tight text-brand-brown bg-clip-text">
+            <span className="font-extrabold text-sm tracking-tight text-brand-brown bg-clip-text whitespace-nowrap">
               NOGATU <span className="text-brand-gold-dark font-medium">Alliance</span>
             </span>
           </a>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center justify-center gap-1.5 z-10 flex-1">
+          <div className="hidden lg:flex items-center justify-center gap-1 z-10 flex-1 min-w-0">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `relative px-4 py-2 rounded-xl text-[15px] font-semibold motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${isActive
+                  `relative px-3 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${isActive
                     ? 'text-brand-gold-dark'
                     : 'text-gray-600 hover:text-brand-brown'
                   }`
@@ -82,10 +89,10 @@ function Navbar() {
           </div>
 
           {/* CTA + Mobile toggle */}
-          <div className="flex items-center justify-end gap-3 z-10 w-[200px]">
+          <div className="flex items-center justify-end gap-3 z-10 w-[170px] flex-shrink-0">
             <a
               href="/portal/login"
-              className="relative hidden sm:inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden"
+              className="relative hidden sm:inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden whitespace-nowrap"
               style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out"></div>
@@ -121,12 +128,6 @@ function Navbar() {
               {link.label}
             </NavLink>
           ))}
-          <a
-            href="/portal/admin/login"
-            className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-700 text-center mt-2 cursor-pointer border border-gray-300 bg-white/60 hover:bg-white"
-          >
-            Admin Portal
-          </a>
           <a
             href="/portal/login"
             className="block px-4 py-3 rounded-full text-sm font-semibold text-white text-center mt-1 cursor-pointer border border-brand-gold-dark"

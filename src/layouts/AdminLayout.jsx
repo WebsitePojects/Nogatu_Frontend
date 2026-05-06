@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck, HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket } from 'react-icons/hi';
+import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck, HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket, HiOutlineClipboardList } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
 
 /**
@@ -49,6 +49,7 @@ const NAV_GROUPS = [
     label: 'Content',
     items: [
       { to: '/admin/messages', label: 'Contact Messages', icon: HiOutlineBell, roles: [1, 3] },
+      { to: '/admin/applications', label: 'Applications', icon: HiOutlineClipboardList, roles: [1, 3] },
       { to: '/admin/news', label: 'News & Posts', icon: HiOutlineNewspaper, roles: [1, 3] },
     ],
   },

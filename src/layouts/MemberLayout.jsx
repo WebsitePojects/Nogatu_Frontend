@@ -36,6 +36,7 @@ const NAV_GROUPS = [
       { to: '/codes',        label: 'Activation Codes', icon: HiOutlineKey },
       { to: '/upgrade',      label: 'Upgrade Account',  icon: HiOutlineArrowUp },
       { to: '/register',     label: 'Register Account', icon: HiOutlineUserAdd },
+      { to: '/referral-invite', label: 'Referral ID',    icon: HiOutlineUserAdd },
       { to: '/transactions', label: 'Transactions',     icon: HiOutlineDocumentText },
       { to: '/vouchers',     label: 'Vouchers',         icon: HiOutlineGift },
       { to: '/account',      label: 'Account Details',  icon: HiOutlineUser },

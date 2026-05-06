@@ -4,7 +4,7 @@ import Lightbox, { useLightbox } from '../components/Lightbox';
 
 function PageHero({ title, subtitle }) {
   return (
-    <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
+    <section className="relative pt-36 pb-14 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
       <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }} />
@@ -63,6 +63,16 @@ export default function About() {
               <div className="w-16 h-1 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
               <p className="leading-relaxed mb-6" style={{ color: '#6d3028' }}>Nogatu Alliance is a supplier and distributor of exclusively manufactured health food supplements as well as skin care products. We are committed to helping empower people in building a sustainable livelihood through marketing and selling of high-quality products that promote improved health and wellness.</p>
               <p className="leading-relaxed mb-8" style={{ color: '#6d3028' }}>It also provides its members with competitive marketing incentives. When you choose us, you become our valued partner, working alongside us to achieve your success.</p>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+                <div className="rounded-2xl border border-primary-200/40 bg-white/70 p-4 sm:p-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-brand-gold-dark mb-2">Main Office</p>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City</p>
+                </div>
+                <div className="rounded-2xl border border-primary-200/40 bg-white/70 p-4 sm:p-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-brand-gold-dark mb-2">Satellite Branch</p>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Reserved space for branch address and contact details.</p>
+                </div>
+              </div>
               <div className="flex gap-6">
                 {['FDA Approved', 'Member-First'].map((t) => (
                   <div key={t} className="flex items-center gap-3">
@@ -72,6 +82,27 @@ export default function About() {
                     <span className="text-sm font-medium" style={{ color: '#3A1000' }}>{t}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
+        <div className="section-container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+            <div className="rounded-2xl overflow-hidden shadow-xl border border-primary-200/30 bg-white">
+              <img src="/landing/assets/img/about.jpg" alt="Main office" className="w-full h-72 sm:h-96 object-cover cursor-pointer" loading="lazy" onClick={() => lightbox.open('/landing/assets/img/about.jpg')} />
+              <div className="p-5">
+                <p className="font-bold text-brand-brown">Main Office Photo</p>
+                <p className="text-sm text-gray-600 mt-1">Current office image space.</p>
+              </div>
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-xl border border-brand-gold/30 bg-white">
+              <img src="/landing/img/about-2.jpg" alt="Satellite branch placeholder" className="w-full h-72 sm:h-96 object-cover cursor-pointer" loading="lazy" onClick={() => lightbox.open('/landing/img/about-2.jpg')} />
+              <div className="p-5">
+                <p className="font-bold text-brand-brown">Satellite Branch Photo</p>
+                <p className="text-sm text-gray-600 mt-1">Reserved upload space for the satellite branch photo.</p>
               </div>
             </div>
           </div>

@@ -174,6 +174,14 @@ export default function Login() {
       <div
         className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden bg-transparent"
       >
+        <button
+          type="button"
+          onClick={() => window.location.href = '/'}
+          className="absolute left-4 top-4 sm:left-6 sm:top-6 z-20 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-gray-800 dark:text-white bg-white/60 dark:bg-black/30 border border-white/50 dark:border-white/10 backdrop-blur-md shadow-sm hover:bg-white/80 dark:hover:bg-black/45 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          Back
+        </button>
         {/* Subtle orb */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none"
