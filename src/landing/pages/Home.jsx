@@ -43,13 +43,13 @@ function Hero() {
           </div>
 
           <div className="order-1 lg:order-2 w-full lg:w-6/12 flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 lg:mt-0 flex-1 lg:flex-none items-center">
-            <div className="relative w-full max-w-[315px] sm:max-w-[430px] lg:max-w-[620px] xl:max-w-[700px] mx-auto lg:mx-0">
+            <div className="relative w-[120vw] max-w-[460px] sm:w-full sm:max-w-[430px] lg:max-w-[620px] xl:max-w-[700px] mx-auto lg:mx-0 -ml-2 sm:ml-0">
               <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-3/4 h-1/3 rounded-full blur-[60px] bg-brand-gold/55 motion-safe:animate-pulse-glow" />
               <div className="absolute inset-x-10 bottom-4 h-10 rounded-full bg-black/35 blur-[32px]" />
               <img
                 src="/img/landing-product.png"
                 alt="Nogatu Alliance Products"
-                className="relative z-10 w-full max-h-[48svh] sm:max-h-none h-auto object-contain motion-safe:animate-float-slow drop-shadow-[0_28px_60px_rgba(0,0,0,0.55)] origin-bottom lg:origin-center"
+                className="relative z-10 w-full h-auto object-contain motion-safe:animate-float-slow drop-shadow-[0_28px_60px_rgba(0,0,0,0.55)] origin-bottom lg:origin-center"
               />
             </div>
           </div>
@@ -285,6 +285,14 @@ function Products() {
 /* ────────────────────── Organizations Preview ───────────── */
 function OrganizationsPreview() {
   const ref = useScrollReveal();
+
+  const OrgNode = ({ top, left, hc, bc }) => (
+    <div className="absolute flex flex-col items-center -translate-x-1/2 z-10" style={{ top: `${top}px`, left: `${left}%` }}>
+      <div className={`w-[18px] h-[18px] sm:w-[22px] sm:h-[22px] rounded-full shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)] mb-1 border border-white/40 bg-gradient-to-b ${hc}`} />
+      <div className={`w-10 h-7 sm:w-12 sm:h-8 rounded-t-xl rounded-b shadow-[0_4px_6px_rgba(0,0,0,0.2),inset_0_-3px_5px_rgba(0,0,0,0.2)] border border-black/10 bg-gradient-to-b ${bc}`} />
+    </div>
+  );
+
   return (
     <section className="section-padding relative overflow-hidden bg-white">
       {/* Minimalist Backgound Pattern */}
@@ -300,25 +308,69 @@ function OrganizationsPreview() {
             Meet the key leaders and important people behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
           </p>
 
-          <div className="relative p-8 md:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
-            {/* Minimalist Org Chart Abstract */}
-            <div className="flex flex-col items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
-               {/* Top Node */}
-               <div className="w-16 h-16 rounded-full bg-brand-gold-dark/10 border border-brand-gold-dark flex items-center justify-center mb-6 relative">
-                 <div className="w-8 h-8 rounded-full bg-brand-gold-dark" />
-                 <div className="absolute w-px h-8 bg-gray-300 -bottom-8" />
-               </div>
+          <div className="relative p-6 sm:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
+            <div className="flex flex-col items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-500 overflow-x-auto pb-6 w-full">
+               
+               {/* Fixed-dimension container allows perfect positional scaling */}
+               <div className="min-w-[400px] w-full max-w-[650px] mx-auto h-[350px] relative mt-2">
+                 
+                 {/* ─── LINES ────────── */}
+                 {/* L1 to L2 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '50px', left: '50%', height: '20px' }} />
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', width: '60%' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '80%', height: '25px' }} />
 
-               {/* Connector Line */}
-               <div className="w-48 h-px bg-gray-300 mb-8 relative">
-                 <div className="absolute w-px h-6 bg-gray-300 left-0 top-0" />
-                 <div className="absolute w-px h-6 bg-gray-300 right-0 top-0" />
-                 {/* Bottom Nodes */}
-                 <div className="absolute -left-6 top-6 w-12 h-12 rounded-xl bg-primary-50 border border-primary-200" />
-                 <div className="absolute -right-6 top-6 w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200" />
+                 {/* L2 to L3 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '145px', left: '50%', height: '20px' }} />
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', width: '80%' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '30%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '70%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '90%', height: '25px' }} />
+
+                 {/* L3 to L4 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '10%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '30%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '50%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '70%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '90%', height: '20px' }} />
+
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', width: '80%' }} />
+
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '30%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '70%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '90%', height: '25px' }} />
+
+                 {/* ─── NODES ────────── */}
+                 {/* L1 */}
+                 <OrgNode top={0} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 
+                 {/* L2 */}
+                 <OrgNode top={95} left={20} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={95} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={95} left={80} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+
+                 {/* L3 */}
+                 <OrgNode top={190} left={10} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={190} left={30} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={190} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={190} left={70} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={190} left={90} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+
+                 {/* L4 */}
+                 <OrgNode top={285} left={10} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={285} left={30} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={285} left={50} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={285} left={70} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={285} left={90} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
                </div>
                
-               <div className="mt-8">
+               <div className="mt-8 relative z-20">
                  <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
                    View People Behind the Company
                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
