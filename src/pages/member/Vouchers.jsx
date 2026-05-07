@@ -19,12 +19,12 @@ const PRODUCTS = [
 ];
 
 const PRODUCT_IMAGES = {
-  bl: '/legacy-img/barley_01.png',
-  gl: '/legacy-img/gluta.png',
-  glc: '/legacy-img/collagen.png',
-  cm: '/legacy-img/coffeemix.png',
-  cd: '/legacy-img/choco.png',
-  mgt: '/legacy-img/mangosteen.png',
+  bl: '/legacy-img/Barley-Mix.png',
+  gl: '/legacy-img/Glow-Pill.png',
+  glc: '/legacy-img/Vitamin-C-Collagen.png',
+  cm: '/legacy-img/Coffee-Mix.png',
+  cd: '/legacy-img/Chox-Mix.png',
+  mgt: '/legacy-img/Mangoosteen_1.png',
 };
 
 function Spinner() {
