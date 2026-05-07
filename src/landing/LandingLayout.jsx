@@ -69,7 +69,7 @@ function Navbar() {
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `relative px-3 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${isActive
+                  `relative px-3 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${link.label === 'Our Products' ? 'nav-products-link ' : ''}${isActive
                     ? 'text-brand-gold-dark'
                     : 'text-gray-600 hover:text-brand-brown'
                   }`
@@ -78,6 +78,12 @@ function Navbar() {
                 {({ isActive }) => (
                   <>
                     <span className="relative z-10">{link.label}</span>
+                    {link.label === 'Our Products' && (
+                      <>
+                        <span className="nav-products-aura" />
+                        <span className="nav-products-sheen" />
+                      </>
+                    )}
                     {isActive && (
                       <div className="absolute inset-0 bg-brand-gold/10 rounded-xl"></div>
                     )}
@@ -89,7 +95,7 @@ function Navbar() {
           </div>
 
           {/* CTA + Mobile toggle */}
-          <div className="flex items-center justify-end gap-3 z-10 w-[170px] flex-shrink-0">
+          <div className="flex items-center justify-end gap-3 z-10 w-auto sm:w-[170px] flex-shrink-0">
             <a
               href="/portal/login"
               className="relative hidden sm:inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden whitespace-nowrap"
@@ -191,7 +197,7 @@ function Footer() {
           <div>
             <h4 className="text-brand-gold-light font-semibold text-sm mb-4">Our Products</h4>
             <ul className="space-y-3 text-sm text-white/50">
-              <li>Barley Juice</li><li>Nogatu Glow</li><li>Collagen Vitamin C</li><li>Chocolate Drink Mix</li><li>Coffee Mix</li><li>Mangosteen Coffee</li>
+              <li>Barley Juice</li><li>Nogatu Glow</li><li>Collagen Vitamin C</li><li>Chocolate Drink Mix</li><li>Coffee Mix</li><li>Mangosteen Coffee</li><li>Vitamin C</li><li>Max Fuel Coffee</li><li>Berry NAD+</li>
             </ul>
           </div>
 

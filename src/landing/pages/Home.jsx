@@ -43,13 +43,13 @@ function Hero() {
           </div>
 
           <div className="order-1 lg:order-2 w-full lg:w-6/12 flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 lg:mt-0 flex-1 lg:flex-none items-center">
-            <div className="relative w-full max-w-[315px] sm:max-w-[430px] lg:max-w-[620px] xl:max-w-[700px] mx-auto lg:mx-0">
+            <div className="relative w-[120vw] max-w-[460px] sm:w-full sm:max-w-[430px] lg:max-w-[620px] xl:max-w-[700px] mx-auto lg:mx-0 -ml-2 sm:ml-0">
               <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-3/4 h-1/3 rounded-full blur-[60px] bg-brand-gold/55 motion-safe:animate-pulse-glow" />
               <div className="absolute inset-x-10 bottom-4 h-10 rounded-full bg-black/35 blur-[32px]" />
               <img
                 src="/img/landing-product.png"
                 alt="Nogatu Alliance Products"
-                className="relative z-10 w-full max-h-[48svh] sm:max-h-none h-auto object-contain motion-safe:animate-float-slow drop-shadow-[0_28px_60px_rgba(0,0,0,0.55)] origin-bottom lg:origin-center"
+                className="relative z-10 w-full h-auto object-contain motion-safe:animate-float-slow drop-shadow-[0_28px_60px_rgba(0,0,0,0.55)] origin-bottom lg:origin-center"
               />
             </div>
           </div>
@@ -105,16 +105,19 @@ function AboutPreview() {
         <SectionHeader badge="About Us" title="Learn More About Us" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div ref={ref1} className="reveal-left">
-            <div className="relative">
+            <div className="relative about-photo-frame">
+              <div className="about-photo-glow" />
+              <div className="about-photo-orb about-photo-orb-left" />
+              <div className="about-photo-orb about-photo-orb-right" />
               <img
                 src="/landing/assets/img/about.jpg"
                 alt="About NOGATU Alliance"
-                className="rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30"
+                className="relative z-10 rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30 about-photo-main"
                 onClick={() => lightbox.open('/landing/assets/img/about.jpg')}
                 loading="lazy"
               />
               {/* Accent badge */}
-              <div className="absolute -bottom-4 -right-4 rounded-2xl px-5 py-3 shadow-xl" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
+              <div className="absolute -bottom-4 -right-4 rounded-2xl px-5 py-3 shadow-xl about-photo-badge" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
                 <div className="text-white font-black text-xl">10+</div>
                 <div className="text-white/80 text-xs font-semibold uppercase tracking-wide">Products</div>
               </div>
@@ -128,20 +131,32 @@ function AboutPreview() {
               It also provides its members with competitive marketing incentives.
             </p>
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
-              <div className="rounded-2xl border border-primary-200/40 bg-white/70 p-4 sm:p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand-gold-dark mb-2">Main Office</p>
+              <div className="about-info-card">
+                <div className="about-info-icon">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Main Office</p>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City</p>
               </div>
-              <div className="rounded-2xl border border-primary-200/40 bg-white/70 p-4 sm:p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand-gold-dark mb-2">Satellite Branch</p>
+              <div className="about-info-card">
+                <div className="about-info-icon">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
+                  </svg>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Satellite Branch</p>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Reserved space for your satellite branch address and contact details.</p>
               </div>
             </div>
-            <div className="relative inline-block">
+            <div className="relative inline-block product-mini-frame">
+              <div className="product-mini-glow" />
               <img
                 src="/landing/img/about-2.jpg"
                 alt="NOGATU Products"
-                className="rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer border border-primary-200/30"
+                className="relative z-10 rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer border border-primary-200/30 product-mini-image"
                 onClick={() => lightbox.open('/landing/img/about-2.jpg')}
                 loading="lazy"
               />
@@ -197,17 +212,19 @@ function WhyUs() {
             {features.map((f, i) => {
               const cardRef = useScrollReveal({ delay: i * 100 });
               return (
-                <div key={f.title} ref={cardRef} className="reveal group bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                  <div className="feature-story-shine" />
+                  <div className="feature-story-aura" />
                   <div
-                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110"
+                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110 feature-story-icon"
                     style={{ color: '#B8860B', backgroundColor: 'rgba(212,165,40,0.08)' }}
                   >
                     <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={f.icon} />
                     </svg>
                   </div>
-                  <h4 className="font-bold text-gray-900 mb-2">{f.title}</h4>
-                  <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                  <h4 className="font-bold text-brand-brown mb-3 text-lg">{f.title}</h4>
+                  <p className="text-sm leading-7 text-[#6d3028] font-medium max-w-[15rem] mx-auto">{f.desc}</p>
                 </div>
               );
             })}
@@ -222,34 +239,39 @@ function WhyUs() {
 function Products() {
   const lightbox = useLightbox();
   const products = [
-    { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/barley_01.png', imgLg: '/legacy-img/barley_01.png' },
-    { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png' },
-    { name: 'Nogatu Collagen Vitamin C', desc: 'Vitamin C with Collagen', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png' },
-    { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/Chox-Mix.png', imgLg: '/legacy-img/Chox-Mix.png' },
-    { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png', imgLg: '/legacy-img/Coffee-Mix.png' },
-    { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/Mangoosteen_1.png', imgLg: '/legacy-img/Mangoosteen_1.png' },
-    { name: 'Vitamin C', desc: 'Vitamin supplement', price: 'TBA', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png' },
+    { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/barley-mix.png', imgLg: '/legacy-img/barley-mix.png' },
+    { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/glow-pill.png', imgLg: '/legacy-img/glow-pill.png' },
+    { name: 'Nogatu Collagen Vitamin C', desc: 'Vitamin C with Collagen', price: '500.00', img: '/legacy-img/vitamin-c-collagen.png', imgLg: '/legacy-img/vitamin-c-collagen.png' },
+    { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/chox-mix.png', imgLg: '/legacy-img/chox-mix.png' },
+    { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/coffee-mix.png', imgLg: '/legacy-img/coffee-mix.png' },
+    { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/mangoosteen_1.png', imgLg: '/legacy-img/mangoosteen_1.png' },
+    { name: 'Vitamin C', desc: 'Vitamin supplement', price: 'TBA', img: '/legacy-img/vitamin-c.png', imgLg: '/legacy-img/vitamin-c.png' },
     { name: 'Black Coffee', desc: 'Premium black coffee drink mix', price: 'TBA', img: '/legacy-img/blck-coffee.png', imgLg: '/legacy-img/blck-coffee.png' },
-    { name: 'Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: 'TBA', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png' },
-    { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: 'TBA', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png' },
+    { name: 'Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: 'TBA', img: '/legacy-img/max-fuel.png', imgLg: '/legacy-img/max-fuel.png' },
+    { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: 'TBA', img: '/legacy-img/berry-nad.png', imgLg: '/legacy-img/berry-nad.png' },
   ];
 
   return (
     <section className="section-padding relative overflow-hidden" style={{ background: '#FFFDF5' }}>
       {/* Geo pattern */}
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
+      <div className="absolute inset-0 pointer-events-none product-lineup-wash" />
       <div className="section-container relative z-10">
         <SectionHeader badge="Products" title="Our Line-up" />
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {products.map((p, i) => {
             const ref = useScrollReveal({ delay: i * 80 });
             return (
-              <div key={p.name} ref={ref} className="reveal group text-center">
+              <div key={p.name} ref={ref} className="reveal group text-center product-lineup-card">
                 <div
-                  className="relative overflow-hidden rounded-2xl p-4 sm:p-8 flex items-center justify-center h-44 sm:h-56 mb-4 cursor-pointer border border-primary-200/30 motion-safe:transition-all motion-safe:duration-300 group-hover:shadow-lg"
+                  className="relative overflow-hidden rounded-[1.75rem] p-4 sm:p-8 flex items-center justify-center h-44 sm:h-56 mb-4 cursor-pointer border border-primary-200/30 motion-safe:transition-all motion-safe:duration-500 group-hover:shadow-lg"
                   style={{ background: 'linear-gradient(135deg, #FFFDF5, #FFF8E1)' }}
                   onClick={() => p.imgLg && lightbox.open(p.imgLg)}
                 >
+                  <div className="product-card-ambient product-card-ambient-left" />
+                  <div className="product-card-ambient product-card-ambient-right" />
+                  <div className="product-card-sheen" />
+                  <div className="product-card-grid" />
                   {p.placeholder ? (
                     <div className="w-full h-full rounded-xl border-2 border-dashed border-brand-gold/35 bg-white/45 flex flex-col items-center justify-center text-brand-brown">
                       <svg className="w-10 h-10 text-brand-gold-dark mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -259,10 +281,11 @@ function Products() {
                     <img
                       src={p.imgLg}
                       alt={p.name}
-                      className="max-h-44 object-contain group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500"
+                      className="relative z-10 max-h-44 object-contain group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500 product-card-image"
                       loading="lazy"
                     />
                   )}
+                  <div className="product-card-badge">Wellness Pick</div>
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 motion-safe:transition-colors motion-safe:duration-300 flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-300 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-md">
                       <svg className="w-5 h-5 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
@@ -285,6 +308,14 @@ function Products() {
 /* ────────────────────── Organizations Preview ───────────── */
 function OrganizationsPreview() {
   const ref = useScrollReveal();
+
+  const OrgNode = ({ top, left, hc, bc }) => (
+    <div className="absolute flex flex-col items-center -translate-x-1/2 z-10" style={{ top: `${top}px`, left: `${left}%` }}>
+      <div className={`w-[18px] h-[18px] sm:w-[22px] sm:h-[22px] rounded-full shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)] mb-1 border border-white/40 bg-gradient-to-b ${hc}`} />
+      <div className={`w-10 h-7 sm:w-12 sm:h-8 rounded-t-xl rounded-b shadow-[0_4px_6px_rgba(0,0,0,0.2),inset_0_-3px_5px_rgba(0,0,0,0.2)] border border-black/10 bg-gradient-to-b ${bc}`} />
+    </div>
+  );
+
   return (
     <section className="section-padding relative overflow-hidden bg-white">
       {/* Minimalist Backgound Pattern */}
@@ -300,25 +331,69 @@ function OrganizationsPreview() {
             Meet the key leaders and important people behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
           </p>
 
-          <div className="relative p-8 md:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
-            {/* Minimalist Org Chart Abstract */}
-            <div className="flex flex-col items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
-               {/* Top Node */}
-               <div className="w-16 h-16 rounded-full bg-brand-gold-dark/10 border border-brand-gold-dark flex items-center justify-center mb-6 relative">
-                 <div className="w-8 h-8 rounded-full bg-brand-gold-dark" />
-                 <div className="absolute w-px h-8 bg-gray-300 -bottom-8" />
-               </div>
+          <div className="relative p-6 sm:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
+            <div className="flex flex-col items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-500 overflow-x-auto pb-6 w-full">
+               
+               {/* Fixed-dimension container allows perfect positional scaling */}
+               <div className="min-w-[400px] w-full max-w-[650px] mx-auto h-[350px] relative mt-2">
+                 
+                 {/* ─── LINES ────────── */}
+                 {/* L1 to L2 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '50px', left: '50%', height: '20px' }} />
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', width: '60%' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '80%', height: '25px' }} />
 
-               {/* Connector Line */}
-               <div className="w-48 h-px bg-gray-300 mb-8 relative">
-                 <div className="absolute w-px h-6 bg-gray-300 left-0 top-0" />
-                 <div className="absolute w-px h-6 bg-gray-300 right-0 top-0" />
-                 {/* Bottom Nodes */}
-                 <div className="absolute -left-6 top-6 w-12 h-12 rounded-xl bg-primary-50 border border-primary-200" />
-                 <div className="absolute -right-6 top-6 w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200" />
+                 {/* L2 to L3 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '145px', left: '50%', height: '20px' }} />
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', width: '80%' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '30%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '70%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '90%', height: '25px' }} />
+
+                 {/* L3 to L4 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '10%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '30%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '50%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '70%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '90%', height: '20px' }} />
+
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', width: '80%' }} />
+
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '30%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '70%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '90%', height: '25px' }} />
+
+                 {/* ─── NODES ────────── */}
+                 {/* L1 */}
+                 <OrgNode top={0} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 
+                 {/* L2 */}
+                 <OrgNode top={95} left={20} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={95} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={95} left={80} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+
+                 {/* L3 */}
+                 <OrgNode top={190} left={10} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={190} left={30} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={190} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={190} left={70} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={190} left={90} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+
+                 {/* L4 */}
+                 <OrgNode top={285} left={10} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={285} left={30} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={285} left={50} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={285} left={70} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={285} left={90} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
                </div>
                
-               <div className="mt-8">
+               <div className="mt-8 relative z-20">
                  <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
                    View People Behind the Company
                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>

@@ -14,20 +14,21 @@ function Spinner() {
 /* Rotating gold colors per card */
 const CARD_ACCENTS = [
   '#D4AF37', '#F2D06B', '#B87333', '#D4AF37', '#9A7B0A',
-  '#F2D06B', '#D4AF37', '#B87333', '#F2D06B',
+  '#F2D06B', '#D4AF37', '#B87333', '#F2D06B', '#B87333',
 ];
 
-const PRODUCT_IMAGES = {
-  bl: '/legacy-img/barley_01.png',
-  gl: '/legacy-img/gluta.png',
-  glc: '/legacy-img/collagen.png',
-  cm: '/legacy-img/coffeemix.png',
-  cd: '/legacy-img/choco.png',
-  mgt: '/legacy-img/mangosteen.png',
-  vz: '/legacy-img/vitamin-zinc.png',
-  cmm: '/legacy-img/max-fuel-coffee.png',
-  bkc: '/legacy-img/black-coffee.png',
-};
+const PRODUCT_CATALOG = [
+  { key: 'bl', name: 'Barley', image: '/legacy-img/barley-mix.png' },
+  { key: 'gl', name: 'Glutathione', image: '/legacy-img/glow-pill.png' },
+  { key: 'glc', name: 'Gluta w/ Collagen', image: '/legacy-img/vitamin-c-collagen.png' },
+  { key: 'cm', name: 'Coffee Mix', image: '/legacy-img/coffee-mix.png' },
+  { key: 'cd', name: 'Chocolate Drink', image: '/legacy-img/chox-mix.png' },
+  { key: 'mgt', name: 'Mangosteen', image: '/legacy-img/mangoosteen_1.png' },
+  { key: 'vz', name: 'Vitamin Zinc', image: '/legacy-img/vitamin-c.png' },
+  { key: 'cmm', name: 'Max Coffee', image: '/legacy-img/max-fuel.png' },
+  { key: 'bkc', name: 'Black Coffee', image: '/legacy-img/blck-coffee.png' },
+  { key: 'bnad', name: 'Berry NAD', image: '/legacy-img/berry-nad.png' },
+];
 
 export default function HiFiveBonus() {
   const [products, setProducts] = useState([]);
@@ -38,7 +39,20 @@ export default function HiFiveBonus() {
   async function loadData() {
     try {
       const res = await api.get('/hifive');
-      setProducts(res.data.products);
+      const apiProducts = Array.isArray(res.data.products) ? res.data.products : [];
+      const productMap = new Map(apiProducts.map((product) => [product.key, product]));
+      const mergedProducts = PRODUCT_CATALOG.map((product) => {
+        const apiProduct = productMap.get(product.key);
+        return {
+          key: product.key,
+          name: apiProduct?.name || product.name,
+          image: product.image,
+          bonus: apiProduct?.bonus || 0,
+          purchases: apiProduct?.purchases || 0,
+          redeemable: apiProduct?.redeemable || 0,
+        };
+      });
+      setProducts(mergedProducts);
     } catch { } finally { setLoading(false); }
   }
 
@@ -102,9 +116,9 @@ export default function HiFiveBonus() {
                 <h3 className="font-semibold text-white text-sm mb-4 leading-tight">{p.name}</h3>
 
                 {/* Legacy product visual */}
-                {PRODUCT_IMAGES[p.key] && (
+                {p.image && (
                   <img
-                    src={PRODUCT_IMAGES[p.key]}
+                    src={p.image}
                     alt={p.name}
                     className="w-full h-32 object-contain rounded-xl mb-4"
                     style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.08)' }}
