@@ -33,6 +33,7 @@ import GenerateCodes from './pages/admin/GenerateCodes';
 import ManageCodes from './pages/admin/ManageCodes';
 import Encashment from './pages/admin/Encashment';
 import Redeem from './pages/admin/Redeem';
+import HiFivePackageClaims from './pages/admin/HiFivePackageClaims';
 import UpdateAccounts from './pages/admin/UpdateAccounts';
 import IncomeDetails from './pages/admin/IncomeDetails';
 import CDPaymentDetails from './pages/admin/CDPaymentDetails';
@@ -176,6 +177,10 @@ export default function App() {
           <Route
             path="redeem"
             element={<ProtectedAdminRoles allowed={[1, 3]}><Redeem /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="hifive-package-claims"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><HiFivePackageClaims /></ProtectedAdminRoles>}
           />
           <Route
             path="rankings"

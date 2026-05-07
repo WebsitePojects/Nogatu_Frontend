@@ -34,6 +34,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin/encashment', label: 'Encashment', icon: HiOutlineCash, roles: [1, 3] },
       { to: '/admin/redeem', label: 'Hi-Five Redeem', icon: HiOutlineGift, roles: [1, 3] },
+      { to: '/admin/hifive-package-claims', label: 'Hi-Five Package Claims', icon: HiOutlineGift, roles: [1, 3] },
       { to: '/admin/rankings', label: 'Rankings', icon: HiOutlineShieldCheck, roles: [1, 3] },
       { to: '/admin/global-bonus', label: 'Global Bonus', icon: HiOutlineSparkles, roles: [1, 3] },
       { to: '/admin/cd-accounts', label: 'CD Accounts', icon: HiOutlineBadgeCheck, roles: [1, 3] },
