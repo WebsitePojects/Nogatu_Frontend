@@ -14,6 +14,8 @@ export default function Join() {
     firstname: '',
     lastname: '',
     middlename: '',
+    email: '',
+    tin: '',
   });
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function Join() {
       const res = await fetch('/api/registration/public-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, token }),
+        body: JSON.stringify({ ...form, token, slug: invite?.reusable ? token : undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed.');
@@ -74,7 +76,7 @@ export default function Join() {
           ) : invite ? (
             <>
               <div className="rounded-xl bg-[#FFF8E1] border border-brand-gold/25 p-4 mb-6 text-sm text-brand-brown">
-                Sponsor: <strong>{invite.sponsor_username}</strong> | Placement UID: <strong>{invite.placement_uid}</strong> | Position: <strong>{Number(invite.position) === 1 ? 'Left' : 'Right'}</strong>
+                Sponsor: <strong>{invite.sponsor_username}</strong>{invite.reusable ? ' | Reusable sponsor referral' : ` | Placement UID: ${invite.placement_uid} | Position: ${Number(invite.position) === 1 ? 'Left' : 'Right'}`}
               </div>
               <form onSubmit={submit} className="space-y-4">
                 {[
@@ -82,6 +84,8 @@ export default function Join() {
                   { key: 'firstname', label: 'First Name', type: 'text' },
                   { key: 'lastname', label: 'Last Name', type: 'text' },
                   { key: 'middlename', label: 'Middle Name', type: 'text', optional: true },
+                  { key: 'email', label: 'Email', type: 'email' },
+                  { key: 'tin', label: 'TIN', type: 'text' },
                   { key: 'username', label: 'Username', type: 'text' },
                   { key: 'password', label: 'Password', type: 'password' },
                 ].map((field) => (

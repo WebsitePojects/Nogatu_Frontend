@@ -47,6 +47,7 @@ function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
             <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.8)' }}><span>Encash Amount</span><span>₱{fmt(data.encashAmount)}</span></div>
             <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>Withholding Tax (10%)</span><span>- ₱{fmt(data.tax)}</span></div>
             <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>Processing Fee</span><span>- ₱{fmt(data.fee)}</span></div>
+            <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>System Maintenance Fee</span><span>- ₱{fmt(data.maintenanceFee)}</span></div>
             {Number(data.cdDeduction || 0) > 0 && (
               <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>CD Deduction</span><span>- ₱{fmt(data.cdDeduction)}</span></div>
             )}
@@ -91,6 +92,8 @@ export default function EWallet() {
   const [globalBonus, setGlobalBonus] = useState(null);
   const [loading, setLoading]       = useState(true);
   const [encashAmount, setEncashAmount] = useState('');
+  const [encashPreview, setEncashPreview] = useState(null);
+  const [previewError, setPreviewError] = useState('');
   const [processing, setProcessing] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [showReceipt, setShowReceipt] = useState(false);
@@ -102,6 +105,36 @@ export default function EWallet() {
     const interval = setInterval(loadData, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const amount = Number(encashAmount);
+    if (!amount || amount <= 0) {
+      setEncashPreview(null);
+      setPreviewError('');
+      return undefined;
+    }
+
+    let cancelled = false;
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await api.post('/wallet/preview-encash', { amount });
+        if (!cancelled) {
+          setEncashPreview(res.data.preview);
+          setPreviewError('');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setEncashPreview(err.response?.data?.preview || null);
+          setPreviewError(err.response?.data?.error || 'Unable to preview encashment.');
+        }
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [encashAmount]);
 
   async function loadData() {
     try {
@@ -129,6 +162,7 @@ export default function EWallet() {
     const amount = Number(encashAmount);
     if (!amount || amount <= 0) return toast.error('Please enter a valid amount greater than zero');
     if (amount > (data?.cashBalance || 0)) return toast.error('Insufficient balance');
+    if (previewError) return toast.error(previewError);
     setProcessing(true);
     try {
       const res = await api.post('/wallet/encash', { amount });
@@ -138,12 +172,13 @@ export default function EWallet() {
         encashAmount: amount,
         tax: Number(res.data.tax || amount * 0.10),
         fee: Number(res.data.fee || 50),
+        maintenanceFee: Number(res.data.maintenanceFee || 20),
         cdDeduction: Number(res.data.cdDeduction || 0),
         netReceivable: Number(res.data.netReceivable || 0),
         beginBalance: Number(data?.cashBalance || 0),
         endBalance: Number(res.data.newBalance || 0),
         paymentOption: res.data.paymentOption || data?.payoutOption,
-        paymentDetails: res.data.paymentDetails || data?.payoutDetails,
+        paymentDetails: res.data.paymentDetailsMasked || res.data.paymentDetails || data?.payoutDetails,
         processedAt: new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' }),
         payoutDate: res.data.payoutDate || 'Next Friday',
       });
@@ -172,9 +207,11 @@ export default function EWallet() {
 
   /* Estimated deductions preview */
   const previewAmount = Number(encashAmount) || 0;
-  const previewTax    = previewAmount * 0.10;
-  const previewFee    = previewAmount > 0 ? 50 : 0;
-  const previewNet    = previewAmount - previewTax - previewFee;
+  const previewTax    = Number(encashPreview?.deductions?.tax || previewAmount * 0.10);
+  const previewFee    = Number(encashPreview?.deductions?.processingFee || (previewAmount > 0 ? 50 : 0));
+  const previewMaintenanceFee = Number(encashPreview?.deductions?.maintenanceFee || (previewAmount > 0 ? 20 : 0));
+  const previewCdDeduction = Number(encashPreview?.deductions?.cdDeduction || 0);
+  const previewNet    = Number(encashPreview?.net ?? (previewAmount - previewTax - previewFee - previewMaintenanceFee - previewCdDeduction));
   const bonusMonthIdx = Math.max(0, Math.min(11, Number(globalBonus?.month || 1) - 1));
   const bonusPeriodLabel = globalBonus ? `${MONTHS[bonusMonthIdx]} ${globalBonus.year || ''}`.trim() : 'N/A';
   const hasDistributedShare = Number(globalBonus?.distributedShare || 0) > 0;
@@ -311,7 +348,7 @@ export default function EWallet() {
             }}
           >
             <span style={{ color: '#D4AF37', fontSize: '14px', lineHeight: 1 }}>ℹ</span>
-            <span>No fixed minimum amount · 10% withholding tax · ₱50 processing fee · Payout every Friday</span>
+            <span>No fixed minimum amount · 10% withholding tax · ₱50 processing fee · ₱20 system maintenance fee · Payout every Friday</span>
           </div>
 
           <form onSubmit={handleEncash} className="space-y-4">
@@ -343,6 +380,21 @@ export default function EWallet() {
                   <span>Processing Fee</span>
                   <span>- ₱{fmt(previewFee)}</span>
                 </div>
+                <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  <span>System Maintenance Fee</span>
+                  <span>- ₱{fmt(previewMaintenanceFee)}</span>
+                </div>
+                {previewCdDeduction > 0 && (
+                  <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    <span>CD Deduction</span>
+                    <span>- ₱{fmt(previewCdDeduction)}</span>
+                  </div>
+                )}
+                {previewError && (
+                  <div className="rounded-lg px-3 py-2" style={{ background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.25)' }}>
+                    {previewError}
+                  </div>
+                )}
                 <div
                   className="flex justify-between font-semibold pt-2 border-t"
                   style={{ borderColor: 'rgba(212,175,55,0.15)', color: previewNet > 0 ? '#D4AF37' : '#ef4444' }}

@@ -1,7 +1,35 @@
-import { HiOutlineMail, HiOutlineExternalLink } from 'react-icons/hi';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { HiOutlineMail, HiOutlineExternalLink, HiOutlinePencilAlt, HiOutlineX } from 'react-icons/hi';
 import { FaFacebook } from 'react-icons/fa';
+import api from '../../api';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function SupportContact() {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ subject: '', message: '' });
+
+  async function submitTicket(event) {
+    event.preventDefault();
+    if (!form.subject.trim() || !form.message.trim()) {
+      return toast.error('Subject and message are required.');
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await api.post('/support/ticket', form);
+      toast.success(`Ticket submitted: ${res.data.ticketUid}`);
+      setForm({ subject: '', message: '' });
+      setOpen(false);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Unable to submit support ticket.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div>
       <div className="mb-7">
@@ -10,11 +38,7 @@ export default function SupportContact() {
       </div>
 
       <div className="max-w-xl">
-        {/* Info banner */}
-        <div
-          className="glass-card rounded-2xl p-6 mb-5"
-          style={{ borderLeft: '3px solid rgba(59,130,246,0.6)' }}
-        >
+        <div className="glass-card rounded-2xl p-6 mb-5" style={{ borderLeft: '3px solid rgba(59,130,246,0.6)' }}>
           <p className="text-sm font-medium text-white/70 mb-1">Preferred support channel</p>
           <p className="text-lg font-bold text-white">NAWi Help Desk</p>
           <p className="text-sm text-white/50 mt-1">
@@ -23,17 +47,13 @@ export default function SupportContact() {
           </p>
         </div>
 
-        {/* Facebook button */}
         <div className="glass-card rounded-2xl p-6 mb-5">
           <div className="flex items-center gap-3 mb-4">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}
-            >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}>
               <FaFacebook className="w-5 h-5" style={{ color: '#60a5fa' }} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Facebook — NAWi Help Desk</p>
+              <p className="text-sm font-semibold text-white">Facebook - NAWi Help Desk</p>
               <p className="text-xs" style={{ color: 'rgba(212,175,55,0.5)' }}>Fastest response time</p>
             </div>
           </div>
@@ -41,14 +61,8 @@ export default function SupportContact() {
             href="https://www.facebook.com/profile.php?id=61577667873284"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-colors"
-            style={{
-              background: 'rgba(59,130,246,0.15)',
-              color: '#60a5fa',
-              border: '1px solid rgba(59,130,246,0.3)',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.25)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.15)'; }}
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold"
+            style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)' }}
           >
             <FaFacebook className="w-4 h-4" />
             Message NAWi Help Desk
@@ -56,47 +70,31 @@ export default function SupportContact() {
           </a>
         </div>
 
-        {/* Landing contact feedback form */}
         <div className="glass-card rounded-2xl p-6 mb-5">
           <div className="flex items-center gap-3 mb-4">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.28)' }}
-            >
-              <HiOutlineMail className="w-5 h-5" style={{ color: '#34d399' }} />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.28)' }}>
+              <HiOutlinePencilAlt className="w-5 h-5" style={{ color: '#34d399' }} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Send a Message Form</p>
+              <p className="text-sm font-semibold text-white">In-Portal Support Ticket</p>
               <p className="text-xs" style={{ color: 'rgba(52,211,153,0.75)' }}>
-                We will reply using the email address you submit in the form.
+                Your member identity is attached automatically without logging you out.
               </p>
             </div>
           </div>
-          <a
-            href="/contact"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-colors"
-            style={{
-              background: 'rgba(16,185,129,0.14)',
-              color: '#34d399',
-              border: '1px solid rgba(16,185,129,0.3)',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.22)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.14)'; }}
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold"
+            style={{ background: 'rgba(16,185,129,0.14)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}
           >
-            Open Feedback Form
-            <HiOutlineExternalLink className="w-3.5 h-3.5 opacity-70" />
-          </a>
+            Open Ticket Form
+          </button>
         </div>
 
-        {/* Email */}
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}
-            >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}>
               <HiOutlineMail className="w-5 h-5" style={{ color: '#D4AF37' }} />
             </div>
             <div>
@@ -106,20 +104,51 @@ export default function SupportContact() {
           </div>
           <a
             href="mailto:nogatu.assist@gmail.com?subject=Nogatu%20System%20Concern"
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-colors"
-            style={{
-              background: 'rgba(212,175,55,0.08)',
-              color: '#D4AF37',
-              border: '1px solid rgba(212,175,55,0.2)',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.15)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.08)'; }}
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold"
+            style={{ background: 'rgba(212,175,55,0.08)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
           >
             <HiOutlineMail className="w-4 h-4" />
             nogatu.assist@gmail.com
           </a>
         </div>
       </div>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onMouseDown={() => setOpen(false)}>
+          <form
+            onSubmit={submitTicket}
+            onMouseDown={(event) => event.stopPropagation()}
+            className="w-full max-w-lg rounded-2xl p-6"
+            style={{ background: '#12100a', border: '1px solid rgba(212,175,55,0.22)' }}
+          >
+            <div className="flex items-start justify-between gap-3 mb-5">
+              <div>
+                <h2 className="font-display text-lg font-bold text-white">Support Ticket</h2>
+                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  {user?.username || user?.accountname || 'Logged-in member'}
+                </p>
+              </div>
+              <button type="button" onClick={() => setOpen(false)} className="p-2 rounded-lg" style={{ color: '#D4AF37', border: '1px solid rgba(212,175,55,0.22)' }}>
+                <HiOutlineX className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="label">Subject</label>
+                <input className="glass-input" value={form.subject} onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))} maxLength={180} />
+              </div>
+              <div>
+                <label className="label">Message</label>
+                <textarea className="glass-input min-h-[150px]" value={form.message} onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))} maxLength={5000} />
+              </div>
+              <button type="submit" disabled={submitting} className="btn-success w-full">
+                {submitting ? 'Submitting...' : 'Submit Ticket'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

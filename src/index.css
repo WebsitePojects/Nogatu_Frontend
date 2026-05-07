@@ -503,6 +503,117 @@ html:not(.dark) .label {
     height: 1rem;
   }
 
+  .genealogy-fullscreen-shell {
+    border-radius: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, rgba(15, 11, 6, 0.98), rgba(10, 8, 5, 1));
+  }
+
+  .genealogy-flow .react-flow__renderer {
+    background: transparent;
+  }
+
+  .genealogy-flow .react-flow__edge-path {
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.18));
+  }
+
+  .genealogy-flow .react-flow__controls {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.38);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(15, 12, 9, 0.96);
+  }
+
+  .genealogy-flow .react-flow__controls-button {
+    background: rgba(15, 12, 9, 0.96);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+    color: #f2d06b;
+    width: 38px;
+    height: 38px;
+  }
+
+  .genealogy-flow .react-flow__controls-button:hover {
+    background: rgba(212, 175, 55, 0.12);
+  }
+
+  .genealogy-flow .react-flow__controls-button svg {
+    fill: #f2d06b;
+  }
+
+  .genealogy-flow .react-flow__controls-button:last-child {
+    border-bottom: 0;
+  }
+
+  .genealogy-flow .react-flow__minimap {
+    background: rgba(14, 12, 9, 0.96);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 18px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
+    overflow: hidden;
+  }
+
+  .genealogy-flow .react-flow__minimap-mask {
+    fill: rgba(242, 208, 107, 0.14);
+    stroke: rgba(242, 208, 107, 0.65);
+    stroke-width: 1;
+  }
+
+  .genealogy-flow .react-flow__minimap-svg {
+    background: radial-gradient(circle at center, rgba(212, 175, 55, 0.06), rgba(14, 12, 9, 0.96));
+  }
+
+  html:not(.dark) .genealogy-flow .react-flow__controls {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(212, 175, 55, 0.24);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  }
+
+  html:not(.dark) .genealogy-flow .react-flow__controls-button {
+    background: rgba(255, 255, 255, 0.96);
+    color: #7a5c08;
+    border-bottom-color: rgba(212, 175, 55, 0.18);
+  }
+
+  html:not(.dark) .genealogy-flow .react-flow__controls-button:hover {
+    background: rgba(212, 175, 55, 0.12);
+  }
+
+  html:not(.dark) .genealogy-flow .react-flow__controls-button svg {
+    fill: #7a5c08;
+  }
+
+  html:not(.dark) .genealogy-flow .react-flow__minimap {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(212, 175, 55, 0.24);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
+  }
+
+  html:not(.dark) .genealogy-flow .react-flow__minimap-svg {
+    background: radial-gradient(circle at center, rgba(212, 175, 55, 0.08), rgba(248, 250, 252, 0.96));
+  }
+
+  html:not(.dark) .genealogy-flow .react-flow__minimap-mask {
+    fill: rgba(212, 175, 55, 0.12);
+    stroke: rgba(122, 92, 8, 0.62);
+  }
+
+  html:not(.dark) .genealogy-level-chip {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #7a5c08 !important;
+    border-color: rgba(212, 175, 55, 0.22) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  }
+
+  html:not(.dark) .genealogy-member-badge {
+    background: rgba(212, 175, 55, 0.16) !important;
+    color: #7a5c08 !important;
+    border-color: rgba(212, 175, 55, 0.32) !important;
+  }
+
   /* ─── HORIZONTAL SCROLL SNAP ──────────────────────────── */
 
   .snap-scroll-x {

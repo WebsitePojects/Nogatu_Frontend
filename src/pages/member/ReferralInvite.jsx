@@ -7,7 +7,8 @@ export default function ReferralInvite() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
 
-  const inviteUrl = invite?.token ? `${window.location.origin}/join/${invite.token}` : '';
+  const inviteToken = invite?.slug || invite?.referral_slug || invite?.token;
+  const inviteUrl = inviteToken ? `${window.location.origin}/join/${inviteToken}` : '';
 
   useEffect(() => {
     loadInvite();
@@ -16,10 +17,15 @@ export default function ReferralInvite() {
   async function loadInvite() {
     setLoading(true);
     try {
-      const res = await api.get('/registration/referral-invite');
-      setInvite(res.data.invite);
+      const res = await api.get('/registration/referral-link');
+      setInvite(res.data);
     } catch {
-      setInvite(null);
+      try {
+        const res = await api.get('/registration/referral-invite');
+        setInvite(res.data.invite);
+      } catch {
+        setInvite(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -67,14 +73,14 @@ export default function ReferralInvite() {
               </div>
               {invite && (
                 <p className="text-xs text-white/45 mt-3">
-                  Placement UID: {invite.placement_uid} | Position: {Number(invite.position) === 1 ? 'Left' : 'Right'}
+                  {invite.slug ? `Reusable sponsor slug: ${invite.slug}` : `Placement UID: ${invite.placement_uid} | Position: ${Number(invite.position) === 1 ? 'Left' : 'Right'}`}
                 </p>
               )}
             </div>
 
             <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/10 p-5">
               <p className="text-sm text-white/70 leading-relaxed">
-                Prospects still need a valid activation code. The referral link supplies your sponsor ID and the binary placement, so they can register without waiting for you to fill out the account form manually.
+                Prospects still need a valid activation code. The reusable referral link supplies your sponsor identity; the server chooses the next safe placement using your placement setting.
               </p>
             </div>
 

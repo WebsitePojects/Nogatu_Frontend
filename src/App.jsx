@@ -9,6 +9,7 @@ import AdminLayout from './layouts/AdminLayout';
 // Member Pages
 import Login from './pages/member/Login';
 import Dashboard from './pages/member/Dashboard';
+import DashboardMetricDetail from './pages/member/DashboardMetricDetail';
 import EWallet from './pages/member/EWallet';
 import AccountDetails from './pages/member/AccountDetails';
 import ActivationCodes from './pages/member/ActivationCodes';
@@ -108,6 +109,7 @@ export default function App() {
         <Route path="/" element={<ProtectedMember><MemberLayout /></ProtectedMember>}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard/details/:metric" element={<DashboardMetricDetail />} />
           <Route path="ewallet" element={<EWallet />} />
           <Route path="account" element={<AccountDetails />} />
           <Route path="codes" element={<ActivationCodes />} />
