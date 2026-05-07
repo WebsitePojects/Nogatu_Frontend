@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import api from '../../api';
 
 /* ── SVG Icons ────────────────────────────────────────────── */
 const CheckIcon = () => (
@@ -57,6 +58,9 @@ export default function Login() {
   const [password, setPassword]       = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading]         = useState(false);
+  const [forgotOpen, setForgotOpen]   = useState(false);
+  const [resetIdentifier, setResetIdentifier] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
   const { loginMember } = useAuth();
   const navigate = useNavigate();
 
@@ -73,6 +77,24 @@ export default function Login() {
       toast.error(msg, { id: toastId });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const submitForgotPassword = async (e) => {
+    e.preventDefault();
+    setResetLoading(true);
+    try {
+      const res = await api.post('/auth/forgot-password', { email: resetIdentifier });
+      toast.success('If the account exists, reset instructions will be sent.');
+      if (res.data?.debugResetToken) {
+        toast(`Dev reset token: ${res.data.debugResetToken}`, { duration: 10000 });
+      }
+      setForgotOpen(false);
+      setResetIdentifier('');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Unable to request reset instructions.');
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -264,6 +286,14 @@ export default function Login() {
             >
               {loading ? <><SpinnerIcon /> Signing in…</> : 'Sign In'}
             </button>
+            <button
+              type="button"
+              onClick={() => setForgotOpen(true)}
+              className="w-full text-xs font-semibold"
+              style={{ color: '#D4AF37' }}
+            >
+              Forgot password?
+            </button>
           </form>
 
           <p className="text-center text-xs mt-5 text-gray-600 dark:text-gray-400">
@@ -274,6 +304,34 @@ export default function Login() {
           </p>
         </div>
       </div>
+      {forgotOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onMouseDown={() => setForgotOpen(false)}>
+          <form
+            onSubmit={submitForgotPassword}
+            onMouseDown={(event) => event.stopPropagation()}
+            className="w-full max-w-md rounded-2xl p-6"
+            style={{ background: '#12100a', border: '1px solid rgba(212,175,55,0.22)' }}
+          >
+            <h2 className="font-display text-lg font-bold text-white">Reset Password</h2>
+            <p className="text-xs mt-1 mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              Enter your email or username. A single-use reset code expires after 15 minutes.
+            </p>
+            <input
+              value={resetIdentifier}
+              onChange={(event) => setResetIdentifier(event.target.value)}
+              className="glass-input mb-4"
+              placeholder="Email or username"
+              required
+            />
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setForgotOpen(false)} className="flex-1 rounded-xl py-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.16)' }}>Cancel</button>
+              <button type="submit" disabled={resetLoading} className="gold-btn flex-1 rounded-xl py-2 text-sm">
+                {resetLoading ? 'Sending...' : 'Send'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
