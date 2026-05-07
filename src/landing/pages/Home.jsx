@@ -105,16 +105,19 @@ function AboutPreview() {
         <SectionHeader badge="About Us" title="Learn More About Us" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div ref={ref1} className="reveal-left">
-            <div className="relative">
+            <div className="relative about-photo-frame">
+              <div className="about-photo-glow" />
+              <div className="about-photo-orb about-photo-orb-left" />
+              <div className="about-photo-orb about-photo-orb-right" />
               <img
                 src="/landing/assets/img/about.jpg"
                 alt="About NOGATU Alliance"
-                className="rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30"
+                className="relative z-10 rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30 about-photo-main"
                 onClick={() => lightbox.open('/landing/assets/img/about.jpg')}
                 loading="lazy"
               />
               {/* Accent badge */}
-              <div className="absolute -bottom-4 -right-4 rounded-2xl px-5 py-3 shadow-xl" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
+              <div className="absolute -bottom-4 -right-4 rounded-2xl px-5 py-3 shadow-xl about-photo-badge" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
                 <div className="text-white font-black text-xl">10+</div>
                 <div className="text-white/80 text-xs font-semibold uppercase tracking-wide">Products</div>
               </div>
@@ -128,20 +131,32 @@ function AboutPreview() {
               It also provides its members with competitive marketing incentives.
             </p>
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
-              <div className="rounded-2xl border border-primary-200/40 bg-white/70 p-4 sm:p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand-gold-dark mb-2">Main Office</p>
+              <div className="about-info-card">
+                <div className="about-info-icon">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Main Office</p>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City</p>
               </div>
-              <div className="rounded-2xl border border-primary-200/40 bg-white/70 p-4 sm:p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand-gold-dark mb-2">Satellite Branch</p>
+              <div className="about-info-card">
+                <div className="about-info-icon">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
+                  </svg>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Satellite Branch</p>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Reserved space for your satellite branch address and contact details.</p>
               </div>
             </div>
-            <div className="relative inline-block">
+            <div className="relative inline-block product-mini-frame">
+              <div className="product-mini-glow" />
               <img
                 src="/landing/img/about-2.jpg"
                 alt="NOGATU Products"
-                className="rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer border border-primary-200/30"
+                className="relative z-10 rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer border border-primary-200/30 product-mini-image"
                 onClick={() => lightbox.open('/landing/img/about-2.jpg')}
                 loading="lazy"
               />
@@ -197,17 +212,19 @@ function WhyUs() {
             {features.map((f, i) => {
               const cardRef = useScrollReveal({ delay: i * 100 });
               return (
-                <div key={f.title} ref={cardRef} className="reveal group bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                  <div className="feature-story-shine" />
+                  <div className="feature-story-aura" />
                   <div
-                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110"
+                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110 feature-story-icon"
                     style={{ color: '#B8860B', backgroundColor: 'rgba(212,165,40,0.08)' }}
                   >
                     <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={f.icon} />
                     </svg>
                   </div>
-                  <h4 className="font-bold text-gray-900 mb-2">{f.title}</h4>
-                  <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                  <h4 className="font-bold text-brand-brown mb-3 text-lg">{f.title}</h4>
+                  <p className="text-sm leading-7 text-[#6d3028] font-medium max-w-[15rem] mx-auto">{f.desc}</p>
                 </div>
               );
             })}
@@ -238,18 +255,23 @@ function Products() {
     <section className="section-padding relative overflow-hidden" style={{ background: '#FFFDF5' }}>
       {/* Geo pattern */}
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
+      <div className="absolute inset-0 pointer-events-none product-lineup-wash" />
       <div className="section-container relative z-10">
         <SectionHeader badge="Products" title="Our Line-up" />
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {products.map((p, i) => {
             const ref = useScrollReveal({ delay: i * 80 });
             return (
-              <div key={p.name} ref={ref} className="reveal group text-center">
+              <div key={p.name} ref={ref} className="reveal group text-center product-lineup-card">
                 <div
-                  className="relative overflow-hidden rounded-2xl p-4 sm:p-8 flex items-center justify-center h-44 sm:h-56 mb-4 cursor-pointer border border-primary-200/30 motion-safe:transition-all motion-safe:duration-300 group-hover:shadow-lg"
+                  className="relative overflow-hidden rounded-[1.75rem] p-4 sm:p-8 flex items-center justify-center h-44 sm:h-56 mb-4 cursor-pointer border border-primary-200/30 motion-safe:transition-all motion-safe:duration-500 group-hover:shadow-lg"
                   style={{ background: 'linear-gradient(135deg, #FFFDF5, #FFF8E1)' }}
                   onClick={() => p.imgLg && lightbox.open(p.imgLg)}
                 >
+                  <div className="product-card-ambient product-card-ambient-left" />
+                  <div className="product-card-ambient product-card-ambient-right" />
+                  <div className="product-card-sheen" />
+                  <div className="product-card-grid" />
                   {p.placeholder ? (
                     <div className="w-full h-full rounded-xl border-2 border-dashed border-brand-gold/35 bg-white/45 flex flex-col items-center justify-center text-brand-brown">
                       <svg className="w-10 h-10 text-brand-gold-dark mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -259,10 +281,11 @@ function Products() {
                     <img
                       src={p.imgLg}
                       alt={p.name}
-                      className="max-h-44 object-contain group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500"
+                      className="relative z-10 max-h-44 object-contain group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500 product-card-image"
                       loading="lazy"
                     />
                   )}
+                  <div className="product-card-badge">Wellness Pick</div>
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 motion-safe:transition-colors motion-safe:duration-300 flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-300 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-md">
                       <svg className="w-5 h-5 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>

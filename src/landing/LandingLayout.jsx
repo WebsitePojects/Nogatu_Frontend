@@ -69,7 +69,7 @@ function Navbar() {
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `relative px-3 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${isActive
+                  `relative px-3 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${link.label === 'Our Products' ? 'nav-products-link ' : ''}${isActive
                     ? 'text-brand-gold-dark'
                     : 'text-gray-600 hover:text-brand-brown'
                   }`
@@ -78,6 +78,12 @@ function Navbar() {
                 {({ isActive }) => (
                   <>
                     <span className="relative z-10">{link.label}</span>
+                    {link.label === 'Our Products' && (
+                      <>
+                        <span className="nav-products-aura" />
+                        <span className="nav-products-sheen" />
+                      </>
+                    )}
                     {isActive && (
                       <div className="absolute inset-0 bg-brand-gold/10 rounded-xl"></div>
                     )}

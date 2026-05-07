@@ -43,6 +43,12 @@ const SpinnerIcon = () => (
   </svg>
 );
 
+const ArrowLeftIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+  </svg>
+);
+
 const adminFeatures = [
   'Manage all member accounts',
   'Generate and release codes',
@@ -188,6 +194,14 @@ export default function AdminLogin() {
         className="flex-1 flex items-center justify-center px-6 py-12 bg-transparent"
       >
         <div className="w-full max-w-[400px]">
+          <button
+            type="button"
+            onClick={() => { window.location.href = '/'; }}
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-6 text-sm font-semibold border border-brand-gold/20 bg-white/70 text-brand-brown hover:bg-white motion-safe:transition-all motion-safe:duration-300 shadow-sm"
+          >
+            <ArrowLeftIcon />
+            Back to Landing Page
+          </button>
 
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-10">
