@@ -6,6 +6,7 @@ export default function Join() {
   const [invite, setInvite] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [form, setForm] = useState({
     activationCode: '',
@@ -91,13 +92,32 @@ export default function Join() {
                 ].map((field) => (
                   <label key={field.key} className="block">
                     <span className="block text-sm font-semibold text-brand-brown mb-2">{field.label}</span>
-                    <input
-                      type={field.type}
-                      value={form[field.key]}
-                      onChange={(e) => updateField(field.key, e.target.value)}
-                      required={!field.optional}
-                      className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
-                    />
+                    {field.key === 'password' ? (
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={form[field.key]}
+                          onChange={(e) => updateField(field.key, e.target.value)}
+                          required={!field.optional}
+                          className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 pr-20 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((current) => !current)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-brand-gold-dark"
+                        >
+                          {showPassword ? 'Hide' : 'Show'}
+                        </button>
+                      </div>
+                    ) : (
+                      <input
+                        type={field.type}
+                        value={form[field.key]}
+                        onChange={(e) => updateField(field.key, e.target.value)}
+                        required={!field.optional}
+                        className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+                      />
+                    )}
                   </label>
                 ))}
                 {message.text && (

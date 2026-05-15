@@ -8,6 +8,7 @@ export default function ReferralInvite() {
   const [creating, setCreating] = useState(false);
 
   const inviteToken = invite?.slug || invite?.referral_slug || invite?.token;
+  const placement = invite?.placement || null;
   const inviteUrl = inviteToken ? `${window.location.origin}/join/${inviteToken}` : '';
 
   useEffect(() => {
@@ -34,11 +35,11 @@ export default function ReferralInvite() {
   async function regenerateInvite() {
     setCreating(true);
     try {
-      const res = await api.post('/registration/referral-invite');
-      setInvite(res.data.invite);
-      toast.success('Referral ID regenerated');
+      const res = await api.get('/registration/referral-link');
+      setInvite(res.data);
+      toast.success('Referral setup refreshed');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Unable to generate referral ID');
+      toast.error(err.response?.data?.error || 'Unable to refresh referral setup');
     } finally {
       setCreating(false);
     }
@@ -80,12 +81,24 @@ export default function ReferralInvite() {
 
             <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/10 p-5">
               <p className="text-sm text-white/70 leading-relaxed">
-                Prospects still need a valid activation code. The reusable referral link supplies your sponsor identity; the server chooses the next safe placement using your placement setting.
+                Prospects still need a valid activation code. The reusable referral link supplies your sponsor identity, and the server auto-assigns the new account to your weak leg for the best chance to generate binary points.
               </p>
+              {placement && (
+                <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-xs text-white/70 space-y-1">
+                  <p className="font-semibold text-white">Current recommended placement</p>
+                  <p>
+                    {placement.placementUsername
+                      ? `${placement.placementUsername} (#${placement.placementUid})`
+                      : `Placement UID #${placement.placementUid}`}
+                    {' '}• {placement.positionLabel || (Number(placement.position) === 2 ? 'Right' : 'Left')} leg
+                  </p>
+                  <p>{placement.note}</p>
+                </div>
+              )}
             </div>
 
             <button onClick={regenerateInvite} disabled={creating} className="gold-btn w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm disabled:opacity-60">
-              {creating ? 'Generating...' : 'Regenerate Referral ID'}
+              {creating ? 'Refreshing...' : 'Refresh Weak-Leg Placement'}
             </button>
           </div>
         )}

@@ -1,41 +1,70 @@
 import { useEffect, useState } from 'react';
 import api from '../../api';
 import {
+  HiOutlineChartBar,
+  HiOutlineClock,
+  HiOutlineCubeTransparent,
   HiOutlineShieldCheck,
-  HiOutlineTrendingUp,
-  HiOutlineCheckCircle,
-  HiOutlineXCircle,
   HiOutlineSparkles,
+  HiOutlineTrendingUp,
+  HiOutlineViewGrid,
 } from 'react-icons/hi';
 
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
-const RANKS = [
-  {
-    rank: 1,
-    label: 'Supervisor 1',
-    minPoints: 10000,
-    requirement: '1 qualified S1 on left leg + 1 qualified S1 on right leg',
-    incentives: 'DP Motorcycle, P5,000 cash, White T-shirt',
-    color: '#CD7F32',
-  },
-  {
-    rank: 2,
-    label: 'Supervisor 2',
-    minPoints: 20000,
-    requirement: '20,000 total binary points',
-    incentives: 'Laptop, P10,000 cash, White Polo',
-    color: '#C0C0C0',
-  },
-  {
-    rank: 3,
-    label: 'Supervisor 3',
-    minPoints: 40000,
-    requirement: '1 qualified S2 on left leg + 1 qualified S2 on right leg',
-    incentives: 'International Asian travel, P20,000 cash, Silver pin',
-    color: '#FFD700',
-  },
-];
+const RANK_CODE_LABELS = {
+  1: 'SP1',
+  2: 'SP2',
+  3: 'SP3',
+  4: 'MN1',
+  5: 'MN2',
+  6: 'MN3',
+  7: 'DR1',
+  8: 'DR2',
+  9: 'DR3',
+  10: 'AMB',
+};
+
+const RANK_REQUIREMENT_TEXT = {
+  supervisor_1: 'No left/right team rank requirement.',
+  supervisor_2: 'Requires 1 SP1 (Supervisor 1) in your left team and 1 SP1 (Supervisor 1) in your right team.',
+  supervisor_3: 'Requires 1 SP2 (Supervisor 2) in your left team and 1 SP2 (Supervisor 2) in your right team.',
+  manager_1: 'Requires 1 SP3 (Supervisor 3) in your left team and 1 SP3 (Supervisor 3) in your right team.',
+  manager_2: 'Requires 1 MN1 (Manager 1) in your left team and 1 MN1 (Manager 1) in your right team.',
+  manager_3: 'Requires 1 MN2 (Manager 2) in your left team and 1 MN2 (Manager 2) in your right team.',
+  director_1: 'Requires 1 Manager 3 in your left team and 1 Manager 3 in your right team.',
+  director_2: 'Requires 1 DR1 (Director 1) in your left team and 1 DR1 (Director 1) in your right team.',
+  director_3: 'Requires 1 DR2 (Director 2) in your left team and 1 DR2 (Director 2) in your right team.',
+  ambassador: 'Requires 1 DR3 (Director 3) in your left team and 1 DR3 (Director 3) in your right team.',
+};
+
+function buildRequirementText(rank) {
+  const directText = RANK_REQUIREMENT_TEXT[String(rank.rank_code || '').toLowerCase()];
+  if (directText) return directText;
+
+  const left = Number(rank.left_rank_required || 0);
+  const right = Number(rank.right_rank_required || 0);
+
+  if (!left && !right) {
+    return 'No left/right team rank requirement.';
+  }
+
+  const leftCode = RANK_CODE_LABELS[left] || `Rank ${left}`;
+  const rightCode = RANK_CODE_LABELS[right] || `Rank ${right}`;
+  return `Requires 1 ${leftCode} in your left team and 1 ${rightCode} in your right team.`;
+}
+
+function buildRequirementStatusText(data) {
+  if (!data?.nextRankRequirement) {
+    return 'You have already cleared the top published rank.';
+  }
+
+  const leftOk = Boolean(data.leftRequirementMet);
+  const rightOk = Boolean(data.rightRequirementMet);
+  const leftText = leftOk ? 'left side ready' : 'left side still missing';
+  const rightText = rightOk ? 'right side ready' : 'right side still missing';
+  return `${leftText}, ${rightText}`;
+}
 
 export default function RankingProgress() {
   const [data, setData] = useState(null);
@@ -72,7 +101,9 @@ export default function RankingProgress() {
     return <p style={{ color: 'rgba(255,255,255,0.45)' }}>Failed to load ranking progress.</p>;
   }
 
+  const basisLabel = data.basisLabel || 'Repurchase points';
   const nextRankPct = Math.min(100, Number(data.progress || 0));
+  const requirementStatusText = buildRequirementStatusText(data);
 
   return (
     <div className="space-y-6">
@@ -88,7 +119,7 @@ export default function RankingProgress() {
               Current Rank
             </p>
             <div className="flex items-center gap-3 mt-1">
-              <h2 className="text-2xl font-bold text-white">{data.currentRankLabel || 'None'}</h2>
+              <h2 className="text-2xl font-bold text-white">{data.currentRankLabel || 'Unranked'}</h2>
               <span
                 className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
                 style={{
@@ -101,7 +132,7 @@ export default function RankingProgress() {
               </span>
             </div>
             <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              Total binary points: <span style={{ color: '#D4AF37', fontWeight: 700 }}>{fmtInt(data.totalPoints)}</span>
+              {basisLabel}: <span style={{ color: '#D4AF37', fontWeight: 700 }}>{fmtInt(data.grossRankablePoints ?? data.repurchasePoints ?? data.totalPoints)}</span>
             </p>
           </div>
 
@@ -117,59 +148,143 @@ export default function RankingProgress() {
             </div>
             <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {data.nextRank
-                ? `${nextRankPct.toFixed(2)}% to ${data.nextRankLabel} (${fmtInt(data.nextRankMinPoints)} pts)`
+                ? `${nextRankPct.toFixed(2)}% to ${data.nextRankLabel} (${fmtInt(data.nextRankMinPoints)} fresh repurchase pts)`
                 : 'Maximum rank achieved'}
             </p>
           </div>
         </div>
-
-        {data.nextRank === 1 || data.nextRank === 3 ? (
-          <div className="mt-5 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
-            <p className="text-sm font-semibold text-white mb-2">Leg Qualification Status</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                {data.legStatus?.leftQualified ? (
-                  <HiOutlineCheckCircle className="w-5 h-5" style={{ color: '#34d399' }} />
-                ) : (
-                  <HiOutlineXCircle className="w-5 h-5" style={{ color: '#f87171' }} />
-                )}
-                Left leg qualification
-              </div>
-              <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                {data.legStatus?.rightQualified ? (
-                  <HiOutlineCheckCircle className="w-5 h-5" style={{ color: '#34d399' }} />
-                ) : (
-                  <HiOutlineXCircle className="w-5 h-5" style={{ color: '#f87171' }} />
-                )}
-                Right leg qualification
-              </div>
-            </div>
-          </div>
-        ) : null}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {RANKS.map((r) => (
-          <div key={r.rank} className="glass-card rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-base font-semibold text-white">{r.label}</p>
-              <span
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold"
-                style={{ background: `${r.color}22`, color: r.color, border: `1px solid ${r.color}44` }}
-              >
-                <HiOutlineShieldCheck className="w-3.5 h-3.5" />
-                {fmtInt(r.minPoints)} pts
-              </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="glass-card rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Gross Rankable Points</p>
+              <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.grossRankablePoints)}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>self + full downline repurchases</p>
             </div>
-            <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {r.requirement}
-            </p>
-            <div className="flex items-start gap-2 text-sm" style={{ color: 'rgba(242,208,107,0.82)' }}>
-              <HiOutlineSparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>{r.incentives}</span>
-            </div>
+            <HiOutlineChartBar className="w-6 h-6" style={{ color: '#D4AF37' }} />
           </div>
-        ))}
+        </div>
+
+        <div className="glass-card rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Consumed Points</p>
+              <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.consumedPoints)}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>already used by awarded ranks</p>
+            </div>
+            <HiOutlineCubeTransparent className="w-6 h-6" style={{ color: '#D4AF37' }} />
+          </div>
+        </div>
+
+        <div className="glass-card rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Remaining Race Points</p>
+              <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.remainingRankablePoints)}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>fresh points left for the next rank</p>
+            </div>
+            <HiOutlineTrendingUp className="w-6 h-6" style={{ color: '#D4AF37' }} />
+          </div>
+        </div>
+
+        <div className="glass-card rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Pending Claims</p>
+              <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.pendingAchievementCount)}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>cash release stays manual</p>
+            </div>
+            <HiOutlineClock className="w-6 h-6" style={{ color: '#D4AF37' }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="glass-card rounded-2xl p-5">
+        <div className="flex items-start gap-3">
+          <HiOutlineShieldCheck className="w-5 h-5 mt-0.5" style={{ color: '#D4AF37' }} />
+          <div>
+            <p className="text-sm font-semibold text-white">Next Rank Gate</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {data.nextRankRequirement
+                ? `${data.nextRankRequirement.rankName} needs ${fmtInt(data.nextRankRequirement.pointsRequired)} fresh repurchase points.`
+                : 'No further gate is waiting because the full published rank ladder is already cleared.'}
+            </p>
+            <p className="text-xs mt-2" style={{ color: 'rgba(212,175,55,0.72)' }}>
+              {requirementStatusText}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="glass-card rounded-2xl p-5">
+        <div className="flex items-start gap-3">
+          <HiOutlineViewGrid className="w-5 h-5 mt-0.5" style={{ color: '#D4AF37' }} />
+          <div>
+            <p className="text-sm font-semibold text-white">Rank Ladder</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>
+              Every rank below shows its target points, team requirement, and the exact incentive package attached to it.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        {(data.rankDefinitions || []).map((rankDefinition) => {
+          const isCurrent = Number(data.currentRank || 0) === Number(rankDefinition.rank || 0);
+          const isUnlocked = Number(data.currentRank || 0) >= Number(rankDefinition.rank || 0);
+
+          return (
+            <div
+              key={rankDefinition.rank}
+              className="glass-card rounded-2xl p-5"
+              style={isCurrent ? { border: '1px solid rgba(212,175,55,0.35)' } : undefined}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-base font-semibold text-white">{rankDefinition.rank_name}</p>
+                  <p className="text-xs mt-1" style={{ color: isUnlocked ? 'rgba(74,222,128,0.9)' : 'rgba(255,255,255,0.45)' }}>
+                    {isCurrent ? 'Your current rank' : isUnlocked ? 'Unlocked' : 'Locked'}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold"
+                    style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.28)' }}
+                  >
+                    <HiOutlineShieldCheck className="w-3.5 h-3.5" />
+                    {fmtInt(rankDefinition.points_required)} pts
+                  </span>
+                  <p className="text-[11px] mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    Code: {RANK_CODE_LABELS[Number(rankDefinition.rank)] || `Rank ${rankDefinition.rank}`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl p-3 mb-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <p className="text-[11px] uppercase tracking-wide mb-2" style={{ color: 'rgba(212,175,55,0.65)' }}>
+                  Requirements
+                </p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                  {buildRequirementText(rankDefinition)}
+                </p>
+              </div>
+
+              <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <div className="flex items-start gap-2 text-sm" style={{ color: 'rgba(242,208,107,0.82)' }}>
+                  <HiOutlineSparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wide mb-1" style={{ color: 'rgba(212,175,55,0.65)' }}>
+                      Incentives
+                    </p>
+                    <span>{rankDefinition.incentive_summary}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="glass-card rounded-2xl p-5 flex items-start gap-3">
@@ -177,8 +292,8 @@ export default function RankingProgress() {
         <div>
           <p className="text-sm font-semibold text-white">Current Incentive Status</p>
           <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            {Number(data.incentiveStatus) === 1 ? 'Claimed' : 'Pending'}
-            {' '}• {data.incentives || 'N/A'}
+            {Number(data.pendingAchievementCount || 0) > 0 ? 'Pending release' : (Number(data.currentRank || 0) > 0 ? 'Released' : 'Locked')}
+            {' '}| {data.incentives || 'N/A'}
           </p>
         </div>
       </div>

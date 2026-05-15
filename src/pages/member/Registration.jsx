@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -25,6 +25,9 @@ export default function Registration() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const explicitPlacementUid = searchParams.get('placement') || '';
+  const explicitPosition = searchParams.get('position') || '1';
+  const hasExplicitPlacement = Boolean(explicitPlacementUid);
 
   const [form, setForm] = useState({
     activationCode: '',
@@ -33,15 +36,60 @@ export default function Registration() {
     firstname:      '',
     lastname:       '',
     middlename:     '',
+    email:          '',
     tin:            '',
-    position:       searchParams.get('position') || '1',
-    placementUid:   searchParams.get('placement') || '',
+    position:       explicitPosition,
+    placementUid:   explicitPlacementUid,
   });
   const [codeValid, setCodeValid]         = useState(null);
   const [usernameValid, setUsernameValid] = useState(null);
   const [submitting, setSubmitting]       = useState(false);
+  const [placementLoading, setPlacementLoading] = useState(!hasExplicitPlacement);
+  const [placementMeta, setPlacementMeta] = useState(
+    hasExplicitPlacement
+      ? {
+          note: 'Placement was selected from the genealogy tree.',
+          positionLabel: explicitPosition === '2' ? 'Right' : 'Left',
+          placementUsername: null,
+        }
+      : null
+  );
 
   const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDefaultPlacement() {
+      if (hasExplicitPlacement) {
+        setPlacementLoading(false);
+        return;
+      }
+
+      setPlacementLoading(true);
+      try {
+        const res = await api.get('/registration/default-placement');
+        const placement = res.data?.placement;
+        if (!cancelled && placement) {
+          setForm((prev) => ({
+            ...prev,
+            placementUid: String(placement.placementUid || ''),
+            position: String(placement.position || '1'),
+          }));
+          setPlacementMeta(placement);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          toast.error(err.response?.data?.error || 'Unable to load the recommended placement.');
+        }
+      } finally {
+        if (!cancelled) setPlacementLoading(false);
+      }
+    }
+
+    loadDefaultPlacement();
+    return () => { cancelled = true; };
+  }, [hasExplicitPlacement]);
 
   async function validateCode() {
     if (!form.activationCode) return;
@@ -133,9 +181,9 @@ export default function Registration() {
             <input
               type="text"
               value={form.placementUid}
-              onChange={(e) => handleChange('placementUid', e.target.value)}
-              className="glass-input"
-              placeholder="Placement account UID"
+              readOnly
+              className="glass-input opacity-70"
+              placeholder={placementLoading ? 'Loading placement...' : 'Placement account UID'}
               required
             />
           </div>
@@ -143,15 +191,27 @@ export default function Registration() {
           {/* Position */}
           <div>
             <label className="label">Position</label>
-            <select
-              value={form.position}
-              onChange={(e) => handleChange('position', e.target.value)}
-              className="glass-input"
-              style={{ cursor: 'pointer' }}
-            >
-              <option value="1" style={{ background: '#1A1610' }}>Left (Position A)</option>
-              <option value="2" style={{ background: '#1A1610' }}>Right (Position B)</option>
-            </select>
+            <input
+              type="text"
+              value={form.position === '2' ? 'Right (Position B)' : 'Left (Position A)'}
+              readOnly
+              className="glass-input opacity-70"
+              placeholder="Assigned position"
+            />
+          </div>
+
+          <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/10 p-4">
+            <p className="text-sm font-semibold text-white">
+              {placementMeta?.positionLabel || (form.position === '2' ? 'Right' : 'Left')} leg placement
+            </p>
+            <p className="text-xs mt-1 text-white/70 leading-relaxed">
+              {placementMeta?.placementUsername
+                ? `Placement account: ${placementMeta.placementUsername} (#${form.placementUid})`
+                : `Placement account UID: ${form.placementUid || 'Loading...'}`}
+            </p>
+            <p className="text-xs mt-2 text-white/65 leading-relaxed">
+              {placementMeta?.note || 'System auto-assigns placement on the weak leg to help generate guaranteed binary points.'}
+            </p>
           </div>
 
           {/* Name fields */}
@@ -168,6 +228,18 @@ export default function Registration() {
               <label className="label">Middle Name</label>
               <input type="text" value={form.middlename} onChange={(e) => handleChange('middlename', e.target.value)} className="glass-input" />
             </div>
+          </div>
+
+          <div>
+            <label className="label">Email</label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              className="glass-input"
+              placeholder="you@example.com"
+              required
+            />
           </div>
 
           {/* TIN No */}
@@ -217,7 +289,7 @@ export default function Registration() {
           <div className="pt-1">
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || placementLoading || !form.placementUid}
               className="gold-btn w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
             >
               {submitting ? <><Spinner /> Registering…</> : <><HiOutlineUserAdd className="w-4 h-4" /> Register Account</>}

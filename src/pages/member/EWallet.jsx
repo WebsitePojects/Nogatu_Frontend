@@ -87,6 +87,57 @@ function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
   );
 }
 
+function VerificationRequiredModal({ open, message, onClose }) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+      <div
+        className="w-full max-w-md rounded-2xl p-6 shadow-2xl"
+        style={{
+          background: '#141008',
+          border: '1px solid rgba(212,175,55,0.24)',
+          animation: 'modal-pop 180ms ease-out',
+        }}
+      >
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+          style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}
+        >
+          <HiOutlineSparkles className="w-7 h-7" style={{ color: '#D4AF37' }} />
+        </div>
+        <div className="text-center">
+          <h3 className="font-display text-xl font-bold text-white">Verification Needed</h3>
+          <p className="text-sm mt-3" style={{ color: 'rgba(255,255,255,0.68)' }}>
+            {message || 'You must complete your payout details before encashment.'}
+          </p>
+          <p className="text-xs mt-3" style={{ color: 'rgba(212,175,55,0.76)' }}>
+            Add your payout option and payout details first so your encashment can be released properly.
+          </p>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-xs px-3 py-2 rounded-lg font-medium"
+            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.14)' }}
+          >
+            Close
+          </button>
+          <Link
+            to="/account"
+            className="text-xs px-3 py-2 rounded-lg font-medium"
+            style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+          >
+            Add Payout Details
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EWallet() {
   const [data, setData]             = useState(null);
   const [globalBonus, setGlobalBonus] = useState(null);
@@ -97,6 +148,7 @@ export default function EWallet() {
   const [processing, setProcessing] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [verificationModal, setVerificationModal] = useState({ open: false, message: '' });
   const receiptRef = useRef(null);
 
   useEffect(() => { loadData(); }, []);
@@ -121,11 +173,18 @@ export default function EWallet() {
         if (!cancelled) {
           setEncashPreview(res.data.preview);
           setPreviewError('');
+          setVerificationModal({ open: false, message: '' });
         }
       } catch (err) {
         if (!cancelled) {
           setEncashPreview(err.response?.data?.preview || null);
           setPreviewError(err.response?.data?.error || 'Unable to preview encashment.');
+          if (['PAYOUT_OPTION_REQUIRED', 'PAYOUT_DETAILS_REQUIRED'].includes(err.response?.data?.code)) {
+            setVerificationModal({
+              open: true,
+              message: err.response?.data?.error || 'You must verify your payout details before encashment.',
+            });
+          }
         }
       }
     }, 350);
@@ -186,6 +245,12 @@ export default function EWallet() {
       setEncashAmount('');
       loadData();
     } catch (err) {
+      if (['PAYOUT_OPTION_REQUIRED', 'PAYOUT_DETAILS_REQUIRED'].includes(err.response?.data?.code)) {
+        setVerificationModal({
+          open: true,
+          message: err.response?.data?.error || 'You must verify your payout details before encashment.',
+        });
+      }
       toast.error(err.response?.data?.error || 'Encashment failed');
     } finally { setProcessing(false); }
   }
@@ -231,6 +296,11 @@ export default function EWallet() {
 
   return (
     <div className="space-y-6">
+      <VerificationRequiredModal
+        open={verificationModal.open}
+        message={verificationModal.message}
+        onClose={() => setVerificationModal({ open: false, message: '' })}
+      />
 
       {/* Page heading */}
       <div>

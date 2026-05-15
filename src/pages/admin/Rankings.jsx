@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
 function formatQualifiedDate(value) {
-  if (!value) return '—';
+  if (!value) return '-';
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -44,8 +44,8 @@ export default function Rankings() {
 
   async function processIncentive(uid) {
     try {
-      await api.put(`/admin/rankings/${uid}/process`);
-      toast.success('Incentive marked as claimed');
+      const res = await api.put(`/admin/rankings/${uid}/process`);
+      toast.success(res.data?.message || 'Ranking bonus claim released');
       loadData();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to process incentive');
@@ -61,7 +61,7 @@ export default function Rankings() {
 
       <div className="glass-card rounded-2xl p-6 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Qualified members</p>
+          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Ranking race members</p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -95,22 +95,22 @@ export default function Rankings() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Top', 'Member', 'Username', 'Supervisor Rank', 'Basis Points', 'Qualified Date', 'Incentive Status', 'Action'].map((h) => (
-                    <th key={h} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{h}</th>
+                  {['Top', 'Member', 'Username', 'Current Rank', 'Gross', 'Consumed', 'Remaining', 'Qualified Date', 'Claim Status', 'Action'].map((heading) => (
+                    <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r, idx) => {
+                {rows.map((row, index) => {
                   const badge = {
-                    label: r.rankLabel || 'Unranked',
-                    color: r.rankColor || '#9CA3AF',
+                    label: row.rankLabel || 'Unranked',
+                    color: row.rankColor || '#9CA3AF',
                   };
 
                   return (
                     <tr
-                      key={`${r.uid}-${r.current_rank}-${idx}`}
-                      style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}
+                      key={`${row.uid}-${row.current_rank}-${index}`}
+                      style={{ background: index % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}
                       className="motion-safe:transition-colors hover:bg-white/[0.04]"
                     >
                       <td className="py-3 px-3">
@@ -118,11 +118,11 @@ export default function Rankings() {
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
                         >
-                          Top {Number(r.position || idx + 1)}
+                          Top {Number(row.position || index + 1)}
                         </span>
                       </td>
-                      <td className="py-3 px-3 font-medium text-white/85">{r.firstname} {r.lastname}</td>
-                      <td className="py-3 px-3 text-white/60">{r.username}</td>
+                      <td className="py-3 px-3 font-medium text-white/85">{row.firstname} {row.lastname}</td>
+                      <td className="py-3 px-3 text-white/60">{row.username}</td>
                       <td className="py-3 px-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
@@ -132,29 +132,33 @@ export default function Rankings() {
                         </span>
                       </td>
                       <td className="py-3 px-3">
-                        <div className="text-white/85 font-medium">{fmtInt(r.basisPoints)}</div>
+                        <div className="text-white/85 font-medium">{fmtInt(row.grossRankablePoints ?? row.basisPoints)}</div>
                       </td>
-                      <td className="py-3 px-3 text-white/55">{formatQualifiedDate(r.qualifiedDate || r.rank_date)}</td>
+                      <td className="py-3 px-3 text-white/60">{fmtInt(row.consumedPoints)}</td>
+                      <td className="py-3 px-3 text-white/60">{fmtInt(row.remainingRankablePoints)}</td>
+                      <td className="py-3 px-3 text-white/55">{formatQualifiedDate(row.qualifiedDate || row.rank_date)}</td>
                       <td className="py-3 px-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={
-                            Number(r.incentive_status) === 1
+                            Number(row.pendingAchievementCount || 0) === 0 && Number(row.current_rank || 0) > 0
                               ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
                               : { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.25)' }
                           }
                         >
-                          {Number(r.incentive_status) === 1 ? 'Claimed' : 'Pending'}
+                          {Number(row.pendingAchievementCount || 0) > 0
+                            ? `${fmtInt(row.pendingAchievementCount)} pending`
+                            : (Number(row.current_rank || 0) > 0 ? 'Released' : 'Not ranked')}
                         </span>
                       </td>
                       <td className="py-3 px-3">
-                        {Number(r.current_rank) > 0 && Number(r.incentive_status) !== 1 && (
+                        {Number(row.pendingAchievementCount || 0) > 0 && (
                           <button
-                            onClick={() => processIncentive(r.uid)}
+                            onClick={() => processIncentive(row.uid)}
                             className="text-xs px-3 py-1 rounded-lg font-medium"
                             style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
                           >
-                            Mark Claimed
+                            Release Next Claim
                           </button>
                         )}
                       </td>
@@ -164,7 +168,7 @@ export default function Rankings() {
 
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    <td colSpan="10" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
                       No ranked members found.
                     </td>
                   </tr>

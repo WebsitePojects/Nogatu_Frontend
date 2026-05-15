@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import dagre from '@dagrejs/dagre';
 import {
@@ -7,13 +7,13 @@ import {
   BaseEdge,
   Controls,
   Handle,
-  MiniMap,
   Position,
   ReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import {
   HiOutlineArrowsExpand,
   HiOutlineArrowLeft,
@@ -21,6 +21,7 @@ import {
   HiOutlinePlusCircle,
   HiOutlineHome,
   HiOutlineMinusSm,
+  HiOutlineSearch,
   HiOutlineSparkles,
   HiOutlineUsers,
   HiOutlineZoomIn,
@@ -31,6 +32,22 @@ const NODE_WIDTH = 208;
 const NODE_HEIGHT = 102;
 const JUNCTION_SIZE = 16;
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+const BP_UNIT_VALUE = 250;
+
+function formatBinaryPackagePoints(binaryPoints) {
+  const raw = Number(binaryPoints || 0);
+  if (!raw) return '0 BP';
+  const bp = raw / BP_UNIT_VALUE;
+  if (Number.isInteger(bp)) return `${fmtInt(bp)} BP`;
+  return `${fmtInt(raw)} pts`;
+}
+
+function getPositionLabel(position, level) {
+  if (level === 0 || position === 'self') return 'Root';
+  if (position === 1 || position === 'left') return 'Left Leg';
+  if (position === 2 || position === 'right') return 'Right Leg';
+  return 'Team';
+}
 
 const PACKAGE_STYLES = {
   Bronze:   { border: '#C9732E', accent: '#E59A57', glow: 'rgba(201,115,46,0.36)', bg: 'linear-gradient(180deg, rgba(201,115,46,0.28), rgba(31,18,10,0.97))', mini: '#C9732E' },
@@ -40,6 +57,40 @@ const PACKAGE_STYLES = {
   Garnet:   { border: '#A8253B', accent: '#E4697D', glow: 'rgba(168,37,59,0.38)', bg: 'linear-gradient(180deg, rgba(168,37,59,0.25), rgba(29,10,14,0.97))', mini: '#A8253B' },
   Diamond:  { border: '#5CCFFF', accent: '#D9F6FF', glow: 'rgba(92,207,255,0.4)', bg: 'linear-gradient(180deg, rgba(92,207,255,0.24), rgba(10,21,28,0.97))', mini: '#5CCFFF' },
 };
+
+function getNodeAppearance(style, isDarkMode) {
+  if (isDarkMode) {
+    return {
+      background: style.bg,
+      border: style.border,
+      accent: style.accent,
+      glow: style.glow,
+      text: '#FFFFFF',
+      subtext: 'rgba(255,255,255,0.5)',
+      badgeBg: 'rgba(0,0,0,0.26)',
+      badgeText: '#F2D06B',
+      pillBg: 'rgba(255,255,255,0.08)',
+      positionText: 'rgba(255,255,255,0.62)',
+      handleBg: '#120f0a',
+      muted: 'rgba(255,255,255,0.48)',
+    };
+  }
+
+  return {
+    background: `linear-gradient(180deg, rgba(255,255,255,0.98), ${style.border}22)`,
+    border: `${style.border}88`,
+    accent: '#7A5C08',
+    glow: 'rgba(212,175,55,0.16)',
+    text: '#2F2412',
+    subtext: 'rgba(74,56,18,0.72)',
+    badgeBg: 'rgba(212,175,55,0.12)',
+    badgeText: '#7A5C08',
+    pillBg: 'rgba(255,255,255,0.82)',
+    positionText: 'rgba(74,56,18,0.78)',
+    handleBg: '#FFF7E3',
+    muted: 'rgba(74,56,18,0.72)',
+  };
+}
 
 function normalizePackageType(value) {
   const raw = String(value || '').trim().toLowerCase();
@@ -67,18 +118,35 @@ function Spinner() {
 function MemberNode({ data }) {
   const packageName = normalizePackageType(data.packageType);
   const style = PACKAGE_STYLES[packageName] || PACKAGE_STYLES.Bronze;
+  const tone = getNodeAppearance(style, Boolean(data.isDarkMode));
+
+  const primaryLabel = data.fullname && String(data.fullname).trim() && String(data.fullname).trim().toLowerCase() !== String(data.username || '').trim().toLowerCase()
+    ? data.fullname
+    : (data.username || data.displayName || `Member ${data.internalUid}`);
+  const secondaryLabel = data.username && primaryLabel.trim().toLowerCase() !== String(data.username).trim().toLowerCase()
+    ? data.username
+    : '';
+  const isPrimaryLong = String(primaryLabel || '').length > 16;
 
   return (
     <button
       type="button"
-      onClick={data.onOpen}
+      onClick={() => {
+        if (!data.canvasActive) {
+          data.onActivateCanvas?.();
+          return;
+        }
+        data.onOpen?.();
+      }}
       className="w-full rounded-2xl p-4 text-left transition-transform duration-200 hover:-translate-y-0.5 relative overflow-hidden"
       style={{
         width: NODE_WIDTH,
         minHeight: NODE_HEIGHT,
-        background: style.bg,
-        border: `1px solid ${style.border}`,
-        boxShadow: `0 12px 30px ${style.glow}`,
+        background: tone.background,
+        border: data.highlighted ? '2px solid rgba(74,222,128,0.95)' : `1px solid ${tone.border}`,
+        boxShadow: data.highlighted
+          ? '0 0 0 3px rgba(74,222,128,0.22), 0 0 28px rgba(74,222,128,0.38)'
+          : `0 12px 30px ${tone.glow}`,
       }}
     >
       <Handle
@@ -90,9 +158,9 @@ function MemberNode({ data }) {
           width: 14,
           height: 14,
           borderRadius: '999px',
-          border: `2px solid ${style.accent}`,
-          background: '#120f0a',
-          boxShadow: `0 0 0 3px ${style.glow}`,
+          border: `2px solid ${tone.accent}`,
+          background: tone.handleBg,
+          boxShadow: `0 0 0 3px ${tone.glow}`,
         }}
       />
 
@@ -105,45 +173,52 @@ function MemberNode({ data }) {
           width: 14,
           height: 14,
           borderRadius: '999px',
-          border: `2px solid ${style.accent}`,
-          background: '#120f0a',
-          boxShadow: `0 0 0 3px ${style.glow}`,
+          border: `2px solid ${tone.accent}`,
+          background: tone.handleBg,
+          boxShadow: `0 0 0 3px ${tone.glow}`,
         }}
       />
 
       <div
         className="absolute inset-x-0 top-0 h-1.5"
-        style={{ background: `linear-gradient(90deg, ${style.border}, ${style.accent})` }}
+        style={{ background: `linear-gradient(90deg, ${style.border}, ${tone.accent})` }}
       />
 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-white truncate">{data.displayName || data.username}</p>
-          <p className="text-[11px] mt-1 truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            {data.username || `Member ${data.internalUid}`}
-          </p>
+          <div className={`genealogy-name-marquee ${isPrimaryLong ? 'is-animated' : ''}`} style={{ color: tone.text }}>
+            <div className={`genealogy-name-track ${isPrimaryLong ? 'is-animated' : ''}`}>
+              <span className="text-base font-bold whitespace-nowrap">{primaryLabel}</span>
+              {isPrimaryLong ? <span className="text-base font-bold whitespace-nowrap genealogy-name-ghost">{primaryLabel}</span> : null}
+            </div>
+          </div>
+          {secondaryLabel ? (
+            <p className="text-[11px] mt-1 truncate" style={{ color: tone.subtext }}>
+              {secondaryLabel}
+            </p>
+          ) : null}
         </div>
-        <span className="text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap" style={{ background: 'rgba(0,0,0,0.26)', color: '#F2D06B', border: '1px solid rgba(212,175,55,0.3)' }}>
+        <span className="text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap" style={{ background: tone.badgeBg, color: tone.badgeText, border: '1px solid rgba(212,175,55,0.3)' }}>
           L{data.level}
         </span>
       </div>
 
       <div className="flex items-center justify-between mt-4">
-        <span className="text-[10px] font-semibold px-2 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.08)', color: style.accent, border: `1px solid ${style.border}` }}>
+        <span className="text-[10px] font-semibold px-2 py-1 rounded-full" style={{ background: tone.pillBg, color: tone.accent, border: `1px solid ${style.border}` }}>
           {packageName}
         </span>
-        <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.62)' }}>
+        <span className="text-[11px]" style={{ color: tone.positionText }}>
           {data.positionLabel}
         </span>
       </div>
 
       <div className="flex items-center justify-between mt-4 text-[11px]">
-        <span style={{ color: 'rgba(255,255,255,0.48)' }}>Points</span>
-        <span className="font-semibold text-white">{data.binaryPoints}</span>
+        <span style={{ color: tone.muted }}>Binary Value</span>
+        <span className="font-semibold" style={{ color: tone.text }}>{formatBinaryPackagePoints(data.binaryPoints)}</span>
       </div>
 
       {Number(data.childCount || 0) > 0 && (
-        <div className="mt-3 text-[10px] font-medium" style={{ color: 'rgba(242,208,107,0.82)' }}>
+        <div className="mt-3 text-[10px] font-medium" style={{ color: tone.accent }}>
           + {data.childCount} more member{Number(data.childCount) > 1 ? 's' : ''} below this level
         </div>
       )}
@@ -170,7 +245,7 @@ function JunctionNode() {
           height: 10,
           borderRadius: '999px',
           border: '2px solid #F9E08A',
-          background: '#120f0a',
+          background: '#FFF7E3',
           boxShadow: '0 0 0 3px rgba(242,208,107,0.18)',
         }}
       />
@@ -191,7 +266,7 @@ function JunctionNode() {
           height: 10,
           borderRadius: '999px',
           border: '2px solid #F9E08A',
-          background: '#120f0a',
+          background: '#FFF7E3',
           boxShadow: '0 0 0 3px rgba(242,208,107,0.18)',
         }}
       />
@@ -200,17 +275,26 @@ function JunctionNode() {
 }
 
 function PlaceholderNode({ data }) {
+  const isDarkMode = Boolean(data.isDarkMode);
   return (
     <button
       type="button"
-      onClick={data.onRegister}
+      onClick={() => {
+        if (!data.canvasActive) {
+          data.onActivateCanvas?.();
+          return;
+        }
+        data.onRegister?.();
+      }}
       className="w-full rounded-2xl p-4 text-left transition-transform duration-200 hover:-translate-y-0.5 relative overflow-hidden"
       style={{
         width: NODE_WIDTH,
         minHeight: NODE_HEIGHT,
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(18,16,10,0.92))',
-        border: '1px dashed rgba(242,208,107,0.42)',
-        boxShadow: '0 10px 24px rgba(0,0,0,0.24)',
+        background: isDarkMode
+          ? 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(18,16,10,0.92))'
+          : 'linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,247,227,0.98))',
+        border: '2px dashed rgba(74,222,128,0.75)',
+        boxShadow: isDarkMode ? '0 10px 24px rgba(0,0,0,0.24), 0 0 0 2px rgba(74,222,128,0.16)' : '0 10px 24px rgba(212,175,55,0.14), 0 0 0 2px rgba(74,222,128,0.12)',
       }}
     >
       <Handle
@@ -223,15 +307,15 @@ function PlaceholderNode({ data }) {
           height: 14,
           borderRadius: '999px',
           border: '2px solid #F2D06B',
-          background: '#120f0a',
+          background: isDarkMode ? '#120f0a' : '#FFF7E3',
           boxShadow: '0 0 0 3px rgba(242,208,107,0.18)',
         }}
       />
 
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-bold text-white">Open Slot</p>
-          <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.54)' }}>
+          <p className="text-sm font-bold" style={{ color: isDarkMode ? '#FFFFFF' : '#2F2412' }}>Open Slot</p>
+          <p className="text-[11px] mt-1" style={{ color: isDarkMode ? 'rgba(255,255,255,0.54)' : 'rgba(74,56,18,0.72)' }}>
             {data.positionLabel}
           </p>
         </div>
@@ -240,9 +324,9 @@ function PlaceholderNode({ data }) {
           style={{
             width: 28,
             height: 28,
-            background: 'rgba(242,208,107,0.12)',
-            border: '1px solid rgba(242,208,107,0.38)',
-            color: '#F2D06B',
+            background: 'rgba(74,222,128,0.12)',
+            border: '1px solid rgba(74,222,128,0.45)',
+            color: '#4ADE80',
           }}
         >
           <HiOutlinePlusCircle className="w-5 h-5" />
@@ -250,12 +334,14 @@ function PlaceholderNode({ data }) {
       </div>
 
       <div className="mt-5 rounded-xl px-3 py-2 text-[11px] font-semibold inline-flex items-center gap-2"
-        style={{ background: 'rgba(242,208,107,0.08)', color: '#F2D06B', border: '1px solid rgba(242,208,107,0.18)' }}>
+        style={{ background: 'rgba(74,222,128,0.1)', color: '#4ADE80', border: '1px solid rgba(74,222,128,0.22)' }}>
         Register new member here
       </div>
 
       <p className="mt-4 text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
-        Keep the binary tree balanced by placing a new account on this side.
+        {isDarkMode
+          ? 'Keep the binary tree balanced by placing a new account on this side.'
+          : 'Place the new account here to keep your tree balanced and support binary points.'}
       </p>
     </button>
   );
@@ -295,7 +381,7 @@ function flattenTree(node, level = 0, maxRenderLevel = 5, bucket = { nodes: [], 
       ...node,
       packageType: normalizePackageType(node.packageType || node.accttypeName),
       level,
-      positionLabel: level === 0 ? 'Root' : (Number(node.position) === 1 ? 'Left Leg' : 'Right Leg'),
+      positionLabel: getPositionLabel(node.position, level),
     },
     position: { x: 0, y: 0 },
   });
@@ -331,6 +417,13 @@ function flattenTree(node, level = 0, maxRenderLevel = 5, bucket = { nodes: [], 
     });
   }
 
+  // Dagre mirrors sibling insertion order in this tree, so keep the right branch first
+  // here to render the actual left leg on the left side of the canvas.
+  children.sort((a, b) => {
+    const weight = (value) => (value.__branchSide === 'right' ? 0 : 1);
+    return weight(a) - weight(b);
+  });
+
   if (children.length > 1) {
     const junctionId = `${nodeId}::junction`;
     bucket.nodes.push({
@@ -358,7 +451,7 @@ function flattenTree(node, level = 0, maxRenderLevel = 5, bucket = { nodes: [], 
           data: {
             ...child,
             level: level + 1,
-            positionLabel: child.position === 1 ? 'Left Leg' : 'Right Leg',
+            positionLabel: getPositionLabel(child.position, level + 1),
           },
           position: { x: 0, y: 0 },
         });
@@ -384,7 +477,7 @@ function flattenTree(node, level = 0, maxRenderLevel = 5, bucket = { nodes: [], 
         data: {
           ...child,
           level: level + 1,
-          positionLabel: child.position === 1 ? 'Left Leg' : 'Right Leg',
+          positionLabel: getPositionLabel(child.position, level + 1),
         },
         position: { x: 0, y: 0 },
       });
@@ -441,15 +534,22 @@ function legLabel(leg) {
 
 export default function GenealogyTree() {
   const { user } = useAuth();
+  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const reactFlowRef = useRef(null);
   const flowShellRef = useRef(null);
+  const searchBoxRef = useRef(null);
   const wantedFullscreenRef = useRef(false);
+  const highlightTimerRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [tree, setTree] = useState(null);
   const [network, setNetwork] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [canvasActive, setCanvasActive] = useState(false);
+  const [highlightedNodeId, setHighlightedNodeId] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const selfRootId = user?.publicUid || user?.public_uid || user?.uid;
   const rootId = searchParams.get('id') || selfRootId;
@@ -501,6 +601,35 @@ export default function GenealogyTree() {
   }, []);
 
   useEffect(() => {
+    function handleOutsidePointer(event) {
+      if (!flowShellRef.current?.contains(event.target)) {
+        setCanvasActive(false);
+      }
+      if (!searchBoxRef.current?.contains(event.target)) {
+        setSearchOpen(false);
+      }
+    }
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setCanvasActive(false);
+        setSearchOpen(false);
+      }
+    }
+
+    document.addEventListener('pointerdown', handleOutsidePointer);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsidePointer);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  useEffect(() => () => {
+    window.clearTimeout(highlightTimerRef.current);
+  }, []);
+
+  useEffect(() => {
     if (!loading && wantedFullscreenRef.current && flowShellRef.current && document.fullscreenElement !== flowShellRef.current) {
       flowShellRef.current.requestFullscreen().catch(() => {});
     }
@@ -530,6 +659,30 @@ export default function GenealogyTree() {
     await flowShellRef.current.requestFullscreen();
   }
 
+  function resetView() {
+    reactFlowRef.current?.fitView({ padding: 0.08, duration: 350, maxZoom: 1.32, minZoom: 0.2 });
+  }
+
+  function activateCanvas() {
+    setCanvasActive(true);
+  }
+
+  function focusNode(nodeId) {
+    const targetNode = nodes.find((node) => String(node.id) === String(nodeId));
+    if (!targetNode) return;
+
+    activateCanvas();
+    setHighlightedNodeId(String(nodeId));
+    reactFlowRef.current?.setCenter(
+      targetNode.position.x + NODE_WIDTH / 2,
+      targetNode.position.y + NODE_HEIGHT / 2,
+      { zoom: 1.12, duration: 420 }
+    );
+
+    window.clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = window.setTimeout(() => setHighlightedNodeId(''), 1800);
+  }
+
   const { nodes, edges } = useMemo(() => {
     if (!tree) return { nodes: [], edges: [] };
     const flattened = flattenTree(tree, 0, selectedDepth);
@@ -537,9 +690,13 @@ export default function GenealogyTree() {
       ...node,
       data: {
         ...node.data,
+        isDarkMode,
+        highlighted: String(node.id) === String(highlightedNodeId),
+        canvasActive,
         binaryPoints: fmtInt(node.data.binaryPoints || 0),
         onOpen: () => setRoot(node.id),
         onRegister: () => navigate(`/register?placement=${node.data.internalUid || node.data.uid}&position=${node.data.position || 1}`),
+        onActivateCanvas: activateCanvas,
       },
     }));
 
@@ -547,15 +704,15 @@ export default function GenealogyTree() {
       nodes: layoutGraph(graphNodes, flattened.edges),
       edges: flattened.edges,
     };
-  }, [tree, selectedDepth, navigate]);
+  }, [tree, selectedDepth, navigate, isDarkMode, highlightedNodeId, canvasActive]);
 
   useEffect(() => {
-    if (!nodes.length) return;
+    if (!tree || !nodes.length) return;
     const timer = setTimeout(() => {
-      reactFlowRef.current?.fitView({ padding: 0.22, duration: 350, maxZoom: 1.15, minZoom: 0.15 });
+      reactFlowRef.current?.fitView({ padding: 0.08, duration: 350, maxZoom: 1.32, minZoom: 0.2 });
     }, 80);
     return () => clearTimeout(timer);
-  }, [nodes, rootId, selectedDepth, isFullscreen]);
+  }, [tree, rootId, selectedDepth, isFullscreen]);
 
   const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode, placeholderNode: PlaceholderNode }), []);
   const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
@@ -563,6 +720,19 @@ export default function GenealogyTree() {
     const levels = new Set(network.map((member) => Number(member.depth || 0)).filter(Boolean));
     return Array.from(levels).sort((a, b) => a - b);
   }, [network]);
+
+  const searchableMembers = useMemo(() => {
+    const query = String(searchTerm || '').trim().toLowerCase();
+    const base = (network || []).filter((member) => member.username);
+    if (!query) return base.slice(0, 8);
+    return base
+      .filter((member) => {
+        const username = String(member.username || '').toLowerCase();
+        const fullname = String(member.fullname || '').toLowerCase();
+        return username.includes(query) || fullname.includes(query);
+      })
+      .slice(0, 8);
+  }, [network, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -591,7 +761,9 @@ export default function GenealogyTree() {
             type="button"
             onClick={() => navigate('/referrals')}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold"
-            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.12)' }}
+            style={isDarkMode
+              ? { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.12)' }
+              : { background: 'rgba(255,255,255,0.88)', color: '#7A5C08', border: '1px solid rgba(212,175,55,0.22)' }}
           >
             <HiOutlineUsers className="w-4 h-4" />
             Direct Referrals
@@ -599,8 +771,8 @@ export default function GenealogyTree() {
         </div>
       </div>
 
-      <div className="glass-card rounded-2xl p-5">
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+      <div className="glass-card relative z-30 rounded-2xl p-5">
+        <div className="relative z-40 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-white">Rendered Levels</p>
             <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
@@ -622,6 +794,54 @@ export default function GenealogyTree() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div ref={searchBoxRef} className="mt-4 relative z-[70]">
+          <div className="relative max-w-xl">
+            <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: isDarkMode ? 'rgba(255,255,255,0.38)' : 'rgba(122,92,8,0.6)' }} />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(event) => {
+                setSearchTerm(event.target.value);
+                setSearchOpen(true);
+              }}
+              onFocus={() => setSearchOpen(true)}
+              placeholder="Search affiliated usernames in this visible tree..."
+              className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm outline-none"
+              style={isDarkMode
+                ? { background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.09)' }
+                : { background: 'rgba(255,255,255,0.95)', color: '#2F2412', border: '1px solid rgba(212,175,55,0.2)' }}
+            />
+          </div>
+
+          {searchOpen && searchableMembers.length > 0 && (
+            <div
+              className="absolute left-0 top-full z-[80] mt-2 w-full max-w-xl rounded-2xl overflow-hidden"
+              style={isDarkMode
+                ? { background: '#15110b', border: '1px solid rgba(212,175,55,0.16)', boxShadow: '0 18px 38px rgba(0,0,0,0.35)' }
+                : { background: '#ffffff', border: '1px solid rgba(212,175,55,0.18)', boxShadow: '0 18px 38px rgba(212,175,55,0.14)' }}
+            >
+              {searchableMembers.map((member) => (
+                <button
+                  key={`${member.publicUid || member.uid}-${member.depth}`}
+                  type="button"
+                  onClick={() => {
+                    focusNode(member.publicUid || member.uid);
+                    setSearchTerm(member.username || '');
+                    setSearchOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm"
+                  style={{ borderBottom: '1px solid rgba(212,175,55,0.08)', color: isDarkMode ? '#fff' : '#2F2412' }}
+                >
+                  <div className="font-semibold">{member.username}</div>
+                  <div className="text-xs mt-1" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(74,56,18,0.62)' }}>
+                    {member.fullname || 'No full name'} - Level {member.depth}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -660,8 +880,8 @@ export default function GenealogyTree() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 2xl:grid-cols-[minmax(0,1.7fr)_420px] gap-5">
-          <div ref={flowShellRef} className={`glass-card rounded-2xl overflow-hidden ${isFullscreen ? 'genealogy-fullscreen-shell' : ''}`}>
+        <div className="space-y-5">
+          <div ref={flowShellRef} className={`glass-card relative z-10 rounded-2xl overflow-hidden ${isFullscreen ? 'genealogy-fullscreen-shell' : ''}`}>
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
               <div>
                 <h2 className="font-display text-lg font-semibold text-white">General Tree Canvas</h2>
@@ -676,9 +896,21 @@ export default function GenealogyTree() {
                 </div>
                 <button
                   type="button"
+                  onClick={resetView}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
+                  style={isDarkMode
+                    ? { background: 'rgba(255,255,255,0.06)', color: '#F4D675', border: '1px solid rgba(255,255,255,0.12)' }
+                    : { background: 'rgba(255,255,255,0.92)', color: '#7A5C08', border: '1px solid rgba(212,175,55,0.24)' }}
+                >
+                  Reset View
+                </button>
+                <button
+                  type="button"
                   onClick={toggleFullscreen}
                   className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
-                  style={{ background: 'rgba(212,175,55,0.08)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.18)' }}
+                  style={isDarkMode
+                    ? { background: 'rgba(212,175,55,0.08)', color: '#F4D675', border: '1px solid rgba(212,175,55,0.18)' }
+                    : { background: 'rgba(255,255,255,0.92)', color: '#7A5C08', border: '1px solid rgba(212,175,55,0.24)' }}
                 >
                   {isFullscreen ? <HiOutlineMinusSm className="w-4 h-4" /> : <HiOutlineArrowsExpand className="w-4 h-4" />}
                   {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
@@ -686,7 +918,18 @@ export default function GenealogyTree() {
               </div>
             </div>
 
-            <div className={`relative ${isFullscreen ? 'h-screen min-h-screen' : 'h-[68vh] min-h-[560px]'}`} style={{ background: 'linear-gradient(180deg, rgba(212,175,55,0.05), rgba(10,8,5,0.95))' }}>
+            <div
+              className={`genealogy-canvas-shell relative ${isFullscreen ? 'h-screen min-h-screen' : 'h-[62vh] min-h-[520px]'}`}
+              style={{ touchAction: canvasActive ? 'none' : 'pan-y pinch-zoom' }}
+            >
+              {!canvasActive ? (
+                <button
+                  type="button"
+                  aria-label="Activate genealogy canvas"
+                  onClick={activateCanvas}
+                  className="absolute inset-0 z-10 block cursor-grab bg-transparent"
+                />
+              ) : null}
               {loading && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center backdrop-blur-[2px]" style={{ background: 'rgba(10,8,5,0.28)' }}>
                   <Spinner />
@@ -696,41 +939,39 @@ export default function GenealogyTree() {
                 onInit={(instance) => {
                   reactFlowRef.current = instance;
                 }}
-                className="genealogy-flow"
+                className="genealogy-flow h-full w-full"
                 nodes={nodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
-                fitView
-                fitViewOptions={{ padding: 0.24 }}
                 minZoom={0.15}
                 maxZoom={1.6}
                 nodesDraggable={false}
                 nodesConnectable={false}
-                elementsSelectable
+                elementsSelectable={canvasActive}
+                panOnDrag={canvasActive}
+                panOnScroll={false}
+                zoomOnScroll={canvasActive}
+                zoomOnPinch={canvasActive}
+                zoomOnDoubleClick={canvasActive}
+                preventScrolling={canvasActive}
                 proOptions={{ hideAttribution: true }}
                 defaultEdgeOptions={{ type: 'treeEdge' }}
               >
-                <MiniMap
-                  className="genealogy-minimap"
-                  pannable
-                  zoomable
-                  position="bottom-right"
-                  style={{ width: 220, height: 140 }}
-                  nodeColor={(node) => PACKAGE_STYLES[node.data?.packageType]?.mini || '#D4AF37'}
-                  maskColor="rgba(242,208,107,0.18)"
-                  nodeStrokeColor={(node) => PACKAGE_STYLES[node.data?.packageType]?.accent || '#F2D06B'}
-                  nodeBorderRadius={10}
-                  nodeStrokeWidth={3}
-                  bgColor="rgba(14,12,9,0.96)"
-                />
                 <Controls className="genealogy-controls" showInteractive={false} position="top-right" />
                 <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="rgba(212,175,55,0.18)" />
               </ReactFlow>
+
+              <div className="absolute left-4 bottom-4 z-20 rounded-xl px-3 py-2 text-xs font-semibold pointer-events-none"
+                style={isDarkMode
+                  ? { background: 'rgba(15,23,42,0.82)', color: canvasActive ? '#4ADE80' : 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)' }
+                  : { background: 'rgba(255,255,255,0.94)', color: canvasActive ? '#15803d' : '#7A5C08', border: '1px solid rgba(212,175,55,0.18)' }}>
+                {canvasActive ? 'Canvas active: drag and zoom enabled' : 'Click the canvas first to drag and zoom. Page scroll stays normal until then.'}
+              </div>
             </div>
           </div>
 
-          <div className="space-y-5">
+          <div className="grid grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)_340px] gap-5">
             <div className="glass-card rounded-2xl p-5">
               <h2 className="font-display text-lg font-semibold text-white">Branch Summary</h2>
               <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
@@ -753,7 +994,7 @@ export default function GenealogyTree() {
               </div>
             </div>
 
-            <div className="glass-card rounded-2xl p-5">
+            <div className="glass-card rounded-2xl p-5 min-h-0">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h2 className="font-display text-lg font-semibold text-white">Affiliated Members</h2>
@@ -763,7 +1004,7 @@ export default function GenealogyTree() {
                 </div>
               </div>
 
-              <div className="mt-4 space-y-3 max-h-[52vh] overflow-auto pr-1">
+              <div className="mt-4 space-y-3 max-h-[42vh] xl:max-h-[36vh] overflow-auto pr-1">
                 {network.map((member) => {
                   const packageStyle = PACKAGE_STYLES[member.accttypeName] || PACKAGE_STYLES.Bronze;
                   return (
@@ -842,3 +1083,4 @@ export default function GenealogyTree() {
     </div>
   );
 }
+

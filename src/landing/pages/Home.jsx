@@ -34,6 +34,15 @@ function Hero() {
             >
               Be the One. Register Now!
             </a>
+            <a
+              href="#stockist-apply"
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18"
+            >
+              Apply as Stockist
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </a>
             <div className="mt-5 hidden sm:flex items-center justify-start gap-3 text-white/90">
               <svg className="w-6 h-6 text-brand-gold-light drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -480,7 +489,7 @@ function DownloadableMaterials() {
 }
 
 function ApplicationForm() {
-  const [form, setForm] = useState({ name: '', phone: '', email: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', letterOfIntent: null });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [showApplicationPrompt, setShowApplicationPrompt] = useState(false);
@@ -494,12 +503,20 @@ function ApplicationForm() {
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: (() => {
+          const payload = new FormData();
+          payload.append('name', form.name);
+          payload.append('phone', form.phone);
+          payload.append('email', form.email);
+          if (form.letterOfIntent) {
+            payload.append('letter_of_intent', form.letterOfIntent);
+          }
+          return payload;
+        })(),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Unable to submit application.');
-      setForm({ name: '', phone: '', email: '' });
+      setForm({ name: '', phone: '', email: '', letterOfIntent: null });
       setShowApplicationPrompt(true);
       setStatus({ type: 'success', message: data.message || 'Distributor application interest submitted.' });
     } catch (err) {
@@ -510,66 +527,110 @@ function ApplicationForm() {
   }
 
   return (
-    <section className="section-padding relative overflow-hidden bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
+    <section id="stockist-apply" className="section-padding relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #fff8e8 0%, #fffdf5 38%, #f6ecdc 100%)' }}>
+      <div className="absolute inset-0 pointer-events-none bg-diagonal-lines opacity-40" />
+      <div className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-[#D4A528]/15 blur-3xl pointer-events-none" />
+      <div className="absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[#592219]/12 blur-3xl pointer-events-none" />
       <div className="section-container">
-        <SectionHeader badge="Application" title="Distributor Application Form" />
+        <SectionHeader badge="Stockist Application" title="Apply as a Nogatu Stockist" />
         <div ref={ref} className="reveal grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-          <div className="rounded-2xl p-8 text-white" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
-            <h3 className="text-2xl font-bold mb-4">New Distributor Onboarding</h3>
-            <p className="text-white/75 leading-relaxed mb-6">
-              Share your contact details so the NOGATU team can follow up with the distributor application form. Re-application is allowed only after a 30-day cool down period from the latest submission.
-            </p>
-            <div className="space-y-4 text-sm text-white/70">
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your name, contact number, and email address.</span></div>
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Admin monitors your interest and follows up with you.</span></div>
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Bring the application form to the nearest office branch to proceed.</span></div>
+          <div className="relative overflow-hidden rounded-[2rem] border border-[#D4A528]/20 bg-[linear-gradient(145deg,#2f1408_0%,#592219_45%,#6d3028_100%)] p-8 text-white shadow-[0_30px_70px_rgba(89,34,25,0.28)]">
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,rgba(255,223,136,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_26%)]" />
+            <div className="relative z-10">
+              <p className="inline-flex rounded-full border border-[#D4A528]/25 bg-white/10 px-4 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-[#FDE68A]">
+                First Step
+              </p>
+              <h3 className="mt-5 text-3xl font-black leading-tight">Stockists now apply here before accessing the Dropshipping portal.</h3>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-white/75">
+                Submit your contact details first. The Nogatu team will review your interest, follow up on your stockist onboarding, and guide you through the next approval steps.
+              </p>
+              <div className="mt-7 grid gap-3 text-sm text-white/78">
+                <div className="flex gap-3 rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
+                  <span className="text-[#FDE68A] font-bold">01</span>
+                  <span>Send your full name, active mobile number, email address, and signed letter of intent.</span>
+                </div>
+                <div className="flex gap-3 rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
+                  <span className="text-[#FDE68A] font-bold">02</span>
+                  <span>Our team checks the application queue and contacts qualified applicants.</span>
+                </div>
+                <div className="flex gap-3 rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
+                  <span className="text-[#FDE68A] font-bold">03</span>
+                  <span>After approval, you can proceed with the stockist setup and portal access.</span>
+                </div>
+              </div>
+              <div className="mt-7 rounded-2xl border border-[#D4A528]/20 bg-black/15 px-5 py-4">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#FDE68A]/85">Important</p>
+                <p className="mt-2 text-sm leading-6 text-white/70">
+                  Re-application is limited for 30 days from the latest submission so the queue stays clean and the team can follow up properly.
+                </p>
+              </div>
             </div>
           </div>
-          <form onSubmit={submitApplication} className="rounded-2xl border border-primary-200/40 bg-white p-6 sm:p-8 shadow-lg space-y-4">
+          <form onSubmit={submitApplication} className="rounded-[2rem] border border-[#D4A528]/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(255,250,239,0.96)_100%)] p-6 sm:p-8 shadow-[0_24px_60px_rgba(184,134,11,0.12)] space-y-5">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#B8860B]">Nogatu Alliance</p>
+              <h3 className="mt-2 text-2xl font-black text-[#3A1000]">Stockist Application Intake</h3>
+              <p className="mt-2 text-sm leading-6 text-[#6d3028]">
+                Use the same brown-and-gold Nogatu member experience to start your stockist application.
+              </p>
+            </div>
             {[
-              { key: 'name', label: 'Full Name', type: 'text' },
-              { key: 'phone', label: 'Contact No.', type: 'tel' },
-              { key: 'email', label: 'Email Address', type: 'email' },
+              { key: 'name', label: 'Full Name', type: 'text', placeholder: 'Enter your full legal name' },
+              { key: 'phone', label: 'Contact Number', type: 'tel', placeholder: '09XX XXX XXXX' },
+              { key: 'email', label: 'Email Address', type: 'email', placeholder: 'you@example.com' },
             ].map((field) => (
               <label key={field.key} className="block">
-                <span className="block text-sm font-semibold text-brand-brown mb-2">{field.label}</span>
+                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-[#8C6A19]">{field.label}</span>
                 <input
                   type={field.type}
                   value={form[field.key]}
                   onChange={(e) => updateField(field.key, e.target.value)}
                   required
-                  className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+                  placeholder={field.placeholder}
+                  className="w-full rounded-2xl border border-[#D4A528]/18 bg-white/80 px-4 py-3.5 text-sm text-[#2f1408] outline-none transition-all duration-300 placeholder:text-[#8c715b]/70 focus:border-[#B8860B] focus:ring-4 focus:ring-[#D4A528]/15"
                 />
               </label>
             ))}
+            <label className="block">
+              <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-[#8C6A19]">Letter of Intent</span>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                required
+                onChange={(e) => updateField('letterOfIntent', e.target.files?.[0] || null)}
+                className="w-full rounded-2xl border border-[#D4A528]/18 bg-white/80 px-4 py-3.5 text-sm text-[#2f1408] outline-none transition-all duration-300 file:mr-4 file:rounded-xl file:border-0 file:bg-[#D4A528]/12 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#7a5608] focus:border-[#B8860B] focus:ring-4 focus:ring-[#D4A528]/15"
+              />
+              <p className="mt-2 text-xs leading-5 text-[#7d6553]">
+                Required. Accepted formats: PDF, DOC, DOCX, JPG, PNG, or WEBP. Maximum file size: 5MB.
+              </p>
+            </label>
             {status.message && (
-              <div className={`rounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+              <div className={`rounded-2xl px-4 py-3 text-sm ${status.type === 'success' ? 'border border-emerald-200 bg-emerald-50 text-emerald-700' : 'border border-red-200 bg-red-50 text-red-700'}`}>
                 {status.message}
               </div>
             )}
-            <button type="submit" disabled={submitting} className="w-full btn-landing-primary disabled:opacity-60 disabled:cursor-not-allowed">
-              {submitting ? 'Submitting...' : 'Show Distributor Application Form'}
+            <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60" style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 55%, #E7C679 100%)', boxShadow: '0 14px 32px rgba(184,134,11,0.28)' }}>
+              {submitting ? 'Submitting application...' : 'Submit Stockist Application'}
             </button>
+            <p className="text-center text-xs leading-5 text-[#7d6553]">
+              This form records your interest together with your required letter of intent. A Nogatu representative will guide you through the next stockist requirements.
+            </p>
           </form>
         </div>
       </div>
       {showApplicationPrompt && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="max-w-lg w-full rounded-2xl bg-white p-7 shadow-2xl border border-brand-gold/30">
-            <div className="w-14 h-14 rounded-2xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-5">
+          <div className="max-w-lg w-full overflow-hidden rounded-[2rem] border border-[#D4A528]/25 bg-[linear-gradient(180deg,#fffdf7_0%,#fff5df_100%)] p-7 shadow-[0_30px_80px_rgba(58,16,0,0.28)]">
+            <div className="w-14 h-14 rounded-2xl bg-[#D4A528]/12 text-[#B8860B] flex items-center justify-center mb-5">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
             </div>
-            <h3 className="text-2xl font-bold text-brand-brown mb-3">Distributor Application Form</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Your details have been recorded. Please drop by the nearest NOGATU office or satellite branch to complete the distributor application form and proceed with onboarding.
+            <h3 className="text-2xl font-black text-[#3A1000] mb-3">Stockist Application Received</h3>
+            <p className="text-[#6d3028] leading-relaxed">
+              Your details have been recorded in the Nogatu stockist queue. Please wait for the team to contact you for the next onboarding steps and approval checks.
             </p>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <a
-                href="data:text/plain;charset=utf-8,NOGATU%20Distributor%20Application%20Form%20Placeholder%0A%0APlease%20replace%20this%20placeholder%20with%20the%20official%20downloadable%20application%20form."
-                download="nogatu-distributor-application-form-placeholder.txt"
-                className="btn-landing-primary w-full"
-              >
-                Download Form
+              <a href="/portal/login" className="btn-landing-primary w-full">
+                Open Members Area
               </a>
               <button onClick={() => setShowApplicationPrompt(false)} className="btn-landing-secondary w-full">
                 Got It

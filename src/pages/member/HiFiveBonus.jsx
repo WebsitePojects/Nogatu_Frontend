@@ -291,10 +291,10 @@ function ProductCard({ item, productEligible, pointsNeeded, onRedeem, onViewCont
 
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium" style={{ color: accent }}>{item.name}</p>
-          <h3 className="font-semibold text-white text-lg mt-1">Free product after 5 same-product buys</h3>
+          <p className="text-xs font-medium" style={{ color: accent }}>Product Hi-Five</p>
+          <h3 className="font-semibold text-white text-lg mt-1">{item.name}</h3>
           <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
-            Direct referrals must accumulate 5 purchases of the same product. You also need at least 200 maintenance points.
+            You qualify once 5 different direct referrals have each bought this same product at least once. You also need at least 200 maintenance points.
           </p>
         </div>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}25` }}>
@@ -317,8 +317,18 @@ function ProductCard({ item, productEligible, pointsNeeded, onRedeem, onViewCont
       )}
 
       <div className="grid grid-cols-2 gap-3 mt-4">
-        <SummaryStat label="Direct Referral Buys" value={fmtInt(item.directReferralPurchases)} subtitle={`${item.purchasePoints} pts each purchase`} icon={HiOutlineUsers} />
+        <SummaryStat
+          label="Qualifying Direct Referrals"
+          value={fmtInt(item.qualifyingDirectReferrals)}
+          subtitle="direct referrals with this product"
+          icon={HiOutlineUsers}
+        />
         <SummaryStat label="Redeemable" value={fmtInt(item.availableClaims)} subtitle={productEligible ? 'ready to redeem' : `${fmtInt(item.blockedClaims)} blocked by maintenance`} icon={HiOutlineCheckCircle} />
+      </div>
+
+      <div className="mt-3 rounded-xl px-4 py-3 text-xs flex items-center justify-between gap-3" style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)' }}>
+        <span>Total same-product purchases from direct referrals</span>
+        <span className="font-semibold text-white">{fmtInt(item.directReferralPurchases)}</span>
       </div>
 
       <div className="grid grid-cols-3 gap-2 mt-4 text-center">
@@ -337,7 +347,7 @@ function ProductCard({ item, productEligible, pointsNeeded, onRedeem, onViewCont
       </div>
 
       <ContributorList
-        title="Top contributing direct referrals"
+        title="Qualifying direct referrals"
         contributors={item.contributors}
         accent="#D4AF37"
         onViewAll={() => onViewContributors(item)}
@@ -356,7 +366,7 @@ function ProductCard({ item, productEligible, pointsNeeded, onRedeem, onViewCont
       ) : (
         <div className="mt-4 rounded-xl py-3 px-4 text-sm" style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.38)' }}>
           {productEligible
-            ? `Need ${item.remainingToNextSet} more same-product purchase${item.remainingToNextSet === 1 ? '' : 's'} from direct referrals.`
+            ? `Need ${item.remainingToNextSet} more qualifying direct referral${item.remainingToNextSet === 1 ? '' : 's'} on this product.`
             : `Redeeming is locked until you reach the 200-point maintenance target. Need ${fmtInt(pointsNeeded)} more point${pointsNeeded === 1 ? '' : 's'}.`}
         </div>
       )}
@@ -369,6 +379,7 @@ export default function HiFiveBonus() {
   const [loading, setLoading] = useState(true);
   const [busyKey, setBusyKey] = useState('');
   const [contributorModal, setContributorModal] = useState(null);
+  const [activeSection, setActiveSection] = useState('package');
 
   useEffect(() => {
     loadData();
@@ -453,7 +464,28 @@ export default function HiFiveBonus() {
         />
       </div>
 
-      <div className="glass-card rounded-3xl p-6">
+      <div className="lg:hidden">
+        <div className="glass-card rounded-2xl p-3 flex items-center gap-2">
+          {[
+            { key: 'package', label: 'Package Claims' },
+            { key: 'product', label: 'Product Claims' },
+          ].map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setActiveSection(item.key)}
+              className="flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold"
+              style={activeSection === item.key
+                ? { background: 'rgba(212,175,55,0.18)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.32)' }
+                : { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className={`${activeSection === 'package' ? 'block' : 'hidden lg:block'} glass-card rounded-3xl p-4 sm:p-6`}>
         <div className="flex items-start justify-between gap-4 flex-col lg:flex-row">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: '#D4AF37' }}>Hi-Five Bonus - Package</p>
@@ -486,13 +518,13 @@ export default function HiFiveBonus() {
         </div>
       </div>
 
-      <div className="glass-card rounded-3xl p-6">
+      <div className={`${activeSection === 'product' ? 'block' : 'hidden lg:block'} glass-card rounded-3xl p-4 sm:p-6`}>
         <div className="flex items-start justify-between gap-4 flex-col lg:flex-row">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: '#D4AF37' }}>Hi-Five Bonus - Products</p>
-            <h2 className="font-display text-xl font-semibold text-white mt-2">Free products when your direct referrals repeat the same product 5 times</h2>
+            <h2 className="font-display text-xl font-semibold text-white mt-2">Free products when 5 direct referrals buy the same item</h2>
             <p className="text-sm mt-2 max-w-3xl" style={{ color: 'rgba(255,255,255,0.42)' }}>
-              Product Hi-Five is unlocked only when you maintain at least 200 repurchase points. Once eligible, every 5 same-product purchases made by your direct referrals can be redeemed as a free product reward.
+              Product Hi-Five is unlocked only when you maintain at least 200 repurchase points. Once eligible, every 5 different direct referrals who each bought the same product unlock one free-item redemption for that product.
             </p>
           </div>
           <div
@@ -542,7 +574,7 @@ export default function HiFiveBonus() {
               productEligible={data.productBonus?.eligible}
               pointsNeeded={data.productBonus?.pointsNeeded}
               onViewContributors={(card) => setContributorModal({
-                title: `${card.name} Product Contributors`,
+                title: `${card.name} Qualifying Direct Referrals`,
                 contributors: card.contributors,
                 accent: '#D4AF37',
               })}
