@@ -3,14 +3,40 @@ import { NavLink } from 'react-router-dom';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
 
+const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
+
 /* ────────────────────────── Hero (NogatuDrop-style with BG image) ────────────────────────── */
 function Hero() {
+  const heroSlides = [
+    {
+      image: '/img/landing-product.png',
+      alt: 'Nogatu Alliance full product lineup',
+      eyebrow: 'Featured Collection',
+      title: 'Healthy essentials in one complete line-up',
+      description: 'A premium showcase of the NOGATU wellness collection for first-time visitors.',
+    },
+    {
+      image: '/img/BerryNad_Market.png',
+      alt: 'Berry NAD+ product feature',
+      eyebrow: 'New Product',
+      title: 'Berry NAD+ now in the spotlight',
+      description: 'A dedicated hero slide that highlights Berry NAD+ before the carousel loops back to the full catalog.',
+    },
+  ];
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % heroSlides.length);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [heroSlides.length]);
+
   return (
     <section
-      className="relative min-h-screen overflow-hidden"
-      className="relative min-h-screen overflow-hidden"
+      className="relative min-h-[100svh] overflow-hidden"
       style={{
-        backgroundImage: 'url(/img/landing-bg-clean.png)',
         backgroundImage: 'url(/img/landing-bg-clean.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -19,41 +45,61 @@ function Hero() {
       {/* Warm gold overlay for readability */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-16 sm:pt-24 pb-8 sm:pb-12">
-        <div className="min-h-[75vh] lg:min-h-[80vh] flex flex-col lg:flex-row gap-8 lg:gap-0 items-center justify-between">
-          <div className="order-2 lg:order-1 w-full lg:w-5/12 pb-6 lg:pb-0 motion-safe:animate-fade-up text-center lg:text-left z-20">
-            <h1 className="text-[clamp(2.5rem,5vw,4.5rem)] font-extrabold leading-[1.05] tracking-tight text-white mb-5 drop-shadow-2xl">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 sm:pt-24 pb-6 sm:pb-10">
+        <div className="min-h-[calc(100svh-120px)] lg:min-h-[78vh] flex flex-col lg:flex-row gap-6 lg:gap-8 items-center justify-between">
+          <div className="order-2 lg:order-1 w-full lg:w-[38%] pb-4 lg:pb-0 mt-auto motion-safe:animate-fade-up text-left z-20 flex flex-col items-start">
+            <h1 className="text-[clamp(1.9rem,4.2vw,3.8rem)] font-extrabold leading-[1.08] tracking-tight text-white mb-4 sm:mb-5 drop-shadow-2xl">
               Enjoy Our Healthy<br />
               <span className="text-brand-gold-light drop-shadow-lg">&amp; Wealthy Lifestyle</span>
-              <span className="text-brand-gold-light drop-shadow-lg">&amp; Wealthy Lifestyle</span>
             </h1>
-            <p className="mb-8 text-white/90 text-lg sm:text-xl font-medium max-w-md mx-auto lg:mx-0 drop-shadow-md">
+            <p className="mb-5 sm:mb-6 text-white/90 text-sm sm:text-lg font-medium max-w-md drop-shadow-md">
               Wellness You Can Taste, Quality You Can Trust.
             </p>
             <a
               href="/portal/login"
-              className="inline-block px-10 sm:px-12 py-3.5 sm:py-4 text-white text-[clamp(1.2rem,2vw,1.8rem)] font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-none hover:scale-105 hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
+              className="inline-block px-6 sm:px-10 py-3 sm:py-3.5 text-white text-sm sm:text-[clamp(1rem,1.6vw,1.25rem)] font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-none hover:scale-105 hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
               style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
             >
               Be the One. Register Now!
             </a>
-            <div className="mt-8 flex items-center justify-center lg:justify-start gap-3 text-white/80">
+            <div className="mt-5 hidden sm:flex items-center justify-start gap-3 text-white/90">
               <svg className="w-6 h-6 text-brand-gold-light drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-[clamp(1.1rem,1.8vw,1.4rem)] font-semibold leading-none drop-shadow">FDA Approved Products</span>
+              <span className="text-[clamp(0.95rem,1.4vw,1.15rem)] font-semibold leading-none drop-shadow">FDA Approved Products</span>
             </div>
           </div>
 
-          <div className="order-1 lg:order-2 w-full lg:w-7/12 flex justify-center motion-safe:animate-fade-up z-10 mt-8 lg:mt-0">
-            <div className="relative w-[120%] sm:w-[130%] lg:w-[140%] xl:w-[160%] max-w-[600px] sm:max-w-[800px] lg:max-w-[1000px] xl:max-w-[1200px] -ml-6 sm:-ml-10 lg:ml-0 lg:-mr-16 xl:-mr-32">
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-3/4 h-1/3 rounded-full blur-[80px] bg-brand-gold/60 motion-safe:animate-pulse-glow" />
-              <div className="absolute inset-x-10 bottom-4 h-12 rounded-full bg-black/40 blur-[40px]" />
-              <img
-                src="/img/product-landing.png"
-                alt="Nogatu Alliance Products"
-                className="relative z-10 w-full h-auto object-contain motion-safe:animate-float-slow drop-shadow-[0_45px_100px_rgba(0,0,0,0.7)] scale-[1.15] sm:scale-[1.25] lg:scale-[1.3] xl:scale-[1.4] origin-bottom lg:origin-center"
-              />
+          <div className="order-1 lg:order-2 w-full lg:w-[62%] flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 lg:mt-0 flex-1 lg:flex-none items-center">
+            <div className="hero-carousel-shell relative w-full max-w-[600px] sm:max-w-[760px] lg:max-w-[1080px] xl:max-w-[1240px] mx-auto lg:mx-0">
+              <div className="hero-carousel-card">
+                <div className="hero-carousel-stage">
+                  <span className={`hero-carousel-eyebrow ${activeSlide === 1 ? 'is-lower' : 'is-upper'}`}>
+                    {heroSlides[activeSlide].eyebrow}
+                  </span>
+                  <div className="hero-carousel-glow" />
+                  <div className="hero-carousel-floor" />
+
+                  {heroSlides.map((slide, index) => (
+                    <img
+                      key={slide.image}
+                      src={slide.image}
+                      alt={slide.alt}
+                      className={`hero-carousel-image ${index === activeSlide ? 'is-active' : 'is-hidden'} ${index === 0 ? 'is-collection' : 'is-single-product'}`}
+                    />
+                  ))}
+
+                  <div className="hero-carousel-indicators" aria-hidden="true">
+                    {heroSlides.map((slide, index) => (
+                      <span
+                        key={slide.image}
+                        className={`hero-carousel-dot ${index === activeSlide ? 'is-active' : ''}`}
+                      />
+                    ))}
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -82,12 +128,12 @@ function StatsBar() {
           <p className="text-sm text-white/60 mt-1 font-medium">Networks Built</p>
         </div>
         <div>
-          <p className="text-3xl lg:text-4xl font-extrabold text-brand-yellow-light">6</p>
-          <p className="text-sm text-white/60 mt-1 font-medium">Product Lines</p>
+          <p className="text-3xl lg:text-4xl font-extrabold" style={{ color: '#FDE68A' }}>10</p>
+          <p className="text-sm mt-1 font-semibold" style={{ color: '#FDE68A' }}>Product Lines</p>
         </div>
         <div>
-          <p className="text-3xl lg:text-4xl font-extrabold text-brand-yellow-light">99%</p>
-          <p className="text-sm text-white/60 mt-1 font-medium">Member Satisfaction</p>
+          <p className="text-3xl lg:text-4xl font-extrabold" style={{ color: '#FDE68A' }}>99%</p>
+          <p className="text-sm mt-1 font-semibold" style={{ color: '#FDE68A' }}>Member Satisfaction</p>
         </div>
       </div>
     </section>
@@ -108,16 +154,19 @@ function AboutPreview() {
         <SectionHeader badge="About Us" title="Learn More About Us" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div ref={ref1} className="reveal-left">
-            <div className="relative">
+            <div className="relative about-photo-frame">
+              <div className="about-photo-glow" />
+              <div className="about-photo-orb about-photo-orb-left" />
+              <div className="about-photo-orb about-photo-orb-right" />
               <img
                 src="/landing/assets/img/about.jpg"
                 alt="About NOGATU Alliance"
-                className="rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30"
+                className="relative z-10 rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30 about-photo-main"
                 onClick={() => lightbox.open('/landing/assets/img/about.jpg')}
                 loading="lazy"
               />
               {/* Accent badge */}
-              <div className="absolute -bottom-4 -right-4 rounded-2xl px-5 py-3 shadow-xl" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
+              <div className="absolute -bottom-4 -right-4 rounded-2xl px-5 py-3 shadow-xl about-photo-badge" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
                 <div className="text-white font-black text-xl">10+</div>
                 <div className="text-white/80 text-xs font-semibold uppercase tracking-wide">Products</div>
               </div>
@@ -130,11 +179,33 @@ function AboutPreview() {
             <p className="text-gray-500 leading-relaxed mb-8">
               It also provides its members with competitive marketing incentives.
             </p>
-            <div className="relative inline-block">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+              <div className="about-info-card">
+                <div className="about-info-icon">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Main Office</p>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City</p>
+              </div>
+              <div className="about-info-card">
+                <div className="about-info-icon">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
+                  </svg>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Satellite Branch</p>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Reserved space for your satellite branch address and contact details.</p>
+              </div>
+            </div>
+            <div className="relative inline-block product-mini-frame">
+              <div className="product-mini-glow" />
               <img
                 src="/landing/img/about-2.jpg"
                 alt="NOGATU Products"
-                className="rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer border border-primary-200/30"
+                className="relative z-10 rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer border border-primary-200/30 product-mini-image"
                 onClick={() => lightbox.open('/landing/img/about-2.jpg')}
                 loading="lazy"
               />
@@ -190,17 +261,19 @@ function WhyUs() {
             {features.map((f, i) => {
               const cardRef = useScrollReveal({ delay: i * 100 });
               return (
-                <div key={f.title} ref={cardRef} className="reveal group bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                  <div className="feature-story-shine" />
+                  <div className="feature-story-aura" />
                   <div
-                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110"
+                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110 feature-story-icon"
                     style={{ color: '#B8860B', backgroundColor: 'rgba(212,165,40,0.08)' }}
                   >
                     <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={f.icon} />
                     </svg>
                   </div>
-                  <h4 className="font-bold text-gray-900 mb-2">{f.title}</h4>
-                  <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                  <h4 className="font-bold text-brand-brown mb-3 text-lg">{f.title}</h4>
+                  <p className="text-sm leading-7 text-[#6d3028] font-medium max-w-[15rem] mx-auto">{f.desc}</p>
                 </div>
               );
             })}
@@ -215,46 +288,62 @@ function WhyUs() {
 function Products() {
   const lightbox = useLightbox();
   const products = [
-    { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/landing/img/menu-item-1.png', imgLg: '/landing/img/menu-item-1.png' },
-    { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/landing/img/menu-item-2.png', imgLg: '/landing/img/menu-item-2.png' },
-    { name: 'Nogatu Collagen Vitamin C', desc: 'Vitamin C with Collagen & Clu', price: '500.00', img: '/landing/img/menu-item-3.png', imgLg: '/landing/img/menu-item-3.png' },
-    { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/landing/img/menu-item-4.png', imgLg: '/landing/img/menu-item-4.png' },
-    { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/landing/img/menu-item-5.png', imgLg: '/landing/img/menu-item-5.png' },
-    { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/landing/img/menu-item-6.png', imgLg: '/landing/img/menu-item-6.png' },
+    { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/Barley-Mix.png', imgLg: '/legacy-img/Barley-Mix.png' },
+    { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png' },
+    { name: 'Vitamin C with Collagen & Glutathione', desc: 'Radiance and antioxidant support formula', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png' },
+    { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/Chox-Mix.png', imgLg: '/legacy-img/Chox-Mix.png' },
+    { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png', imgLg: '/legacy-img/Coffee-Mix.png' },
+    { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/Mangoosteen_1.png', imgLg: '/legacy-img/Mangoosteen_1.png' },
+    { name: 'Vitamin C with Zinc & Mangosteen', desc: 'Vitamin support blend with mangosteen extract', price: '580.00', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png' },
+    { name: 'Nogatu Black Coffee', desc: 'Premium black coffee drink mix', price: '250.00', img: '/legacy-img/blck-coffee.png', imgLg: '/legacy-img/blck-coffee.png' },
+    { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png' },
+    { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png' },
   ];
 
   return (
     <section className="section-padding relative overflow-hidden" style={{ background: '#FFFDF5' }}>
       {/* Geo pattern */}
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
+      <div className="absolute inset-0 pointer-events-none product-lineup-wash" />
       <div className="section-container relative z-10">
         <SectionHeader badge="Products" title="Our Line-up" />
-        <SectionHeader badge="Products" title="Our Line-up" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {products.map((p, i) => {
             const ref = useScrollReveal({ delay: i * 80 });
             return (
-              <div key={p.name} ref={ref} className="reveal group text-center">
+              <div key={p.name} ref={ref} className="reveal group text-center product-lineup-card">
                 <div
-                  className="relative overflow-hidden rounded-2xl p-8 flex items-center justify-center h-56 mb-4 cursor-pointer border border-primary-200/30 motion-safe:transition-all motion-safe:duration-300 group-hover:shadow-lg"
+                  className="relative overflow-hidden rounded-[1.75rem] p-4 sm:p-8 flex items-center justify-center h-44 sm:h-56 mb-4 cursor-pointer border border-primary-200/30 motion-safe:transition-all motion-safe:duration-500 group-hover:shadow-lg"
                   style={{ background: 'linear-gradient(135deg, #FFFDF5, #FFF8E1)' }}
-                  onClick={() => lightbox.open(p.imgLg)}
+                  onClick={() => p.imgLg && lightbox.open(p.imgLg)}
                 >
-                  <img
-                    src={p.imgLg}
-                    alt={p.name}
-                    className="max-h-44 object-contain group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500"
-                    loading="lazy"
-                  />
+                  <div className="product-card-ambient product-card-ambient-left" />
+                  <div className="product-card-ambient product-card-ambient-right" />
+                  <div className="product-card-sheen" />
+                  <div className="product-card-grid" />
+                  {p.placeholder ? (
+                    <div className="w-full h-full rounded-xl border-2 border-dashed border-brand-gold/35 bg-white/45 flex flex-col items-center justify-center text-brand-brown">
+                      <svg className="w-10 h-10 text-brand-gold-dark mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      <span className="text-sm font-semibold">Image Slot</span>
+                    </div>
+                  ) : (
+                    <img
+                      src={p.imgLg}
+                      alt={p.name}
+                      className="relative z-10 max-h-44 object-contain group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500 product-card-image"
+                      loading="lazy"
+                    />
+                  )}
+                  <div className="product-card-badge">Wellness Pick</div>
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 motion-safe:transition-colors motion-safe:duration-300 flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-300 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-md">
                       <svg className="w-5 h-5 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                     </div>
                   </div>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-1">{p.name}</h4>
-                <p className="text-sm text-gray-500 mb-1">{p.desc}</p>
-                <p className="text-lg font-bold text-brand-gold-dark">Php {p.price}</p>
+                <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">{p.name}</h4>
+                <p className="text-xs sm:text-sm text-gray-500 mb-1">{p.desc}</p>
+                <p className="text-lg font-bold text-brand-gold-dark">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
               </div>
             );
           })}
@@ -268,6 +357,14 @@ function Products() {
 /* ────────────────────── Organizations Preview ───────────── */
 function OrganizationsPreview() {
   const ref = useScrollReveal();
+
+  const OrgNode = ({ top, left, hc, bc }) => (
+    <div className="absolute flex flex-col items-center -translate-x-1/2 z-10" style={{ top: `${top}px`, left: `${left}%` }}>
+      <div className={`w-[18px] h-[18px] sm:w-[22px] sm:h-[22px] rounded-full shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)] mb-1 border border-white/40 bg-gradient-to-b ${hc}`} />
+      <div className={`w-10 h-7 sm:w-12 sm:h-8 rounded-t-xl rounded-b shadow-[0_4px_6px_rgba(0,0,0,0.2),inset_0_-3px_5px_rgba(0,0,0,0.2)] border border-black/10 bg-gradient-to-b ${bc}`} />
+    </div>
+  );
+
   return (
     <section className="section-padding relative overflow-hidden bg-white">
       {/* Minimalist Backgound Pattern */}
@@ -276,34 +373,78 @@ function OrganizationsPreview() {
       </div>
 
       <div className="section-container relative z-10">
-        <SectionHeader badge="Organizations" title="Our Network Structure" />
+        <SectionHeader badge="People" title="People Behind the Company" />
         
         <div ref={ref} className="reveal max-w-4xl mx-auto text-center">
-          <p className="text-gray-600 leading-relaxed mb-12">
-            A minimalist approach to a powerful network. See how our leadership, regional centers, and product suppliers connect to deliver unparalleled success.
+            <p className="text-gray-600 leading-relaxed mb-12">
+            Meet the key leaders and important people behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
           </p>
 
-          <div className="relative p-8 md:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
-            {/* Minimalist Org Chart Abstract */}
-            <div className="flex flex-col items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
-               {/* Top Node */}
-               <div className="w-16 h-16 rounded-full bg-brand-gold-dark/10 border border-brand-gold-dark flex items-center justify-center mb-6 relative">
-                 <div className="w-8 h-8 rounded-full bg-brand-gold-dark" />
-                 <div className="absolute w-px h-8 bg-gray-300 -bottom-8" />
-               </div>
+          <div className="relative p-6 sm:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
+            <div className="flex flex-col items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-500 overflow-x-auto pb-6 w-full">
+               
+               {/* Fixed-dimension container allows perfect positional scaling */}
+               <div className="min-w-[400px] w-full max-w-[650px] mx-auto h-[350px] relative mt-2">
+                 
+                 {/* ─── LINES ────────── */}
+                 {/* L1 to L2 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '50px', left: '50%', height: '20px' }} />
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', width: '60%' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '80%', height: '25px' }} />
 
-               {/* Connector Line */}
-               <div className="w-48 h-px bg-gray-300 mb-8 relative">
-                 <div className="absolute w-px h-6 bg-gray-300 left-0 top-0" />
-                 <div className="absolute w-px h-6 bg-gray-300 right-0 top-0" />
-                 {/* Bottom Nodes */}
-                 <div className="absolute -left-6 top-6 w-12 h-12 rounded-xl bg-primary-50 border border-primary-200" />
-                 <div className="absolute -right-6 top-6 w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200" />
+                 {/* L2 to L3 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '145px', left: '50%', height: '20px' }} />
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', width: '80%' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '30%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '70%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '90%', height: '25px' }} />
+
+                 {/* L3 to L4 */}
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '10%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '30%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '50%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '70%', height: '20px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '90%', height: '20px' }} />
+
+                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', width: '80%' }} />
+
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '30%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '50%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '70%', height: '25px' }} />
+                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '90%', height: '25px' }} />
+
+                 {/* ─── NODES ────────── */}
+                 {/* L1 */}
+                 <OrgNode top={0} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 
+                 {/* L2 */}
+                 <OrgNode top={95} left={20} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={95} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={95} left={80} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+
+                 {/* L3 */}
+                 <OrgNode top={190} left={10} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={190} left={30} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={190} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={190} left={70} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={190} left={90} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+
+                 {/* L4 */}
+                 <OrgNode top={285} left={10} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={285} left={30} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={285} left={50} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
+                 <OrgNode top={285} left={70} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
+                 <OrgNode top={285} left={90} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
                </div>
                
-               <div className="mt-8">
+               <div className="mt-8 relative z-20">
                  <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
-                   View Full Organization
+                   View People Behind the Company
                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                  </NavLink>
                </div>
@@ -346,7 +487,7 @@ function BusinessPreview() {
                 Join Now
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
               </a>
-              <NavLink to="/opportunities" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl text-[#B8860B] font-bold text-lg border-2 border-[#D4A528]/30 hover:border-[#D4A528] hover:bg-[#FFF8E1] transition-all duration-300">
+              <NavLink to="/products#packages" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl text-[#B8860B] font-bold text-lg border-2 border-[#D4A528]/30 hover:border-[#D4A528] hover:bg-[#FFF8E1] transition-all duration-300">
                 View Business Plans &rarr;
               </NavLink>
             </div>
@@ -358,6 +499,178 @@ function BusinessPreview() {
 }
 
 /* ────────────────────── Section Header ───────────────────── */
+function DownloadableMaterials() {
+  const ref = useScrollReveal();
+  const materials = [
+    { title: 'ODF Product Presentation', desc: 'Presentation deck placeholder for product education and distributor orientation.' },
+    { title: 'PDF Brochures', desc: 'Brochure upload space for product details, benefits, and customer-facing information.' },
+    { title: 'Marketing Collateral', desc: 'Flyers, social posts, and campaign materials for field marketing support.' },
+  ];
+
+  return (
+    <section id="downloadable-materials" className="section-padding relative overflow-hidden bg-white scroll-mt-28">
+      <div className="section-container">
+        <SectionHeader badge="Resources" title="Downloadable Materials" />
+        <div ref={ref} className="reveal grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {materials.map((item) => (
+            <div key={item.title} className="rounded-2xl border border-primary-200/40 bg-[#FFFDF5] p-4 sm:p-7">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-4 sm:mb-5">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <h3 className="font-bold text-brand-brown mb-2 text-sm sm:text-base">{item.title}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4 sm:mb-5">{item.desc}</p>
+              <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-brand-gold/10 text-brand-gold-dark border border-brand-gold/20">Upload pending</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ApplicationForm() {
+  const [form, setForm] = useState({ name: '', phone: '', email: '' });
+  const [status, setStatus] = useState({ type: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [showApplicationPrompt, setShowApplicationPrompt] = useState(false);
+  const ref = useScrollReveal();
+  const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+
+  async function submitApplication(e) {
+    e.preventDefault();
+    setSubmitting(true);
+    setStatus({ type: '', message: '' });
+    try {
+      const res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unable to submit application.');
+      setForm({ name: '', phone: '', email: '' });
+      setShowApplicationPrompt(true);
+      setStatus({ type: 'success', message: data.message || 'Distributor application interest submitted.' });
+    } catch (err) {
+      setStatus({ type: 'error', message: err.message || 'Unable to submit application.' });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <section className="section-padding relative overflow-hidden bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
+      <div className="section-container">
+        <SectionHeader badge="Application" title="Distributor Application Form" />
+        <div ref={ref} className="reveal grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          <div className="rounded-2xl p-8 text-white" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
+            <h3 className="text-2xl font-bold mb-4">New Distributor Onboarding</h3>
+            <p className="text-white/75 leading-relaxed mb-6">
+              Share your contact details so the NOGATU team can follow up with the distributor application form. Re-application is allowed only after a 30-day cool down period from the latest submission.
+            </p>
+            <div className="space-y-4 text-sm text-white/70">
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your name, contact number, and email address.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Admin monitors your interest and follows up with you.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Bring the application form to the nearest office branch to proceed.</span></div>
+            </div>
+          </div>
+          <form onSubmit={submitApplication} className="rounded-2xl border border-primary-200/40 bg-white p-6 sm:p-8 shadow-lg space-y-4">
+            {[
+              { key: 'name', label: 'Full Name', type: 'text' },
+              { key: 'phone', label: 'Contact No.', type: 'tel' },
+              { key: 'email', label: 'Email Address', type: 'email' },
+            ].map((field) => (
+              <label key={field.key} className="block">
+                <span className="block text-sm font-semibold text-brand-brown mb-2">{field.label}</span>
+                <input
+                  type={field.type}
+                  value={form[field.key]}
+                  onChange={(e) => updateField(field.key, e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+                />
+              </label>
+            ))}
+            {status.message && (
+              <div className={`rounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                {status.message}
+              </div>
+            )}
+            <button type="submit" disabled={submitting} className="w-full btn-landing-primary disabled:opacity-60 disabled:cursor-not-allowed">
+              {submitting ? 'Submitting...' : 'Show Distributor Application Form'}
+            </button>
+          </form>
+        </div>
+      </div>
+      {showApplicationPrompt && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="max-w-lg w-full rounded-2xl bg-white p-7 shadow-2xl border border-brand-gold/30">
+            <div className="w-14 h-14 rounded-2xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-5">
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <h3 className="text-2xl font-bold text-brand-brown mb-3">Distributor Application Form</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Your details have been recorded. Please drop by the nearest NOGATU office or satellite branch to complete the distributor application form and proceed with onboarding.
+            </p>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <a
+                href="data:text/plain;charset=utf-8,NOGATU%20Distributor%20Application%20Form%20Placeholder%0A%0APlease%20replace%20this%20placeholder%20with%20the%20official%20downloadable%20application%20form."
+                download="nogatu-distributor-application-form-placeholder.txt"
+                className="btn-landing-primary w-full"
+              >
+                Download Form
+              </a>
+              <button onClick={() => setShowApplicationPrompt(false)} className="btn-landing-secondary w-full">
+                Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function CertificationsPreview() {
+  const ref = useScrollReveal();
+  return (
+    <section className="section-padding bg-diagonal-lines" style={{ backgroundColor: '#FFF8E1' }}>
+      <div className="section-container">
+        <SectionHeader badge="Compliance" title="Certifications" />
+        <section
+          ref={ref}
+          className="reveal rounded-[1.75rem] border border-brand-gold/20 bg-white/90 shadow-[0_24px_60px_rgba(89,34,25,0.08)] p-3 sm:p-5 lg:p-6"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-5">
+            <div>
+              <h3 className="text-lg sm:text-2xl font-bold text-brand-brown">
+                NOGATU Products CPR and Halal Certificates
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">
+                View the same certification PDF featured on the Certifications page.
+              </p>
+            </div>
+            <NavLink
+              to="/certifications"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-full bg-brand-gold text-white font-semibold shadow-sm hover:bg-brand-gold-dark transition-colors"
+            >
+              View Full Page
+            </NavLink>
+          </div>
+
+          <div className="rounded-[1.35rem] overflow-hidden border border-brand-gold/15 bg-[#FFFDF7] min-h-[60vh]">
+            <iframe
+              src={CERTIFICATIONS_PDF_PATH}
+              title="NOGATU Certifications PDF Preview"
+              className="w-full h-[60vh] sm:h-[68vh]"
+            />
+          </div>
+        </section>
+      </div>
+    </section>
+  );
+}
+
 function SectionHeader({ badge, title }) {
   const ref = useScrollReveal();
   return (
@@ -385,7 +698,9 @@ export default function Home() {
       <WhyUs />
       <Products />
       <OrganizationsPreview />
-      <OrganizationsPreview />
+      <DownloadableMaterials />
+      <ApplicationForm />
+      <CertificationsPreview />
       <BusinessPreview />
     </>
   );
