@@ -10,12 +10,16 @@ const PACKAGE_LABELS = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum',
 
 // Products available for voucher purchase (example catalog)
 const PRODUCTS = [
-  { key: 'bl', code: 100, name: 'Barley Juice', price: 750 },
+  { key: 'bl', code: 100, name: 'Nogatu Barley Juice', price: 750 },
   { key: 'gl', code: 101, name: 'Nogatu Glow', price: 850 },
   { key: 'glc', code: 102, name: 'Collagen Vitamin C', price: 950 },
   { key: 'cd', code: 104, name: 'Chocolate Drink Mix', price: 650 },
-  { key: 'cm', code: 103, name: 'Coffee Mix', price: 550 },
-  { key: 'mgt', code: 105, name: 'Mangosteen Coffee', price: 700 },
+  { key: 'cm', code: 103, name: 'Nogatu Coffee Mix', price: 550 },
+  { key: 'mgt', code: 105, name: 'Mangosteen Coffee Mix', price: 700 },
+  { key: 'vc', code: 106, name: 'Vitamin C', price: 500 },
+  { key: 'bkc', code: 108, name: 'Black Coffee', price: 500 },
+  { key: 'cmm', code: 107, name: 'Max Fuel Coffee Drink Mix', price: 950 },
+  { key: 'bnad', code: 109, name: 'Berry NAD+', price: 1200 },
 ];
 
 const PRODUCT_IMAGES = {
@@ -25,6 +29,10 @@ const PRODUCT_IMAGES = {
   cm: '/legacy-img/Coffee-Mix.png',
   cd: '/legacy-img/Chox-Mix.png',
   mgt: '/legacy-img/Mangoosteen_1.png',
+  vc: '/legacy-img/Vitamin-C.png',
+  bkc: '/legacy-img/blck-coffee.png',
+  cmm: '/legacy-img/Max-Fuel.png',
+  bnad: '/legacy-img/Berry-Nad.png',
 };
 
 function Spinner() {

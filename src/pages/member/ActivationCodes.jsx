@@ -3,6 +3,7 @@ import api from '../../api';
 import toast from 'react-hot-toast';
 import { HiOutlineKey, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
 import { useAuth } from '../../contexts/AuthContext';
+import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
 
 const STATUS_STYLES = {
   0: { label: 'Unreleased', bg: 'rgba(100,116,139,0.1)', color: '#64748b', border: 'rgba(100,116,139,0.2)' },
@@ -21,14 +22,20 @@ function Spinner() {
 export default function ActivationCodes() {
   const { user } = useAuth();
   const [codes, setCodes]           = useState([]);
+  const [historyRows, setHistoryRows] = useState([]);
   const [total, setTotal]           = useState(0);
   const [page, setPage]             = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotalPages, setHistoryTotalPages] = useState(1);
   const [loading, setLoading]       = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [selected, setSelected]     = useState([]);
   const [targetUsername, setTargetUsername] = useState('');
+  const [confirmModal, setConfirmModal] = useState(null);
 
   useEffect(() => { loadCodes(); }, [page]);
+  useEffect(() => { loadHistory(); }, [historyPage]);
 
   async function loadCodes() {
     setLoading(true);
@@ -40,11 +47,28 @@ export default function ActivationCodes() {
     } catch { } finally { setLoading(false); }
   }
 
+  async function loadHistory() {
+    setHistoryLoading(true);
+    try {
+      const res = await api.get(`/codes/history?page=${historyPage}`);
+      setHistoryRows(res.data.rows || []);
+      setHistoryTotalPages(res.data.totalPages || 1);
+    } catch {
+      setHistoryRows([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
+
   function toggleSelect(code) {
     setSelected(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
   }
 
-  async function handleTransfer() {
+  function findCodeRecord(code) {
+    return codes.find((entry) => entry.code === code) || null;
+  }
+
+  async function performTransfer() {
     if (!targetUsername) return toast.error('Enter a target username');
     if (selected.length === 0) return toast.error('Select at least one code');
     try {
@@ -52,36 +76,105 @@ export default function ActivationCodes() {
       toast.success(`${res.data.transferred} code(s) transferred to ${res.data.targetName}`);
       setSelected([]);
       setTargetUsername('');
+      setConfirmModal(null);
       loadCodes();
+      loadHistory();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Transfer failed');
     }
   }
 
-  async function handleMaintenance(code, transType) {
+  function handleTransfer() {
+    if (!targetUsername) return toast.error('Enter a target username');
+    if (selected.length === 0) return toast.error('Select at least one code');
+
+    const selectedRows = selected.map((code) => findCodeRecord(code)).filter(Boolean);
+    setConfirmModal({
+      tone: 'gold',
+      title: 'Transfer selected codes?',
+      message: 'This will move the selected activation codes to another member account and the transfer will be recorded in the activation history.',
+      confirmLabel: 'Transfer Codes',
+      onConfirm: performTransfer,
+      details: [
+        { label: 'Target username', value: targetUsername },
+        { label: 'Codes selected', value: String(selected.length) },
+        { label: 'Code types', value: selectedRows.map((row) => row.accountLabel || row.producttypeName).join(', ') || 'Selected codes' },
+      ],
+    });
+  }
+
+  async function performMaintenance(code, transType) {
     try {
       await api.post('/codes/maintenance', { code, transType });
       toast.success('Code activated successfully');
+      setConfirmModal(null);
       loadCodes();
+      loadHistory();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Activation failed');
     }
   }
 
-  async function handleUpgrade(code) {
+  function handleMaintenance(code, transType) {
+    const codeRow = findCodeRecord(code);
+    const actionLabel = transType === 2 ? 'Hi-Five maintenance' : 'maintenance';
+    setConfirmModal({
+      tone: 'gold',
+      title: `Use this code for ${actionLabel}?`,
+      message: 'This code will be consumed immediately after confirmation and will move into your activation history.',
+      confirmLabel: 'Consume Code',
+      onConfirm: () => performMaintenance(code, transType),
+      details: [
+        { label: 'Code', value: code },
+        { label: 'Account type', value: codeRow?.accountLabel || codeRow?.producttypeName || 'Maintenance code' },
+        { label: 'Use', value: transType === 2 ? 'Hi-Five product maintenance' : 'Monthly maintenance' },
+      ],
+    });
+  }
+
+  async function performUpgrade(code) {
     try {
       const res = await api.post('/codes/upgrade', { code });
       toast.success(`Account upgraded to ${res.data.newAccountTypeName}!`);
+      setConfirmModal(null);
       loadCodes();
+      loadHistory();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Upgrade failed');
     }
+  }
+
+  function handleUpgrade(code) {
+    const codeRow = findCodeRecord(code);
+    setConfirmModal({
+      tone: 'gold',
+      title: 'Upgrade this account with the selected code?',
+      message: 'This upgrade code will be consumed immediately and the account state will change based on the package and slot type tied to this code.',
+      confirmLabel: 'Upgrade Account',
+      onConfirm: () => performUpgrade(code),
+      details: [
+        { label: 'Code', value: code },
+        { label: 'Account type', value: codeRow?.accountLabel || codeRow?.producttypeName || 'Upgrade code' },
+        { label: 'Package amount', value: codeRow?.productamount ? `PHP ${Number(codeRow.productamount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A' },
+      ],
+    });
   }
 
   const currentAccttype = Number(user?.currentaccttype || 0);
 
   return (
     <div className="space-y-6">
+      <CodeUseConfirmModal
+        open={Boolean(confirmModal)}
+        tone={confirmModal?.tone || 'gold'}
+        title={confirmModal?.title}
+        message={confirmModal?.message}
+        details={confirmModal?.details || []}
+        confirmLabel={confirmModal?.confirmLabel || 'Confirm'}
+        onConfirm={confirmModal?.onConfirm}
+        onClose={() => setConfirmModal(null)}
+      />
+
       {/* Heading */}
       <div>
         <h1 className="font-display text-2xl font-bold text-white">Activation Codes</h1>
@@ -236,6 +329,81 @@ export default function ActivationCodes() {
                     <td colSpan="5" className="py-14 text-center">
                       <HiOutlineKey className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
                       <p style={{ color: 'rgba(255,255,255,0.3)' }}>No activation codes found.</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="glass-card rounded-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
+          <div>
+            <p className="text-sm font-semibold text-white">Code History</p>
+            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Release, transfer, upgrade, and maintenance actions tied to your codes.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
+              disabled={historyPage <= 1}
+              className="p-1.5 rounded-lg disabled:opacity-30 hover:bg-white/[0.06] transition-colors"
+              style={{ color: 'rgba(255,255,255,0.5)' }}
+            >
+              <HiOutlineChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.7)' }}>
+              {historyPage} / {historyTotalPages}
+            </span>
+            <button
+              onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))}
+              disabled={historyPage >= historyTotalPages}
+              className="p-1.5 rounded-lg disabled:opacity-30 hover:bg-white/[0.06] transition-colors"
+              style={{ color: 'rgba(255,255,255,0.5)' }}
+            >
+              <HiOutlineChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {historyLoading ? <Spinner /> : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[680px]">
+              <thead>
+                <tr>
+                  {['Code', 'Event', 'Summary', 'Date'].map((heading) => (
+                    <th key={heading} className="table-header py-3 px-4 text-left">{heading}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {historyRows.map((row, i) => (
+                  <tr
+                    key={`${row.code}-${row.processKey || row.createdAt || i}`}
+                    style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'transparent', borderBottom: '1px solid rgba(212,175,55,0.05)' }}
+                  >
+                    <td className="py-3 px-4 font-mono text-xs" style={{ color: 'rgba(212,175,55,0.8)' }}>{row.code}</td>
+                    <td className="py-3 px-4">
+                      <span
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold"
+                        style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.22)' }}
+                      >
+                        {row.eventLabel}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>{row.summary}</td>
+                    <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                      {row.createdAt ? new Date(row.createdAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : '-'}
+                    </td>
+                  </tr>
+                ))}
+                {historyRows.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      No code history found yet.
                     </td>
                   </tr>
                 )}

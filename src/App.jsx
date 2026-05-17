@@ -44,6 +44,7 @@ import Messages from './pages/admin/Messages';
 import Rankings from './pages/admin/Rankings';
 import GlobalBonus from './pages/admin/GlobalBonus';
 import CDAccounts from './pages/admin/CDAccounts';
+import Finance from './pages/admin/Finance';
 import VoucherManagement from './pages/admin/VoucherManagement';
 import VoucherGrant from './pages/admin/VoucherGrant';
 import Applications from './pages/admin/Applications';
@@ -185,6 +186,10 @@ export default function App() {
           <Route
             path="rankings"
             element={<ProtectedAdminRoles allowed={[1, 3]}><Rankings /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="finance"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><Finance /></ProtectedAdminRoles>}
           />
           <Route
             path="global-bonus"

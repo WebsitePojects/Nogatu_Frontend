@@ -95,7 +95,7 @@ export default function Rankings() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Top', 'Member', 'Username', 'Current Rank', 'Gross', 'Consumed', 'Remaining', 'Qualified Date', 'Claim Status', 'Action'].map((heading) => (
+                  {['Top', 'Member', 'Username', 'Package', 'Gate', 'Current Rank', 'Gross', 'Consumed', 'Remaining', 'Qualified Date', 'Claim Status', 'Action'].map((heading) => (
                     <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
@@ -126,6 +126,33 @@ export default function Rankings() {
                       <td className="py-3 px-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                          style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+                        >
+                          {row.packageLabel || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="flex flex-col gap-1">
+                          <span
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                            style={
+                              row.rankingEligible
+                                ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
+                                : { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.25)' }
+                            }
+                          >
+                            {row.rankingEligible ? `Up to ${row.packageRankMaxLabel || 'ceiling'}` : 'Locked'}
+                          </span>
+                          {row.blockedByPackageGate && row.upgradeRequiredPackageLabel && (
+                            <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                              Upgrade: {row.upgradeRequiredPackageLabel}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-3">
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={{ background: `${badge.color}22`, color: badge.color, border: `1px solid ${badge.color}55` }}
                         >
                           {badge.label}
@@ -152,7 +179,7 @@ export default function Rankings() {
                         </span>
                       </td>
                       <td className="py-3 px-3">
-                        {Number(row.pendingAchievementCount || 0) > 0 && (
+                        {Number(row.pendingAchievementCount || 0) > 0 && !row.blockedByPackageGate && (
                           <button
                             onClick={() => processIncentive(row.uid)}
                             className="text-xs px-3 py-1 rounded-lg font-medium"
@@ -161,6 +188,11 @@ export default function Rankings() {
                             Release Next Claim
                           </button>
                         )}
+                        {row.blockedByPackageGate && (
+                          <span className="text-xs" style={{ color: 'rgba(245,158,11,0.85)' }}>
+                            Gate blocked
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -168,7 +200,7 @@ export default function Rankings() {
 
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan="10" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    <td colSpan="12" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
                       No ranked members found.
                     </td>
                   </tr>

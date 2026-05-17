@@ -10,6 +10,7 @@ export default function ReferralInvite() {
   const inviteToken = invite?.slug || invite?.referral_slug || invite?.token;
   const placement = invite?.placement || null;
   const inviteUrl = inviteToken ? `${window.location.origin}/join/${inviteToken}` : '';
+  const placementMode = placement?.placementPolicy?.mode || invite?.placementMode || 'manual';
 
   useEffect(() => {
     loadInvite();
@@ -81,11 +82,13 @@ export default function ReferralInvite() {
 
             <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/10 p-5">
               <p className="text-sm text-white/70 leading-relaxed">
-                Prospects still need a valid activation code. The reusable referral link supplies your sponsor identity, and the server auto-assigns the new account to your weak leg for the best chance to generate binary points.
+                Prospects still need a valid activation code. The reusable referral link supplies your sponsor identity, and the server will validate the live placement policy before saving the account.
               </p>
               {placement && (
                 <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-xs text-white/70 space-y-1">
-                  <p className="font-semibold text-white">Current recommended placement</p>
+                  <p className="font-semibold text-white">
+                    {placementMode === 'forced' ? 'Current first-invite safetynet placement' : 'Current placement guidance'}
+                  </p>
                   <p>
                     {placement.placementUsername
                       ? `${placement.placementUsername} (#${placement.placementUid})`
@@ -98,7 +101,7 @@ export default function ReferralInvite() {
             </div>
 
             <button onClick={regenerateInvite} disabled={creating} className="gold-btn w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm disabled:opacity-60">
-              {creating ? 'Refreshing...' : 'Refresh Weak-Leg Placement'}
+              {creating ? 'Refreshing...' : placementMode === 'forced' ? 'Refresh Placement Policy' : 'Refresh Placement Guidance'}
             </button>
           </div>
         )}

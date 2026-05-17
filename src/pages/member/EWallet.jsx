@@ -6,7 +6,6 @@ import html2canvas from 'html2canvas';
 import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const INCOME_ITEMS = [
   { key: 'directReferral', label: 'Direct Referral',  icon: HiOutlineUsers,       color: '#D4AF37' },
@@ -277,8 +276,7 @@ export default function EWallet() {
   const previewMaintenanceFee = Number(encashPreview?.deductions?.maintenanceFee || (previewAmount > 0 ? 20 : 0));
   const previewCdDeduction = Number(encashPreview?.deductions?.cdDeduction || 0);
   const previewNet    = Number(encashPreview?.net ?? (previewAmount - previewTax - previewFee - previewMaintenanceFee - previewCdDeduction));
-  const bonusMonthIdx = Math.max(0, Math.min(11, Number(globalBonus?.month || 1) - 1));
-  const bonusPeriodLabel = globalBonus ? `${MONTHS[bonusMonthIdx]} ${globalBonus.year || ''}`.trim() : 'N/A';
+  const bonusPeriodLabel = globalBonus?.periodLabel || (globalBonus?.year ? `Year ${globalBonus.year}` : 'N/A');
   const hasDistributedShare = Number(globalBonus?.distributedShare || 0) > 0;
 
   if (loading) {
@@ -548,7 +546,7 @@ export default function EWallet() {
         {globalBonus?.latestShare && (
           <div className="mt-4 rounded-xl p-3.5 text-xs" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)', color: 'rgba(255,255,255,0.6)' }}>
             Latest distributed share: <span style={{ color: '#D4AF37', fontWeight: 700 }}>₱{fmt(globalBonus.latestShare.shareAmount)}</span>
-            {' '}({MONTHS[Math.max(0, Math.min(11, Number(globalBonus.latestShare.month || 1) - 1))]} {globalBonus.latestShare.year})
+            {' '}({globalBonus.latestShare.periodLabel || `Year ${globalBonus.latestShare.year}`})
           </div>
         )}
       </div>
