@@ -92,6 +92,9 @@ export default function AdminLayout() {
   );
 
   const roleLabel = rights === 1 ? 'Administrator' : rights === 2 ? 'Cashier' : 'BOD';
+  const topbarText = isDarkMode ? 'rgba(255,255,255,0.8)' : '#334155';
+  const topbarMuted = isDarkMode ? 'rgba(255,255,255,0.4)' : '#64748b';
+  const topbarGold = isDarkMode ? '#D4AF37' : '#7a5c08';
 
   return (
     <div className="flex h-screen overflow-hidden portal-bg">
@@ -191,42 +194,33 @@ export default function AdminLayout() {
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 -ml-2 rounded-xl motion-safe:transition-colors cursor-pointer"
-              style={{ color: '#D4AF37' }}
+              style={{ color: topbarGold }}
               aria-label="Open menu"
             >
               <HiOutlineMenu className="w-5 h-5" />
             </button>
-            <a
-              href="/"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-white/80 text-sm font-medium motion-safe:transition-colors hover:bg-white/10 hover:text-brand-gold"
-              aria-label="Back to landing page"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="hidden sm:inline">Back</span>
-            </a>
-            <h2 className="text-sm font-semibold text-white/80">{currentPage?.label || 'Admin Dashboard'}</h2>
+            <h2 className="text-sm font-semibold" style={{ color: topbarText }}>{currentPage?.label || 'Admin Dashboard'}</h2>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl transition-colors text-white/40 hover:text-brand-gold"
+              className="p-2 rounded-xl transition-colors"
+              style={{ color: topbarMuted }}
               title="Toggle Theme"
             >
               {isDarkMode ? <HiOutlineSun className="w-5 h-5" /> : <HiOutlineMoon className="w-5 h-5" />}
             </button>
             <button
               className="relative p-2 rounded-xl motion-safe:transition-colors cursor-pointer"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
+              style={{ color: topbarMuted }}
               aria-label="Notifications"
-              onMouseEnter={e => e.currentTarget.style.color = '#D4AF37'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+              onMouseEnter={e => e.currentTarget.style.color = topbarGold}
+              onMouseLeave={e => e.currentTarget.style.color = topbarMuted}
             >
               <HiOutlineBell className="w-5 h-5" />
               <span
                 className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-                style={{ background: '#D4AF37' }}
+                style={{ background: topbarGold }}
               />
             </button>
             <div

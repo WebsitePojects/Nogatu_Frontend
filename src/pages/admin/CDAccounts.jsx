@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { useTheme } from '../../contexts/ThemeContext';
 import {
   HiOutlineCreditCard,
   HiOutlineBadgeCheck,
@@ -35,6 +36,7 @@ function triggerBrowserDownload(url) {
 
 export default function CDAccounts() {
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const [accounts, setAccounts] = useState([]);
   const [stats, setStats] = useState(null);
   const [packageBreakdown, setPackageBreakdown] = useState([]);
@@ -45,6 +47,16 @@ export default function CDAccounts() {
   const [packageType, setPackageType] = useState('all');
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const headingText = isDarkMode ? '#ffffff' : '#111827';
+  const mutedText = isDarkMode ? 'rgba(255,255,255,0.4)' : '#64748b';
+  const subtleText = isDarkMode ? 'rgba(255,255,255,0.35)' : '#94a3b8';
+  const rowStrong = isDarkMode ? 'rgba(255,255,255,0.8)' : '#334155';
+  const rowSoft = isDarkMode ? 'rgba(255,255,255,0.7)' : '#475569';
+  const goldText = isDarkMode ? '#D4AF37' : '#7a5c08';
+  const amberText = isDarkMode ? '#fbbf24' : '#9a6700';
+  const redText = isDarkMode ? '#fca5a5' : '#b91c1c';
+  const greenText = isDarkMode ? '#4ade80' : '#047857';
+  const blueText = isDarkMode ? '#93c5fd' : '#1d4ed8';
 
   useEffect(() => {
     loadAccounts(page);
@@ -106,7 +118,7 @@ export default function CDAccounts() {
           label: 'Total CD Accounts',
           value: stats.total,
           icon: HiOutlineCreditCard,
-          color: '#D4AF37',
+          color: goldText,
           bg: 'rgba(212,175,55,0.10)',
           border: 'rgba(212,175,55,0.20)',
         },
@@ -114,7 +126,7 @@ export default function CDAccounts() {
           label: 'Fully Paid',
           value: stats.fullyPaid,
           icon: HiOutlineBadgeCheck,
-          color: '#4ade80',
+          color: greenText,
           bg: 'rgba(74,222,128,0.10)',
           border: 'rgba(74,222,128,0.20)',
         },
@@ -122,7 +134,7 @@ export default function CDAccounts() {
           label: 'Still Paying',
           value: stats.stillPaying,
           icon: HiOutlineClock,
-          color: '#fbbf24',
+          color: amberText,
           bg: 'rgba(251,191,36,0.10)',
           border: 'rgba(251,191,36,0.20)',
         },
@@ -130,7 +142,7 @@ export default function CDAccounts() {
           label: 'Total CD Amount',
           value: `PHP ${fmt(stats.totalCdAmount)}`,
           icon: HiOutlineExclamationCircle,
-          color: '#f87171',
+          color: redText,
           bg: 'rgba(248,113,113,0.10)',
           border: 'rgba(248,113,113,0.20)',
         },
@@ -138,7 +150,7 @@ export default function CDAccounts() {
           label: 'Total Paid So Far',
           value: `PHP ${fmt(stats.totalPaid)}`,
           icon: HiOutlineCash,
-          color: '#34d399',
+          color: greenText,
           bg: 'rgba(52,211,153,0.10)',
           border: 'rgba(52,211,153,0.20)',
         },
@@ -146,7 +158,7 @@ export default function CDAccounts() {
           label: 'CD Deductions',
           value: `PHP ${fmt(stats.totalCdDeduction)}`,
           icon: HiOutlineExclamationCircle,
-          color: '#fb7185',
+          color: redText,
           bg: 'rgba(251,113,133,0.10)',
           border: 'rgba(251,113,133,0.20)',
         },
@@ -154,7 +166,7 @@ export default function CDAccounts() {
           label: 'Net Encashment',
           value: `PHP ${fmt(stats.totalNetEncashment)}`,
           icon: HiOutlineCash,
-          color: '#93c5fd',
+          color: blueText,
           bg: 'rgba(59,130,246,0.10)',
           border: 'rgba(59,130,246,0.20)',
         },
@@ -164,7 +176,7 @@ export default function CDAccounts() {
   return (
     <div>
       <div className="mb-7">
-        <h1 className="font-display text-2xl font-bold text-white">
+        <h1 className="font-display text-2xl font-bold" style={{ color: headingText }}>
           CD Account Management
         </h1>
         <div
@@ -193,7 +205,7 @@ export default function CDAccounts() {
               </div>
               <p
                 className="text-[10px] uppercase tracking-wider mb-1"
-                style={{ color: 'rgba(255,255,255,0.35)' }}
+                style={{ color: subtleText }}
               >
                 {card.label}
               </p>
@@ -256,7 +268,7 @@ export default function CDAccounts() {
               onClick={() => handleExport('xlsx')}
               disabled={exporting}
               className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50 h-[46px]"
-              style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
+              style={{ borderColor: 'rgba(59,130,246,0.22)', color: blueText, background: 'rgba(59,130,246,0.08)' }}
             >
               {exporting ? 'Exporting...' : 'Export XLSX'}
             </button>
@@ -265,7 +277,7 @@ export default function CDAccounts() {
               onClick={() => handleExport('pdf')}
               disabled={exporting}
               className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50 h-[46px]"
-              style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
+              style={{ borderColor: 'rgba(16,185,129,0.22)', color: greenText, background: 'rgba(16,185,129,0.08)' }}
             >
               {exporting ? 'Preparing PDF...' : 'Export PDF'}
             </button>
@@ -278,11 +290,11 @@ export default function CDAccounts() {
           <div className="flex items-center justify-between mb-4">
             <p
               className="text-sm font-medium"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
+              style={{ color: mutedText }}
             >
               CD Package Breakdown
             </p>
-            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <span className="text-xs" style={{ color: subtleText }}>
               {packageBreakdown.length} package rows
             </span>
           </div>
@@ -300,14 +312,14 @@ export default function CDAccounts() {
               <tbody>
                 {packageBreakdown.map((row, idx) => (
                   <tr key={row.package} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
-                    <td className="py-3 px-3 text-white/80 font-medium">{row.package}</td>
-                    <td className="py-3 px-3 text-white/70">{row.totalAccounts}</td>
-                    <td className="py-3 px-3 text-emerald-300">{row.fullyPaid}</td>
-                    <td className="py-3 px-3 text-amber-300">{row.stillPaying}</td>
-                    <td className="py-3 px-3 text-white/80">PHP {fmt(row.totalCdAmount)}</td>
-                    <td className="py-3 px-3 text-white/80">PHP {fmt(row.totalPaid)}</td>
-                    <td className="py-3 px-3 text-rose-200">PHP {fmt(row.totalRemaining)}</td>
-                    <td className="py-3 px-3 text-sky-300">PHP {fmt(row.totalNetEncashment)}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: rowStrong }}>{row.package}</td>
+                    <td className="py-3 px-3" style={{ color: rowSoft }}>{row.totalAccounts}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: greenText }}>{row.fullyPaid}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: amberText }}>{row.stillPaying}</td>
+                    <td className="py-3 px-3" style={{ color: rowStrong }}>PHP {fmt(row.totalCdAmount)}</td>
+                    <td className="py-3 px-3" style={{ color: rowStrong }}>PHP {fmt(row.totalPaid)}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: redText }}>PHP {fmt(row.totalRemaining)}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: blueText }}>PHP {fmt(row.totalNetEncashment)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -320,7 +332,7 @@ export default function CDAccounts() {
         <div className="flex items-center justify-between mb-4">
           <p
             className="text-sm font-medium"
-            style={{ color: 'rgba(255,255,255,0.4)' }}
+            style={{ color: mutedText }}
           >
             CD Accounts
           </p>
@@ -333,7 +345,7 @@ export default function CDAccounts() {
             </PaginationBtn>
             <span
               className="text-sm"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
+              style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : '#64748b' }}
             >
               {page} / {totalPages}
             </span>
@@ -419,10 +431,10 @@ export default function CDAccounts() {
                             : 'transparent')
                       }
                     >
-                      <td className="py-3 px-3 font-mono text-sm text-white/70">
+                      <td className="py-3 px-3 font-mono text-sm" style={{ color: rowSoft }}>
                         {a.username}
                       </td>
-                      <td className="py-3 px-3 font-medium text-white/80">
+                      <td className="py-3 px-3 font-medium" style={{ color: rowStrong }}>
                         {a.fullname}
                       </td>
                       <td className="py-3 px-3">
@@ -430,23 +442,23 @@ export default function CDAccounts() {
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                           style={{
                             background: 'rgba(212,175,55,0.12)',
-                            color: '#D4AF37',
+                            color: goldText,
                             border: '1px solid rgba(212,175,55,0.2)',
                           }}
                         >
                           {packageName}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-white/75 font-medium">
+                      <td className="py-3 px-3 font-medium" style={{ color: rowSoft }}>
                         PHP {fmt(cdAmount)}
                       </td>
-                      <td className="py-3 px-3 text-white/60">
+                      <td className="py-3 px-3" style={{ color: rowSoft }}>
                         PHP {fmt(cdPaid)}
                       </td>
                       <td
                         className="py-3 px-3 font-medium"
                         style={{
-                          color: isFullyPaid ? '#4ade80' : '#fca5a5',
+                          color: isFullyPaid ? greenText : redText,
                         }}
                       >
                         PHP {fmt(cdRemaining)}
@@ -477,8 +489,8 @@ export default function CDAccounts() {
                             className="text-xs font-medium tabular-nums"
                             style={{
                               color: isFullyPaid
-                                ? '#4ade80'
-                                : 'rgba(255,255,255,0.5)',
+                                ? greenText
+                                : (isDarkMode ? 'rgba(255,255,255,0.5)' : '#64748b'),
                               minWidth: '32px',
                               textAlign: 'right',
                             }}
@@ -487,13 +499,13 @@ export default function CDAccounts() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 px-3 text-white/70">
+                      <td className="py-3 px-3" style={{ color: rowSoft }}>
                         {a.deductionCount} deductions / {a.encashmentCount} encashments
                       </td>
-                      <td className="py-3 px-3 text-sky-300 font-medium">
+                      <td className="py-3 px-3 font-medium" style={{ color: blueText }}>
                         PHP {fmt(a.netEncashment)}
                       </td>
-                      <td className="py-3 px-3 text-xs text-white/50">
+                      <td className="py-3 px-3 text-xs" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : '#64748b' }}>
                         {a.lastDeductionDate || '-'}
                       </td>
                       <td className="py-3 px-3">
@@ -503,12 +515,12 @@ export default function CDAccounts() {
                             isFullyPaid
                               ? {
                                   background: 'rgba(74,222,128,0.12)',
-                                  color: '#4ade80',
+                                  color: greenText,
                                   border: '1px solid rgba(74,222,128,0.22)',
                                 }
                               : {
                                   background: 'rgba(251,191,36,0.12)',
-                                  color: '#fbbf24',
+                                  color: amberText,
                                   border: '1px solid rgba(251,191,36,0.22)',
                                 }
                           }
@@ -516,7 +528,7 @@ export default function CDAccounts() {
                           {a.cdstatusLabel || (isFullyPaid ? 'Fully Paid' : 'Paying')}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-xs text-white/40">
+                      <td className="py-3 px-3 text-xs" style={{ color: mutedText }}>
                         {a.datereg}
                       </td>
                       <td className="py-3 px-3">
@@ -528,7 +540,7 @@ export default function CDAccounts() {
                             className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
                             style={{
                               background: 'rgba(212,175,55,0.12)',
-                              color: '#D4AF37',
+                              color: goldText,
                               border: '1px solid rgba(212,175,55,0.2)',
                             }}
                           >
@@ -541,7 +553,7 @@ export default function CDAccounts() {
                             className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
                             style={{
                               background: 'rgba(59,130,246,0.1)',
-                              color: '#93c5fd',
+                              color: blueText,
                               border: '1px solid rgba(59,130,246,0.25)',
                             }}
                           >
@@ -554,7 +566,7 @@ export default function CDAccounts() {
                             className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
                             style={{
                               background: 'rgba(16,185,129,0.1)',
-                              color: '#34d399',
+                              color: greenText,
                               border: '1px solid rgba(16,185,129,0.2)',
                             }}
                           >

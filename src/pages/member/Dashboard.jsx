@@ -54,13 +54,13 @@ function StatCard({ card, idx, onClick }) {
         <HiOutlineChevronRight className="w-4 h-4 mt-1 flex-shrink-0" style={{ color: 'rgba(212,175,55,0.65)' }} />
       </div>
 
-      <p className="text-[11px] sm:text-[12px] font-medium mt-4 mb-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+      <p className="portal-card-muted text-[11px] sm:text-[12px] font-medium mt-4 mb-1">
         {card.label}
       </p>
-      <p className="text-[18px] sm:text-[22px] font-bold text-white leading-tight tracking-tight break-words">
+      <p className="portal-card-title text-[18px] sm:text-[22px] font-bold leading-tight tracking-tight break-words">
         {card.value}
       </p>
-      <p className="text-[11px] mt-2" style={{ color: 'rgba(212,175,55,0.7)' }}>
+      <p className="portal-gold-text text-[11px] mt-2">
         {card.actionLabel}
       </p>
     </button>
@@ -72,12 +72,11 @@ function ActionPanel({ title, subtitle, metric, value, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-xl p-3 text-left w-full"
-      style={{ background: 'rgba(255,255,255,0.04)' }}
+      className="portal-soft-panel rounded-xl p-3 text-left w-full"
     >
-      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{title}</p>
-      <p className="font-bold text-white mt-1">{value}</p>
-      <p className="text-[11px] mt-2" style={{ color: '#D4AF37' }}>{subtitle || metric}</p>
+      <p className="portal-card-muted text-xs">{title}</p>
+      <p className="portal-card-title font-bold mt-1">{value}</p>
+      <p className="portal-gold-text text-[11px] mt-2">{subtitle || metric}</p>
     </button>
   );
 }
@@ -121,13 +120,13 @@ export default function Dashboard() {
           className="w-12 h-12 rounded-full border-[3px] animate-spin"
           style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }}
         />
-        <p className="text-sm" style={{ color: 'rgba(212,175,55,0.5)' }}>Loading your dashboard...</p>
+        <p className="portal-card-muted text-sm">Loading your dashboard...</p>
       </div>
     );
   }
 
   if (!data) {
-    return <p style={{ color: 'rgba(255,255,255,0.4)' }}>Failed to load dashboard.</p>;
+    return <p className="portal-card-muted">Failed to load dashboard.</p>;
   }
 
   const cards = [
@@ -185,24 +184,23 @@ export default function Dashboard() {
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="font-display text-base font-semibold text-white">Unilevel Maintenance</h3>
+              <h3 className="portal-card-title font-display text-base font-semibold">Unilevel Maintenance</h3>
               <div className="w-8 h-0.5 mt-1.5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
             </div>
             <button
               type="button"
               onClick={() => navigate('/dashboard/details/uni-level')}
-              className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-              style={{ color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+              className="portal-accent-chip text-xs px-3 py-1.5 rounded-lg font-semibold"
             >
               View Details
             </button>
           </div>
 
           <div className="flex items-center justify-between text-sm mt-5 mb-2">
-            <span style={{ color: 'rgba(255,255,255,0.55)' }}>Product Points This Month</span>
-            <span className="font-semibold text-white">{fmtInt(data.unilevelMaintenance?.currentPoints ?? data.maintenancePoints)} / 200</span>
+            <span className="portal-card-muted">Product Points This Month</span>
+            <span className="portal-card-title font-semibold">{fmtInt(data.unilevelMaintenance?.currentPoints ?? data.maintenancePoints)} / 200</span>
           </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--portal-soft-bg)', border: '1px solid var(--portal-soft-border)' }}>
             <div className="h-full" style={{ width: `${maintenancePct}%`, background: '#D4AF37' }} />
           </div>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
@@ -226,14 +224,13 @@ export default function Dashboard() {
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="font-display text-base font-semibold text-white">Direct Referrals by Package</h3>
+              <h3 className="portal-card-title font-display text-base font-semibold">Direct Referrals by Package</h3>
               <div className="w-8 h-0.5 mt-1.5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
             </div>
             <button
               type="button"
               onClick={() => navigate('/referrals')}
-              className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-              style={{ color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+              className="portal-accent-chip text-xs px-3 py-1.5 rounded-lg font-semibold"
             >
               Open Referrals
             </button>
@@ -248,11 +245,11 @@ export default function Dashboard() {
                   key={type}
                   onClick={() => navigate('/referrals')}
                   className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl text-left"
-                  style={{ borderBottom: '1px solid rgba(212,175,55,0.07)' }}
+                  style={{ borderBottom: '1px solid var(--portal-row-border)' }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}66` }} />
-                    <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{type}</span>
+                    <span className="portal-card-text text-sm">{type}</span>
                   </div>
                   <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}>
                     {count} {count === 1 ? 'Acct' : 'Accts'}
@@ -263,8 +260,8 @@ export default function Dashboard() {
             {Object.keys(data.directReferrals || {}).length === 0 && (
               <div className="text-center py-10">
                 <HiOutlineUsers className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.25)' }} />
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>No direct referrals yet.</p>
-                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.2)' }}>Start building your network.</p>
+                <p className="portal-card-muted text-sm">No direct referrals yet.</p>
+                <p className="portal-card-muted text-xs mt-1">Start building your network.</p>
               </div>
             )}
           </div>

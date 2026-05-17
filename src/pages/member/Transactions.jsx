@@ -223,7 +223,7 @@ export default function Transactions() {
     <div className="space-y-6">
       {/* Heading */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">Transaction History</h1>
+        <h1 className="portal-page-title font-display text-2xl font-bold">Transaction History</h1>
         <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
@@ -231,24 +231,24 @@ export default function Transactions() {
       <div className="glass-card rounded-2xl overflow-hidden">
         {/* Pagination bar */}
         <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Transaction records</p>
+          <p className="portal-card-muted text-sm">Transaction records</p>
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page <= 1}
               className="p-1.5 rounded-lg disabled:opacity-30 transition-colors hover:bg-white/[0.06]"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
+              style={{ color: 'var(--portal-card-muted)' }}
             >
               <HiOutlineChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.7)' }}>
+            <span className="portal-accent-chip text-xs px-2 py-1 rounded-lg">
               {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
               className="p-1.5 rounded-lg disabled:opacity-30 transition-colors hover:bg-white/[0.06]"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
+              style={{ color: 'var(--portal-card-muted)' }}
             >
               <HiOutlineChevronRight className="w-4 h-4" />
             </button>
@@ -273,8 +273,8 @@ export default function Transactions() {
                   <tr
                     key={t.pid}
                     style={{
-                      background: i % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'transparent',
-                      borderBottom: '1px solid rgba(212,175,55,0.05)',
+                      background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent',
+                      borderBottom: '1px solid var(--portal-row-border)',
                     }}
                     className="hover:bg-white/[0.03] transition-colors"
                   >
@@ -316,7 +316,7 @@ export default function Transactions() {
                   <tr>
                     <td colSpan="6" className="py-14 text-center">
                       <HiOutlineDocumentText className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
-                      <p style={{ color: 'rgba(255,255,255,0.3)' }}>No transactions found.</p>
+                      <p className="portal-card-muted">No transactions found.</p>
                     </td>
                   </tr>
                 )}
@@ -328,25 +328,25 @@ export default function Transactions() {
 
       {selectedTx && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 dark:bg-black/55 backdrop-blur-xs"
+          className="portal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedTx(null)}
         >
           <div
-              className="rounded-2xl w-full max-w-[560px] p-6 shadow-2xl bg-white border border-slate-200 dark:bg-[#141008] dark:border-[rgba(212,175,55,0.25)]"
+              className="portal-modal-panel rounded-2xl w-full max-w-[560px] p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display text-lg font-semibold text-slate-900 dark:text-white">Transaction Details</h3>
+              <h3 className="portal-modal-title font-display text-lg font-semibold">Transaction Details</h3>
               <button
                 type="button"
                 onClick={() => setSelectedTx(null)}
-                className="text-sm px-2.5 py-1 rounded-lg text-slate-600 border border-slate-300 hover:bg-slate-100 dark:text-[rgba(255,255,255,0.72)] dark:border-[rgba(255,255,255,0.15)] dark:hover:bg-white/[0.06]"
+                className="portal-muted-button text-sm px-2.5 py-1 rounded-lg"
               >
                 Close
               </button>
             </div>
 
-            <div className="space-y-2.5 text-sm text-slate-700 dark:text-[rgba(255,255,255,0.72)]">
+            <div className="portal-modal-text space-y-2.5 text-sm">
               <div className="flex justify-between"><span>Type</span><span>{selectedTx.transactionTypeName}</span></div>
               <div className="flex justify-between"><span>Date</span><span>{selectedTx.transdate || '—'}</span></div>
               <div className="flex justify-between"><span>Beginning Balance</span><span>₱{fmt(selectedTx.beginningBalance)}</span></div>

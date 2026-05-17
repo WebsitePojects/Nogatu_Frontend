@@ -64,9 +64,19 @@ function Hero() {
             </a>
             <a
               href="#stockist-apply"
-              className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18"
+              className="mt-3 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
+              style={{
+                border: '1px solid rgba(255,255,255,0.42)',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(212,165,40,0.16))',
+                boxShadow: '0 10px 28px rgba(89,34,25,0.18), inset 0 1px 0 rgba(255,255,255,0.32)',
+              }}
             >
-              Apply as Stockist
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/25 bg-white/15">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+                </svg>
+              </span>
+              Become a Distributor
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
@@ -366,97 +376,71 @@ function Products() {
 /* ────────────────────── Organizations Preview ───────────── */
 function OrganizationsPreview() {
   const ref = useScrollReveal();
-
-  const OrgNode = ({ top, left, hc, bc }) => (
-    <div className="absolute flex flex-col items-center -translate-x-1/2 z-10" style={{ top: `${top}px`, left: `${left}%` }}>
-      <div className={`w-[18px] h-[18px] sm:w-[22px] sm:h-[22px] rounded-full shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)] mb-1 border border-white/40 bg-gradient-to-b ${hc}`} />
-      <div className={`w-10 h-7 sm:w-12 sm:h-8 rounded-t-xl rounded-b shadow-[0_4px_6px_rgba(0,0,0,0.2),inset_0_-3px_5px_rgba(0,0,0,0.2)] border border-black/10 bg-gradient-to-b ${bc}`} />
-    </div>
-  );
+  const leaders = [
+    {
+      name: 'Harold M. Tugano',
+      role: 'Chairman',
+      message: 'Guiding the company with steady leadership, product discipline, and a long-term vision for every distributor community we build.',
+    },
+    {
+      name: 'Sherwin Catera',
+      role: 'Chief Executive Officer',
+      message: 'Focused on field support, operations, and a cleaner member experience that helps every branch and distributor move with confidence.',
+    },
+  ];
 
   return (
     <section className="section-padding relative overflow-hidden bg-white">
-      {/* Minimalist Backgound Pattern */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,1)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,1)_1px,transparent_1px)] bg-[size:40px_40px]" />
       </div>
 
       <div className="section-container relative z-10">
         <SectionHeader badge="People" title="People Behind the Company" />
-        
-        <div ref={ref} className="reveal max-w-4xl mx-auto text-center">
-            <p className="text-gray-600 leading-relaxed mb-12">
-            Meet the key leaders and important people behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
+
+        <div ref={ref} className="reveal max-w-5xl mx-auto text-center">
+          <p className="text-gray-600 leading-relaxed mb-12">
+            Meet the key leaders behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
           </p>
 
-          <div className="relative p-6 sm:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
-            <div className="flex flex-col items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-500 overflow-x-auto pb-6 w-full">
-               
-               {/* Fixed-dimension container allows perfect positional scaling */}
-               <div className="min-w-[400px] w-full max-w-[650px] mx-auto h-[350px] relative mt-2">
-                 
-                 {/* ─── LINES ────────── */}
-                 {/* L1 to L2 */}
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '50px', left: '50%', height: '20px' }} />
-                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', width: '60%' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '50%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '80%', height: '25px' }} />
+          <div className="rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm p-6 sm:p-8 lg:p-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              {leaders.map((leader) => (
+                <article
+                  key={leader.name}
+                  className="group rounded-[1.75rem] border border-brand-gold/25 bg-white/90 p-4 sm:p-5 shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
+                >
+                  <div className="rounded-[1.4rem] border border-brand-gold/20 bg-gradient-to-br from-[#FFF9E8] via-white to-[#F4E5BF] p-4">
+                    <div className="relative min-h-[240px] sm:min-h-[300px] overflow-hidden rounded-[1.1rem] border border-brand-gold/25 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.18),transparent_50%),linear-gradient(160deg,#fffdf4_0%,#f8ecd0_100%)] flex items-center justify-center">
+                      <div className="absolute inset-x-6 top-5 h-px bg-gradient-to-r from-transparent via-brand-gold/45 to-transparent" />
+                      <div className="absolute bottom-5 inset-x-8 h-20 rounded-full bg-brand-gold/10 blur-2xl" />
+                      <div className="text-center px-6 relative z-10">
+                        <span className="inline-flex rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-gold-dark">
+                          Leadership
+                        </span>
+                        <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-3xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
+                        {leader.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
+                      </div>
+                        <p className="mt-5 text-xs font-bold uppercase tracking-[0.32em] text-brand-gold-dark">Official Portrait</p>
+                        <p className="mt-2 text-sm text-gray-600">Ready for the final company photo.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-2 pt-5 pb-2 text-center">
+                    <h3 className="text-xl font-black tracking-tight text-brand-brown">{leader.name}</h3>
+                    <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-brand-gold-dark">{leader.role}</p>
+                    <div className="mt-4 h-px w-14 mx-auto bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
+                    <p className="mt-5 text-sm leading-7 text-[#5B4A3A]">{leader.message}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
 
-                 {/* L2 to L3 */}
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '145px', left: '50%', height: '20px' }} />
-                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', width: '80%' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '30%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '50%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '70%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '90%', height: '25px' }} />
-
-                 {/* L3 to L4 */}
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '10%', height: '20px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '30%', height: '20px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '50%', height: '20px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '70%', height: '20px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '90%', height: '20px' }} />
-
-                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', width: '80%' }} />
-
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '30%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '50%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '70%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '90%', height: '25px' }} />
-
-                 {/* ─── NODES ────────── */}
-                 {/* L1 */}
-                 <OrgNode top={0} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 
-                 {/* L2 */}
-                 <OrgNode top={95} left={20} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={95} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={95} left={80} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-
-                 {/* L3 */}
-                 <OrgNode top={190} left={10} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={190} left={30} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={190} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={190} left={70} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={190} left={90} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-
-                 {/* L4 */}
-                 <OrgNode top={285} left={10} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={285} left={30} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={285} left={50} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={285} left={70} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={285} left={90} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-               </div>
-               
-               <div className="mt-8 relative z-20">
-                 <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
-                   View People Behind the Company
-                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                 </NavLink>
-               </div>
+            <div className="mt-8 relative z-20 text-center">
+              <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
+                View People Behind the Company
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </NavLink>
             </div>
           </div>
         </div>
@@ -465,7 +449,6 @@ function OrganizationsPreview() {
   );
 }
 
-/* ────────────────────── Business Opps Preview ────────────── */
 function BusinessPreview() {
   const ref = useScrollReveal();
   return (
@@ -538,7 +521,7 @@ function DownloadableMaterials() {
 }
 
 function ApplicationForm() {
-  const [form, setForm] = useState({ name: '', phone: '', email: '', letterOfIntent: null });
+  const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [showApplicationPrompt, setShowApplicationPrompt] = useState(false);
@@ -552,20 +535,12 @@ function ApplicationForm() {
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
-        body: (() => {
-          const payload = new FormData();
-          payload.append('name', form.name);
-          payload.append('phone', form.phone);
-          payload.append('email', form.email);
-          if (form.letterOfIntent) {
-            payload.append('letter_of_intent', form.letterOfIntent);
-          }
-          return payload;
-        })(),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Unable to submit application.');
-      setForm({ name: '', phone: '', email: '', letterOfIntent: null });
+      setForm({ name: '', phone: '', email: '' });
       setShowApplicationPrompt(true);
       setStatus({ type: 'success', message: data.message || 'Distributor application interest submitted.' });
     } catch (err) {
@@ -578,17 +553,17 @@ function ApplicationForm() {
   return (
     <section id="stockist-apply" className="section-padding relative overflow-hidden bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
       <div className="section-container">
-        <SectionHeader badge="Stockist Application" title="Distributor Application Form" />
+        <SectionHeader badge="Distributor Application" title="Distributor Application Form" />
         <div ref={ref} className="reveal grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           <div className="rounded-2xl p-8 text-white" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
-            <h3 className="text-2xl font-bold mb-4">Stockist Application Intake</h3>
+            <h3 className="text-2xl font-bold mb-4">Become a Distributor Today</h3>
             <p className="text-white/75 leading-relaxed mb-6">
-              Share your contact details and letter of intent so the NOGATU team can review your stockist application. Re-application is allowed only after a 30-day cool down period from the latest submission.
+              Start with your full name, contact number, and email address. Once submitted, we will give you the ready-to-print distributor form you can download, print, and personally submit at the nearest branch office.
             </p>
             <div className="space-y-4 text-sm text-white/70">
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your full name, contact number, email address, and signed letter of intent.</span></div>
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Admin reviews your stockist interest and follows up with you.</span></div>
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Proceed with the next onboarding steps after approval.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your full name, contact number, and email address.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Download the printable distributor application form from the confirmation popup.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Print the form and submit it to the nearest NOGATU branch office if you want to proceed.</span></div>
             </div>
           </div>
           <form onSubmit={submitApplication} className="rounded-2xl border border-primary-200/40 bg-white p-6 sm:p-8 shadow-lg space-y-4">
@@ -608,26 +583,13 @@ function ApplicationForm() {
                 />
               </label>
             ))}
-            <label className="block">
-              <span className="block text-sm font-semibold text-brand-brown mb-2">Letter of Intent</span>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
-                required
-                onChange={(e) => updateField('letterOfIntent', e.target.files?.[0] || null)}
-                className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-brand-gold/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-brown focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
-              />
-              <p className="mt-2 text-xs text-gray-500">
-                Required. Accepted formats: PDF, DOC, DOCX, JPG, PNG, or WEBP. Maximum file size: 5MB.
-              </p>
-            </label>
             {status.message && (
               <div className={`rounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                 {status.message}
               </div>
             )}
             <button type="submit" disabled={submitting} className="w-full btn-landing-primary disabled:opacity-60 disabled:cursor-not-allowed">
-              {submitting ? 'Submitting...' : 'Submit Stockist Application'}
+              {submitting ? 'Submitting...' : 'Submit Distributor Inquiry'}
             </button>
           </form>
         </div>
@@ -638,12 +600,14 @@ function ApplicationForm() {
             <div className="w-14 h-14 rounded-2xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-5">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
             </div>
-            <h3 className="text-2xl font-bold text-brand-brown mb-3">Stockist Application Received</h3>
+            <h3 className="text-2xl font-bold text-brand-brown mb-3">Distributor Inquiry Received</h3>
             <p className="text-gray-600 leading-relaxed">
-              Your details and letter of intent have been recorded. Please wait for a NOGATU representative to contact you for the next stockist onboarding steps.
+              Your details have been recorded. Download the printable application form below, print it, and bring it to the nearest NOGATU branch office if you want to continue your distributor application.
             </p>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <a href="/portal/login" className="btn-landing-primary w-full">Open Members Area</a>
+              <a href="/docs/nogatu-distributor-application-form.pdf" target="_blank" rel="noreferrer" className="btn-landing-primary w-full text-center">
+                Download PDF Form
+              </a>
               <button onClick={() => setShowApplicationPrompt(false)} className="btn-landing-secondary w-full">
                 Got It
               </button>

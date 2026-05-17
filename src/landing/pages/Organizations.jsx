@@ -1,9 +1,16 @@
 const LEADERS = [
-  { name: 'Harold M. Tugano', role: 'Chairman' },
-  { name: 'Sherwin Catera', role: 'CEO' },
-  { name: 'Yoren Abihay', role: 'President' },
-  { name: 'Cecilia Haspe', role: 'Vice President' },
-  { name: 'Dino S. Erfe', role: 'Manager' },
+  {
+    name: 'Harold M. Tugano',
+    role: 'Chairman',
+    message:
+      'Guiding the company with steady leadership, product discipline, and a long-term vision for every distributor community we build.',
+  },
+  {
+    name: 'Sherwin Catera',
+    role: 'Chief Executive Officer',
+    message:
+      'Focused on field support, operations, and a cleaner member experience that helps every branch and distributor move with confidence.',
+  },
 ];
 
 export default function Organizations() {
@@ -20,38 +27,41 @@ export default function Organizations() {
             People Behind the Company
           </h1>
           <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
-            Meet the important people of NOGATU Alliance, the leaders guiding the company, supporting the network, and inspiring the community forward.
+            Meet the leaders keeping NOGATU Alliance grounded in service, community, and practical growth.
           </p>
         </div>
 
-        <div className="max-w-5xl mx-auto">
-          <div className="space-y-5 sm:space-y-6">
-            {LEADERS.map((leader, index) => (
-              <div key={leader.name} className="relative">
-                {index > 0 && (
-                  <div className="hidden sm:block absolute left-1/2 -top-6 h-6 w-px bg-brand-gold/40" />
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-4 sm:gap-6 items-stretch">
-                  <div className="rounded-2xl border border-brand-gold/30 bg-white shadow-sm p-4 flex items-center gap-4">
-                    <div className="w-20 h-20 rounded-xl bg-[#FFF8E1] border-2 border-dashed border-brand-gold/40 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-9 h-9 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    </div>
-                    <div>
-                      <p className="font-extrabold uppercase tracking-wide text-brand-brown leading-tight">{leader.name}</p>
-                      <p className="text-sm font-semibold uppercase text-brand-gold-dark mt-2">{leader.role}</p>
-                    </div>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+          {LEADERS.map((leader) => (
+            <article
+              key={leader.name}
+              className="group rounded-[2rem] border border-brand-gold/25 bg-white/90 p-5 sm:p-6 shadow-[0_24px_60px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
+            >
+              <div className="rounded-[1.6rem] border border-brand-gold/20 bg-gradient-to-br from-[#FFF9E8] via-white to-[#F4E5BF] p-4 sm:p-5">
+                <div className="relative min-h-[280px] sm:min-h-[360px] overflow-hidden rounded-[1.35rem] border border-brand-gold/25 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.20),transparent_52%),linear-gradient(160deg,#fffdf4_0%,#f8ecd0_100%)] flex items-center justify-center">
+                  <div className="absolute inset-x-6 top-6 h-px bg-gradient-to-r from-transparent via-brand-gold/45 to-transparent" />
+                  <div className="absolute bottom-6 inset-x-10 h-24 rounded-full bg-brand-gold/10 blur-2xl" />
+                  <div className="text-center px-6 relative z-10">
+                    <span className="inline-flex rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-gold-dark">
+                      Leadership
+                    </span>
+                    <div className="mx-auto mt-6 flex h-24 w-24 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-4xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
+                    {leader.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
                   </div>
-
-                  <div className="rounded-2xl border border-primary-200/40 bg-white/85 shadow-sm p-5 sm:p-6">
-                    <p className="text-xs font-bold uppercase tracking-wider text-brand-gold-dark mb-2">Message for NOGATU</p>
-                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                      Reserved space for {leader.name}'s company message, personal note, or motivational quote.
-                    </p>
+                    <p className="mt-6 text-xs font-bold uppercase tracking-[0.32em] text-brand-gold-dark">Official Portrait</p>
+                    <p className="mt-2 text-sm text-gray-600">Reserved for the final company photo.</p>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="px-2 pt-6 pb-3 text-center">
+                <h2 className="text-2xl sm:text-[1.9rem] font-black tracking-tight text-brand-brown">{leader.name}</h2>
+                <p className="mt-3 text-xs font-bold uppercase tracking-[0.3em] text-brand-gold-dark">{leader.role}</p>
+                <div className="mt-5 h-px w-16 mx-auto bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
+                <p className="mt-5 text-sm sm:text-base text-[#5B4A3A] leading-7">{leader.message}</p>
+              </div>
+            </article>
+          ))}
         </div>
 
         <section className="mt-14 sm:mt-20">

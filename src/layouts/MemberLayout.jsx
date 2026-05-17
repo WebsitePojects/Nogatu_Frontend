@@ -130,7 +130,7 @@ export default function MemberLayout() {
           {/* Close on mobile */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden ml-auto p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.05] transition-colors"
+            className="lg:hidden ml-auto p-1.5 rounded-lg portal-card-muted hover:text-[var(--portal-title)] hover:bg-white/[0.05] transition-colors"
           >
             <HiOutlineX className="w-4 h-4" />
           </button>
@@ -140,7 +140,7 @@ export default function MemberLayout() {
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5 scrollbar-thin">
           {NAV_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] px-3 mb-1.5" style={{ color: 'var(--brand-gold)' }}>
+              <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] px-3 mb-1.5" style={{ color: 'var(--portal-gold-text)' }}>
                 {group.label}
               </p>
               <div className="space-y-0.5">
@@ -188,7 +188,7 @@ export default function MemberLayout() {
           <button
             onClick={handleLogout}
             className="nav-item w-full cursor-pointer"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
+            style={{ color: 'var(--portal-card-muted)' }}
           >
             <HiOutlineLogout className="w-[17px] h-[17px]" />
             Sign Out
@@ -217,13 +217,13 @@ export default function MemberLayout() {
           <div className="flex items-center gap-3.5">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-1.5 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-colors"
+              className="lg:hidden p-2 -ml-1.5 rounded-xl portal-card-muted hover:text-[var(--portal-title)] hover:bg-white/[0.05] transition-colors"
               aria-label="Open menu"
             >
               <HiOutlineMenu className="w-5 h-5" />
             </button>
             <div>
-              <p className="text-sm font-semibold text-white/90 leading-none">{currentPage?.label || 'Dashboard'}</p>
+              <p className="portal-page-title text-sm font-semibold leading-none">{currentPage?.label || 'Dashboard'}</p>
               <p className="hero-welcome-subtitle text-[11px] mt-0.5 hidden sm:block">
                 Welcome back, {user?.shortname}
               </p>
@@ -235,7 +235,7 @@ export default function MemberLayout() {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl text-white/35 hover:text-gold-300 transition-colors"
+              className="p-2 rounded-xl portal-card-muted hover:text-[var(--portal-gold-text)] transition-colors"
               title="Toggle Theme"
             >
               {isDarkMode ? <HiOutlineSun className="w-[18px] h-[18px]" /> : <HiOutlineMoon className="w-[18px] h-[18px]" />}
@@ -243,7 +243,7 @@ export default function MemberLayout() {
             
             {/* Notification bell */}
             <button
-              className="relative p-2 rounded-xl text-white/35 hover:text-gold-300 transition-colors"
+              className="relative p-2 rounded-xl portal-card-muted hover:text-[var(--portal-gold-text)] transition-colors"
               style={{ '--tw-ring-color': 'rgba(212,175,55,0.2)' }}
               aria-label="Notifications"
             >
@@ -257,7 +257,7 @@ export default function MemberLayout() {
             {/* User chip */}
             <div className="hidden sm:flex items-center gap-2.5 pl-3 ml-1 border-l" style={{ borderColor: 'rgba(212,175,55,0.1)' }}>
               <div className="text-right">
-                <p className="text-[13px] font-semibold text-white/85 text-always-white leading-none">{user?.accountname}</p>
+                <p className="text-[13px] font-semibold portal-page-title leading-none">{user?.accountname}</p>
                 <p className="topbar-account-tier text-[10.5px] mt-0.5">{user?.caccttype}</p>
               </div>
               <div
