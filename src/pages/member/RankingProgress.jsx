@@ -104,6 +104,7 @@ export default function RankingProgress() {
   const basisLabel = data.basisLabel || 'Repurchase points';
   const nextRankPct = Math.min(100, Number(data.progress || 0));
   const requirementStatusText = buildRequirementStatusText(data);
+  const showPackageGate = Boolean(data.blockedByPackageGate || !data.rankingEligible);
 
   return (
     <div className="space-y-6">
@@ -115,6 +116,27 @@ export default function RankingProgress() {
       <div className="glass-card rounded-2xl p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
           <div>
+            <p className="text-xs uppercase tracking-wider" style={{ color: 'rgba(212,175,55,0.5)' }}>
+              Package
+            </p>
+            <div className="flex items-center gap-3 mt-1 mb-3 flex-wrap">
+              <span
+                className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
+                style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.28)' }}
+              >
+                {data.packageLabel || 'Unknown Package'}
+              </span>
+              <span
+                className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
+                style={
+                  data.rankingEligible
+                    ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
+                    : { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.25)' }
+                }
+              >
+                {data.rankingEligible ? `Ranking up to ${data.packageRankMaxLabel || 'published ceiling'}` : 'Ranking locked'}
+              </span>
+            </div>
             <p className="text-xs uppercase tracking-wider" style={{ color: 'rgba(212,175,55,0.5)' }}>
               Current Rank
             </p>
@@ -147,13 +169,29 @@ export default function RankingProgress() {
               />
             </div>
             <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {data.nextRank
-                ? `${nextRankPct.toFixed(2)}% to ${data.nextRankLabel} (${fmtInt(data.nextRankMinPoints)} fresh repurchase pts)`
-                : 'Maximum rank achieved'}
+              {!data.rankingEligible
+                ? 'upgrade required before ranking can begin'
+                : data.nextRank
+                  ? `${nextRankPct.toFixed(2)}% to ${data.nextRankLabel} (${fmtInt(data.nextRankMinPoints)} fresh repurchase pts)`
+                  : (data.blockedByPackageGate ? 'upgrade required to unlock the next rank tier' : 'Maximum rank achieved')}
             </p>
           </div>
         </div>
       </div>
+
+      {showPackageGate && (
+        <div className="glass-card rounded-2xl p-5">
+          <div className="flex items-start gap-3">
+            <HiOutlineShieldCheck className="w-5 h-5 mt-0.5" style={{ color: '#D4AF37' }} />
+            <div>
+              <p className="text-sm font-semibold text-white">Package Gate</p>
+              <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                {data.rankingEligibilityReason || 'Your current package has reached its ranking ceiling.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="glass-card rounded-2xl p-5">
@@ -209,10 +247,14 @@ export default function RankingProgress() {
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {data.nextRankRequirement
                 ? `${data.nextRankRequirement.rankName} needs ${fmtInt(data.nextRankRequirement.pointsRequired)} fresh repurchase points.`
-                : 'No further gate is waiting because the full published rank ladder is already cleared.'}
+                : (data.blockedByPackageGate
+                  ? `${data.rankingEligibilityReason || 'Upgrade is required to continue ranking.'}`
+                  : 'No further gate is waiting because the full published rank ladder is already cleared.')}
             </p>
             <p className="text-xs mt-2" style={{ color: 'rgba(212,175,55,0.72)' }}>
-              {requirementStatusText}
+              {data.nextRankRequirement
+                ? requirementStatusText
+                : (data.upgradeRequiredPackageLabel ? `Next upgrade target: ${data.upgradeRequiredPackageLabel}` : requirementStatusText)}
             </p>
           </div>
         </div>
@@ -224,7 +266,9 @@ export default function RankingProgress() {
           <div>
             <p className="text-sm font-semibold text-white">Rank Ladder</p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>
-              Every rank below shows its target points, team requirement, and the exact incentive package attached to it.
+              {data.rankingEligible
+                ? 'Every rank below shows the ranks currently available to your package, with target points, team requirement, and incentives.'
+                : 'Ranking starts at Gold package. Upgrade first to unlock the rank ladder.'}
             </p>
           </div>
         </div>

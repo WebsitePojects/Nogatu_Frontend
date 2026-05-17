@@ -6,32 +6,62 @@ import html2canvas from 'html2canvas';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+function triggerBrowserDownload(url) {
+  const link = document.createElement('a');
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
 export default function Encashment() {
   const navigate = useNavigate();
   const [records, setRecords] = useState([]);
+  const [summary, setSummary] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
+  const [exporting, setExporting] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [activeDetails, setActiveDetails] = useState(null);
   const receiptRef = useRef(null);
 
-  useEffect(() => { loadData(); }, [page]);
+  useEffect(() => { loadData(page); }, [page]);
 
-  async function loadData() {
+  async function loadData(targetPage = page, nextFilters = {}) {
     setLoading(true);
     try {
-      let url = `/admin/encashment?page=${page}`;
-      if (startDate) url += `&startDate=${startDate}`;
-      if (endDate) url += `&endDate=${endDate}`;
-      if (keyword.trim()) url += `&q=${encodeURIComponent(keyword.trim())}`;
+      const activeStart = nextFilters.startDate ?? startDate;
+      const activeEnd = nextFilters.endDate ?? endDate;
+      const activeKeyword = nextFilters.keyword ?? keyword;
+
+      let url = `/admin/encashment?page=${targetPage}`;
+      if (activeStart) url += `&startDate=${activeStart}`;
+      if (activeEnd) url += `&endDate=${activeEnd}`;
+      if (activeKeyword.trim()) url += `&q=${encodeURIComponent(activeKeyword.trim())}`;
       const res = await api.get(url);
       setRecords(res.data.records);
       setTotalPages(res.data.totalPages);
+      setSummary(res.data.summary || null);
     } catch { } finally { setLoading(false); }
+  }
+
+  async function handleExport(format = 'xlsx') {
+    setExporting(true);
+    try {
+      let url = `/admin/encashment/export?format=${format}`;
+      if (startDate) url += `&startDate=${startDate}`;
+      if (endDate) url += `&endDate=${endDate}`;
+      if (keyword.trim()) url += `&q=${encodeURIComponent(keyword.trim())}`;
+      triggerBrowserDownload(`/api${url}`);
+    } catch {
+      toast.error('Failed to export encashment report');
+    } finally {
+      window.setTimeout(() => setExporting(false), 500);
+    }
   }
 
   async function handleProcess(pid, uid) {
@@ -127,7 +157,10 @@ export default function Encashment() {
             />
           </div>
           <button
-            onClick={() => { setPage(1); loadData(); }}
+            onClick={() => {
+              setPage(1);
+              loadData(1);
+            }}
             className="gold-btn rounded-xl py-2.5 px-5 text-sm"
           >
             Filter
@@ -138,15 +171,88 @@ export default function Encashment() {
               setStartDate('');
               setEndDate('');
               setPage(1);
-              setTimeout(() => loadData(), 0);
+              setTimeout(() => loadData(1, { keyword: '', startDate: '', endDate: '' }), 0);
             }}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
             style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
           >
             Clear
           </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleExport('xlsx')}
+              disabled={exporting}
+              className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
+              style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
+            >
+              {exporting ? 'Exporting...' : 'Export XLSX'}
+            </button>
+            <button
+              onClick={() => handleExport('pdf')}
+              disabled={exporting}
+              className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
+              style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
+            >
+              {exporting ? 'Preparing PDF...' : 'Export PDF'}
+            </button>
+          </div>
         </div>
       </div>
+
+      {summary?.overview && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          {[
+            { label: 'Net Receivable', value: `PHP ${fmt(summary.overview.netReceivable)}`, color: '#D4AF37' },
+            { label: 'Gross Encashment', value: `PHP ${fmt(summary.overview.grossEncashment)}`, color: '#fbbf24' },
+            { label: 'Total Deductions', value: `PHP ${fmt(summary.overview.totalDeductions)}`, color: '#f87171' },
+            { label: 'CD Deductions', value: `PHP ${fmt(summary.overview.totalCdDeduction)}`, color: '#fb7185' },
+            { label: 'Paid Requests', value: summary.overview.paidCount, color: '#34d399' },
+            { label: 'Pending Requests', value: summary.overview.pendingCount, color: '#f59e0b' },
+            { label: 'Members Covered', value: summary.overview.uniqueMembers, color: '#93c5fd' },
+            { label: 'Total Records', value: summary.overview.totalRecords, color: '#c4b5fd' },
+          ].map((card) => (
+            <div key={card.label} className="glass-card rounded-2xl p-4" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>{card.label}</p>
+              <p className="text-lg font-bold" style={{ color: card.color }}>{card.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {summary?.daily?.length > 0 && (
+        <div className="glass-card rounded-2xl p-6 mb-6 overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Daily Encashment Totals</p>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{summary.daily.length} day rows</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  {['Date', 'Requests', 'Members', 'Gross', 'Net', 'Deductions', 'CD', 'Paid', 'Pending'].map((h) => (
+                    <th key={h} className="table-header py-3 px-3 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {summary.daily.map((row, idx) => (
+                  <tr key={row.date} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                    <td className="py-3 px-3 text-white/80 font-medium">{row.date}</td>
+                    <td className="py-3 px-3 text-white/70">{row.totalRecords}</td>
+                    <td className="py-3 px-3 text-white/70">{row.uniqueMembers}</td>
+                    <td className="py-3 px-3 text-white/80">PHP {fmt(row.grossEncashment)}</td>
+                    <td className="py-3 px-3 text-white/80">PHP {fmt(row.netReceivable)}</td>
+                    <td className="py-3 px-3 text-rose-200">PHP {fmt(row.totalDeductions)}</td>
+                    <td className="py-3 px-3 text-amber-300">PHP {fmt(row.totalCdDeduction)}</td>
+                    <td className="py-3 px-3 text-emerald-300">{row.paidCount}</td>
+                    <td className="py-3 px-3 text-amber-300">{row.pendingCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       <div className="glass-card rounded-2xl p-6 overflow-hidden">

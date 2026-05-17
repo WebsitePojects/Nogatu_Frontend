@@ -27,7 +27,7 @@ function PkgBadge({ pkg }) {
   );
 }
 
-function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, onClose }) {
+function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, pairingTrace, onClose }) {
   if (!tx) return null;
 
   function incomeRow(label, desc, value, color) {
@@ -157,6 +157,38 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
               </div>
             </div>
           )}
+
+          {pairingTrace?.rows?.length > 0 && (
+            <div className="mt-5">
+              <p className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--brand-gold)' }}>Pairing Audit Trail</p>
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {pairingTrace.rows.slice(0, 8).map((row) => (
+                  <div
+                    key={row.ledgerUid}
+                    className="rounded-xl p-3"
+                    style={{ background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.18)' }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs text-white/80">
+                          {row.left?.username || '—'} × {row.right?.username || '—'}
+                        </p>
+                        <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          {row.pairedAt} · {fmt(row.pairPoints)} BP
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-semibold" style={{ color: '#fb923c' }}>₱{fmt(row.creditedIncome)}</p>
+                        <p className="text-[10px]" style={{ color: row.capApplied ? '#f87171' : 'rgba(255,255,255,0.35)' }}>
+                          {row.capApplied ? `Blocked ₱${fmt(row.blockedIncome)}` : 'Fully credited'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="px-6 pb-5 flex justify-end">
@@ -203,7 +235,7 @@ export default function IncomeDetails() {
     );
   }
 
-  const { member, totals, transactions, directReferrals, binaryChildren, leadershipDownline } = data;
+  const { member, totals, transactions, directReferrals, binaryChildren, leadershipDownline, pairingTrace } = data;
 
   const totalCards = [
     { label: 'Direct Referral', value: totals.ttlincome1, color: '#4ade80' },
@@ -306,22 +338,82 @@ export default function IncomeDetails() {
           ) : (
             <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
               {leadershipDownline.map((d, i) => (
-                <div key={i} className="flex items-center justify-between">
+                <div key={i} className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs text-white/70">{d.name}</p>
                     <p className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.3)' }}>{d.username}</p>
+                    <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      Pairing source: ₱{fmt(d.sourcePairingIncome)} | Leadership: ₱{fmt(d.leadershipBonus)} | Direct refs: {Number(d.directReferralCount || 0)}
+                    </p>
                   </div>
                   <span
                     className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                     style={{ background: 'rgba(192,132,252,0.12)', color: '#c084fc', border: '1px solid rgba(192,132,252,0.25)' }}
                   >
-                    {d.lvl}
+                    {d.lvl} · {Number(d.ratePercent || 0)}%
                   </span>
                 </div>
               ))}
             </div>
           )}
         </div>
+      </div>
+
+      <div className="glass-card rounded-2xl p-5 mb-6">
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(212,175,55,0.4)' }}>Pairing Trace</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Match-level audit of left-right binary events and the payout released from each one.
+            </p>
+          </div>
+          <div className="text-right text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <div>Events: {pairingTrace?.summary?.totalEvents || 0}</div>
+            <div>Credited: ₱{fmt(pairingTrace?.summary?.totalCreditedIncome || 0)}</div>
+          </div>
+        </div>
+        {pairingTrace?.rows?.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[840px]">
+              <thead>
+                <tr>
+                  {['Date', 'Left Source', 'Right Source', 'BP', 'Gross', 'Credited', 'Blocked', 'Status'].map((h) => (
+                    <th key={h} className="table-header py-3 px-4 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {pairingTrace.rows.map((row, idx) => (
+                  <tr key={row.ledgerUid || idx} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                    <td className="py-3 px-4 text-xs text-white/60">{row.pairedAt}</td>
+                    <td className="py-3 px-4 text-xs text-white/80">{row.left?.fullName || row.left?.username || '—'}</td>
+                    <td className="py-3 px-4 text-xs text-white/80">{row.right?.fullName || row.right?.username || '—'}</td>
+                    <td className="py-3 px-4 text-xs text-white/80">{fmt(row.pairPoints)}</td>
+                    <td className="py-3 px-4 text-xs text-white/70">₱{fmt(row.grossIncome)}</td>
+                    <td className="py-3 px-4 text-xs font-semibold" style={{ color: '#fb923c' }}>₱{fmt(row.creditedIncome)}</td>
+                    <td className="py-3 px-4 text-xs" style={{ color: row.blockedIncome > 0 ? '#f87171' : 'rgba(255,255,255,0.3)' }}>
+                      ₱{fmt(row.blockedIncome)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{
+                          background: row.capApplied ? 'rgba(248,113,113,0.12)' : 'rgba(74,222,128,0.12)',
+                          color: row.capApplied ? '#f87171' : '#4ade80',
+                          border: `1px solid ${row.capApplied ? 'rgba(248,113,113,0.25)' : 'rgba(74,222,128,0.25)'}`,
+                        }}
+                      >
+                        {row.capApplied ? (row.creditedIncome > 0 ? 'Partially Paid' : 'Cap Reached') : 'Credited'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-sm italic" style={{ color: 'rgba(255,255,255,0.25)' }}>No pairing trace rows yet.</p>
+        )}
       </div>
 
       {/* Transactions table */}
@@ -379,6 +471,7 @@ export default function IncomeDetails() {
           directReferrals={directReferrals}
           binaryChildren={binaryChildren}
           leadershipDownline={leadershipDownline}
+          pairingTrace={pairingTrace}
           onClose={() => setSelectedTx(null)}
         />
       )}

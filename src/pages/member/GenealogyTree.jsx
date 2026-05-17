@@ -49,6 +49,27 @@ function getPositionLabel(position, level) {
   return 'Team';
 }
 
+function getAccountStateChipStyle(label, isDarkMode) {
+  if (label === 'PD') {
+    return isDarkMode
+      ? { background: 'rgba(74,222,128,0.12)', color: '#4ADE80', border: '1px solid rgba(74,222,128,0.28)' }
+      : { background: 'rgba(22,163,74,0.1)', color: '#166534', border: '1px solid rgba(22,163,74,0.22)' };
+  }
+  if (label === 'FS') {
+    return isDarkMode
+      ? { background: 'rgba(96,165,250,0.12)', color: '#93C5FD', border: '1px solid rgba(96,165,250,0.28)' }
+      : { background: 'rgba(59,130,246,0.1)', color: '#1D4ED8', border: '1px solid rgba(59,130,246,0.22)' };
+  }
+  if (label === 'CD - Paid') {
+    return isDarkMode
+      ? { background: 'rgba(250,204,21,0.14)', color: '#FDE68A', border: '1px solid rgba(250,204,21,0.28)' }
+      : { background: 'rgba(234,179,8,0.12)', color: '#92400E', border: '1px solid rgba(234,179,8,0.24)' };
+  }
+  return isDarkMode
+    ? { background: 'rgba(248,113,113,0.12)', color: '#FCA5A5', border: '1px solid rgba(248,113,113,0.28)' }
+    : { background: 'rgba(239,68,68,0.1)', color: '#B91C1C', border: '1px solid rgba(239,68,68,0.22)' };
+}
+
 const PACKAGE_STYLES = {
   Bronze:   { border: '#C9732E', accent: '#E59A57', glow: 'rgba(201,115,46,0.36)', bg: 'linear-gradient(180deg, rgba(201,115,46,0.28), rgba(31,18,10,0.97))', mini: '#C9732E' },
   Silver:   { border: '#B8C2CC', accent: '#E5ECF3', glow: 'rgba(184,194,204,0.34)', bg: 'linear-gradient(180deg, rgba(184,194,204,0.24), rgba(19,20,24,0.97))', mini: '#B8C2CC' },
@@ -119,6 +140,7 @@ function MemberNode({ data }) {
   const packageName = normalizePackageType(data.packageType);
   const style = PACKAGE_STYLES[packageName] || PACKAGE_STYLES.Bronze;
   const tone = getNodeAppearance(style, Boolean(data.isDarkMode));
+  const stateChip = getAccountStateChipStyle(data.accountStateLabel || 'PD', Boolean(data.isDarkMode));
 
   const primaryLabel = data.fullname && String(data.fullname).trim() && String(data.fullname).trim().toLowerCase() !== String(data.username || '').trim().toLowerCase()
     ? data.fullname
@@ -203,13 +225,18 @@ function MemberNode({ data }) {
         </span>
       </div>
 
-      <div className="flex items-center justify-between mt-4">
+      <div className="flex items-center justify-between mt-4 gap-2">
         <span className="text-[10px] font-semibold px-2 py-1 rounded-full" style={{ background: tone.pillBg, color: tone.accent, border: `1px solid ${style.border}` }}>
           {packageName}
         </span>
-        <span className="text-[11px]" style={{ color: tone.positionText }}>
-          {data.positionLabel}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap" style={stateChip}>
+            {data.accountStateLabel || 'PD'}
+          </span>
+          <span className="text-[11px]" style={{ color: tone.positionText }}>
+            {data.positionLabel}
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center justify-between mt-4 text-[11px]">
@@ -340,8 +367,8 @@ function PlaceholderNode({ data }) {
 
       <p className="mt-4 text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
         {isDarkMode
-          ? 'Keep the binary tree balanced by placing a new account on this side.'
-          : 'Place the new account here to keep your tree balanced and support binary points.'}
+          ? 'Registration will verify the live binary placement policy before saving this slot.'
+          : 'The registration screen will verify the live binary placement policy before saving this slot.'}
       </p>
     </button>
   );
@@ -693,7 +720,7 @@ export default function GenealogyTree() {
         isDarkMode,
         highlighted: String(node.id) === String(highlightedNodeId),
         canvasActive,
-        binaryPoints: fmtInt(node.data.binaryPoints || 0),
+        binaryPoints: Number(node.data.binaryPoints || 0),
         onOpen: () => setRoot(node.id),
         onRegister: () => navigate(`/register?placement=${node.data.internalUid || node.data.uid}&position=${node.data.position || 1}`),
         onActivateCanvas: activateCanvas,
@@ -1037,8 +1064,8 @@ export default function GenealogyTree() {
                           <p className="font-semibold text-white mt-1">{legLabel(member.leg)}</p>
                         </div>
                         <div>
-                          <p style={{ color: 'rgba(255,255,255,0.45)' }}>Points</p>
-                          <p className="font-semibold text-white mt-1">{fmtInt(member.binaryPoints)}</p>
+                          <p style={{ color: 'rgba(255,255,255,0.45)' }}>Status</p>
+                          <p className="font-semibold text-white mt-1">{member.accountStateLabel || 'PD'}</p>
                         </div>
                       </div>
                     </button>

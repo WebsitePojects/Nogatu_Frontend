@@ -121,9 +121,31 @@ function IncomeEntryCard({ row, accent, metric }) {
       )}
 
       {metric === 'leadership-bonus' && (
-        <div className="text-sm">
-          <p style={{ color: 'rgba(255,255,255,0.45)' }}>Reference</p>
-          <p className="text-white">{row.processid || row.processKey || `PID ${row.pid || '-'}`}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Triggered By</p>
+            <p className="text-white">{row.fullname || row.username || 'Not available'}</p>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Username</p>
+            <p className="text-white">{row.username || 'Not available'}</p>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Leadership Level</p>
+            <p className="text-white">Level {row.level || '-'}</p>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Rate</p>
+            <p className="text-white">{Number(row.ratePercent || 0)}%</p>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Source Pairing Income</p>
+            <p className="text-white">{fmtMoney(row.pairingIncome || 0)}</p>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Direct Referrals</p>
+            <p className="text-white">{fmtInt(row.directReferralCount || 0)}</p>
+          </div>
         </div>
       )}
 
@@ -224,7 +246,11 @@ export default function DashboardMetricDetail() {
         <SummaryCard label="Total" value={typeof data.total === 'number' ? fmtMoney(data.total) : data.total} accent={config.accent} />
         <SummaryCard label="Entries Shown" value={fmtInt(rows.length)} accent="#fff" />
         <SummaryCard label="As Of" value={data.asOf ? new Date(data.asOf).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Now'} accent="#fff" />
-        <SummaryCard label="Traceability" value="Readable breakdown" accent="#fff" />
+        <SummaryCard
+          label="Traceability"
+          value={metric === 'leadership-bonus' ? `${fmtInt(data.summary?.directReferralCount || 0)} direct referrals` : 'Readable breakdown'}
+          accent="#fff"
+        />
       </div>
 
       {metric === 'uni-level' && data.eligibility && (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
+import toast from 'react-hot-toast';
 import {
   HiOutlineCreditCard,
   HiOutlineBadgeCheck,
@@ -24,30 +25,43 @@ const PACKAGE_NAMES = {
   60: 'Diamond',
 };
 
+function triggerBrowserDownload(url) {
+  const link = document.createElement('a');
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
 export default function CDAccounts() {
   const navigate = useNavigate();
   const [accounts, setAccounts] = useState([]);
   const [stats, setStats] = useState(null);
+  const [packageBreakdown, setPackageBreakdown] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const [packageType, setPackageType] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    loadAccounts();
+    loadAccounts(page);
   }, [page]);
 
-  async function loadAccounts(searchTerm) {
+  async function loadAccounts(targetPage = page, searchTerm = search, statusValue = status, packageValue = packageType) {
     setLoading(true);
     try {
-      const q = searchTerm !== undefined ? searchTerm : search;
       const res = await api.get(
-        `/admin/cd-accounts?page=${page}&search=${encodeURIComponent(q)}`
+        `/admin/cd-accounts?page=${targetPage}&search=${encodeURIComponent(searchTerm)}&status=${encodeURIComponent(statusValue)}&packageType=${encodeURIComponent(packageValue)}`
       );
       setAccounts(res.data.accounts);
       setTotalPages(res.data.totalPages);
       setStats(res.data.stats);
+      setPackageBreakdown(res.data.packageBreakdown || []);
     } catch {
+      toast.error('Failed to load CD accounts');
     } finally {
       setLoading(false);
     }
@@ -56,7 +70,19 @@ export default function CDAccounts() {
   function handleSearch(e) {
     e.preventDefault();
     setPage(1);
-    loadAccounts(search);
+    loadAccounts(1, search, status, packageType);
+  }
+
+  async function handleExport(format = 'xlsx') {
+    setExporting(true);
+    try {
+      const url = `/api/admin/cd-accounts/export?format=${encodeURIComponent(format)}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&packageType=${encodeURIComponent(packageType)}`;
+      triggerBrowserDownload(url);
+    } catch {
+      toast.error('Failed to export CD accounts');
+    } finally {
+      window.setTimeout(() => setExporting(false), 500);
+    }
   }
 
   const PaginationBtn = ({ onClick, disabled, children }) => (
@@ -102,7 +128,7 @@ export default function CDAccounts() {
         },
         {
           label: 'Total CD Amount',
-          value: `₱${fmt(stats.totalCdAmount)}`,
+          value: `PHP ${fmt(stats.totalCdAmount)}`,
           icon: HiOutlineExclamationCircle,
           color: '#f87171',
           bg: 'rgba(248,113,113,0.10)',
@@ -110,18 +136,33 @@ export default function CDAccounts() {
         },
         {
           label: 'Total Paid So Far',
-          value: `₱${fmt(stats.totalPaid)}`,
+          value: `PHP ${fmt(stats.totalPaid)}`,
           icon: HiOutlineCash,
           color: '#34d399',
           bg: 'rgba(52,211,153,0.10)',
           border: 'rgba(52,211,153,0.20)',
+        },
+        {
+          label: 'CD Deductions',
+          value: `PHP ${fmt(stats.totalCdDeduction)}`,
+          icon: HiOutlineExclamationCircle,
+          color: '#fb7185',
+          bg: 'rgba(251,113,133,0.10)',
+          border: 'rgba(251,113,133,0.20)',
+        },
+        {
+          label: 'Net Encashment',
+          value: `PHP ${fmt(stats.totalNetEncashment)}`,
+          icon: HiOutlineCash,
+          color: '#93c5fd',
+          bg: 'rgba(59,130,246,0.10)',
+          border: 'rgba(59,130,246,0.20)',
         },
       ]
     : [];
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-7">
         <h1 className="font-display text-2xl font-bold text-white">
           CD Account Management
@@ -134,9 +175,8 @@ export default function CDAccounts() {
         />
       </div>
 
-      {/* Summary Stats */}
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-7 gap-3 mb-6">
           {statCards.map((card) => (
             <div
               key={card.label}
@@ -165,23 +205,117 @@ export default function CDAccounts() {
         </div>
       )}
 
-      {/* Search */}
-      <div className="glass-card rounded-2xl p-6 mb-6">
-        <form onSubmit={handleSearch} className="flex gap-3">
+      <div className="glass-card rounded-2xl p-4 mb-6">
+        <form onSubmit={handleSearch} className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.3fr)_220px_220px_auto_auto_auto] gap-3 items-center">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="glass-input flex-1 rounded-xl px-4 py-2.5 text-sm"
-            placeholder="Search by username..."
+            className="glass-input rounded-xl px-4 py-2.5 text-sm h-[46px]"
+            placeholder="Type account name or username..."
           />
-          <button type="submit" className="gold-btn rounded-xl py-2.5 px-5 text-sm">
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="glass-input rounded-xl px-4 py-2.5 text-sm h-[46px]"
+          >
+            <option value="all">All CD Status</option>
+            <option value="paid">Fully Paid</option>
+            <option value="unpaid">Still Paying</option>
+          </select>
+          <select
+            value={packageType}
+            onChange={(e) => setPackageType(e.target.value)}
+            className="glass-input rounded-xl px-4 py-2.5 text-sm h-[46px]"
+          >
+            <option value="all">All Packages</option>
+            {Object.entries(PACKAGE_NAMES).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+          <button type="submit" className="gold-btn rounded-xl py-2.5 px-5 text-sm h-[46px]">
             Search
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setStatus('all');
+              setPackageType('all');
+              setPage(1);
+              loadAccounts(1, '', 'all', 'all');
+            }}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border h-[46px]"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
+          >
+            Clear
+          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => handleExport('xlsx')}
+              disabled={exporting}
+              className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50 h-[46px]"
+              style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
+            >
+              {exporting ? 'Exporting...' : 'Export XLSX'}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleExport('pdf')}
+              disabled={exporting}
+              className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50 h-[46px]"
+              style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
+            >
+              {exporting ? 'Preparing PDF...' : 'Export PDF'}
+            </button>
+          </div>
         </form>
       </div>
 
-      {/* Table Card */}
+      {packageBreakdown.length > 0 && (
+        <div className="glass-card rounded-2xl p-6 mb-6 overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <p
+              className="text-sm font-medium"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+            >
+              CD Package Breakdown
+            </p>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              {packageBreakdown.length} package rows
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  {['Package', 'Accounts', 'Fully Paid', 'Paying', 'CD Amount', 'Paid', 'Remaining', 'Net Encashment'].map((h) => (
+                    <th key={h} className="table-header py-3 px-3 text-left font-semibold text-xs uppercase tracking-wide">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {packageBreakdown.map((row, idx) => (
+                  <tr key={row.package} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                    <td className="py-3 px-3 text-white/80 font-medium">{row.package}</td>
+                    <td className="py-3 px-3 text-white/70">{row.totalAccounts}</td>
+                    <td className="py-3 px-3 text-emerald-300">{row.fullyPaid}</td>
+                    <td className="py-3 px-3 text-amber-300">{row.stillPaying}</td>
+                    <td className="py-3 px-3 text-white/80">PHP {fmt(row.totalCdAmount)}</td>
+                    <td className="py-3 px-3 text-white/80">PHP {fmt(row.totalPaid)}</td>
+                    <td className="py-3 px-3 text-rose-200">PHP {fmt(row.totalRemaining)}</td>
+                    <td className="py-3 px-3 text-sky-300">PHP {fmt(row.totalNetEncashment)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div className="glass-card rounded-2xl p-6 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <p
@@ -235,6 +369,9 @@ export default function CDAccounts() {
                     'Paid',
                     'Remaining',
                     'Progress',
+                    'CD Logs',
+                    'Net Encashment',
+                    'Last Deduction',
                     'Status',
                     'Date Reg',
                     'Actions',
@@ -257,8 +394,7 @@ export default function CDAccounts() {
                     cdAmount > 0
                       ? Math.min(100, Math.round((cdPaid / cdAmount) * 100))
                       : 0;
-                  const isFullyPaid =
-                    Number(a.cdstatus) === 2 || cdRemaining <= 0;
+                  const isFullyPaid = Boolean(a.isRecoveredFullyPaid);
                   const packageName =
                     PACKAGE_NAMES[a.accttype] || `Type ${a.accttype}`;
 
@@ -302,10 +438,10 @@ export default function CDAccounts() {
                         </span>
                       </td>
                       <td className="py-3 px-3 text-white/75 font-medium">
-                        ₱{fmt(cdAmount)}
+                        PHP {fmt(cdAmount)}
                       </td>
                       <td className="py-3 px-3 text-white/60">
-                        ₱{fmt(cdPaid)}
+                        PHP {fmt(cdPaid)}
                       </td>
                       <td
                         className="py-3 px-3 font-medium"
@@ -313,7 +449,7 @@ export default function CDAccounts() {
                           color: isFullyPaid ? '#4ade80' : '#fca5a5',
                         }}
                       >
-                        ₱{fmt(cdRemaining)}
+                        PHP {fmt(cdRemaining)}
                       </td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-2 min-w-[120px]">
@@ -351,6 +487,15 @@ export default function CDAccounts() {
                           </span>
                         </div>
                       </td>
+                      <td className="py-3 px-3 text-white/70">
+                        {a.deductionCount} deductions / {a.encashmentCount} encashments
+                      </td>
+                      <td className="py-3 px-3 text-sky-300 font-medium">
+                        PHP {fmt(a.netEncashment)}
+                      </td>
+                      <td className="py-3 px-3 text-xs text-white/50">
+                        {a.lastDeductionDate || '-'}
+                      </td>
                       <td className="py-3 px-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
@@ -368,7 +513,7 @@ export default function CDAccounts() {
                                 }
                           }
                         >
-                          {isFullyPaid ? 'Fully Paid' : 'Paying'}
+                          {a.cdstatusLabel || (isFullyPaid ? 'Fully Paid' : 'Paying')}
                         </span>
                       </td>
                       <td className="py-3 px-3 text-xs text-white/40">
@@ -423,7 +568,7 @@ export default function CDAccounts() {
                 {accounts.length === 0 && (
                   <tr>
                     <td
-                      colSpan="10"
+                      colSpan="13"
                       className="py-12 text-center"
                       style={{ color: 'rgba(255,255,255,0.25)' }}
                     >

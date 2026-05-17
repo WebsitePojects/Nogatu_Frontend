@@ -3,27 +3,28 @@ import api from '../../api';
 import toast from 'react-hot-toast';
 
 const PRODUCT_OPTIONS = [
-  { value: 10, label: 'Bronze (₱2,500)', color: '#CD7F32' },
-  { value: 20, label: 'Silver (₱5,000)', color: '#C0C0C0' },
-  { value: 30, label: 'Gold (₱10,000)', color: '#FFD700' },
-  { value: 40, label: 'Platinum (₱25,000)', color: '#E5E4E2' },
-  { value: 50, label: 'Garnet (₱50,000)', color: '#733635' },
-  { value: 60, label: 'Diamond (₱150,000)', color: '#B9F2FF' },
-  { value: 100, label: 'Barley (Maintenance)', color: '#6b7280' },
-  { value: 101, label: 'Glutathione (Maintenance)', color: '#6b7280' },
-  { value: 102, label: 'Gluta w/ Collagen (Maintenance)', color: '#6b7280' },
-  { value: 103, label: 'Coffee Mix (Maintenance)', color: '#6b7280' },
-  { value: 104, label: 'Chocolate Drink (Maintenance)', color: '#6b7280' },
-  { value: 105, label: 'Mangosteen (Maintenance)', color: '#6b7280' },
-  { value: 106, label: 'Vitamin Zinc (Maintenance)', color: '#6b7280' },
-  { value: 107, label: 'Max Coffee (Maintenance)', color: '#6b7280' },
+  { value: 10, label: 'Bronze (PHP 2,500)', color: '#CD7F32' },
+  { value: 20, label: 'Silver (PHP 5,000)', color: '#C0C0C0' },
+  { value: 30, label: 'Gold (PHP 10,000)', color: '#FFD700' },
+  { value: 40, label: 'Platinum (PHP 25,000)', color: '#E5E4E2' },
+  { value: 50, label: 'Garnet (PHP 50,000)', color: '#733635' },
+  { value: 60, label: 'Diamond (PHP 150,000)', color: '#B9F2FF' },
+  { value: 100, label: 'Nogatu Barley Juice (Maintenance)', color: '#6b7280' },
+  { value: 101, label: 'Nogatu Glow (Maintenance)', color: '#6b7280' },
+  { value: 102, label: 'Nogatu Collagen Vitamin C (Maintenance)', color: '#6b7280' },
+  { value: 103, label: 'Nogatu Coffee Mix (Maintenance)', color: '#6b7280' },
+  { value: 104, label: 'Chocolate Drink Mix (Maintenance)', color: '#6b7280' },
+  { value: 105, label: 'Mangosteen Coffee Mix (Maintenance)', color: '#6b7280' },
+  { value: 106, label: 'Vitamin C (Maintenance)', color: '#6b7280' },
+  { value: 107, label: 'Max Fuel Coffee Drink Mix (Maintenance)', color: '#6b7280' },
   { value: 108, label: 'Black Coffee (Maintenance)', color: '#6b7280' },
+  { value: 109, label: 'Berry NAD+ (Maintenance)', color: '#6b7280' },
 ];
 
 const CODE_TYPES = [
-  { value: 1, label: 'Paid (PD)', desc: 'Full income eligibility', color: '#D4AF37' },
-  { value: 2, label: 'Free Slot (FS)', desc: 'No income earnings', color: '#94a3b8' },
-  { value: 3, label: 'CD Slot (CD)', desc: '25% encashment deduction', color: '#f87171' },
+  { value: 1, label: 'Paid (PD)', desc: 'Full income eligibility including SMB and sponsor BP', color: '#D4AF37' },
+  { value: 2, label: 'Free Slot (FS)', desc: 'Can earn non-pairing incomes, but no SMB or sponsor BP', color: '#94a3b8' },
+  { value: 3, label: 'CD Slot (CD)', desc: '25% encashment deduction until fully paid; no SMB or sponsor BP while unpaid', color: '#f87171' },
 ];
 
 export default function GenerateCodes() {
@@ -42,14 +43,18 @@ export default function GenerateCodes() {
       toast.success(`${res.data.count} code(s) generated!`);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Generation failed');
-    } finally { setGenerating(false); }
+    } finally {
+      setGenerating(false);
+    }
   }
 
   async function handleCopyAll() {
     try {
       await navigator.clipboard.writeText(generatedCodes.join('\n'));
       toast.success('All codes copied!');
-    } catch { toast.error('Copy failed'); }
+    } catch {
+      toast.error('Copy failed');
+    }
   }
 
   return (
@@ -60,7 +65,6 @@ export default function GenerateCodes() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Form Panel */}
         <div className="glass-card rounded-2xl p-6">
           <h3 className="font-semibold text-white mb-1">New Code Generation</h3>
           <p className="text-xs mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>Configure and generate activation codes</p>
@@ -86,17 +90,16 @@ export default function GenerateCodes() {
                 onChange={(e) => setProductType(Number(e.target.value))}
                 className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
               >
-                {PRODUCT_OPTIONS.map(opt => (
+                {PRODUCT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
 
-            {/* Code Type Cards */}
             <div>
               <label className="label mb-2">Code Type</label>
               <div className="flex gap-3 mt-1.5 flex-wrap">
-                {CODE_TYPES.map(opt => (
+                {CODE_TYPES.map((opt) => (
                   <label
                     key={opt.value}
                     className="flex-1 min-w-[90px] flex flex-col items-center gap-1 p-3 rounded-xl cursor-pointer motion-safe:transition-all"
@@ -113,16 +116,16 @@ export default function GenerateCodes() {
                       onChange={() => setCodeType(opt.value)}
                       className="sr-only"
                     />
-                    <span
-                      className="text-[11px] font-bold tracking-wide"
-                      style={{ color: opt.color }}
-                    >
+                    <span className="text-[11px] font-bold tracking-wide" style={{ color: opt.color }}>
                       {opt.label}
                     </span>
                     <span className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>{opt.desc}</span>
                   </label>
                 ))}
               </div>
+              <p className="text-[11px] mt-2 leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                FS and unpaid CD accounts can still earn the other published wealth streams. The restriction is on SMB or binary pairing credits and on passing sponsor BP upstream until the slot becomes eligible.
+              </p>
             </div>
 
             <button
@@ -135,7 +138,6 @@ export default function GenerateCodes() {
           </form>
         </div>
 
-        {/* Generated Codes Panel */}
         {generatedCodes.length > 0 && (
           <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">

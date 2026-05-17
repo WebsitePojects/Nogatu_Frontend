@@ -8,9 +8,13 @@ export default function ManageCodes() {
   const { admin } = useAuth();
   const { isDarkMode } = useTheme();
   const [codes, setCodes] = useState([]);
+  const [historyRows, setHistoryRows] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotalPages, setHistoryTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [selected, setSelected] = useState([]);
   const [selectMode, setSelectMode] = useState(false);
   const [codeSearch, setCodeSearch] = useState('');
@@ -29,6 +33,7 @@ export default function ManageCodes() {
   const dateColor = isDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(71,85,105,0.82)';
 
   useEffect(() => { loadCodes(); }, [page]);
+  useEffect(() => { loadHistory(); }, [historyPage]);
 
   async function loadCodes() {
     setLoading(true);
@@ -41,6 +46,23 @@ export default function ManageCodes() {
       setCodes(res.data.codes);
       setTotalPages(res.data.totalPages);
     } catch { } finally { setLoading(false); }
+  }
+
+  async function loadHistory() {
+    setHistoryLoading(true);
+    try {
+      const q = codeSearch.trim();
+      const url = q
+        ? `/admin/codes/history?page=${historyPage}&q=${encodeURIComponent(q)}`
+        : `/admin/codes/history?page=${historyPage}`;
+      const res = await api.get(url);
+      setHistoryRows(res.data.rows || []);
+      setHistoryTotalPages(res.data.totalPages || 1);
+    } catch {
+      setHistoryRows([]);
+    } finally {
+      setHistoryLoading(false);
+    }
   }
 
   function toggleSelect(code) {
@@ -61,6 +83,7 @@ export default function ManageCodes() {
       toast.success(`${res.data.released} code(s) released`);
       setSelected([]);
       loadCodes();
+      loadHistory();
     } catch (err) { toast.error(err.response?.data?.error || 'Release failed'); }
   }
 
@@ -74,6 +97,7 @@ export default function ManageCodes() {
       setTargetUsername('');
       setTaggedAccount(null);
       loadCodes();
+      loadHistory();
     } catch (err) { toast.error(err.response?.data?.error || 'Transfer failed'); }
   }
 
@@ -174,7 +198,7 @@ export default function ManageCodes() {
             />
           </div>
           <button
-            onClick={() => { setPage(1); loadCodes(); }}
+            onClick={() => { setPage(1); setHistoryPage(1); loadCodes(); loadHistory(); }}
             className="gold-btn rounded-xl py-2.5 px-5 text-sm"
           >
             Search
@@ -183,7 +207,8 @@ export default function ManageCodes() {
             onClick={() => {
               setCodeSearch('');
               setPage(1);
-              setTimeout(() => loadCodes(), 0);
+              setHistoryPage(1);
+              setTimeout(() => { loadCodes(); loadHistory(); }, 0);
             }}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
             style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
@@ -327,6 +352,72 @@ export default function ManageCodes() {
                   <tr>
                     <td colSpan="5" className="py-12 text-center" style={{ color: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(71,85,105,0.7)' }}>
                       No codes found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="glass-card rounded-2xl p-6 overflow-hidden mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-sm font-semibold" style={{ color: headingColor }}>Activation Code History</p>
+            <p className="text-xs mt-1" style={{ color: textMuted }}>Generated, released, transferred, upgraded, and maintenance usage events.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <PaginationBtn onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage <= 1}>Prev</PaginationBtn>
+            <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{historyPage} / {historyTotalPages}</span>
+            <PaginationBtn onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))} disabled={historyPage >= historyTotalPages}>Next</PaginationBtn>
+          </div>
+        </div>
+
+        {historyLoading ? (
+          <div className="flex justify-center py-10">
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-4"
+              style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
+            />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  {['Code', 'Event', 'Summary', 'Date'].map(h => (
+                    <th key={h} className="table-header py-3 px-4 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {historyRows.map((row, idx) => (
+                  <tr
+                    key={`${row.code}-${row.processKey || row.createdAt || idx}`}
+                    style={{ background: idx % 2 === 0 ? rowAlt : 'transparent' }}
+                  >
+                    <td className="py-3 px-4 font-mono text-xs" style={{ color: '#F2D06B' }}>{row.code}</td>
+                    <td className="py-3 px-4">
+                      <span
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                        style={isDarkMode
+                          ? { background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.22)' }
+                          : { background: 'rgba(99,102,241,0.14)', color: '#4338ca', border: '1px solid rgba(99,102,241,0.32)' }}
+                      >
+                        {row.eventLabel}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4" style={{ color: textSubtle }}>{row.summary}</td>
+                    <td className="py-3 px-4 text-xs" style={{ color: dateColor }}>
+                      {row.createdAt ? new Date(row.createdAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : '-'}
+                    </td>
+                  </tr>
+                ))}
+                {historyRows.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="py-12 text-center" style={{ color: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(71,85,105,0.7)' }}>
+                      No activation history found.
                     </td>
                   </tr>
                 )}
