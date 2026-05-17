@@ -7,7 +7,8 @@ const NAV_LINKS = [
   { to: '/about', label: 'About Us' },
   { to: '/products', label: 'Our Products' },
   { to: '/news', label: 'News & Updates' },
-  { to: '/organizations', label: 'Organizations' },
+  { to: '/organizations', label: 'People Behind' },
+  { to: '/certifications', label: 'Certifications' },
   { to: '/contact', label: 'Contact Us' },
 ];
 
