@@ -100,7 +100,7 @@ export default function Applications() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Name', 'Contact No.', 'Email', 'Letter', 'Submitted', 'Follow Up', 'Action'].map((heading) => (
+                  {['Name', 'Contact No.', 'Email', 'Submitted', 'Follow Up', 'Action'].map((heading) => (
                     <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
@@ -111,21 +111,6 @@ export default function Applications() {
                     <td className="py-3 px-3 text-white/80">{row.name}</td>
                     <td className="py-3 px-3 text-white/60">{row.phone}</td>
                     <td className="py-3 px-3 text-white/60">{row.email}</td>
-                    <td className="py-3 px-3">
-                      {row.letterOfIntentUrl ? (
-                        <a
-                          href={row.letterOfIntentUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs px-2.5 py-1 rounded-lg inline-flex"
-                          style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)' }}
-                        >
-                          {row.letterOfIntentFilename ? 'Open Letter' : 'View File'}
-                        </a>
-                      ) : (
-                        <span className="text-xs text-white/35">Missing</span>
-                      )}
-                    </td>
                     <td className="py-3 px-3 text-white/50 text-xs">{row.submittedAt}</td>
                     <td className="py-3 px-3">
                       <span className="inline-block text-xs px-2.5 py-0.5 rounded-full" style={statusStyle(row.followUpStatus)}>
@@ -145,7 +130,7 @@ export default function Applications() {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    <td colSpan="6" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
                       No applications found.
                     </td>
                   </tr>
@@ -177,61 +162,45 @@ export default function Applications() {
       </div>
 
       {active && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
-          <div className="w-full max-w-2xl rounded-2xl p-6 bg-white text-gray-900 dark:bg-[#141008] dark:text-white shadow-2xl" style={{ border: '1px solid rgba(212,175,55,0.25)' }}>
+        <div className="portal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="portal-modal-panel w-full max-w-2xl rounded-3xl p-6 shadow-[0_28px_64px_rgba(15,23,42,0.22)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.45)]">
             <div className="flex items-center justify-between gap-4">
-              <h2 className="font-display text-xl text-gray-950 dark:text-white">Application Review</h2>
-              <button onClick={() => setActive(null)} className="text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white">Close</button>
+              <h2 className="portal-modal-title font-display text-xl">Application Review</h2>
+              <button onClick={() => setActive(null)} className="portal-modal-muted text-sm font-medium hover:opacity-80">Close</button>
             </div>
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-              <p className="text-gray-700 dark:text-white/75"><strong>Name:</strong> {active.name}</p>
-              <p className="text-gray-700 dark:text-white/75"><strong>Contact No.:</strong> {active.phone}</p>
-              <p className="text-gray-700 dark:text-white/75"><strong>Email:</strong> {active.email}</p>
-              <p className="text-gray-700 dark:text-white/75">
-                <strong>Letter of Intent:</strong>{' '}
-                {active.letterOfIntentUrl ? (
-                  <a
-                    href={active.letterOfIntentUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline text-amber-600 dark:text-amber-300"
-                  >
-                    {active.letterOfIntentFilename || 'Open uploaded file'}
-                  </a>
-                ) : 'Missing'}
-              </p>
-              <p className="text-gray-700 dark:text-white/75"><strong>Submitted:</strong> {active.submittedAt}</p>
-              <p className="text-gray-700 dark:text-white/75"><strong>Follow Up:</strong> {statusLabel(active.followUpStatus)}</p>
+            <div className="portal-modal-text mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <p><strong className="portal-modal-title">Name:</strong> {active.name}</p>
+              <p><strong className="portal-modal-title">Contact No.:</strong> {active.phone}</p>
+              <p><strong className="portal-modal-title">Email:</strong> {active.email}</p>
+              <p><strong className="portal-modal-title">Submitted:</strong> {active.submittedAt}</p>
+              <p><strong className="portal-modal-title">Follow Up:</strong> {statusLabel(active.followUpStatus)}</p>
             </div>
             <label className="block mt-5">
-              <span className="block text-sm font-semibold text-gray-700 dark:text-white/70 mb-2">Admin Note</span>
+              <span className="portal-modal-title block text-sm font-semibold mb-2">Admin Note</span>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={4}
-                className="w-full rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 outline-none focus:border-brand-gold"
+                className="w-full rounded-2xl px-4 py-3 text-sm portal-modal-title outline-none bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)] focus:border-[color:var(--portal-warning-border)]"
                 placeholder="Optional follow-up note"
               />
             </label>
             <div className="mt-5 flex flex-wrap gap-2">
               <button
                 onClick={() => updateFollowUp(active.id, 'followed_up')}
-                className="text-xs px-3 py-2 rounded-lg"
-                style={{ background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
+                className="portal-button portal-info-button text-xs px-3.5 py-2.5"
               >
                 Followed Up
               </button>
               <button
                 onClick={() => updateFollowUp(active.id, 'cancelled')}
-                className="text-xs px-3 py-2 rounded-lg"
-                style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.25)' }}
+                className="portal-button portal-danger-button text-xs px-3.5 py-2.5"
               >
                 Cancelled
               </button>
               <button
                 onClick={() => updateFollowUp(active.id, 'done')}
-                className="text-xs px-3 py-2 rounded-lg"
-                style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
+                className="portal-button portal-success-button text-xs px-3.5 py-2.5"
               >
                 Done
               </button>

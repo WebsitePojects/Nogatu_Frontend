@@ -5,8 +5,8 @@ import About from './pages/About';
 import Products from './pages/Products';
 import News from './pages/News';
 import Organizations from './pages/Organizations';
-import Contact from './pages/Contact';
 import Certifications from './pages/Certifications';
+import Contact from './pages/Contact';
 import Join from './pages/Join';
 
 export default function LandingApp() {

@@ -33,15 +33,15 @@ export default function SupportContact() {
   return (
     <div>
       <div className="mb-7">
-        <h1 className="font-display text-2xl font-bold text-white">Issue or Concern</h1>
+        <h1 className="font-display text-2xl font-bold portal-page-title">Issue or Concern</h1>
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
       <div className="max-w-xl">
         <div className="glass-card rounded-2xl p-6 mb-5" style={{ borderLeft: '3px solid rgba(59,130,246,0.6)' }}>
-          <p className="text-sm font-medium text-white/70 mb-1">Preferred support channel</p>
-          <p className="text-lg font-bold text-white">NAWi Help Desk</p>
-          <p className="text-sm text-white/50 mt-1">
+          <p className="text-sm font-medium portal-card-text mb-1">Preferred support channel</p>
+          <p className="text-lg font-bold portal-card-title">NAWi Help Desk</p>
+          <p className="text-sm leading-6 portal-card-muted mt-2">
             For faster response, message us directly on Facebook first. Include your username,
             date/time, and a short description of your concern.
           </p>
@@ -53,8 +53,8 @@ export default function SupportContact() {
               <FaFacebook className="w-5 h-5" style={{ color: '#60a5fa' }} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Facebook - NAWi Help Desk</p>
-              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.5)' }}>Fastest response time</p>
+              <p className="text-sm font-semibold portal-card-title">Facebook - NAWi Help Desk</p>
+              <p className="text-sm portal-gold-text">Fastest response time</p>
             </div>
           </div>
           <a
@@ -76,8 +76,8 @@ export default function SupportContact() {
               <HiOutlinePencilAlt className="w-5 h-5" style={{ color: '#34d399' }} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">In-Portal Support Ticket</p>
-              <p className="text-xs" style={{ color: 'rgba(52,211,153,0.75)' }}>
+              <p className="text-sm font-semibold portal-card-title">In-Portal Support Ticket</p>
+              <p className="text-sm" style={{ color: '#0f8f66' }}>
                 Your member identity is attached automatically without logging you out.
               </p>
             </div>
@@ -98,8 +98,8 @@ export default function SupportContact() {
               <HiOutlineMail className="w-5 h-5" style={{ color: '#D4AF37' }} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Email Support</p>
-              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.5)' }}>Alternative contact method</p>
+              <p className="text-sm font-semibold portal-card-title">Email Support</p>
+              <p className="text-sm portal-gold-text">Alternative contact method</p>
             </div>
           </div>
           <a
@@ -114,21 +114,20 @@ export default function SupportContact() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onMouseDown={() => setOpen(false)}>
+        <div className="portal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onMouseDown={() => setOpen(false)}>
           <form
             onSubmit={submitTicket}
             onMouseDown={(event) => event.stopPropagation()}
-            className="w-full max-w-lg rounded-2xl p-6"
-            style={{ background: '#12100a', border: '1px solid rgba(212,175,55,0.22)' }}
+            className="portal-modal-panel w-full max-w-lg rounded-2xl p-6"
           >
             <div className="flex items-start justify-between gap-3 mb-5">
               <div>
-                <h2 className="font-display text-lg font-bold text-white">Support Ticket</h2>
-                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <h2 className="portal-modal-title font-display text-xl font-bold">Support Ticket</h2>
+                <p className="portal-modal-muted text-sm mt-1">
                   {user?.username || user?.accountname || 'Logged-in member'}
                 </p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="p-2 rounded-lg" style={{ color: '#D4AF37', border: '1px solid rgba(212,175,55,0.22)' }}>
+              <button type="button" onClick={() => setOpen(false)} className="portal-close-button p-2 rounded-lg">
                 <HiOutlineX className="w-4 h-4" />
               </button>
             </div>

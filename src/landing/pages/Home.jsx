@@ -3,8 +3,36 @@ import { NavLink } from 'react-router-dom';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
 
+const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
+
 /* ────────────────────────── Hero (NogatuDrop-style with BG image) ────────────────────────── */
 function Hero() {
+  const heroSlides = [
+    {
+      image: '/img/landing-product.png',
+      alt: 'Nogatu Alliance full product lineup',
+      eyebrow: 'Featured Collection',
+      title: 'Healthy essentials in one complete line-up',
+      description: 'A premium showcase of the NOGATU wellness collection for first-time visitors.',
+    },
+    {
+      image: '/img/BerryNad_Market.png',
+      alt: 'Berry NAD+ product feature',
+      eyebrow: 'New Product',
+      title: 'Berry NAD+ now in the spotlight',
+      description: 'A dedicated hero slide that highlights Berry NAD+ before the carousel loops back to the full catalog.',
+    },
+  ];
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % heroSlides.length);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [heroSlides.length]);
+
   return (
     <section
       className="relative min-h-[100svh] overflow-hidden"
@@ -18,8 +46,8 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 sm:pt-24 pb-6 sm:pb-10">
-        <div className="min-h-[calc(100svh-120px)] lg:min-h-[74vh] flex flex-col lg:flex-row gap-4 lg:gap-0 items-center justify-between">
-          <div className="order-2 lg:order-1 w-full lg:w-5/12 pb-4 lg:pb-0 mt-auto motion-safe:animate-fade-up text-left z-20 flex flex-col items-start">
+        <div className="min-h-[calc(100svh-120px)] lg:min-h-[78vh] flex flex-col lg:flex-row gap-6 lg:gap-8 items-center justify-between">
+          <div className="order-2 lg:order-1 w-full lg:w-[38%] pb-4 lg:pb-0 mt-auto motion-safe:animate-fade-up text-left z-20 flex flex-col items-start">
             <h1 className="text-[clamp(1.9rem,4.2vw,3.8rem)] font-extrabold leading-[1.08] tracking-tight text-white mb-4 sm:mb-5 drop-shadow-2xl">
               Enjoy Our Healthy<br />
               <span className="text-brand-gold-light drop-shadow-lg">&amp; Wealthy Lifestyle</span>
@@ -36,9 +64,19 @@ function Hero() {
             </a>
             <a
               href="#stockist-apply"
-              className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18"
+              className="mt-3 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
+              style={{
+                border: '1px solid rgba(255,255,255,0.42)',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(212,165,40,0.16))',
+                boxShadow: '0 10px 28px rgba(89,34,25,0.18), inset 0 1px 0 rgba(255,255,255,0.32)',
+              }}
             >
-              Apply as Stockist
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/25 bg-white/15">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+                </svg>
+              </span>
+              Become a Distributor
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
@@ -51,15 +89,36 @@ function Hero() {
             </div>
           </div>
 
-          <div className="order-1 lg:order-2 w-full lg:w-6/12 flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 lg:mt-0 flex-1 lg:flex-none items-center">
-            <div className="relative w-[120vw] max-w-[460px] sm:w-full sm:max-w-[430px] lg:max-w-[620px] xl:max-w-[700px] mx-auto lg:mx-0 -ml-2 sm:ml-0">
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-3/4 h-1/3 rounded-full blur-[60px] bg-brand-gold/55 motion-safe:animate-pulse-glow" />
-              <div className="absolute inset-x-10 bottom-4 h-10 rounded-full bg-black/35 blur-[32px]" />
-              <img
-                src="/img/landing-product.png"
-                alt="Nogatu Alliance Products"
-                className="relative z-10 w-full h-auto object-contain motion-safe:animate-float-slow drop-shadow-[0_28px_60px_rgba(0,0,0,0.55)] origin-bottom lg:origin-center"
-              />
+          <div className="order-1 lg:order-2 w-full lg:w-[62%] flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 lg:mt-0 flex-1 lg:flex-none items-center">
+            <div className="hero-carousel-shell relative w-full max-w-[600px] sm:max-w-[760px] lg:max-w-[1080px] xl:max-w-[1240px] mx-auto lg:mx-0">
+              <div className="hero-carousel-card">
+                <div className="hero-carousel-stage">
+                  <span className={`hero-carousel-eyebrow ${activeSlide === 1 ? 'is-lower' : 'is-upper'}`}>
+                    {heroSlides[activeSlide].eyebrow}
+                  </span>
+                  <div className="hero-carousel-glow" />
+                  <div className="hero-carousel-floor" />
+
+                  {heroSlides.map((slide, index) => (
+                    <img
+                      key={slide.image}
+                      src={slide.image}
+                      alt={slide.alt}
+                      className={`hero-carousel-image ${index === activeSlide ? 'is-active' : 'is-hidden'} ${index === 0 ? 'is-collection' : 'is-single-product'}`}
+                    />
+                  ))}
+
+                  <div className="hero-carousel-indicators" aria-hidden="true">
+                    {heroSlides.map((slide, index) => (
+                      <span
+                        key={slide.image}
+                        className={`hero-carousel-dot ${index === activeSlide ? 'is-active' : ''}`}
+                      />
+                    ))}
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -250,14 +309,14 @@ function Products() {
   const products = [
     { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/Barley-Mix.png', imgLg: '/legacy-img/Barley-Mix.png' },
     { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png' },
-    { name: 'Nogatu Collagen Vitamin C', desc: 'Vitamin C with Collagen', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png' },
+    { name: 'Vitamin C with Collagen & Glutathione', desc: 'Radiance and antioxidant support formula', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png' },
     { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/Chox-Mix.png', imgLg: '/legacy-img/Chox-Mix.png' },
     { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png', imgLg: '/legacy-img/Coffee-Mix.png' },
     { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/Mangoosteen_1.png', imgLg: '/legacy-img/Mangoosteen_1.png' },
-    { name: 'Vitamin C', desc: 'Vitamin supplement', price: 'TBA', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png' },
-    { name: 'Black Coffee', desc: 'Premium black coffee drink mix', price: 'TBA', img: '/legacy-img/blck-coffee.png', imgLg: '/legacy-img/blck-coffee.png' },
-    { name: 'Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: 'TBA', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png' },
-    { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: 'TBA', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png' },
+    { name: 'Vitamin C with Zinc & Mangosteen', desc: 'Vitamin support blend with mangosteen extract', price: '580.00', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png' },
+    { name: 'Nogatu Black Coffee', desc: 'Premium black coffee drink mix', price: '250.00', img: '/legacy-img/blck-coffee.png', imgLg: '/legacy-img/blck-coffee.png' },
+    { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png' },
+    { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png' },
   ];
 
   return (
@@ -317,97 +376,71 @@ function Products() {
 /* ────────────────────── Organizations Preview ───────────── */
 function OrganizationsPreview() {
   const ref = useScrollReveal();
-
-  const OrgNode = ({ top, left, hc, bc }) => (
-    <div className="absolute flex flex-col items-center -translate-x-1/2 z-10" style={{ top: `${top}px`, left: `${left}%` }}>
-      <div className={`w-[18px] h-[18px] sm:w-[22px] sm:h-[22px] rounded-full shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)] mb-1 border border-white/40 bg-gradient-to-b ${hc}`} />
-      <div className={`w-10 h-7 sm:w-12 sm:h-8 rounded-t-xl rounded-b shadow-[0_4px_6px_rgba(0,0,0,0.2),inset_0_-3px_5px_rgba(0,0,0,0.2)] border border-black/10 bg-gradient-to-b ${bc}`} />
-    </div>
-  );
+  const leaders = [
+    {
+      name: 'Harold M. Tugano',
+      role: 'Chairman',
+      message: 'Guiding the company with steady leadership, product discipline, and a long-term vision for every distributor community we build.',
+    },
+    {
+      name: 'Sherwin Catera',
+      role: 'Chief Executive Officer',
+      message: 'Focused on field support, operations, and a cleaner member experience that helps every branch and distributor move with confidence.',
+    },
+  ];
 
   return (
     <section className="section-padding relative overflow-hidden bg-white">
-      {/* Minimalist Backgound Pattern */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,1)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,1)_1px,transparent_1px)] bg-[size:40px_40px]" />
       </div>
 
       <div className="section-container relative z-10">
         <SectionHeader badge="People" title="People Behind the Company" />
-        
-        <div ref={ref} className="reveal max-w-4xl mx-auto text-center">
-            <p className="text-gray-600 leading-relaxed mb-12">
-            Meet the key leaders and important people behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
+
+        <div ref={ref} className="reveal max-w-5xl mx-auto text-center">
+          <p className="text-gray-600 leading-relaxed mb-12">
+            Meet the key leaders behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
           </p>
 
-          <div className="relative p-6 sm:p-10 rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-500">
-            <div className="flex flex-col items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-500 overflow-x-auto pb-6 w-full">
-               
-               {/* Fixed-dimension container allows perfect positional scaling */}
-               <div className="min-w-[400px] w-full max-w-[650px] mx-auto h-[350px] relative mt-2">
-                 
-                 {/* ─── LINES ────────── */}
-                 {/* L1 to L2 */}
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '50px', left: '50%', height: '20px' }} />
-                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', width: '60%' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '20%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '50%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '70px', left: '80%', height: '25px' }} />
+          <div className="rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm p-6 sm:p-8 lg:p-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              {leaders.map((leader) => (
+                <article
+                  key={leader.name}
+                  className="group rounded-[1.75rem] border border-brand-gold/25 bg-white/90 p-4 sm:p-5 shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
+                >
+                  <div className="rounded-[1.4rem] border border-brand-gold/20 bg-gradient-to-br from-[#FFF9E8] via-white to-[#F4E5BF] p-4">
+                    <div className="relative min-h-[240px] sm:min-h-[300px] overflow-hidden rounded-[1.1rem] border border-brand-gold/25 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.18),transparent_50%),linear-gradient(160deg,#fffdf4_0%,#f8ecd0_100%)] flex items-center justify-center">
+                      <div className="absolute inset-x-6 top-5 h-px bg-gradient-to-r from-transparent via-brand-gold/45 to-transparent" />
+                      <div className="absolute bottom-5 inset-x-8 h-20 rounded-full bg-brand-gold/10 blur-2xl" />
+                      <div className="text-center px-6 relative z-10">
+                        <span className="inline-flex rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-gold-dark">
+                          Leadership
+                        </span>
+                        <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-3xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
+                        {leader.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
+                      </div>
+                        <p className="mt-5 text-xs font-bold uppercase tracking-[0.32em] text-brand-gold-dark">Official Portrait</p>
+                        <p className="mt-2 text-sm text-gray-600">Ready for the final company photo.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-2 pt-5 pb-2 text-center">
+                    <h3 className="text-xl font-black tracking-tight text-brand-brown">{leader.name}</h3>
+                    <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-brand-gold-dark">{leader.role}</p>
+                    <div className="mt-4 h-px w-14 mx-auto bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
+                    <p className="mt-5 text-sm leading-7 text-[#5B4A3A]">{leader.message}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
 
-                 {/* L2 to L3 */}
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '145px', left: '50%', height: '20px' }} />
-                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', width: '80%' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '10%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '30%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '50%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '70%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '165px', left: '90%', height: '25px' }} />
-
-                 {/* L3 to L4 */}
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '10%', height: '20px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '30%', height: '20px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '50%', height: '20px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '70%', height: '20px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '240px', left: '90%', height: '20px' }} />
-
-                 <div className="absolute h-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', width: '80%' }} />
-
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '10%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '30%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '50%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '70%', height: '25px' }} />
-                 <div className="absolute w-[2px] bg-brand-brown" style={{ top: '260px', left: '90%', height: '25px' }} />
-
-                 {/* ─── NODES ────────── */}
-                 {/* L1 */}
-                 <OrgNode top={0} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 
-                 {/* L2 */}
-                 <OrgNode top={95} left={20} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={95} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={95} left={80} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-
-                 {/* L3 */}
-                 <OrgNode top={190} left={10} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={190} left={30} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={190} left={50} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={190} left={70} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={190} left={90} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-
-                 {/* L4 */}
-                 <OrgNode top={285} left={10} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={285} left={30} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={285} left={50} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-                 <OrgNode top={285} left={70} hc="from-brand-gold to-brand-gold-dark" bc="from-gold-300 to-brand-gold" />
-                 <OrgNode top={285} left={90} hc="from-brand-brown-light to-brand-brown-dark" bc="from-brand-brown to-brand-brown-dark" />
-               </div>
-               
-               <div className="mt-8 relative z-20">
-                 <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
-                   View People Behind the Company
-                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                 </NavLink>
-               </div>
+            <div className="mt-8 relative z-20 text-center">
+              <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
+                View People Behind the Company
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </NavLink>
             </div>
           </div>
         </div>
@@ -416,7 +449,6 @@ function OrganizationsPreview() {
   );
 }
 
-/* ────────────────────── Business Opps Preview ────────────── */
 function BusinessPreview() {
   const ref = useScrollReveal();
   return (
@@ -489,7 +521,7 @@ function DownloadableMaterials() {
 }
 
 function ApplicationForm() {
-  const [form, setForm] = useState({ name: '', phone: '', email: '', letterOfIntent: null });
+  const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [showApplicationPrompt, setShowApplicationPrompt] = useState(false);
@@ -503,20 +535,12 @@ function ApplicationForm() {
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
-        body: (() => {
-          const payload = new FormData();
-          payload.append('name', form.name);
-          payload.append('phone', form.phone);
-          payload.append('email', form.email);
-          if (form.letterOfIntent) {
-            payload.append('letter_of_intent', form.letterOfIntent);
-          }
-          return payload;
-        })(),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Unable to submit application.');
-      setForm({ name: '', phone: '', email: '', letterOfIntent: null });
+      setForm({ name: '', phone: '', email: '' });
       setShowApplicationPrompt(true);
       setStatus({ type: 'success', message: data.message || 'Distributor application interest submitted.' });
     } catch (err) {
@@ -527,110 +551,62 @@ function ApplicationForm() {
   }
 
   return (
-    <section id="stockist-apply" className="section-padding relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #fff8e8 0%, #fffdf5 38%, #f6ecdc 100%)' }}>
-      <div className="absolute inset-0 pointer-events-none bg-diagonal-lines opacity-40" />
-      <div className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-[#D4A528]/15 blur-3xl pointer-events-none" />
-      <div className="absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[#592219]/12 blur-3xl pointer-events-none" />
+    <section id="stockist-apply" className="section-padding relative overflow-hidden bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
       <div className="section-container">
-        <SectionHeader badge="Stockist Application" title="Apply as a Nogatu Stockist" />
+        <SectionHeader badge="Distributor Application" title="Distributor Application Form" />
         <div ref={ref} className="reveal grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-          <div className="relative overflow-hidden rounded-[2rem] border border-[#D4A528]/20 bg-[linear-gradient(145deg,#2f1408_0%,#592219_45%,#6d3028_100%)] p-8 text-white shadow-[0_30px_70px_rgba(89,34,25,0.28)]">
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,rgba(255,223,136,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_26%)]" />
-            <div className="relative z-10">
-              <p className="inline-flex rounded-full border border-[#D4A528]/25 bg-white/10 px-4 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-[#FDE68A]">
-                First Step
-              </p>
-              <h3 className="mt-5 text-3xl font-black leading-tight">Stockists now apply here before accessing the Dropshipping portal.</h3>
-              <p className="mt-4 max-w-lg text-sm leading-7 text-white/75">
-                Submit your contact details first. The Nogatu team will review your interest, follow up on your stockist onboarding, and guide you through the next approval steps.
-              </p>
-              <div className="mt-7 grid gap-3 text-sm text-white/78">
-                <div className="flex gap-3 rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
-                  <span className="text-[#FDE68A] font-bold">01</span>
-                  <span>Send your full name, active mobile number, email address, and signed letter of intent.</span>
-                </div>
-                <div className="flex gap-3 rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
-                  <span className="text-[#FDE68A] font-bold">02</span>
-                  <span>Our team checks the application queue and contacts qualified applicants.</span>
-                </div>
-                <div className="flex gap-3 rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
-                  <span className="text-[#FDE68A] font-bold">03</span>
-                  <span>After approval, you can proceed with the stockist setup and portal access.</span>
-                </div>
-              </div>
-              <div className="mt-7 rounded-2xl border border-[#D4A528]/20 bg-black/15 px-5 py-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#FDE68A]/85">Important</p>
-                <p className="mt-2 text-sm leading-6 text-white/70">
-                  Re-application is limited for 30 days from the latest submission so the queue stays clean and the team can follow up properly.
-                </p>
-              </div>
+          <div className="rounded-2xl p-8 text-white" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
+            <h3 className="text-2xl font-bold mb-4">Become a Distributor Today</h3>
+            <p className="text-white/75 leading-relaxed mb-6">
+              Start with your full name, contact number, and email address. Once submitted, we will give you the ready-to-print distributor form you can download, print, and personally submit at the nearest branch office.
+            </p>
+            <div className="space-y-4 text-sm text-white/70">
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your full name, contact number, and email address.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Download the printable distributor application form from the confirmation popup.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Print the form and submit it to the nearest NOGATU branch office if you want to proceed.</span></div>
             </div>
           </div>
-          <form onSubmit={submitApplication} className="rounded-[2rem] border border-[#D4A528]/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(255,250,239,0.96)_100%)] p-6 sm:p-8 shadow-[0_24px_60px_rgba(184,134,11,0.12)] space-y-5">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#B8860B]">Nogatu Alliance</p>
-              <h3 className="mt-2 text-2xl font-black text-[#3A1000]">Stockist Application Intake</h3>
-              <p className="mt-2 text-sm leading-6 text-[#6d3028]">
-                Use the same brown-and-gold Nogatu member experience to start your stockist application.
-              </p>
-            </div>
+          <form onSubmit={submitApplication} className="rounded-2xl border border-primary-200/40 bg-white p-6 sm:p-8 shadow-lg space-y-4">
             {[
-              { key: 'name', label: 'Full Name', type: 'text', placeholder: 'Enter your full legal name' },
-              { key: 'phone', label: 'Contact Number', type: 'tel', placeholder: '09XX XXX XXXX' },
-              { key: 'email', label: 'Email Address', type: 'email', placeholder: 'you@example.com' },
+              { key: 'name', label: 'Full Name', type: 'text' },
+              { key: 'phone', label: 'Contact No.', type: 'tel' },
+              { key: 'email', label: 'Email Address', type: 'email' },
             ].map((field) => (
               <label key={field.key} className="block">
-                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-[#8C6A19]">{field.label}</span>
+                <span className="block text-sm font-semibold text-brand-brown mb-2">{field.label}</span>
                 <input
                   type={field.type}
                   value={form[field.key]}
                   onChange={(e) => updateField(field.key, e.target.value)}
                   required
-                  placeholder={field.placeholder}
-                  className="w-full rounded-2xl border border-[#D4A528]/18 bg-white/80 px-4 py-3.5 text-sm text-[#2f1408] outline-none transition-all duration-300 placeholder:text-[#8c715b]/70 focus:border-[#B8860B] focus:ring-4 focus:ring-[#D4A528]/15"
+                  className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
                 />
               </label>
             ))}
-            <label className="block">
-              <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-[#8C6A19]">Letter of Intent</span>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
-                required
-                onChange={(e) => updateField('letterOfIntent', e.target.files?.[0] || null)}
-                className="w-full rounded-2xl border border-[#D4A528]/18 bg-white/80 px-4 py-3.5 text-sm text-[#2f1408] outline-none transition-all duration-300 file:mr-4 file:rounded-xl file:border-0 file:bg-[#D4A528]/12 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#7a5608] focus:border-[#B8860B] focus:ring-4 focus:ring-[#D4A528]/15"
-              />
-              <p className="mt-2 text-xs leading-5 text-[#7d6553]">
-                Required. Accepted formats: PDF, DOC, DOCX, JPG, PNG, or WEBP. Maximum file size: 5MB.
-              </p>
-            </label>
             {status.message && (
-              <div className={`rounded-2xl px-4 py-3 text-sm ${status.type === 'success' ? 'border border-emerald-200 bg-emerald-50 text-emerald-700' : 'border border-red-200 bg-red-50 text-red-700'}`}>
+              <div className={`rounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                 {status.message}
               </div>
             )}
-            <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60" style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 55%, #E7C679 100%)', boxShadow: '0 14px 32px rgba(184,134,11,0.28)' }}>
-              {submitting ? 'Submitting application...' : 'Submit Stockist Application'}
+            <button type="submit" disabled={submitting} className="w-full btn-landing-primary disabled:opacity-60 disabled:cursor-not-allowed">
+              {submitting ? 'Submitting...' : 'Submit Distributor Inquiry'}
             </button>
-            <p className="text-center text-xs leading-5 text-[#7d6553]">
-              This form records your interest together with your required letter of intent. A Nogatu representative will guide you through the next stockist requirements.
-            </p>
           </form>
         </div>
       </div>
       {showApplicationPrompt && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="max-w-lg w-full overflow-hidden rounded-[2rem] border border-[#D4A528]/25 bg-[linear-gradient(180deg,#fffdf7_0%,#fff5df_100%)] p-7 shadow-[0_30px_80px_rgba(58,16,0,0.28)]">
-            <div className="w-14 h-14 rounded-2xl bg-[#D4A528]/12 text-[#B8860B] flex items-center justify-center mb-5">
+          <div className="max-w-lg w-full rounded-2xl bg-white p-7 shadow-2xl border border-brand-gold/30">
+            <div className="w-14 h-14 rounded-2xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-5">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
             </div>
-            <h3 className="text-2xl font-black text-[#3A1000] mb-3">Stockist Application Received</h3>
-            <p className="text-[#6d3028] leading-relaxed">
-              Your details have been recorded in the Nogatu stockist queue. Please wait for the team to contact you for the next onboarding steps and approval checks.
+            <h3 className="text-2xl font-bold text-brand-brown mb-3">Distributor Inquiry Received</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Your details have been recorded. Download the printable application form below, print it, and bring it to the nearest NOGATU branch office if you want to continue your distributor application.
             </p>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <a href="/portal/login" className="btn-landing-primary w-full">
-                Open Members Area
+              <a href="/docs/nogatu-distributor-application-form.pdf" target="_blank" rel="noreferrer" className="btn-landing-primary w-full text-center">
+                Download PDF Form
               </a>
               <button onClick={() => setShowApplicationPrompt(false)} className="btn-landing-secondary w-full">
                 Got It
@@ -649,17 +625,35 @@ function CertificationsPreview() {
     <section className="section-padding bg-diagonal-lines" style={{ backgroundColor: '#FFF8E1' }}>
       <div className="section-container">
         <SectionHeader badge="Compliance" title="Certifications" />
-        <div ref={ref} className="reveal grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {['Product Standards', 'Quality Certification', 'Regulatory Documents'].map((title) => (
-            <div key={title} className="rounded-2xl border border-brand-gold/20 bg-white/75 p-5 sm:p-8 text-center">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl mx-auto mb-4 sm:mb-5 bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center">
-                <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-              </div>
-              <h3 className="font-bold text-brand-brown mb-2 text-sm sm:text-base">{title}</h3>
-              <p className="text-xs sm:text-sm text-gray-600">Placeholder for certification uploads and product standard verification.</p>
+        <section
+          ref={ref}
+          className="reveal rounded-[1.75rem] border border-brand-gold/20 bg-white/90 shadow-[0_24px_60px_rgba(89,34,25,0.08)] p-3 sm:p-5 lg:p-6"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-5">
+            <div>
+              <h3 className="text-lg sm:text-2xl font-bold text-brand-brown">
+                NOGATU Products CPR and Halal Certificates
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">
+                View the same certification PDF featured on the Certifications page.
+              </p>
             </div>
-          ))}
-        </div>
+            <NavLink
+              to="/certifications"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-full bg-brand-gold text-white font-semibold shadow-sm hover:bg-brand-gold-dark transition-colors"
+            >
+              View Full Page
+            </NavLink>
+          </div>
+
+          <div className="rounded-[1.35rem] overflow-hidden border border-brand-gold/15 bg-[#FFFDF7] min-h-[60vh]">
+            <iframe
+              src={CERTIFICATIONS_PDF_PATH}
+              title="NOGATU Certifications PDF Preview"
+              className="w-full h-[60vh] sm:h-[68vh]"
+            />
+          </div>
+        </section>
       </div>
     </section>
   );

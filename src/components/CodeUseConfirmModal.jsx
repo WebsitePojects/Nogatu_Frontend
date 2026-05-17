@@ -35,8 +35,8 @@ export default function CodeUseConfirmModal({
   const currentTone = tones[tone] || tones.gold;
 
   return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/75 px-4">
-      <div className="glass-card rounded-2xl w-full max-w-lg p-6 border border-brand-gold/20 shadow-2xl">
+    <div className="portal-overlay fixed inset-0 z-[130] flex items-center justify-center px-4">
+      <div className="portal-modal-panel rounded-2xl w-full max-w-lg p-6 shadow-2xl">
         <div
           className="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
           style={{
@@ -47,15 +47,15 @@ export default function CodeUseConfirmModal({
         >
           Code Confirmation
         </div>
-        <h2 className="mt-3 text-xl font-display font-bold text-white">{title}</h2>
-        <p className="mt-3 text-sm leading-6 text-white/70">{message}</p>
+        <h2 className="portal-modal-title mt-3 text-xl font-display font-bold">{title}</h2>
+        <p className="portal-modal-text mt-3 text-sm leading-6">{message}</p>
 
         {details.length > 0 && (
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 space-y-2">
+          <div className="portal-soft-panel mt-4 rounded-2xl p-4 space-y-2">
             {details.map((detail) => (
               <div key={detail.label} className="flex items-start justify-between gap-4 text-sm">
-                <span className="text-white/45">{detail.label}</span>
-                <span className="text-right font-medium text-white/85">{detail.value}</span>
+                <span className="portal-card-muted">{detail.label}</span>
+                <span className="portal-page-title text-right font-medium">{detail.value}</span>
               </div>
             ))}
           </div>
@@ -65,8 +65,7 @@ export default function CodeUseConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl px-4 py-2.5 text-sm font-medium border"
-            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.72)' }}
+            className="portal-muted-button rounded-xl px-4 py-2.5 text-sm font-medium"
           >
             {cancelLabel}
           </button>

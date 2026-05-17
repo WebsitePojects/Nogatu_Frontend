@@ -45,14 +45,14 @@ const TIERS = [
 const PRODUCTS = [
   { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/Barley-Mix.png' },
   { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png' },
-  { name: 'Nogatu Collagen Vitamin C', desc: 'Vitamin C with Collagen', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png' },
+  { name: 'Vitamin C with Collagen & Glutathione', desc: 'Radiance and antioxidant support formula', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png' },
   { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/Chox-Mix.png' },
   { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png' },
   { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/Mangoosteen_1.png' },
-  { name: 'Vitamin C', desc: 'Vitamin supplement', price: 'TBA', img: '/legacy-img/Vitamin-C.png' },
-  { name: 'Black Coffee', desc: 'Premium black coffee drink mix', price: 'TBA', img: '/legacy-img/blck-coffee.png' },
-  { name: 'Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: 'TBA', img: '/legacy-img/Max-Fuel.png' },
-  { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: 'TBA', img: '/legacy-img/Berry-Nad.png' },
+  { name: 'Vitamin C with Zinc & Mangosteen', desc: 'Vitamin support blend with mangosteen extract', price: '580.00', img: '/legacy-img/Vitamin-C.png' },
+  { name: 'Nogatu Black Coffee', desc: 'Premium black coffee drink mix', price: '250.00', img: '/legacy-img/blck-coffee.png' },
+  { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png' },
+  { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png' },
 ];
 
 function ProductCard({ product, delay, onLightbox }) {

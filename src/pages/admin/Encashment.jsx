@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -16,6 +17,7 @@ function triggerBrowserDownload(url) {
 
 export default function Encashment() {
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const [records, setRecords] = useState([]);
   const [summary, setSummary] = useState(null);
   const [page, setPage] = useState(1);
@@ -28,6 +30,12 @@ export default function Encashment() {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [activeDetails, setActiveDetails] = useState(null);
   const receiptRef = useRef(null);
+  const textStrong = isDarkMode ? 'rgba(255,255,255,0.8)' : '#334155';
+  const textSoft = isDarkMode ? 'rgba(255,255,255,0.7)' : '#475569';
+  const goldText = isDarkMode ? '#D4AF37' : '#7a5c08';
+  const amberText = isDarkMode ? '#fbbf24' : '#9a6700';
+  const redText = isDarkMode ? '#fda4af' : '#b91c1c';
+  const greenText = isDarkMode ? '#34d399' : '#047857';
 
   useEffect(() => { loadData(page); }, [page]);
 
@@ -237,15 +245,15 @@ export default function Encashment() {
               <tbody>
                 {summary.daily.map((row, idx) => (
                   <tr key={row.date} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
-                    <td className="py-3 px-3 text-white/80 font-medium">{row.date}</td>
-                    <td className="py-3 px-3 text-white/70">{row.totalRecords}</td>
-                    <td className="py-3 px-3 text-white/70">{row.uniqueMembers}</td>
-                    <td className="py-3 px-3 text-white/80">PHP {fmt(row.grossEncashment)}</td>
-                    <td className="py-3 px-3 text-white/80">PHP {fmt(row.netReceivable)}</td>
-                    <td className="py-3 px-3 text-rose-200">PHP {fmt(row.totalDeductions)}</td>
-                    <td className="py-3 px-3 text-amber-300">PHP {fmt(row.totalCdDeduction)}</td>
-                    <td className="py-3 px-3 text-emerald-300">{row.paidCount}</td>
-                    <td className="py-3 px-3 text-amber-300">{row.pendingCount}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: textStrong }}>{row.date}</td>
+                    <td className="py-3 px-3" style={{ color: textSoft }}>{row.totalRecords}</td>
+                    <td className="py-3 px-3" style={{ color: textSoft }}>{row.uniqueMembers}</td>
+                    <td className="py-3 px-3" style={{ color: textStrong }}>PHP {fmt(row.grossEncashment)}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: goldText }}>PHP {fmt(row.netReceivable)}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: redText }}>PHP {fmt(row.totalDeductions)}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: amberText }}>PHP {fmt(row.totalCdDeduction)}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: greenText }}>{row.paidCount}</td>
+                    <td className="py-3 px-3 font-medium" style={{ color: amberText }}>{row.pendingCount}</td>
                   </tr>
                 ))}
               </tbody>

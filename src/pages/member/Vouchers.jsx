@@ -273,22 +273,22 @@ export default function Vouchers() {
             <HiOutlineSparkles className="w-6 h-6" style={{ color: '#D4AF37' }} />
           </div>
           <div>
-            <p className="font-semibold text-white text-base">PRODUCT + PRODUCT VOUCHER = DOBLE SULIT</p>
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
-              Buy 1 Take 1 style: every successful checkout gives you <span className="font-semibold text-white">2x of the selected product</span>. Your cash payment is matched by your voucher balance, based on wallet spend.
+            <p className="portal-card-title font-semibold text-base">PRODUCT + PRODUCT VOUCHER = DOBLE SULIT</p>
+            <p className="portal-card-text text-sm mt-1 leading-6">
+              Buy 1 Take 1 style: every successful checkout gives you <span className="portal-card-title font-semibold">2x of the selected product</span>. Your cash payment is matched by your voucher balance, based on wallet spend.
             </p>
-            <div className="mt-3 flex items-center gap-4">
-              <div className="px-3 py-2 rounded-lg" style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)' }}>
-                <p className="text-[10px] uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.6)' }}>Available Voucher Balance</p>
-                <p className="text-lg font-bold" style={{ color: '#D4AF37' }}>P{fmt(totalBalance)}</p>
+            <div className="mt-4 flex flex-wrap items-center gap-4">
+              <div className="portal-soft-panel min-w-[150px] px-4 py-3 rounded-xl">
+                <p className="portal-card-muted text-[10px] uppercase tracking-wide">Available Voucher Balance</p>
+                <p className="portal-warning-text text-lg font-bold">P{fmt(totalBalance)}</p>
               </div>
-              <div className="px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)' }}>
-                <p className="text-[10px] uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>Wallet Balance</p>
-                <p className="text-lg font-bold text-white">P{fmt(walletBalance)}</p>
+              <div className="portal-soft-panel min-w-[150px] px-4 py-3 rounded-xl">
+                <p className="portal-card-muted text-[10px] uppercase tracking-wide">Wallet Balance</p>
+                <p className="portal-card-title text-lg font-bold">P{fmt(walletBalance)}</p>
               </div>
-              <div className="px-3 py-2 rounded-lg" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.22)' }}>
-                <p className="text-[10px] uppercase tracking-wide" style={{ color: 'rgba(52,211,153,0.75)' }}>Usable Voucher Match</p>
-                <p className="text-lg font-bold" style={{ color: '#34d399' }}>P{fmt(matchedVoucherBudget)}</p>
+              <div className="portal-soft-panel min-w-[150px] px-4 py-3 rounded-xl" style={{ background: 'color-mix(in srgb, var(--portal-soft-bg) 82%, rgba(16,185,129,0.12))', borderColor: 'var(--portal-success-border)' }}>
+                <p className="portal-card-muted text-[10px] uppercase tracking-wide">Usable Voucher Match</p>
+                <p className="portal-success-text text-lg font-bold">P{fmt(matchedVoucherBudget)}</p>
               </div>
             </div>
           </div>

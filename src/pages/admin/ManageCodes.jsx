@@ -31,6 +31,10 @@ export default function ManageCodes() {
   const rowHover = isDarkMode ? 'rgba(212,175,55,0.05)' : 'rgba(212,175,55,0.11)';
   const rowSelected = isDarkMode ? 'rgba(212,175,55,0.12)' : 'rgba(212,175,55,0.2)';
   const dateColor = isDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(71,85,105,0.82)';
+  const goldText = isDarkMode ? '#D4AF37' : '#7a5c08';
+  const blueText = isDarkMode ? '#93c5fd' : '#1d4ed8';
+  const greenText = isDarkMode ? '#34d399' : '#047857';
+  const greenSoft = isDarkMode ? '#a7f3d0' : '#065f46';
 
   useEffect(() => { loadCodes(); }, [page]);
   useEffect(() => { loadHistory(); }, [historyPage]);
@@ -172,14 +176,14 @@ export default function ManageCodes() {
       <div className="glass-card rounded-2xl p-6 mb-6">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="text-sm font-medium" style={{ color: textMuted }}>
-            {selected.length > 0 ? <span style={{ color: '#D4AF37' }}>{selected.length} codes selected</span> : 'Select codes below'}
+            {selected.length > 0 ? <span style={{ color: goldText }}>{selected.length} codes selected</span> : 'Select codes below'}
           </div>
           <button
             onClick={() => setSelectMode(v => !v)}
             className="text-sm py-1.5 px-3 rounded-lg font-medium"
             style={{
               background: selectMode ? 'rgba(212,175,55,0.14)' : subtleButtonBg,
-              color: selectMode ? '#F2D06B' : textSubtle,
+              color: selectMode ? goldText : textSubtle,
               border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(148,163,184,0.35)',
             }}
           >
@@ -231,7 +235,7 @@ export default function ManageCodes() {
           <button
             onClick={handleTagAccount}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: 'rgba(59,130,246,0.35)', color: '#93c5fd', background: 'rgba(59,130,246,0.1)' }}
+            style={{ borderColor: 'rgba(59,130,246,0.35)', color: blueText, background: 'rgba(59,130,246,0.1)' }}
           >
             Search Account
           </button>
@@ -252,7 +256,7 @@ export default function ManageCodes() {
           <button
             onClick={toggleSelectAllCurrentPage}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: 'rgba(212,175,55,0.18)', color: 'rgba(212,175,55,0.85)' }}
+            style={{ borderColor: 'rgba(212,175,55,0.18)', color: goldText }}
           >
             Select All Page
           </button>
@@ -270,7 +274,7 @@ export default function ManageCodes() {
         {taggedAccount && (
           <div
             className="mt-4 rounded-xl px-4 py-3 text-sm"
-            style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', color: '#a7f3d0' }}
+            style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', color: greenSoft }}
           >
             Tagged account: <strong>{taggedAccount.username}</strong> ({taggedAccount.fullname})
           </div>
@@ -282,12 +286,12 @@ export default function ManageCodes() {
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm font-medium" style={{ color: textMuted }}>
             {selected.length > 0
-              ? <span style={{ color: '#D4AF37' }}>{selected.length} selected</span>
+              ? <span style={{ color: goldText }}>{selected.length} selected</span>
               : 'Select codes below'}
           </p>
           <div className="flex items-center gap-2">
             <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
-            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
+            <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{page} / {totalPages}</span>
             <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
           </div>
         </div>
@@ -335,8 +339,8 @@ export default function ManageCodes() {
                         style={{ accentColor: '#D4AF37' }}
                       />
                     </td>
-                    <td className="py-3 px-4 font-mono text-xs" style={{ color: '#F2D06B' }}>{c.code}</td>
-                    <td className="py-3 px-4 text-white/70">{c.producttypeName}</td>
+                    <td className="py-3 px-4 font-mono text-xs" style={{ color: goldText }}>{c.code}</td>
+                    <td className="py-3 px-4" style={{ color: textSubtle }}>{c.producttypeName}</td>
                     <td className="py-3 px-4">
                       <span
                         className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
@@ -397,7 +401,7 @@ export default function ManageCodes() {
                     key={`${row.code}-${row.processKey || row.createdAt || idx}`}
                     style={{ background: idx % 2 === 0 ? rowAlt : 'transparent' }}
                   >
-                    <td className="py-3 px-4 font-mono text-xs" style={{ color: '#F2D06B' }}>{row.code}</td>
+                    <td className="py-3 px-4 font-mono text-xs" style={{ color: goldText }}>{row.code}</td>
                     <td className="py-3 px-4">
                       <span
                         className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"

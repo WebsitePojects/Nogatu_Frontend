@@ -29,13 +29,13 @@ function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
   if (!data) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
-      <div className="w-full max-w-lg rounded-2xl p-7 shadow-2xl" style={{ background: '#141008', border: '1px solid rgba(212,175,55,0.25)' }}>
+    <div className="portal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="portal-modal-panel w-full max-w-lg rounded-2xl p-7 shadow-2xl">
         <div ref={receiptRef}>
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h3 className="font-display text-xl font-bold text-white">Encashment Receipt</h3>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Ref #{data.refNumber}</p>
+              <h3 className="portal-modal-title font-display text-xl font-bold">Encashment Receipt</h3>
+              <p className="portal-modal-muted text-sm mt-1">Ref #{data.refNumber}</p>
             </div>
             <span className="text-xs px-2.5 py-1 rounded-full" style={{ color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }}>
               Submitted
@@ -75,8 +75,7 @@ function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
           </button>
           <button
             onClick={onClose}
-            className="text-xs px-3 py-2 rounded-lg font-medium"
-            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.14)' }}
+            className="portal-muted-button text-xs px-3 py-2 rounded-lg font-medium"
           >
             Close
           </button>
@@ -90,14 +89,9 @@ function VerificationRequiredModal({ open, message, onClose }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+    <div className="portal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="w-full max-w-md rounded-2xl p-6 shadow-2xl"
-        style={{
-          background: '#141008',
-          border: '1px solid rgba(212,175,55,0.24)',
-          animation: 'modal-pop 180ms ease-out',
-        }}
+        className="portal-modal-panel w-full max-w-md rounded-2xl p-6 shadow-2xl"
       >
         <div
           className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -106,11 +100,11 @@ function VerificationRequiredModal({ open, message, onClose }) {
           <HiOutlineSparkles className="w-7 h-7" style={{ color: '#D4AF37' }} />
         </div>
         <div className="text-center">
-          <h3 className="font-display text-xl font-bold text-white">Verification Needed</h3>
-          <p className="text-sm mt-3" style={{ color: 'rgba(255,255,255,0.68)' }}>
+          <h3 className="portal-modal-title font-display text-xl font-bold">Verification Needed</h3>
+          <p className="portal-modal-text text-sm mt-3 leading-6">
             {message || 'You must complete your payout details before encashment.'}
           </p>
-          <p className="text-xs mt-3" style={{ color: 'rgba(212,175,55,0.76)' }}>
+          <p className="portal-gold-text text-sm mt-3">
             Add your payout option and payout details first so your encashment can be released properly.
           </p>
         </div>
@@ -119,8 +113,7 @@ function VerificationRequiredModal({ open, message, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="text-xs px-3 py-2 rounded-lg font-medium"
-            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.14)' }}
+            className="portal-muted-button text-xs px-3 py-2 rounded-lg font-medium"
           >
             Close
           </button>
@@ -224,7 +217,7 @@ export default function EWallet() {
     setProcessing(true);
     try {
       const res = await api.post('/wallet/encash', { amount });
-      toast.success(`Encashment of ₱${fmt(amount)} processed successfully`);
+      toast.success(`Encashment of PHP ${fmt(amount)} processed successfully`);
       setReceiptData({
         refNumber: res.data.pid || 'N/A',
         encashAmount: amount,
@@ -286,11 +279,11 @@ export default function EWallet() {
           className="w-12 h-12 rounded-full border-[3px] animate-spin"
           style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }}
         />
-        <p className="text-sm" style={{ color: 'rgba(212,175,55,0.5)' }}>Loading wallet…</p>
+        <p className="portal-card-muted text-sm">Loading wallet...</p>
       </div>
     );
   }
-  if (!data) return <p style={{ color: 'rgba(255,255,255,0.4)' }}>Failed to load wallet data.</p>;
+  if (!data) return <p className="portal-card-muted">Failed to load wallet data.</p>;
 
   return (
     <div className="space-y-6">
@@ -302,7 +295,7 @@ export default function EWallet() {
 
       {/* Page heading */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">E-Wallet</h1>
+        <h1 className="portal-page-title font-display text-2xl font-bold">E-Wallet</h1>
         <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
@@ -339,7 +332,7 @@ export default function EWallet() {
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-5">
             <div>
-              <p className="text-xs font-medium tracking-wider uppercase mb-1 text-yellow-800 dark:text-yellow-200/50">
+              <p className="portal-gold-text text-sm font-semibold tracking-wider uppercase mb-1">
                 Available Balance
               </p>
               <p className="font-display text-[42px] font-bold text-gray-900 dark:text-white leading-none tracking-tight">
@@ -363,8 +356,8 @@ export default function EWallet() {
             className="flex items-center gap-2 pt-4 border-t"
             style={{ borderColor: 'rgba(212,175,55,0.1)' }}
           >
-            <span className="text-xs text-gray-500 dark:text-white/35">Total Income Earned:</span>
-            <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300/80">₱{fmt(data.totalIncome)}</span>
+            <span className="portal-card-muted text-sm">Total Income Earned:</span>
+            <span className="portal-gold-text text-sm font-semibold">₱{fmt(data.totalIncome)}</span>
           </div>
         </div>
       </div>
@@ -374,7 +367,7 @@ export default function EWallet() {
 
         {/* Income Breakdown */}
         <div className="glass-card rounded-2xl p-6">
-          <h3 className="font-display text-base font-semibold text-white mb-1">Income Breakdown</h3>
+          <h3 className="portal-card-title font-display text-base font-semibold mb-1">Income Breakdown</h3>
           <div className="w-8 h-0.5 mb-5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
 
           <div className="space-y-1">
@@ -382,7 +375,7 @@ export default function EWallet() {
               <div
                 key={item.key}
                 className="flex items-center justify-between py-2.5 px-3 rounded-xl"
-                style={{ borderBottom: '1px solid rgba(212,175,55,0.06)' }}
+                style={{ borderBottom: '1px solid var(--portal-row-border)' }}
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -391,9 +384,9 @@ export default function EWallet() {
                   >
                     <item.icon className="w-3.5 h-3.5" style={{ color: item.color }} />
                   </div>
-                  <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{item.label}</span>
+                  <span className="portal-card-text text-sm">{item.label}</span>
                 </div>
-                <span className="text-sm font-semibold" style={{ color: item.color }}>
+                <span className="portal-warning-text text-sm font-semibold">
                   ₱{fmt(data[item.key])}
                 </span>
               </div>
@@ -403,18 +396,11 @@ export default function EWallet() {
 
         {/* Encashment */}
         <div className="glass-card rounded-2xl p-6">
-          <h3 className="font-display text-base font-semibold text-white mb-1">Request Encashment</h3>
+          <h3 className="portal-card-title font-display text-base font-semibold mb-1">Request Encashment</h3>
           <div className="w-8 h-0.5 mb-5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
 
           {/* Info box */}
-          <div
-            className="flex gap-2.5 p-3.5 rounded-xl mb-5 text-xs"
-            style={{
-              background: 'rgba(212,175,55,0.06)',
-              border: '1px solid rgba(212,175,55,0.14)',
-              color: 'rgba(255,255,255,0.45)',
-            }}
-          >
+          <div className="portal-info-box flex gap-2.5 p-3.5 rounded-xl mb-5 text-sm leading-6">
             <span style={{ color: '#D4AF37', fontSize: '14px', lineHeight: 1 }}>ℹ</span>
             <span>No fixed minimum amount · 10% withholding tax · ₱50 processing fee · ₱20 system maintenance fee · Payout every Friday</span>
           </div>
@@ -437,23 +423,22 @@ export default function EWallet() {
             {/* Deduction preview */}
             {previewAmount > 0 && (
               <div
-                className="space-y-2 p-3.5 rounded-xl text-xs"
-                style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.12)' }}
+                className="portal-soft-panel space-y-2 p-3.5 rounded-xl text-sm"
               >
-                <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                <div className="portal-card-text flex justify-between">
                   <span>10% Tax</span>
                   <span>- ₱{fmt(previewTax)}</span>
                 </div>
-                <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                <div className="portal-card-text flex justify-between">
                   <span>Processing Fee</span>
                   <span>- ₱{fmt(previewFee)}</span>
                 </div>
-                <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                <div className="portal-card-text flex justify-between">
                   <span>System Maintenance Fee</span>
                   <span>- ₱{fmt(previewMaintenanceFee)}</span>
                 </div>
                 {previewCdDeduction > 0 && (
-                  <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  <div className="portal-card-text flex justify-between">
                     <span>CD Deduction</span>
                     <span>- ₱{fmt(previewCdDeduction)}</span>
                   </div>
@@ -465,7 +450,7 @@ export default function EWallet() {
                 )}
                 <div
                   className="flex justify-between font-semibold pt-2 border-t"
-                  style={{ borderColor: 'rgba(212,175,55,0.15)', color: previewNet > 0 ? '#D4AF37' : '#ef4444' }}
+                  style={{ borderColor: 'var(--portal-row-border)', color: previewNet > 0 ? 'var(--portal-gold-text)' : '#ef4444' }}
                 >
                   <span>Net Receivable</span>
                   <span>₱{fmt(Math.max(0, previewNet))}</span>
@@ -488,14 +473,14 @@ export default function EWallet() {
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center justify-between gap-3 mb-5">
           <div>
-            <h3 className="font-display text-base font-semibold text-white mb-1">Global Bonus</h3>
+            <h3 className="portal-card-title font-display text-base font-semibold mb-1">Global Bonus</h3>
             <div className="w-8 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
           </div>
           <div className="flex items-center gap-2">
             <Link
               to="/leaderboard"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-              style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+              style={{ background: 'rgba(212,175,55,0.1)', color: 'var(--portal-gold-text)', border: '1px solid rgba(212,175,55,0.2)' }}
             >
               <HiOutlineTrendingUp className="w-3.5 h-3.5" />
               View Leaderboard
@@ -517,35 +502,35 @@ export default function EWallet() {
         {globalBonus ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
             <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
-              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Period</p>
-              <p className="text-sm font-semibold text-white mt-1">{bonusPeriodLabel}</p>
+              <p className="portal-card-muted text-xs">Period</p>
+              <p className="portal-card-title text-sm font-semibold mt-1">{bonusPeriodLabel}</p>
             </div>
             <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
-              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Member Type</p>
-              <p className="text-sm font-semibold text-white mt-1">{globalBonus.memberType || 'N/A'}</p>
+              <p className="portal-card-muted text-xs">Member Type</p>
+              <p className="portal-card-title text-sm font-semibold mt-1">{globalBonus.memberType || 'N/A'}</p>
             </div>
             <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
-              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>Portions</p>
-              <p className="text-sm font-semibold text-white mt-1">{Number(globalBonus.portions || 0)}</p>
+              <p className="portal-card-muted text-xs">Portions</p>
+              <p className="portal-card-title text-sm font-semibold mt-1">{Number(globalBonus.portions || 0)}</p>
             </div>
             <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
-              <p className="text-xs" style={{ color: 'rgba(212,175,55,0.55)' }}>
+              <p className="portal-card-muted text-xs">
                 {hasDistributedShare ? 'Distributed Share' : 'Projected Share'}
               </p>
-              <p className="text-sm font-semibold mt-1" style={{ color: '#D4AF37' }}>
+              <p className="portal-gold-text text-sm font-semibold mt-1">
                 ₱{fmt(hasDistributedShare ? globalBonus.distributedShare : globalBonus.projectedShare)}
               </p>
             </div>
           </div>
         ) : (
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <p className="portal-card-muted text-sm">
             Global bonus details are currently unavailable.
           </p>
         )}
 
         {globalBonus?.latestShare && (
-          <div className="mt-4 rounded-xl p-3.5 text-xs" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)', color: 'rgba(255,255,255,0.6)' }}>
-            Latest distributed share: <span style={{ color: '#D4AF37', fontWeight: 700 }}>₱{fmt(globalBonus.latestShare.shareAmount)}</span>
+          <div className="portal-info-box mt-4 rounded-xl p-3.5 text-sm">
+            Latest distributed share: <span className="portal-gold-text" style={{ fontWeight: 700 }}>₱{fmt(globalBonus.latestShare.shareAmount)}</span>
             {' '}({globalBonus.latestShare.periodLabel || `Year ${globalBonus.latestShare.year}`})
           </div>
         )}

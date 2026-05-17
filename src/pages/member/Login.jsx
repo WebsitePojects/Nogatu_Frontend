@@ -311,11 +311,11 @@ export default function Login() {
             }}
           >
             <p className="text-[11px] font-bold tracking-[0.24em] uppercase" style={{ color: '#B8860B' }}>
-              Stockist Path
+              Distributor Path
             </p>
-            <h3 className="mt-2 text-sm font-bold text-gray-900">Applying as a Stockist first?</h3>
+            <h3 className="mt-2 text-sm font-bold text-gray-900">Applying as a Distributor first?</h3>
             <p className="mt-1 text-xs leading-5 text-gray-600">
-              Submit your stockist application on the Nogatu landing page before requesting Dropshipping portal access.
+              Submit your distributor inquiry on the NOGATU landing page, download the printable form, and bring it to the nearest branch before requesting portal access.
             </p>
             <a
               href="/#stockist-apply"
@@ -325,7 +325,7 @@ export default function Login() {
                 boxShadow: '0 12px 24px rgba(184,134,11,0.22)',
               }}
             >
-              Apply as Stockist
+              Open Distributor Form
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -334,15 +334,14 @@ export default function Login() {
         </div>
       </div>
       {forgotOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onMouseDown={() => setForgotOpen(false)}>
+        <div className="portal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onMouseDown={() => setForgotOpen(false)}>
           <form
             onSubmit={submitForgotPassword}
             onMouseDown={(event) => event.stopPropagation()}
-            className="w-full max-w-md rounded-2xl p-6"
-            style={{ background: '#12100a', border: '1px solid rgba(212,175,55,0.22)' }}
+            className="portal-modal-panel w-full max-w-md rounded-2xl p-6 shadow-2xl"
           >
-            <h2 className="font-display text-lg font-bold text-white">Reset Password</h2>
-            <p className="text-xs mt-1 mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <h2 className="portal-modal-title font-display text-xl font-bold">Reset Password</h2>
+            <p className="portal-modal-text text-sm mt-1 mb-4 leading-6">
               Enter the email address saved on your account. A single-use reset code expires after 15 minutes.
             </p>
             <input
@@ -353,7 +352,7 @@ export default function Login() {
               required
             />
             <div className="flex gap-2">
-              <button type="button" onClick={() => setForgotOpen(false)} className="flex-1 rounded-xl py-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.16)' }}>Cancel</button>
+              <button type="button" onClick={() => setForgotOpen(false)} className="portal-muted-button flex-1 rounded-xl py-2 text-sm font-medium">Cancel</button>
               <button type="submit" disabled={resetLoading} className="gold-btn flex-1 rounded-xl py-2 text-sm">
                 {resetLoading ? 'Sending...' : 'Send'}
               </button>

@@ -6,11 +6,25 @@ const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About Us' },
   { to: '/products', label: 'Our Products' },
-  { to: '/news', label: 'News' },
-  { to: '/organizations', label: 'People Behind' },
+  { to: '/news', label: 'News & Updates' },
+  { to: '/organizations', label: 'People Behind the Company' },
   { to: '/certifications', label: 'Certifications' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/contact', label: 'Contact Us' },
 ];
+
+function scrollToCurrentRouteTarget(location) {
+  if (location.hash) {
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById(location.hash.slice(1));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+    return;
+  }
+
+  window.scrollTo(0, 0);
+}
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -25,89 +39,73 @@ function Navbar() {
 
   useEffect(() => {
     setMobileOpen(false);
-    if (location.hash) {
-      window.setTimeout(() => {
-        document.querySelector(location.hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 0);
-    } else {
-      window.scrollTo(0, 0);
-    }
+    scrollToCurrentRouteTarget(location);
   }, [location.pathname, location.hash]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 pt-3">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className={`relative rounded-3xl overflow-hidden flex items-center justify-between h-[72px] px-4 sm:px-6 transition-all duration-500 border ${scrolled
-            ? 'bg-white/70 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border-white/50'
-            : 'bg-white/40 backdrop-blur-lg border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:bg-white/60'
-            }`}
+          className={`relative rounded-3xl overflow-hidden flex items-center justify-between h-[72px] px-4 sm:px-6 transition-all duration-500 border ${
+            scrolled
+              ? 'bg-white/70 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border-white/50'
+              : 'bg-white/40 backdrop-blur-lg border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:bg-white/60'
+          }`}
         >
-          {/* Subtle animated gradient border effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-primary-400/10 opacity-50 pointer-events-none mix-blend-overlay"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-primary-400/10 opacity-50 pointer-events-none mix-blend-overlay" />
 
-          {/* Logo */}
-          <a href="/portal/admin/login" className="relative flex items-center gap-2 group z-10 w-[170px] flex-shrink-0" title="Admin Portal Login">
-            <div className="relative">
-              <div className="absolute inset-0 bg-brand-gold blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-500 rounded-full"></div>
+          <a href="/portal/admin/login" className="relative flex items-center gap-3 group z-10 min-w-0 sm:w-[220px]">
+            <div className="relative flex-shrink-0">
+              <div className="absolute inset-0 bg-brand-gold blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-500 rounded-full" />
               <img
                 src="/img/nogatu_logo.png"
                 alt="NOGATU Alliance"
-                className="relative h-10 w-10 rounded-full object-contain border border-white/60 shadow-sm motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-105 group-hover:rotate-3"
+                className="relative h-11 w-11 rounded-full object-contain border border-white/60 shadow-sm motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-105 group-hover:rotate-3"
               />
             </div>
-            <span className="font-extrabold text-sm tracking-tight text-brand-brown bg-clip-text whitespace-nowrap">
+            <span className="truncate font-extrabold text-sm sm:text-base tracking-tight text-brand-brown bg-clip-text">
               NOGATU <span className="text-brand-gold-dark font-medium">Alliance</span>
             </span>
           </a>
 
-          {/* Desktop nav */}
-          <div className="hidden lg:flex items-center justify-center gap-1 z-10 flex-1 min-w-0">
+          <div className="hidden lg:flex items-center justify-center gap-1 z-10 flex-1 min-w-0 px-4">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `relative px-3 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${link.label === 'Our Products' ? 'nav-products-link ' : ''}${isActive
-                    ? 'text-brand-gold-dark'
-                    : 'text-gray-600 hover:text-brand-brown'
+                  `relative px-2.5 xl:px-3 py-2 rounded-xl text-[11px] xl:text-[12px] font-semibold whitespace-nowrap motion-safe:transition-all motion-safe:duration-300 group overflow-hidden ${
+                    isActive ? 'text-brand-gold-dark' : 'text-gray-600 hover:text-brand-brown'
                   }`
                 }
+                title={link.label}
               >
                 {({ isActive }) => (
                   <>
                     <span className="relative z-10">{link.label}</span>
-                    {link.label === 'Our Products' && (
-                      <>
-                        <span className="nav-products-aura" />
-                        <span className="nav-products-sheen" />
-                      </>
-                    )}
-                    {isActive && (
-                      <div className="absolute inset-0 bg-brand-gold/10 rounded-xl"></div>
-                    )}
-                    <div className="absolute inset-0 bg-white/40 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-xl"></div>
+                    {isActive && <div className="absolute inset-0 bg-brand-gold/10 rounded-xl" />}
+                    <div className="absolute inset-0 bg-white/40 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-xl" />
                   </>
                 )}
               </NavLink>
             ))}
           </div>
 
-          {/* CTA + Mobile toggle */}
-          <div className="flex items-center justify-end gap-3 z-10 w-auto sm:w-[170px] flex-shrink-0">
+          <div className="flex items-center justify-end gap-3 z-10 sm:w-[220px]">
             <a
               href="/portal/login"
-              className="relative hidden sm:inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden whitespace-nowrap"
+              className="relative hidden sm:inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-full text-white text-sm font-bold motion-safe:transition-all motion-safe:duration-300 shadow-lg hover:shadow-brand-gold/40 border border-white/20 group overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
             >
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out"></div>
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out" />
               <span className="relative z-10 drop-shadow-sm">Members Area</span>
             </a>
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
+              onClick={() => setMobileOpen((current) => !current)}
               className="lg:hidden relative p-2.5 rounded-xl text-brand-brown bg-white/50 hover:bg-white border border-white/50 motion-safe:transition-all shadow-sm cursor-pointer z-10"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
             >
               {mobileOpen ? <HiOutlineX className="w-5 h-5" /> : <HiOutlineMenu className="w-5 h-5" />}
             </button>
@@ -115,11 +113,7 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
-      <div
-        className={`lg:hidden transition-all duration-300 overflow-hidden ${mobileOpen ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
-          }`}
-      >
+      <div className={`lg:hidden transition-all duration-300 overflow-hidden ${mobileOpen ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="mx-4 sm:mx-6 lg:mx-8 mt-1 bg-white/95 backdrop-blur-xl border border-primary-200/40 rounded-2xl px-4 py-4 space-y-1 shadow-xl">
           {NAV_LINKS.map((link) => (
             <NavLink
@@ -127,7 +121,8 @@ function Navbar() {
               to={link.to}
               end={link.to === '/'}
               className={({ isActive }) =>
-                `block px-4 py-3 rounded-xl text-sm font-medium motion-safe:transition-colors ${isActive ? 'text-brand-gold-dark bg-primary-100/60' : 'text-gray-700 hover:bg-primary-50'
+                `block px-4 py-3 rounded-xl text-sm font-medium motion-safe:transition-colors ${
+                  isActive ? 'text-brand-gold-dark bg-primary-100/60' : 'text-gray-700 hover:bg-primary-50'
                 }`
               }
             >
@@ -150,7 +145,6 @@ function Navbar() {
 function Footer() {
   return (
     <footer className="text-white/70 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #3A1000 0%, #592219 50%, #3A1000 100%)' }}>
-      {/* Subtle dot pattern overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -161,7 +155,6 @@ function Footer() {
 
       <div className="section-container py-16 lg:py-20 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-          {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
               <img src="/img/nogatu_logo.png" alt="NOGATU Alliance" className="w-12 h-12 rounded-lg border border-brand-gold/30" />
@@ -183,7 +176,6 @@ function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h4 className="text-brand-gold-light font-semibold text-sm mb-4">Quick Links</h4>
             <ul className="space-y-3">
@@ -193,7 +185,6 @@ function Footer() {
             </ul>
           </div>
 
-          {/* Products */}
           <div>
             <h4 className="text-brand-gold-light font-semibold text-sm mb-4">Our Products</h4>
             <ul className="space-y-3 text-sm text-white/50">
@@ -201,7 +192,6 @@ function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h4 className="text-brand-gold-light font-semibold text-sm mb-4">Contact Info</h4>
             <ul className="space-y-4 text-sm text-white/50">

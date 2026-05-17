@@ -206,6 +206,133 @@
   .product-mini-image {
     animation: imageFloat 5.8s ease-in-out infinite;
   }
+.hero-carousel-shell {
+  isolation: isolate;
+  overflow: visible;
+}
+.hero-carousel-card {
+  display: block;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.hero-carousel-eyebrow {
+  position: absolute;
+  left: 1.4rem;
+  z-index: 3;
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.58rem 1rem;
+  border-radius: 9999px;
+  background: rgba(255, 248, 225, 0.88);
+  color: #9a6e04;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 24px rgba(89, 34, 25, 0.1);
+  transition: top 300ms ease, bottom 300ms ease, transform 300ms ease, padding 300ms ease, font-size 300ms ease;
+}
+.hero-carousel-eyebrow.is-upper {
+  top: 1.35rem;
+  bottom: auto;
+}
+.hero-carousel-eyebrow.is-lower {
+  top: auto;
+  bottom: 4.2rem;
+  padding: 0.72rem 1.2rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.2em;
+  transform: translateY(0);
+}
+.hero-carousel-stage {
+  position: relative;
+  min-height: 660px;
+  border-radius: 0;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: none;
+}
+.hero-carousel-glow {
+  position: absolute;
+  inset: auto 8% 8% 8%;
+  height: 38%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(212, 165, 40, 0.18) 0%, rgba(212, 165, 40, 0) 72%);
+  filter: blur(24px);
+  animation: softPulse 4.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.hero-carousel-floor {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 1.8rem;
+  height: 1.15rem;
+  border-radius: 9999px;
+  background: rgba(38, 22, 9, 0.22);
+  filter: blur(18px);
+  pointer-events: none;
+}
+.hero-carousel-image {
+  position: absolute;
+  inset: 2rem 0 0.85rem 0;
+  width: 100%;
+  height: calc(100% - 2.85rem);
+  object-fit: contain;
+  object-position: center;
+  transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1), transform 900ms cubic-bezier(0.22, 1, 0.36, 1), filter 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center bottom;
+  pointer-events: none;
+  filter: drop-shadow(0 24px 42px rgba(38, 22, 9, 0.22));
+}
+.hero-carousel-image.is-collection {
+  transform-origin: center center;
+}
+.hero-carousel-image.is-single-product {
+  inset: 4.5rem 16% 2.8rem 16%;
+  width: 68%;
+  height: calc(100% - 7.3rem);
+  margin: 0 auto;
+}
+.hero-carousel-image.is-active {
+  opacity: 1;
+  transform: translateY(0) scale(1.02);
+  animation: heroProductFloat 5.2s ease-in-out infinite;
+}
+.hero-carousel-image.is-hidden {
+  opacity: 0;
+  transform: translateY(16px) scale(0.94);
+  filter: drop-shadow(0 10px 22px rgba(38, 22, 9, 0.12));
+  animation: none;
+}
+.hero-carousel-indicators {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 24px rgba(89, 34, 25, 0.08);
+}
+.hero-carousel-dot {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 9999px;
+  background: rgba(184, 134, 11, 0.26);
+  transition: transform 200ms ease, background-color 200ms ease;
+}
+.hero-carousel-dot.is-active {
+  transform: scale(1.2);
+  background: #b8860b;
+}
   .feature-story-card {
     position: relative;
     overflow: hidden;
@@ -450,6 +577,69 @@
     opacity: 1;
     animation: navSheen 1.25s ease forwards;
   }
+
+@media (max-width: 1023px) {
+  .hero-carousel-card {
+    display: block;
+  }
+  .hero-carousel-stage {
+    min-height: 540px;
+  }
+  .hero-carousel-image {
+    inset: 2.45rem 0 0.9rem 0;
+    height: calc(100% - 3.35rem);
+  }
+  .hero-carousel-image.is-single-product {
+    inset: 3.9rem 14% 1.9rem 14%;
+    width: 72%;
+    height: calc(100% - 5.8rem);
+  }
+  .hero-carousel-eyebrow.is-lower {
+    bottom: 3.7rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-carousel-shell {
+    max-width: 100%;
+  }
+  .hero-carousel-eyebrow {
+    left: 0.9rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    padding: 0.45rem 0.7rem;
+  }
+  .hero-carousel-eyebrow.is-upper {
+    top: 0.9rem;
+  }
+  .hero-carousel-eyebrow.is-lower {
+    bottom: 3rem;
+    padding: 0.56rem 0.85rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+  }
+  .hero-carousel-stage {
+    min-height: 390px;
+    border-radius: 0;
+  }
+  .hero-carousel-image {
+    inset: 2rem 0.25rem 0.75rem 0.25rem;
+    width: calc(100% - 0.4rem);
+    height: calc(100% - 2.75rem);
+  }
+  .hero-carousel-image.is-active {
+    transform: translateY(0) scale(1.015);
+  }
+  .hero-carousel-image.is-single-product {
+    inset: 3.15rem 14% 1.45rem 14%;
+    width: 72%;
+    height: calc(100% - 4.6rem);
+  }
+  .hero-carousel-indicators {
+    bottom: 0.75rem;
+    padding: 0.5rem 0.8rem;
+  }
+}
 }
 
 @layer utilities {
@@ -491,6 +681,11 @@
 @keyframes imageFloat {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
+}
+
+@keyframes heroProductFloat {
+  0%, 100% { transform: translateY(0px) scale(1.02); }
+  50% { transform: translateY(-8px) scale(1.02); }
 }
 
 @keyframes ambientBlob {

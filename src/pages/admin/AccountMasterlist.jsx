@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { useTheme } from '../../contexts/ThemeContext';
 
 function statusStyle(status) {
   if (status === 'frozen') {
@@ -15,6 +16,7 @@ function statusStyle(status) {
 
 export default function AccountMasterlist() {
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const [accounts, setAccounts] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -23,6 +25,10 @@ export default function AccountMasterlist() {
   const [statusLoadingUid, setStatusLoadingUid] = useState(null);
   const [statusModal, setStatusModal] = useState(null);
   const [statusReason, setStatusReason] = useState('');
+  const goldText = isDarkMode ? '#D4AF37' : '#7a5c08';
+  const greenText = isDarkMode ? '#34d399' : '#047857';
+  const blueText = isDarkMode ? '#93c5fd' : '#1d4ed8';
+  const redText = isDarkMode ? '#fca5a5' : '#b91c1c';
 
   useEffect(() => { loadAccounts(); }, [page]);
 
@@ -199,28 +205,28 @@ export default function AccountMasterlist() {
                         <button
                           onClick={() => navigate(`/admin/accounts/${a.uid}`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
-                          style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+                          style={{ background: 'rgba(212,175,55,0.12)', color: goldText, border: '1px solid rgba(212,175,55,0.2)' }}
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => navigate(`/admin/genealogy?id=${a.uid}`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
-                          style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
+                          style={{ background: 'rgba(16,185,129,0.1)', color: greenText, border: '1px solid rgba(16,185,129,0.2)' }}
                         >
                           Tree
                         </button>
                         <button
                           onClick={() => navigate(`/admin/accounts/${a.uid}/income`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
-                          style={{ background: 'rgba(59,130,246,0.1)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
+                          style={{ background: 'rgba(59,130,246,0.1)', color: blueText, border: '1px solid rgba(59,130,246,0.25)' }}
                         >
                           Income
                         </button>
                         <button
                           onClick={() => navigate(`/admin/accounts/${a.uid}/cd`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
-                          style={{ background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.25)' }}
+                          style={{ background: 'rgba(239,68,68,0.1)', color: redText, border: '1px solid rgba(239,68,68,0.25)' }}
                         >
                           CD
                         </button>
@@ -230,7 +236,7 @@ export default function AccountMasterlist() {
                               onClick={() => openStatusModal(a, 'suspended')}
                               disabled={statusLoadingUid === a.uid}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer disabled:opacity-50"
-                              style={{ background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.25)' }}
+                              style={{ background: 'rgba(239,68,68,0.1)', color: redText, border: '1px solid rgba(239,68,68,0.25)' }}
                             >
                               Suspend
                             </button>
@@ -238,7 +244,7 @@ export default function AccountMasterlist() {
                               onClick={() => openStatusModal(a, 'frozen')}
                               disabled={statusLoadingUid === a.uid}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer disabled:opacity-50"
-                              style={{ background: 'rgba(59,130,246,0.1)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
+                              style={{ background: 'rgba(59,130,246,0.1)', color: blueText, border: '1px solid rgba(59,130,246,0.25)' }}
                             >
                               Freeze
                             </button>
@@ -248,7 +254,7 @@ export default function AccountMasterlist() {
                             onClick={() => openStatusModal(a, 'active')}
                             disabled={statusLoadingUid === a.uid}
                             className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer disabled:opacity-50"
-                            style={{ background: 'rgba(74,222,128,0.1)', color: '#86efac', border: '1px solid rgba(74,222,128,0.22)' }}
+                            style={{ background: 'rgba(74,222,128,0.1)', color: greenText, border: '1px solid rgba(74,222,128,0.22)' }}
                           >
                             Reactivate
                           </button>

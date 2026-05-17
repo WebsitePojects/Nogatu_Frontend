@@ -50,19 +50,19 @@ function Spinner() {
         className="w-10 h-10 rounded-full border-[3px] animate-spin"
         style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }}
       />
-      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Loading Hi-Five bonuses...</p>
+      <p className="portal-card-muted text-sm">Loading Hi-Five bonuses...</p>
     </div>
   );
 }
 
 function SummaryStat({ label, value, subtitle, icon: Icon }) {
   return (
-    <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.08)' }}>
+    <div className="portal-soft-panel rounded-2xl p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</p>
-          <p className="text-xl font-bold text-white mt-1">{value}</p>
-          {subtitle && <p className="text-[11px] mt-2" style={{ color: 'rgba(212,175,55,0.7)' }}>{subtitle}</p>}
+          <p className="portal-card-muted text-xs">{label}</p>
+          <p className="portal-card-title text-xl font-bold mt-1">{value}</p>
+          {subtitle && <p className="portal-warning-text text-[11px] mt-2">{subtitle}</p>}
         </div>
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -445,9 +445,9 @@ export default function HiFiveBonus() {
       />
 
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">Hi-Five Bonus Center</h1>
+        <h1 className="portal-page-title font-display text-2xl font-bold">Hi-Five Bonus Center</h1>
         <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
-        <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+        <p className="portal-card-muted text-sm mt-2">
           Track both package-based cash Hi-Five rewards and product-based free-item redemptions in one place.
         </p>
       </div>
@@ -495,9 +495,9 @@ export default function HiFiveBonus() {
               Example: 5 Silver direct referrals unlock a PHP 5,000 cash Hi-Five claim.
             </p>
           </div>
-          <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.15)' }}>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Guardrail</p>
-            <p className="text-sm font-semibold text-white mt-1">Claims are submitted for review before payout release.</p>
+          <div className="portal-soft-panel rounded-2xl px-4 py-3">
+            <p className="portal-card-muted text-xs">Guardrail</p>
+            <p className="portal-card-title text-sm font-semibold mt-1">Claims are submitted for review before payout release.</p>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const fmtMoney = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -35,6 +36,7 @@ function DetailList({ items = [] }) {
 }
 
 export default function Finance() {
+  const { isDarkMode } = useTheme();
   const [year, setYear] = useState(currentYear());
   const [loading, setLoading] = useState(true);
   const [savingPackage, setSavingPackage] = useState(null);
@@ -43,6 +45,15 @@ export default function Finance() {
   const [drafts, setDrafts] = useState({});
   const [selectedPanel, setSelectedPanel] = useState('expenseReserve');
   const [selectedPackageType, setSelectedPackageType] = useState(null);
+  const headingText = isDarkMode ? '#ffffff' : '#111827';
+  const strongText = isDarkMode ? 'rgba(255,255,255,0.85)' : '#334155';
+  const softText = isDarkMode ? 'rgba(255,255,255,0.7)' : '#475569';
+  const packageActiveText = isDarkMode ? '#F9E08A' : '#7a5c08';
+  const packageIdleText = isDarkMode ? '#ffffff' : '#334155';
+  const directReferralText = isDarkMode ? '#fcd34d' : '#9a6700';
+  const reserveTotalText = isDarkMode ? '#fecdd3' : '#be185d';
+  const marginText = isDarkMode ? '#86efac' : '#047857';
+  const saveText = isDarkMode ? '#D4AF37' : '#7a5c08';
 
   useEffect(() => {
     loadFinance(year);
@@ -225,7 +236,7 @@ export default function Finance() {
   return (
     <div className="space-y-6 max-w-none">
       <div className="mb-1">
-        <h1 className="font-display text-2xl font-bold text-white">Finance Accounting</h1>
+        <h1 className="font-display text-2xl font-bold" style={{ color: headingText }}>Finance Accounting</h1>
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
@@ -366,13 +377,13 @@ export default function Finance() {
                             type="button"
                             onClick={() => setSelectedPackageType(row.packageType)}
                             className="font-semibold text-left"
-                            style={{ color: active ? '#F9E08A' : '#ffffff' }}
+                            style={{ color: active ? packageActiveText : packageIdleText }}
                           >
                             {row.packageLabel}
                           </button>
                         </td>
-                        <td className="py-3 px-3 text-white/70">{fmtInt(row.soldCount)}</td>
-                        <td className="py-3 px-3 text-white/85">PHP {fmtMoney(row.grossSales)}</td>
+                        <td className="py-3 px-3" style={{ color: softText }}>{fmtInt(row.soldCount)}</td>
+                        <td className="py-3 px-3" style={{ color: strongText }}>PHP {fmtMoney(row.grossSales)}</td>
                         <td className="py-3 px-3 min-w-[140px]">
                           <input
                             type="number"
@@ -389,7 +400,7 @@ export default function Finance() {
                             className="glass-input rounded-xl px-3 py-2 text-xs w-full"
                           />
                         </td>
-                        <td className="py-3 px-3 text-amber-300">PHP {fmtMoney(row.directReferralFixed)}</td>
+                        <td className="py-3 px-3 font-medium" style={{ color: directReferralText }}>PHP {fmtMoney(row.directReferralFixed)}</td>
                         <td className="py-3 px-3 min-w-[150px]">
                           <input
                             type="number"
@@ -398,9 +409,9 @@ export default function Finance() {
                             className="glass-input rounded-xl px-3 py-2 text-xs w-full"
                           />
                         </td>
-                        <td className="py-3 px-3 text-white/80">PHP {fmtMoney(row.reservePerCode)}</td>
-                        <td className="py-3 px-3 text-rose-200">PHP {fmtMoney(row.reserveTotal)}</td>
-                        <td className="py-3 px-3 text-emerald-300">PHP {fmtMoney(row.projectedOperatingMargin)}</td>
+                        <td className="py-3 px-3" style={{ color: strongText }}>PHP {fmtMoney(row.reservePerCode)}</td>
+                        <td className="py-3 px-3 font-medium" style={{ color: reserveTotalText }}>PHP {fmtMoney(row.reserveTotal)}</td>
+                        <td className="py-3 px-3 font-medium" style={{ color: marginText }}>PHP {fmtMoney(row.projectedOperatingMargin)}</td>
                         <td className="py-3 px-3 min-w-[220px]">
                           <input
                             type="text"
@@ -416,7 +427,7 @@ export default function Finance() {
                             onClick={() => saveDraft(row.packageType)}
                             disabled={savingPackage === row.packageType}
                             className="rounded-xl py-2 px-3 text-xs font-medium border disabled:opacity-50"
-                            style={{ borderColor: 'rgba(212,175,55,0.22)', color: '#D4AF37', background: 'rgba(212,175,55,0.08)' }}
+                            style={{ borderColor: 'rgba(212,175,55,0.22)', color: saveText, background: 'rgba(212,175,55,0.08)' }}
                           >
                             {savingPackage === row.packageType ? 'Saving...' : 'Save'}
                           </button>
