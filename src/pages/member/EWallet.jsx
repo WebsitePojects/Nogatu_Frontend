@@ -47,6 +47,7 @@ function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
             <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.8)' }}><span>Encash Amount</span><span>₱{fmt(data.encashAmount)}</span></div>
             <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>Withholding Tax (10%)</span><span>- ₱{fmt(data.tax)}</span></div>
             <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>Processing Fee</span><span>- ₱{fmt(data.fee)}</span></div>
+            <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>System Maintenance Fee</span><span>- ₱{fmt(data.maintenanceFee)}</span></div>
             {Number(data.cdDeduction || 0) > 0 && (
               <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.6)' }}><span>CD Deduction</span><span>- ₱{fmt(data.cdDeduction)}</span></div>
             )}
@@ -86,14 +87,68 @@ function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
   );
 }
 
+function VerificationRequiredModal({ open, message, onClose }) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+      <div
+        className="w-full max-w-md rounded-2xl p-6 shadow-2xl"
+        style={{
+          background: '#141008',
+          border: '1px solid rgba(212,175,55,0.24)',
+          animation: 'modal-pop 180ms ease-out',
+        }}
+      >
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+          style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}
+        >
+          <HiOutlineSparkles className="w-7 h-7" style={{ color: '#D4AF37' }} />
+        </div>
+        <div className="text-center">
+          <h3 className="font-display text-xl font-bold text-white">Verification Needed</h3>
+          <p className="text-sm mt-3" style={{ color: 'rgba(255,255,255,0.68)' }}>
+            {message || 'You must complete your payout details before encashment.'}
+          </p>
+          <p className="text-xs mt-3" style={{ color: 'rgba(212,175,55,0.76)' }}>
+            Add your payout option and payout details first so your encashment can be released properly.
+          </p>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-xs px-3 py-2 rounded-lg font-medium"
+            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.14)' }}
+          >
+            Close
+          </button>
+          <Link
+            to="/account"
+            className="text-xs px-3 py-2 rounded-lg font-medium"
+            style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+          >
+            Add Payout Details
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EWallet() {
   const [data, setData]             = useState(null);
   const [globalBonus, setGlobalBonus] = useState(null);
   const [loading, setLoading]       = useState(true);
   const [encashAmount, setEncashAmount] = useState('');
+  const [encashPreview, setEncashPreview] = useState(null);
+  const [previewError, setPreviewError] = useState('');
   const [processing, setProcessing] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [verificationModal, setVerificationModal] = useState({ open: false, message: '' });
   const receiptRef = useRef(null);
 
   useEffect(() => { loadData(); }, []);
@@ -102,6 +157,43 @@ export default function EWallet() {
     const interval = setInterval(loadData, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const amount = Number(encashAmount);
+    if (!amount || amount <= 0) {
+      setEncashPreview(null);
+      setPreviewError('');
+      return undefined;
+    }
+
+    let cancelled = false;
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await api.post('/wallet/preview-encash', { amount });
+        if (!cancelled) {
+          setEncashPreview(res.data.preview);
+          setPreviewError('');
+          setVerificationModal({ open: false, message: '' });
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setEncashPreview(err.response?.data?.preview || null);
+          setPreviewError(err.response?.data?.error || 'Unable to preview encashment.');
+          if (['PAYOUT_OPTION_REQUIRED', 'PAYOUT_DETAILS_REQUIRED'].includes(err.response?.data?.code)) {
+            setVerificationModal({
+              open: true,
+              message: err.response?.data?.error || 'You must verify your payout details before encashment.',
+            });
+          }
+        }
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [encashAmount]);
 
   async function loadData() {
     try {
@@ -129,6 +221,7 @@ export default function EWallet() {
     const amount = Number(encashAmount);
     if (!amount || amount <= 0) return toast.error('Please enter a valid amount greater than zero');
     if (amount > (data?.cashBalance || 0)) return toast.error('Insufficient balance');
+    if (previewError) return toast.error(previewError);
     setProcessing(true);
     try {
       const res = await api.post('/wallet/encash', { amount });
@@ -138,12 +231,13 @@ export default function EWallet() {
         encashAmount: amount,
         tax: Number(res.data.tax || amount * 0.10),
         fee: Number(res.data.fee || 50),
+        maintenanceFee: Number(res.data.maintenanceFee || 20),
         cdDeduction: Number(res.data.cdDeduction || 0),
         netReceivable: Number(res.data.netReceivable || 0),
         beginBalance: Number(data?.cashBalance || 0),
         endBalance: Number(res.data.newBalance || 0),
         paymentOption: res.data.paymentOption || data?.payoutOption,
-        paymentDetails: res.data.paymentDetails || data?.payoutDetails,
+        paymentDetails: res.data.paymentDetailsMasked || res.data.paymentDetails || data?.payoutDetails,
         processedAt: new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' }),
         payoutDate: res.data.payoutDate || 'Next Friday',
       });
@@ -151,6 +245,12 @@ export default function EWallet() {
       setEncashAmount('');
       loadData();
     } catch (err) {
+      if (['PAYOUT_OPTION_REQUIRED', 'PAYOUT_DETAILS_REQUIRED'].includes(err.response?.data?.code)) {
+        setVerificationModal({
+          open: true,
+          message: err.response?.data?.error || 'You must verify your payout details before encashment.',
+        });
+      }
       toast.error(err.response?.data?.error || 'Encashment failed');
     } finally { setProcessing(false); }
   }
@@ -172,9 +272,11 @@ export default function EWallet() {
 
   /* Estimated deductions preview */
   const previewAmount = Number(encashAmount) || 0;
-  const previewTax    = previewAmount * 0.10;
-  const previewFee    = previewAmount > 0 ? 50 : 0;
-  const previewNet    = previewAmount - previewTax - previewFee;
+  const previewTax    = Number(encashPreview?.deductions?.tax || previewAmount * 0.10);
+  const previewFee    = Number(encashPreview?.deductions?.processingFee || (previewAmount > 0 ? 50 : 0));
+  const previewMaintenanceFee = Number(encashPreview?.deductions?.maintenanceFee || (previewAmount > 0 ? 20 : 0));
+  const previewCdDeduction = Number(encashPreview?.deductions?.cdDeduction || 0);
+  const previewNet    = Number(encashPreview?.net ?? (previewAmount - previewTax - previewFee - previewMaintenanceFee - previewCdDeduction));
   const bonusMonthIdx = Math.max(0, Math.min(11, Number(globalBonus?.month || 1) - 1));
   const bonusPeriodLabel = globalBonus ? `${MONTHS[bonusMonthIdx]} ${globalBonus.year || ''}`.trim() : 'N/A';
   const hasDistributedShare = Number(globalBonus?.distributedShare || 0) > 0;
@@ -194,6 +296,11 @@ export default function EWallet() {
 
   return (
     <div className="space-y-6">
+      <VerificationRequiredModal
+        open={verificationModal.open}
+        message={verificationModal.message}
+        onClose={() => setVerificationModal({ open: false, message: '' })}
+      />
 
       {/* Page heading */}
       <div>
@@ -311,7 +418,7 @@ export default function EWallet() {
             }}
           >
             <span style={{ color: '#D4AF37', fontSize: '14px', lineHeight: 1 }}>ℹ</span>
-            <span>No fixed minimum amount · 10% withholding tax · ₱50 processing fee · Payout every Friday</span>
+            <span>No fixed minimum amount · 10% withholding tax · ₱50 processing fee · ₱20 system maintenance fee · Payout every Friday</span>
           </div>
 
           <form onSubmit={handleEncash} className="space-y-4">
@@ -343,6 +450,21 @@ export default function EWallet() {
                   <span>Processing Fee</span>
                   <span>- ₱{fmt(previewFee)}</span>
                 </div>
+                <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  <span>System Maintenance Fee</span>
+                  <span>- ₱{fmt(previewMaintenanceFee)}</span>
+                </div>
+                {previewCdDeduction > 0 && (
+                  <div className="flex justify-between" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    <span>CD Deduction</span>
+                    <span>- ₱{fmt(previewCdDeduction)}</span>
+                  </div>
+                )}
+                {previewError && (
+                  <div className="rounded-lg px-3 py-2" style={{ background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.25)' }}>
+                    {previewError}
+                  </div>
+                )}
                 <div
                   className="flex justify-between font-semibold pt-2 border-t"
                   style={{ borderColor: 'rgba(212,175,55,0.15)', color: previewNet > 0 ? '#D4AF37' : '#ef4444' }}

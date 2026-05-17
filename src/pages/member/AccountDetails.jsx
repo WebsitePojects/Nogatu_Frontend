@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
-import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLocationMarker, HiOutlinePhone, HiOutlineCreditCard } from 'react-icons/hi';
+import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLocationMarker, HiOutlinePhone, HiOutlineCreditCard, HiOutlineMail } from 'react-icons/hi';
 
 const PAYOUT_OPTIONS = [
   { id: 1, label: 'Pickup' },
@@ -60,6 +60,7 @@ export default function AccountDetails() {
         payoutoptions: Number(data.payoutid) || '',
         contactnos:    data.contactnos,
         tin:           data.tin || data.tinno || '',
+        email:         data.email || '',
       });
       toast.success('Account updated successfully');
       setNewPassword('');
@@ -101,6 +102,17 @@ export default function AccountDetails() {
             />
           </FieldRow>
 
+          <FieldRow icon={HiOutlineMail} label={<>Email {data.emailRequired ? <span className="text-xs ml-1" style={{ color: '#F2D06B' }}>(required for password reset)</span> : null}</>}>
+            <input
+              type="email"
+              value={data.email || ''}
+              onChange={(e) => handleChange('email', e.target.value)}
+              className="glass-input"
+              placeholder="you@example.com"
+              required
+            />
+          </FieldRow>
+
           <FieldRow icon={HiOutlineCreditCard} label="TIN No.">
             <input
               type="text"
@@ -114,6 +126,12 @@ export default function AccountDetails() {
               placeholder="e.g. 123-456-789-000"
             />
           </FieldRow>
+
+          {data.emailRequired && (
+            <p className="text-xs -mt-2" style={{ color: 'rgba(242,208,107,0.82)' }}>
+              Add an email address now. This will be required for future password reset requests.
+            </p>
+          )}
 
           {/* Password */}
           <FieldRow icon={HiOutlineLockClosed} label={<>New Password <span className="text-xs ml-1" style={{ color: 'rgba(255,255,255,0.25)' }}>(leave blank to keep current)</span></>}>

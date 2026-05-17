@@ -62,6 +62,15 @@ function Hero() {
             >
               Be the One. Register Now!
             </a>
+            <a
+              href="#stockist-apply"
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/18"
+            >
+              Apply as Stockist
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </a>
             <div className="mt-5 hidden sm:flex items-center justify-start gap-3 text-white/90">
               <svg className="w-6 h-6 text-brand-gold-light drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -529,7 +538,7 @@ function DownloadableMaterials() {
 }
 
 function ApplicationForm() {
-  const [form, setForm] = useState({ name: '', phone: '', email: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', letterOfIntent: null });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [showApplicationPrompt, setShowApplicationPrompt] = useState(false);
@@ -543,12 +552,20 @@ function ApplicationForm() {
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: (() => {
+          const payload = new FormData();
+          payload.append('name', form.name);
+          payload.append('phone', form.phone);
+          payload.append('email', form.email);
+          if (form.letterOfIntent) {
+            payload.append('letter_of_intent', form.letterOfIntent);
+          }
+          return payload;
+        })(),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Unable to submit application.');
-      setForm({ name: '', phone: '', email: '' });
+      setForm({ name: '', phone: '', email: '', letterOfIntent: null });
       setShowApplicationPrompt(true);
       setStatus({ type: 'success', message: data.message || 'Distributor application interest submitted.' });
     } catch (err) {
@@ -559,19 +576,19 @@ function ApplicationForm() {
   }
 
   return (
-    <section className="section-padding relative overflow-hidden bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
+    <section id="stockist-apply" className="section-padding relative overflow-hidden bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
       <div className="section-container">
-        <SectionHeader badge="Application" title="Distributor Application Form" />
+        <SectionHeader badge="Stockist Application" title="Distributor Application Form" />
         <div ref={ref} className="reveal grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           <div className="rounded-2xl p-8 text-white" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
-            <h3 className="text-2xl font-bold mb-4">New Distributor Onboarding</h3>
+            <h3 className="text-2xl font-bold mb-4">Stockist Application Intake</h3>
             <p className="text-white/75 leading-relaxed mb-6">
-              Share your contact details so the NOGATU team can follow up with the distributor application form. Re-application is allowed only after a 30-day cool down period from the latest submission.
+              Share your contact details and letter of intent so the NOGATU team can review your stockist application. Re-application is allowed only after a 30-day cool down period from the latest submission.
             </p>
             <div className="space-y-4 text-sm text-white/70">
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your name, contact number, and email address.</span></div>
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Admin monitors your interest and follows up with you.</span></div>
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Bring the application form to the nearest office branch to proceed.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your full name, contact number, email address, and signed letter of intent.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Admin reviews your stockist interest and follows up with you.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Proceed with the next onboarding steps after approval.</span></div>
             </div>
           </div>
           <form onSubmit={submitApplication} className="rounded-2xl border border-primary-200/40 bg-white p-6 sm:p-8 shadow-lg space-y-4">
@@ -591,13 +608,26 @@ function ApplicationForm() {
                 />
               </label>
             ))}
+            <label className="block">
+              <span className="block text-sm font-semibold text-brand-brown mb-2">Letter of Intent</span>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                required
+                onChange={(e) => updateField('letterOfIntent', e.target.files?.[0] || null)}
+                className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-brand-gold/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-brown focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Required. Accepted formats: PDF, DOC, DOCX, JPG, PNG, or WEBP. Maximum file size: 5MB.
+              </p>
+            </label>
             {status.message && (
               <div className={`rounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                 {status.message}
               </div>
             )}
             <button type="submit" disabled={submitting} className="w-full btn-landing-primary disabled:opacity-60 disabled:cursor-not-allowed">
-              {submitting ? 'Submitting...' : 'Show Distributor Application Form'}
+              {submitting ? 'Submitting...' : 'Submit Stockist Application'}
             </button>
           </form>
         </div>
@@ -608,18 +638,12 @@ function ApplicationForm() {
             <div className="w-14 h-14 rounded-2xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-5">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
             </div>
-            <h3 className="text-2xl font-bold text-brand-brown mb-3">Distributor Application Form</h3>
+            <h3 className="text-2xl font-bold text-brand-brown mb-3">Stockist Application Received</h3>
             <p className="text-gray-600 leading-relaxed">
-              Your details have been recorded. Please drop by the nearest NOGATU office or satellite branch to complete the distributor application form and proceed with onboarding.
+              Your details and letter of intent have been recorded. Please wait for a NOGATU representative to contact you for the next stockist onboarding steps.
             </p>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <a
-                href="data:text/plain;charset=utf-8,NOGATU%20Distributor%20Application%20Form%20Placeholder%0A%0APlease%20replace%20this%20placeholder%20with%20the%20official%20downloadable%20application%20form."
-                download="nogatu-distributor-application-form-placeholder.txt"
-                className="btn-landing-primary w-full"
-              >
-                Download Form
-              </a>
+              <a href="/portal/login" className="btn-landing-primary w-full">Open Members Area</a>
               <button onClick={() => setShowApplicationPrompt(false)} className="btn-landing-secondary w-full">
                 Got It
               </button>

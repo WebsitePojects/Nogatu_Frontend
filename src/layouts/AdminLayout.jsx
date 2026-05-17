@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck, HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket } from 'react-icons/hi';
+import { HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog, HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu, HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell, HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck, HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket, HiOutlineClipboardList } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
 
 /**
@@ -34,6 +34,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin/encashment', label: 'Encashment', icon: HiOutlineCash, roles: [1, 3] },
       { to: '/admin/redeem', label: 'Hi-Five Redeem', icon: HiOutlineGift, roles: [1, 3] },
+      { to: '/admin/hifive-package-claims', label: 'Hi-Five Package Claims', icon: HiOutlineGift, roles: [1, 3] },
       { to: '/admin/rankings', label: 'Rankings', icon: HiOutlineShieldCheck, roles: [1, 3] },
       { to: '/admin/global-bonus', label: 'Global Bonus', icon: HiOutlineSparkles, roles: [1, 3] },
       { to: '/admin/cd-accounts', label: 'CD Accounts', icon: HiOutlineBadgeCheck, roles: [1, 3] },
@@ -49,6 +50,7 @@ const NAV_GROUPS = [
     label: 'Content',
     items: [
       { to: '/admin/messages', label: 'Contact Messages', icon: HiOutlineBell, roles: [1, 3] },
+      { to: '/admin/applications', label: 'Applications', icon: HiOutlineClipboardList, roles: [1, 3] },
       { to: '/admin/news', label: 'News & Posts', icon: HiOutlineNewspaper, roles: [1, 3] },
     ],
   },
@@ -193,6 +195,16 @@ export default function AdminLayout() {
             >
               <HiOutlineMenu className="w-5 h-5" />
             </button>
+            <a
+              href="/"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-white/80 text-sm font-medium motion-safe:transition-colors hover:bg-white/10 hover:text-brand-gold"
+              aria-label="Back to landing page"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span className="hidden sm:inline">Back</span>
+            </a>
             <h2 className="text-sm font-semibold text-white/80">{currentPage?.label || 'Admin Dashboard'}</h2>
           </div>
           <div className="flex items-center gap-2">

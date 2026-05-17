@@ -9,6 +9,7 @@ import AdminLayout from './layouts/AdminLayout';
 // Member Pages
 import Login from './pages/member/Login';
 import Dashboard from './pages/member/Dashboard';
+import DashboardMetricDetail from './pages/member/DashboardMetricDetail';
 import EWallet from './pages/member/EWallet';
 import AccountDetails from './pages/member/AccountDetails';
 import ActivationCodes from './pages/member/ActivationCodes';
@@ -32,6 +33,7 @@ import GenerateCodes from './pages/admin/GenerateCodes';
 import ManageCodes from './pages/admin/ManageCodes';
 import Encashment from './pages/admin/Encashment';
 import Redeem from './pages/admin/Redeem';
+import HiFivePackageClaims from './pages/admin/HiFivePackageClaims';
 import UpdateAccounts from './pages/admin/UpdateAccounts';
 import IncomeDetails from './pages/admin/IncomeDetails';
 import CDPaymentDetails from './pages/admin/CDPaymentDetails';
@@ -44,6 +46,8 @@ import GlobalBonus from './pages/admin/GlobalBonus';
 import CDAccounts from './pages/admin/CDAccounts';
 import VoucherManagement from './pages/admin/VoucherManagement';
 import VoucherGrant from './pages/admin/VoucherGrant';
+import Applications from './pages/admin/Applications';
+import ReferralInvite from './pages/member/ReferralInvite';
 
 function ProtectedMember({ children }) {
   const { user, loading } = useAuth();
@@ -106,6 +110,7 @@ export default function App() {
         <Route path="/" element={<ProtectedMember><MemberLayout /></ProtectedMember>}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard/details/:metric" element={<DashboardMetricDetail />} />
           <Route path="ewallet" element={<EWallet />} />
           <Route path="account" element={<AccountDetails />} />
           <Route path="codes" element={<ActivationCodes />} />
@@ -119,6 +124,7 @@ export default function App() {
           <Route path="transactions" element={<Transactions />} />
           <Route path="upgrade" element={<UpgradeAccount />} />
           <Route path="register" element={<Registration />} />
+          <Route path="referral-invite" element={<ReferralInvite />} />
           <Route path="support" element={<SupportContact />} />
         </Route>
 
@@ -173,6 +179,10 @@ export default function App() {
             element={<ProtectedAdminRoles allowed={[1, 3]}><Redeem /></ProtectedAdminRoles>}
           />
           <Route
+            path="hifive-package-claims"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><HiFivePackageClaims /></ProtectedAdminRoles>}
+          />
+          <Route
             path="rankings"
             element={<ProtectedAdminRoles allowed={[1, 3]}><Rankings /></ProtectedAdminRoles>}
           />
@@ -195,6 +205,10 @@ export default function App() {
           <Route
             path="messages"
             element={<ProtectedAdminRoles allowed={[1, 3]}><Messages /></ProtectedAdminRoles>}
+          />
+          <Route
+            path="applications"
+            element={<ProtectedAdminRoles allowed={[1, 3]}><Applications /></ProtectedAdminRoles>}
           />
           <Route
             path="change-password"

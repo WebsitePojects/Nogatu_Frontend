@@ -10,21 +10,21 @@ const PACKAGE_LABELS = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum',
 
 // Products available for voucher purchase (example catalog)
 const PRODUCTS = [
-  { key: 'bl', name: 'Barley Juice', price: 750 },
-  { key: 'gl', name: 'Nogatu Glow', price: 850 },
-  { key: 'glc', name: 'Collagen Vitamin C', price: 950 },
-  { key: 'cd', name: 'Chocolate Drink Mix', price: 650 },
-  { key: 'cm', name: 'Coffee Mix', price: 550 },
-  { key: 'mgt', name: 'Mangosteen Coffee', price: 700 },
+  { key: 'bl', code: 100, name: 'Barley Juice', price: 750 },
+  { key: 'gl', code: 101, name: 'Nogatu Glow', price: 850 },
+  { key: 'glc', code: 102, name: 'Collagen Vitamin C', price: 950 },
+  { key: 'cd', code: 104, name: 'Chocolate Drink Mix', price: 650 },
+  { key: 'cm', code: 103, name: 'Coffee Mix', price: 550 },
+  { key: 'mgt', code: 105, name: 'Mangosteen Coffee', price: 700 },
 ];
 
 const PRODUCT_IMAGES = {
-  bl: '/legacy-img/barley_01.png',
-  gl: '/legacy-img/gluta.png',
-  glc: '/legacy-img/collagen.png',
-  cm: '/legacy-img/coffeemix.png',
-  cd: '/legacy-img/choco.png',
-  mgt: '/legacy-img/mangosteen.png',
+  bl: '/legacy-img/Barley-Mix.png',
+  gl: '/legacy-img/Glow-Pill.png',
+  glc: '/legacy-img/Vitamin-C-Collagen.png',
+  cm: '/legacy-img/Coffee-Mix.png',
+  cd: '/legacy-img/Chox-Mix.png',
+  mgt: '/legacy-img/Mangoosteen_1.png',
 };
 
 function Spinner() {
@@ -191,6 +191,8 @@ export default function Vouchers() {
       const { data } = await api.post('/vouchers/redeem', {
         voucherId: voucher.id,
         cashAmount: price,
+        productKey: product.key,
+        productCode: product.code,
         productName: product.name,
       });
 

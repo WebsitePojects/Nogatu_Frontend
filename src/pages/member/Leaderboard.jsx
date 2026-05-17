@@ -7,13 +7,6 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-US', {
   maximumFractionDigits: 0,
 });
 
-function medal(rank) {
-  if (rank === 1) return '🥇';
-  if (rank === 2) return '🥈';
-  if (rank === 3) return '🥉';
-  return '#';
-}
-
 export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -35,17 +28,20 @@ export default function Leaderboard() {
     }
   }
 
+  const pointsBasis = data?.pointsBasis || 'Repurchase points';
   const userRank = Number(data?.userRank || 0);
-  const userPoints = Number(data?.userPoints || 0);
+  const userPoints = Number((data?.userGrossRankablePoints ?? data?.userRepurchasePoints ?? data?.userPoints) || 0);
+  const userRemaining = Number(data?.userRemainingRankablePoints || 0);
+  const userConsumed = Number(data?.userConsumedPoints || 0);
   const nextRankPoints = Number(data?.nextRankPoints || 0);
-  const needed = Math.max(0, nextRankPoints - userPoints);
+  const needed = Math.max(0, nextRankPoints - userRemaining);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold text-white">Global Leaderboard</h1>
         <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Binary Points Rankings
+          {pointsBasis} race standings
         </p>
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
@@ -57,14 +53,17 @@ export default function Leaderboard() {
             <p className="mt-1 text-2xl font-bold text-white">
               {userRank > 0 ? `#${userRank}` : 'Not ranked yet'}
             </p>
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Binary points: {fmt(userPoints)}</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>{pointsBasis}: {fmt(userPoints)}</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>
+              Remaining race points: {fmt(userRemaining)} | Consumed: {fmt(userConsumed)}
+            </p>
           </div>
           <div
             className="px-3 py-2 rounded-xl text-xs font-semibold"
             style={{ background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.25)', color: '#D4AF37' }}
           >
             <HiOutlineSparkles className="inline w-4 h-4 mr-1" />
-            {needed > 0 ? `${fmt(needed)} more points to next Supervisor rank` : 'Supervisor target reached'}
+            {needed > 0 ? `${fmt(needed)} more fresh race points to the next rank` : 'Next rank point target reached'}
           </div>
         </div>
       </div>
@@ -104,8 +103,8 @@ export default function Leaderboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Rank', 'Member', 'Package', 'Binary Points', 'Supervisor Rank'].map((h) => (
-                    <th key={h} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{h}</th>
+                  {['Top', 'Member', 'Package', 'Current Rank', 'Gross Points', 'Remaining Points'].map((heading) => (
+                    <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
               </thead>
@@ -120,7 +119,7 @@ export default function Leaderboard() {
                     }
                   >
                     <td className="py-3 px-3 font-semibold" style={{ color: '#D4AF37' }}>
-                      {row.rank <= 3 ? medal(row.rank) : row.rank}
+                      #{row.rank}
                     </td>
                     <td className="py-3 px-3 text-white/80">
                       <span className="inline-flex items-center gap-2">
@@ -134,16 +133,17 @@ export default function Leaderboard() {
                       </span>
                     </td>
                     <td className="py-3 px-3 text-white/60">{row.package}</td>
-                    <td className="py-3 px-3 font-semibold text-white">{fmt(row.binaryPoints)}</td>
                     <td className="py-3 px-3 text-white/70">
                       <HiOutlineStar className="inline w-4 h-4 mr-1" />
-                      {row.supervisorRankLabel}
+                      {row.currentRankLabel}
                     </td>
+                    <td className="py-3 px-3 font-semibold text-white">{fmt(row.grossRankablePoints ?? row.repurchasePoints)}</td>
+                    <td className="py-3 px-3 text-white/70">{fmt(row.remainingRankablePoints)}</td>
                   </tr>
                 ))}
                 {(!data?.leaderboard || data.leaderboard.length === 0) && (
                   <tr>
-                    <td colSpan="5" className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    <td colSpan="6" className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
                       No leaderboard records found.
                     </td>
                   </tr>
@@ -154,21 +154,28 @@ export default function Leaderboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[
-          { key: 's1', label: 'Supervisor 1' },
-          { key: 's2', label: 'Supervisor 2' },
-          { key: 's3', label: 'Supervisor 3' },
-        ].map((item) => {
-          const row = data?.supervisorProgress?.[item.key];
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {(data?.rankDefinitions || []).map((item) => {
+          const achieved = (data?.raceProgress?.achievements || []).some((achievement) => Number(achievement.rank || 0) === Number(item.rank || 0));
           return (
-            <div key={item.key} className="glass-card rounded-xl p-4">
-              <p className="text-sm font-semibold text-white">{item.label}</p>
-              <p className="text-xs mt-1" style={{ color: row?.qualified ? '#34d399' : 'rgba(255,255,255,0.5)' }}>
-                {row?.qualified ? 'Qualified' : 'In progress'}
+            <div key={item.rank_code || item.rank_name} className="glass-card rounded-xl p-4">
+              <p className="text-sm font-semibold text-white">{item.rank_name}</p>
+              <p className="text-xs mt-1" style={{ color: achieved ? '#34d399' : 'rgba(255,255,255,0.5)' }}>
+                {achieved ? 'Achieved in race' : 'Race target'}
               </p>
               <p className="text-xs mt-2" style={{ color: 'rgba(212,175,55,0.65)' }}>
-                Min points: {fmt(row?.minPoints || 0)}
+                Min points: {fmt(item.points_required || 0)}
+              </p>
+              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Cash bonus: PHP {fmt(item.cash_incentive || 0)}
+              </p>
+              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                {Number(item.left_rank_required || 0) > 0 || Number(item.right_rank_required || 0) > 0
+                  ? `Needs rank ${item.left_rank_required} left / rank ${item.right_rank_required} right`
+                  : 'No left/right rank requirement'}
+              </p>
+              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.42)' }}>
+                {item.incentive_summary}
               </p>
             </div>
           );

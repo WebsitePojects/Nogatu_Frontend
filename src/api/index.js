@@ -6,6 +6,13 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+api.interceptors.request.use((config) => {
+  const requestId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  config.headers = config.headers || {};
+  config.headers['X-Request-ID'] = requestId;
+  return config;
+});
+
 // Auto-redirect on 401 (but never for the login endpoints themselves —
 // those return 401 for bad credentials and the form handles it via toast)
 api.interceptors.response.use(

@@ -18,14 +18,18 @@ export function AuthProvider({ children }) {
         api.get('/auth/session'),
         api.get('/admin/auth/session'),
       ]);
-      if (memberRes.status === 'fulfilled' && memberRes.value.data.authenticated) {
-        setUser(memberRes.value.data.user);
-      }
-      if (adminRes.status === 'fulfilled' && adminRes.value.data.authenticated) {
-        setAdmin(adminRes.value.data.admin);
-      }
+      const nextUser = memberRes.status === 'fulfilled' && memberRes.value.data.authenticated
+        ? memberRes.value.data.user
+        : null;
+      const nextAdmin = adminRes.status === 'fulfilled' && adminRes.value.data.authenticated
+        ? adminRes.value.data.admin
+        : null;
+
+      setUser(nextUser);
+      setAdmin(nextAdmin);
     } catch {
-      // Not authenticated
+      setUser(null);
+      setAdmin(null);
     } finally {
       setLoading(false);
     }
@@ -48,23 +52,27 @@ export function AuthProvider({ children }) {
   async function loginMember(username, password) {
     const res = await api.post('/auth/login', { username, password });
     setUser(res.data.user);
+    setAdmin(null);
     return res.data;
   }
 
   async function logoutMember() {
     await api.post('/auth/logout');
     setUser(null);
+    setAdmin(null);
   }
 
   async function loginAdmin(username, password) {
     const res = await api.post('/admin/auth/login', { username, password });
     setAdmin(res.data.admin);
+    setUser(null);
     return res.data;
   }
 
   async function logoutAdmin() {
     await api.post('/admin/auth/logout');
     setAdmin(null);
+    setUser(null);
   }
 
   return (

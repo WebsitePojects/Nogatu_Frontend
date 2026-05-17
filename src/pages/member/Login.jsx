@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import api from '../../api';
 
 /* ── SVG Icons ────────────────────────────────────────────── */
 const CheckIcon = () => (
@@ -57,6 +58,9 @@ export default function Login() {
   const [password, setPassword]       = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading]         = useState(false);
+  const [forgotOpen, setForgotOpen]   = useState(false);
+  const [resetIdentifier, setResetIdentifier] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
   const { loginMember } = useAuth();
   const navigate = useNavigate();
 
@@ -73,6 +77,24 @@ export default function Login() {
       toast.error(msg, { id: toastId });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const submitForgotPassword = async (e) => {
+    e.preventDefault();
+    setResetLoading(true);
+    try {
+      const res = await api.post('/auth/forgot-password', { email: resetIdentifier });
+      toast.success('If the account exists, reset instructions will be sent.');
+      if (res.data?.debugResetToken) {
+        toast(`Dev reset token: ${res.data.debugResetToken}`, { duration: 10000 });
+      }
+      setForgotOpen(false);
+      setResetIdentifier('');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Unable to request reset instructions.');
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -174,6 +196,14 @@ export default function Login() {
       <div
         className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden bg-transparent"
       >
+        <button
+          type="button"
+          onClick={() => window.location.href = '/'}
+          className="absolute left-4 top-4 sm:left-6 sm:top-6 z-20 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-gray-800 dark:text-white bg-white/60 dark:bg-black/30 border border-white/50 dark:border-white/10 backdrop-blur-md shadow-sm hover:bg-white/80 dark:hover:bg-black/45 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          Back
+        </button>
         {/* Subtle orb */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none"
@@ -256,6 +286,14 @@ export default function Login() {
             >
               {loading ? <><SpinnerIcon /> Signing in…</> : 'Sign In'}
             </button>
+            <button
+              type="button"
+              onClick={() => setForgotOpen(true)}
+              className="w-full text-xs font-semibold"
+              style={{ color: '#D4AF37' }}
+            >
+              Forgot password?
+            </button>
           </form>
 
           <p className="text-center text-xs mt-5 text-gray-600 dark:text-gray-400">
@@ -264,8 +302,65 @@ export default function Login() {
               Contact your upline to get registered.
             </span>
           </p>
+
+          <div
+            className="mt-4 rounded-2xl border px-4 py-4 text-left shadow-sm backdrop-blur-md"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,248,225,0.88))',
+              borderColor: 'rgba(212,175,55,0.22)',
+            }}
+          >
+            <p className="text-[11px] font-bold tracking-[0.24em] uppercase" style={{ color: '#B8860B' }}>
+              Stockist Path
+            </p>
+            <h3 className="mt-2 text-sm font-bold text-gray-900">Applying as a Stockist first?</h3>
+            <p className="mt-1 text-xs leading-5 text-gray-600">
+              Submit your stockist application on the Nogatu landing page before requesting Dropshipping portal access.
+            </p>
+            <a
+              href="/#stockist-apply"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all duration-300 hover:-translate-y-0.5"
+              style={{
+                background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 55%, #E7C679 100%)',
+                boxShadow: '0 12px 24px rgba(184,134,11,0.22)',
+              }}
+            >
+              Apply as Stockist
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
+      {forgotOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onMouseDown={() => setForgotOpen(false)}>
+          <form
+            onSubmit={submitForgotPassword}
+            onMouseDown={(event) => event.stopPropagation()}
+            className="w-full max-w-md rounded-2xl p-6"
+            style={{ background: '#12100a', border: '1px solid rgba(212,175,55,0.22)' }}
+          >
+            <h2 className="font-display text-lg font-bold text-white">Reset Password</h2>
+            <p className="text-xs mt-1 mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              Enter the email address saved on your account. A single-use reset code expires after 15 minutes.
+            </p>
+            <input
+              value={resetIdentifier}
+              onChange={(event) => setResetIdentifier(event.target.value)}
+              className="glass-input mb-4"
+              placeholder="Email address"
+              required
+            />
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setForgotOpen(false)} className="flex-1 rounded-xl py-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.16)' }}>Cancel</button>
+              <button type="submit" disabled={resetLoading} className="gold-btn flex-1 rounded-xl py-2 text-sm">
+                {resetLoading ? 'Sending...' : 'Send'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

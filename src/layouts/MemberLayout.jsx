@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import {
@@ -36,6 +36,7 @@ const NAV_GROUPS = [
       { to: '/codes',        label: 'Activation Codes', icon: HiOutlineKey },
       { to: '/upgrade',      label: 'Upgrade Account',  icon: HiOutlineArrowUp },
       { to: '/register',     label: 'Register Account', icon: HiOutlineUserAdd },
+      { to: '/referral-invite', label: 'Referral ID',    icon: HiOutlineUserAdd },
       { to: '/transactions', label: 'Transactions',     icon: HiOutlineDocumentText },
       { to: '/vouchers',     label: 'Vouchers',         icon: HiOutlineGift },
       { to: '/account',      label: 'Account Details',  icon: HiOutlineUser },
@@ -82,6 +83,7 @@ export default function MemberLayout() {
   const currentPage = NAV_GROUPS.flatMap(g => g.items).find(
     i => location.pathname === i.to || location.pathname === `/portal${i.to}`
   );
+  const isItemActive = (path) => location.pathname === path || location.pathname === `/portal${path}`;
 
   const acctInitial = user?.shortname?.charAt(0)?.toUpperCase() || 'M';
 
@@ -143,15 +145,18 @@ export default function MemberLayout() {
               </p>
               <div className="space-y-0.5">
                 {group.items.map((item) => (
-                  <NavLink
+                  <button
                     key={item.to}
-                    to={item.to}
-                    onClick={() => setSidebarOpen(false)}
-                    className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                    type="button"
+                    onClick={() => {
+                      setSidebarOpen(false);
+                      navigate(item.to);
+                    }}
+                    className={`nav-item w-full text-left${isItemActive(item.to) ? ' active' : ''}`}
                   >
                     <item.icon className="w-[17px] h-[17px] flex-shrink-0" />
                     {item.label}
-                  </NavLink>
+                  </button>
                 ))}
               </div>
             </div>

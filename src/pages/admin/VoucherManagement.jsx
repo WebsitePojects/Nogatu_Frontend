@@ -49,6 +49,7 @@ export default function VoucherManagement() {
 
   const rights = Number(admin?.rights || 0);
   const canGrant = rights === 1 || rights === 2 || rights === 3;
+  const canSuspend = rights === 1 || rights === 3;
 
   useEffect(() => { loadData(); }, [page, status, search]);
 
@@ -275,7 +276,7 @@ export default function VoucherManagement() {
                           <HiOutlineEye className="w-3.5 h-3.5" />
                           <span className="hidden sm:inline">View</span>
                         </button>
-                        {Number(r.status) === 1 && (
+                        {canSuspend && Number(r.status) === 1 && (
                           <button
                             onClick={() => openSuspend(r)}
                             className="text-xs px-2.5 py-1 rounded-lg flex items-center gap-1"
@@ -286,7 +287,7 @@ export default function VoucherManagement() {
                             <span className="hidden sm:inline">Suspend</span>
                           </button>
                         )}
-                        {Number(r.status) === 4 && (
+                        {canSuspend && Number(r.status) === 4 && (
                           <button
                             onClick={() => handleUnsuspend(r)}
                             className="text-xs px-2.5 py-1 rounded-lg flex items-center gap-1"
@@ -440,7 +441,7 @@ export default function VoucherManagement() {
 
             {/* Modal Footer */}
             <div className="flex flex-wrap gap-2 p-6 pt-4 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-              {Number(detailVoucher.status) === 1 && (
+              {canSuspend && Number(detailVoucher.status) === 1 && (
                 <button
                   onClick={() => { closeDetails(); openSuspend(detailVoucher); }}
                   className="text-xs px-3 py-2 rounded-lg"
@@ -449,7 +450,7 @@ export default function VoucherManagement() {
                   Suspend
                 </button>
               )}
-              {Number(detailVoucher.status) === 4 && (
+              {canSuspend && Number(detailVoucher.status) === 4 && (
                 <button
                   onClick={() => { handleUnsuspend(detailVoucher); closeDetails(); }}
                   className="text-xs px-3 py-2 rounded-lg"

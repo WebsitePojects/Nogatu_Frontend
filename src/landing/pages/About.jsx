@@ -4,7 +4,7 @@ import Lightbox, { useLightbox } from '../components/Lightbox';
 
 function PageHero({ title, subtitle }) {
   return (
-    <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
+    <section className="relative pt-36 pb-14 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
       <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }} />
@@ -50,10 +50,13 @@ export default function About() {
         <div className="section-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div ref={ref1} className="reveal-left">
-              <div className="relative">
-                <img src="/landing/assets/img/about.jpg" alt="About NOGATU Alliance" className="rounded-2xl shadow-2xl w-full object-cover cursor-pointer" style={{ boxShadow: '0 25px 50px rgba(89,34,25,0.15)' }} loading="lazy" onClick={() => lightbox.open('/landing/assets/img/about.jpg')} />
-                <div className="absolute -bottom-6 -right-6 w-40 h-40 rounded-2xl shadow-xl overflow-hidden hidden lg:block cursor-pointer" style={{ border: '4px solid #E7C679' }} onClick={() => lightbox.open('/landing/img/about-2.jpg')}>
-                  <img src="/landing/img/about-2.jpg" alt="NOGATU Products" className="w-full h-full object-cover" loading="lazy" />
+              <div className="relative about-photo-frame">
+                <div className="about-photo-glow" />
+                <div className="about-photo-orb about-photo-orb-left" />
+                <div className="about-photo-orb about-photo-orb-right" />
+                <img src="/landing/assets/img/about.jpg" alt="About NOGATU Alliance" className="relative z-10 rounded-2xl shadow-2xl w-full object-cover cursor-pointer about-photo-main" style={{ boxShadow: '0 25px 50px rgba(89,34,25,0.15)' }} loading="lazy" onClick={() => lightbox.open('/landing/assets/img/about.jpg')} />
+                <div className="absolute -bottom-6 -right-6 w-40 h-40 rounded-2xl shadow-xl overflow-hidden hidden lg:block cursor-pointer z-20" style={{ border: '4px solid #E7C679' }} onClick={() => lightbox.open('/landing/img/about-2.jpg')}>
+                  <img src="/landing/img/about-2.jpg" alt="NOGATU Products" className="w-full h-full object-cover product-mini-image" loading="lazy" />
                 </div>
               </div>
             </div>
@@ -63,6 +66,27 @@ export default function About() {
               <div className="w-16 h-1 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
               <p className="leading-relaxed mb-6" style={{ color: '#6d3028' }}>Nogatu Alliance is a supplier and distributor of exclusively manufactured health food supplements as well as skin care products. We are committed to helping empower people in building a sustainable livelihood through marketing and selling of high-quality products that promote improved health and wellness.</p>
               <p className="leading-relaxed mb-8" style={{ color: '#6d3028' }}>It also provides its members with competitive marketing incentives. When you choose us, you become our valued partner, working alongside us to achieve your success.</p>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+                <div className="about-info-card">
+                  <div className="about-info-icon">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Main Office</p>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City</p>
+                </div>
+                <div className="about-info-card">
+                  <div className="about-info-icon">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Satellite Branch</p>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Reserved space for branch address and contact details.</p>
+                </div>
+              </div>
               <div className="flex gap-6">
                 {['FDA Approved', 'Member-First'].map((t) => (
                   <div key={t} className="flex items-center gap-3">
@@ -72,6 +96,35 @@ export default function About() {
                     <span className="text-sm font-medium" style={{ color: '#3A1000' }}>{t}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
+        <div className="section-container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+            <div className="about-gallery-card group">
+              <div className="about-gallery-glow" />
+              <div className="relative overflow-hidden rounded-[1.75rem]">
+                <img src="/landing/assets/img/about.jpg" alt="Main office" className="w-full h-72 sm:h-96 object-cover cursor-pointer about-gallery-image" loading="lazy" onClick={() => lightbox.open('/landing/assets/img/about.jpg')} />
+                <div className="about-gallery-label">Main Office</div>
+              </div>
+              <div className="p-5 sm:p-6 relative z-10">
+                <p className="font-bold text-brand-brown text-lg">Main Office Photo</p>
+                <p className="text-sm text-gray-600 mt-1">Current office image space with a refreshed showcase treatment.</p>
+              </div>
+            </div>
+            <div className="about-gallery-card group">
+              <div className="about-gallery-glow about-gallery-glow-alt" />
+              <div className="relative overflow-hidden rounded-[1.75rem]">
+                <img src="/landing/img/about-2.jpg" alt="Satellite branch placeholder" className="w-full h-72 sm:h-96 object-cover cursor-pointer about-gallery-image" loading="lazy" onClick={() => lightbox.open('/landing/img/about-2.jpg')} />
+                <div className="about-gallery-label">Satellite Branch</div>
+              </div>
+              <div className="p-5 sm:p-6 relative z-10">
+                <p className="font-bold text-brand-brown text-lg">Satellite Branch Photo</p>
+                <p className="text-sm text-gray-600 mt-1">Reserved upload space for the satellite branch photo.</p>
               </div>
             </div>
           </div>
@@ -94,21 +147,23 @@ export default function About() {
       <section className="section-padding bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
         <div className="section-container">
           <div ref={ref4} className="reveal grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="group p-8 lg:p-10 rounded-2xl border motion-safe:hover:shadow-xl motion-safe:transition-all motion-safe:duration-300" style={{ borderColor: 'rgba(184,134,11,0.2)', backgroundColor: 'rgba(255,253,245,0.8)' }}>
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 motion-safe:transition-colors motion-safe:duration-300" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>
+            <div className="mission-vision-card mission-vision-card-gold group p-8 lg:p-10 rounded-2xl border motion-safe:hover:shadow-xl motion-safe:transition-all motion-safe:duration-300">
+              <div className="mission-vision-glow" />
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 motion-safe:transition-colors motion-safe:duration-300 mission-vision-icon" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
-              <h3 className="text-xl font-bold mb-2" style={{ color: '#3A1000' }}>Our Mission</h3>
-              <div className="w-10 h-0.5 rounded-full mb-3" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
-              <p className="leading-relaxed" style={{ color: '#6d3028' }}>Nogatu Alliance aims to become one of the Philippines' leading network marketing company that spans locally and abroad, delivering exceptional health products and empowering communities through entrepreneurship.</p>
+              <h3 className="text-2xl font-bold mb-2" style={{ color: '#3A1000' }}>Our Mission</h3>
+              <div className="w-14 h-1 rounded-full mb-4" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
+              <p className="leading-8 font-medium" style={{ color: '#6d3028' }}>Nogatu Alliance aims to become one of the Philippines' leading network marketing company that spans locally and abroad, delivering exceptional health products and empowering communities through entrepreneurship.</p>
             </div>
-            <div className="group p-8 lg:p-10 rounded-2xl border motion-safe:hover:shadow-xl motion-safe:transition-all motion-safe:duration-300" style={{ borderColor: 'rgba(89,34,25,0.15)', backgroundColor: 'rgba(255,253,245,0.8)' }}>
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 motion-safe:transition-colors motion-safe:duration-300" style={{ backgroundColor: 'rgba(89,34,25,0.08)', color: '#592219' }}>
+            <div className="mission-vision-card mission-vision-card-brown group p-8 lg:p-10 rounded-2xl border motion-safe:hover:shadow-xl motion-safe:transition-all motion-safe:duration-300">
+              <div className="mission-vision-glow" />
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 motion-safe:transition-colors motion-safe:duration-300 mission-vision-icon" style={{ backgroundColor: 'rgba(89,34,25,0.08)', color: '#592219' }}>
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
               </div>
-              <h3 className="text-xl font-bold mb-2" style={{ color: '#3A1000' }}>Our Vision</h3>
-              <div className="w-10 h-0.5 rounded-full mb-3" style={{ background: 'linear-gradient(90deg, #592219, #6d3028)' }} />
-              <p className="leading-relaxed" style={{ color: '#6d3028' }}>Nogatu Alliance empowers people by giving them access to high quality health and wellness products and enables them to earn significant income from marketing these products to their network of friends, family and society at large.</p>
+              <h3 className="text-2xl font-bold mb-2" style={{ color: '#3A1000' }}>Our Vision</h3>
+              <div className="w-14 h-1 rounded-full mb-4" style={{ background: 'linear-gradient(90deg, #592219, #6d3028)' }} />
+              <p className="leading-8 font-medium" style={{ color: '#6d3028' }}>Nogatu Alliance empowers people by giving them access to high quality health and wellness products and enables them to earn significant income from marketing these products to their network of friends, family and society at large.</p>
             </div>
           </div>
         </div>
