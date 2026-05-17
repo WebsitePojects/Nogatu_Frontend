@@ -7,7 +7,6 @@ import News from './pages/News';
 import Organizations from './pages/Organizations';
 import Certifications from './pages/Certifications';
 import Contact from './pages/Contact';
-import Certifications from './pages/Certifications';
 import Join from './pages/Join';
 
 export default function LandingApp() {
