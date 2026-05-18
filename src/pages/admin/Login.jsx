@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import usePublicStats from '../../hooks/usePublicStats';
 
 const CheckIcon = () => (
   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,9 +62,9 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const stats = { activeMembers: 5900, networksBuilt: 5900 };
   const { loginAdmin } = useAuth();
   const navigate = useNavigate();
+  const { stats } = usePublicStats();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

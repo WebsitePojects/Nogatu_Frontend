@@ -3,37 +3,11 @@ import toast from 'react-hot-toast';
 import { HiOutlineGift, HiOutlineSparkles, HiOutlineCash, HiOutlineRefresh, HiOutlineShoppingCart, HiOutlineDocumentText, HiOutlineExclamation, HiOutlineX } from 'react-icons/hi';
 import api from '../../api';
 import { useTheme } from '../../contexts/ThemeContext';
+import { MAINTENANCE_PRODUCTS, MAINTENANCE_PRODUCT_IMAGES } from '../../constants/maintenanceProducts';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const PACKAGE_LABELS = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum', 50: 'Garnet', 60: 'Diamond' };
-
-// Products available for voucher purchase (example catalog)
-const PRODUCTS = [
-  { key: 'bl', code: 100, name: 'Nogatu Barley Juice', price: 750 },
-  { key: 'gl', code: 101, name: 'Nogatu Glow', price: 850 },
-  { key: 'glc', code: 102, name: 'Collagen Vitamin C', price: 950 },
-  { key: 'cd', code: 104, name: 'Chocolate Drink Mix', price: 650 },
-  { key: 'cm', code: 103, name: 'Nogatu Coffee Mix', price: 550 },
-  { key: 'mgt', code: 105, name: 'Mangosteen Coffee Mix', price: 700 },
-  { key: 'vc', code: 106, name: 'Vitamin C', price: 500 },
-  { key: 'bkc', code: 108, name: 'Black Coffee', price: 500 },
-  { key: 'cmm', code: 107, name: 'Max Fuel Coffee Drink Mix', price: 950 },
-  { key: 'bnad', code: 109, name: 'Berry NAD+', price: 1200 },
-];
-
-const PRODUCT_IMAGES = {
-  bl: '/legacy-img/Barley-Mix.png',
-  gl: '/legacy-img/Glow-Pill.png',
-  glc: '/legacy-img/Vitamin-C-Collagen.png',
-  cm: '/legacy-img/Coffee-Mix.png',
-  cd: '/legacy-img/Chox-Mix.png',
-  mgt: '/legacy-img/Mangoosteen_1.png',
-  vc: '/legacy-img/Vitamin-C.png',
-  bkc: '/legacy-img/blck-coffee.png',
-  cmm: '/legacy-img/Max-Fuel.png',
-  bnad: '/legacy-img/Berry-Nad.png',
-};
 
 function Spinner() {
   return (
@@ -330,7 +304,10 @@ export default function Vouchers() {
                       <td className="py-2.5 px-2 text-white/80">P{fmt(r.voucher_amount)}</td>
                       <td className="py-2.5 px-2 text-white/80">P{fmt(r.remaining_balance)}</td>
                       <td className="py-2.5 px-2 text-white/60">{r.issued_date}</td>
-                      <td className="py-2.5 px-2 text-white/60">{r.expiry_date}</td>
+                      <td className="py-2.5 px-2 text-white/60">
+                        <div>{r.expiry_date}</div>
+                        <div className="text-[11px] text-white/40">{r.expiry_label || 'Active'}</div>
+                      </td>
                       <td className="py-2.5 px-2">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs" style={statusStyle(r.status)}>
                           {Number(r.status) === 4 ? 'Suspended' : r.status_label}
@@ -356,7 +333,7 @@ export default function Vouchers() {
                     <p>Amount: P{fmt(r.voucher_amount)}</p>
                     <p>Remaining: P{fmt(r.remaining_balance)}</p>
                     <p>Issued: {r.issued_date}</p>
-                    <p>Expiry: {r.expiry_date}</p>
+                    <p>Expiry: {r.expiry_date} <span className="text-white/40">({r.expiry_label || 'Active'})</span></p>
                   </div>
                 </div>
               ))}
@@ -382,7 +359,7 @@ export default function Vouchers() {
           Products are based on your wallet cash balance. Voucher usage can match the cash amount you spend, up to your remaining voucher balance.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {PRODUCTS.map((p) => {
+          {MAINTENANCE_PRODUCTS.map((p) => {
             const canAfford = Number(walletBalance || 0) >= Number(p.price || 0);
             const voucher = pickVoucherForCheckout(p.price);
             const voucherMatch = Math.min(Number(p.price || 0), Number(voucher?.remaining_balance || 0));
@@ -401,9 +378,9 @@ export default function Vouchers() {
                   background: canCheckout ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)',
                 }}
               >
-                {PRODUCT_IMAGES[p.key] ? (
+                {MAINTENANCE_PRODUCT_IMAGES[p.key] ? (
                   <img
-                    src={PRODUCT_IMAGES[p.key]}
+                    src={MAINTENANCE_PRODUCT_IMAGES[p.key]}
                     alt={p.name}
                     className="w-full h-24 object-contain rounded-xl mb-2"
                     style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.08)' }}

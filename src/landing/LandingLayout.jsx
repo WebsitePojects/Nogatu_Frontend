@@ -188,7 +188,7 @@ function Footer() {
           <div>
             <h4 className="text-brand-gold-light font-semibold text-sm mb-4">Our Products</h4>
             <ul className="space-y-3 text-sm text-white/50">
-              <li>Nogatu Barley Juice</li><li>Nogatu Glow</li><li>Collagen Vitamin C</li><li>Chocolate Drink Mix</li><li>Nogatu Coffee Mix</li><li>Mangosteen Coffee Mix</li><li>Vitamin C</li><li>Max Fuel Coffee Drink Mix</li><li>Berry NAD+</li>
+              <li>Nogatu Barley Juice</li><li>Nogatu Glow</li><li>Vitamin C with Collagen &amp; Glutathione</li><li>Chocolate Drink Mix</li><li>Nogatu Coffee Mix</li><li>Mangosteen Coffee Mix</li><li>Vitamin C with Zinc &amp; Mangosteen</li><li>Nogatu Black Coffee</li><li>Nogatu Max Fuel Coffee Drink Mix</li><li>Berry NAD+</li>
             </ul>
           </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
+import usePublicStats from '../../hooks/usePublicStats';
 
 const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
 
@@ -129,8 +130,9 @@ function Hero() {
 
 /* ────────────────────────── Stats Bar ───────────────────── */
 function StatsBar() {
-  const membersRef = useCountUp(5900, 2000);
-  const networksRef = useCountUp(5900, 2000);
+  const { stats } = usePublicStats();
+  const membersRef = useCountUp(Number(stats.activeMembers || 0), 2000);
+  const networksRef = useCountUp(Number(stats.networksBuilt || 0), 2000);
 
   const ref = useScrollReveal();
   return (

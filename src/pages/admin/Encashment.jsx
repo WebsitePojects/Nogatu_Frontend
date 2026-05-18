@@ -29,6 +29,8 @@ export default function Encashment() {
   const [exporting, setExporting] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [activeDetails, setActiveDetails] = useState(null);
+  const [dailyExpanded, setDailyExpanded] = useState(false);
+  const [dailyPage, setDailyPage] = useState(1);
   const receiptRef = useRef(null);
   const textStrong = isDarkMode ? 'rgba(255,255,255,0.8)' : '#334155';
   const textSoft = isDarkMode ? 'rgba(255,255,255,0.7)' : '#475569';
@@ -54,6 +56,7 @@ export default function Encashment() {
       setRecords(res.data.records);
       setTotalPages(res.data.totalPages);
       setSummary(res.data.summary || null);
+      setDailyPage(1);
     } catch { } finally { setLoading(false); }
   }
 
@@ -125,6 +128,11 @@ export default function Encashment() {
       {children}
     </button>
   );
+
+  const dailyPerPage = dailyExpanded ? 100 : 30;
+  const dailyRows = summary?.daily || [];
+  const dailyTotalPages = Math.max(1, Math.ceil(dailyRows.length / dailyPerPage));
+  const visibleDailyRows = dailyRows.slice((dailyPage - 1) * dailyPerPage, dailyPage * dailyPerPage);
 
   return (
     <div>
@@ -231,7 +239,30 @@ export default function Encashment() {
         <div className="glass-card rounded-2xl p-6 mb-6 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Daily Encashment Totals</p>
-            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{summary.daily.length} day rows</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setDailyExpanded((current) => !current);
+                  setDailyPage(1);
+                }}
+                className="rounded-xl px-4 py-2 text-xs font-semibold border"
+                style={{ background: 'rgba(212,175,55,0.1)', color: goldText, border: '1px solid rgba(212,175,55,0.2)' }}
+              >
+                {dailyExpanded ? 'Retract to 30 Rows' : 'Expand to 100 Rows'}
+              </button>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{summary.daily.length} day rows</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              Showing {visibleDailyRows.length} rows per page ({dailyPerPage} max)
+            </span>
+            <div className="flex items-center gap-2">
+              <PaginationBtn onClick={() => setDailyPage((p) => Math.max(1, p - 1))} disabled={dailyPage <= 1}>Prev</PaginationBtn>
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{dailyPage} / {dailyTotalPages}</span>
+              <PaginationBtn onClick={() => setDailyPage((p) => Math.min(dailyTotalPages, p + 1))} disabled={dailyPage >= dailyTotalPages}>Next</PaginationBtn>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -243,7 +274,7 @@ export default function Encashment() {
                 </tr>
               </thead>
               <tbody>
-                {summary.daily.map((row, idx) => (
+                {visibleDailyRows.map((row, idx) => (
                   <tr key={row.date} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
                     <td className="py-3 px-3 font-medium" style={{ color: textStrong }}>{row.date}</td>
                     <td className="py-3 px-3" style={{ color: textSoft }}>{row.totalRecords}</td>
@@ -258,6 +289,13 @@ export default function Encashment() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2">
+              <PaginationBtn onClick={() => setDailyPage((p) => Math.max(1, p - 1))} disabled={dailyPage <= 1}>Prev</PaginationBtn>
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{dailyPage} / {dailyTotalPages}</span>
+              <PaginationBtn onClick={() => setDailyPage((p) => Math.min(dailyTotalPages, p + 1))} disabled={dailyPage >= dailyTotalPages}>Next</PaginationBtn>
+            </div>
           </div>
         </div>
       )}
@@ -282,6 +320,11 @@ export default function Encashment() {
           </div>
         ) : (
           <div className="overflow-x-auto">
+            <div className="flex items-center justify-end mb-4 gap-2">
+              <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
+              <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+            </div>
             <table className="w-full text-sm">
               <thead>
                 <tr>
@@ -366,6 +409,11 @@ export default function Encashment() {
                 )}
               </tbody>
             </table>
+            <div className="flex items-center justify-end mt-4 gap-2">
+              <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
+              <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+            </div>
           </div>
         )}
       </div>

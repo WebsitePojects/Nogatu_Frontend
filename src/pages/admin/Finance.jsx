@@ -35,6 +35,40 @@ function DetailList({ items = [] }) {
   );
 }
 
+function BarChartCard({ title, subtitle, rows = [] }) {
+  const maxValue = Math.max(1, ...rows.map((row) => Number(row.value || 0)));
+  return (
+    <div className="glass-card rounded-2xl p-5">
+      <div className="mb-4">
+        <p className="text-sm font-semibold text-white">{title}</p>
+        <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>{subtitle}</p>
+      </div>
+      <div className="space-y-3">
+        {rows.map((row) => {
+          const width = Math.max(4, Math.round((Number(row.value || 0) / maxValue) * 100));
+          return (
+            <div key={row.label}>
+              <div className="flex items-center justify-between gap-3 mb-1.5">
+                <span className="text-xs font-medium text-white/75">{row.label}</span>
+                <span className="text-xs font-semibold" style={{ color: row.color || '#D4AF37' }}>{row.valueLabel}</span>
+              </div>
+              <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div
+                  className="h-full rounded-full motion-safe:transition-all"
+                  style={{
+                    width: `${width}%`,
+                    background: row.color || '#D4AF37',
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Finance() {
   const { isDarkMode } = useTheme();
   const [year, setYear] = useState(currentYear());
@@ -43,6 +77,9 @@ export default function Finance() {
   const [exporting, setExporting] = useState('');
   const [snapshot, setSnapshot] = useState(null);
   const [drafts, setDrafts] = useState({});
+  const [customColumns, setCustomColumns] = useState([]);
+  const [newColumnLabel, setNewColumnLabel] = useState('');
+  const [savingCustomColumnId, setSavingCustomColumnId] = useState(null);
   const [selectedPanel, setSelectedPanel] = useState('expenseReserve');
   const [selectedPackageType, setSelectedPackageType] = useState(null);
   const headingText = isDarkMode ? '#ffffff' : '#111827';
@@ -64,6 +101,7 @@ export default function Finance() {
     try {
       const res = await api.get(`/admin/finance?year=${targetYear}`);
       setSnapshot(res.data);
+      setCustomColumns(res.data.customColumns || []);
       const nextDrafts = {};
       for (const config of res.data.packageConfigs || []) {
         nextDrafts[config.packageType] = {
@@ -94,6 +132,28 @@ export default function Finance() {
     }));
   }
 
+  function updateCustomColumnDraft(columnId, field, value) {
+    setCustomColumns((current) => current.map((column) => (
+      Number(column.id) === Number(columnId)
+        ? { ...column, [field]: value }
+        : column
+    )));
+  }
+
+  function updateCustomColumnValueDraft(columnId, packageType, value) {
+    setCustomColumns((current) => current.map((column) => (
+      Number(column.id) === Number(columnId)
+        ? {
+            ...column,
+            valuesByPackage: {
+              ...column.valuesByPackage,
+              [packageType]: value,
+            },
+          }
+        : column
+    )));
+  }
+
   async function saveDraft(packageType) {
     setSavingPackage(packageType);
     try {
@@ -105,6 +165,54 @@ export default function Finance() {
       toast.error(error.response?.data?.error || 'Failed to save package settings');
     } finally {
       setSavingPackage(null);
+    }
+  }
+
+  async function createBudgetColumn() {
+    if (!newColumnLabel.trim()) {
+      toast.error('Column label is required');
+      return;
+    }
+
+    setSavingCustomColumnId('new');
+    try {
+      await api.post('/admin/finance/custom-columns', { label: newColumnLabel.trim() });
+      toast.success('Budget column added');
+      setNewColumnLabel('');
+      await loadFinance(year);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to add budget column');
+    } finally {
+      setSavingCustomColumnId(null);
+    }
+  }
+
+  async function saveBudgetColumnLabel(column) {
+    setSavingCustomColumnId(`label-${column.id}`);
+    try {
+      await api.put(`/admin/finance/custom-columns/${column.id}`, {
+        label: column.label,
+        sortOrder: column.sortOrder,
+      });
+      toast.success('Column label updated');
+      await loadFinance(year);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to update budget column');
+    } finally {
+      setSavingCustomColumnId(null);
+    }
+  }
+
+  async function saveBudgetColumnValue(columnId, packageType, amount) {
+    setSavingCustomColumnId(`value-${columnId}-${packageType}`);
+    try {
+      await api.put(`/admin/finance/custom-columns/${columnId}/values/${packageType}`, { amount });
+      toast.success('Budget amount updated');
+      await loadFinance(year);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to update budget amount');
+    } finally {
+      setSavingCustomColumnId(null);
     }
   }
 
@@ -209,7 +317,7 @@ export default function Finance() {
     [selectedPackageType, snapshot]
   );
 
-  const detailPanel = selectedPackage
+  const selectedPackagePanel = selectedPackage
     ? {
       title: `${selectedPackage.packageLabel} package breakdown`,
       subtitle: 'This package row shows the reserve math per code and in aggregate for the selected year.',
@@ -220,18 +328,64 @@ export default function Finance() {
         { label: 'Sales Match Reserve / Code', value: `PHP ${fmtMoney(selectedPackage.salesMatchCeiling)}` },
         { label: 'Direct Referral / Code', value: `PHP ${fmtMoney(selectedPackage.directReferralFixed)}` },
         { label: 'Admin / Ops Reserve / Code', value: `PHP ${fmtMoney(selectedPackage.adminExtraCost)}` },
+        ...customColumns.map((column) => ({
+          label: `${column.label} / Code`,
+          value: `PHP ${fmtMoney(column.valuesByPackage?.[selectedPackage.packageType] ?? 0)}`,
+        })),
         { label: 'Reserve / Code', value: `PHP ${fmtMoney(selectedPackage.reservePerCode)}` },
         { label: 'Reserve Total', value: `PHP ${fmtMoney(selectedPackage.reserveTotal)}` },
         { label: 'Projected Margin', value: `PHP ${fmtMoney(selectedPackage.projectedOperatingMargin)}` },
       ],
     }
-    : selectedCard
-      ? {
-        title: selectedCard.label,
-        subtitle: selectedCard.description,
-        details: selectedCard.details,
-      }
-      : null;
+    : null;
+
+  const selectedSummaryPanel = selectedCard
+    ? {
+      title: selectedCard.label,
+      subtitle: selectedCard.description,
+      details: selectedCard.details,
+    }
+    : null;
+
+  const packageGraphRows = useMemo(
+    () => (snapshot?.packageRows || []).map((row) => ({
+      label: row.packageLabel,
+      value: Number(row.grossSales || 0),
+      valueLabel: `PHP ${fmtMoney(row.grossSales)}`,
+      color: '#D4AF37',
+    })),
+    [snapshot]
+  );
+
+  const walletGraphRows = useMemo(() => {
+    if (!snapshot?.wallets) return [];
+    return [
+      {
+        label: 'Expense Reserve',
+        value: Number(snapshot.wallets.expenseReserveWallet || 0),
+        valueLabel: `PHP ${fmtMoney(snapshot.wallets.expenseReserveWallet)}`,
+        color: '#f59e0b',
+      },
+      {
+        label: 'Encashment Requested',
+        value: Number(snapshot.wallets.encashmentWallet?.requestedAmount || 0),
+        valueLabel: `PHP ${fmtMoney(snapshot.wallets.encashmentWallet?.requestedAmount)}`,
+        color: '#60a5fa',
+      },
+      {
+        label: 'Service + Maintenance',
+        value: Number(snapshot.wallets.serviceAndMaintenanceWallet?.total || 0),
+        valueLabel: `PHP ${fmtMoney(snapshot.wallets.serviceAndMaintenanceWallet?.total)}`,
+        color: '#34d399',
+      },
+      {
+        label: 'CD Recovery',
+        value: Number(snapshot.wallets.cdRecoveryWallet?.totalCdDeduction || 0),
+        valueLabel: `PHP ${fmtMoney(snapshot.wallets.cdRecoveryWallet?.totalCdDeduction)}`,
+        color: '#f472b6',
+      },
+    ];
+  }, [snapshot]);
 
   return (
     <div className="space-y-6 max-w-none">
@@ -247,6 +401,7 @@ export default function Finance() {
             <p className="text-xs mt-1 leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
               This workspace tracks package sales, reserve buckets, encashment obligations, service-fee capture, and the manual admin or ops reserve per package.
               {' '}<span className="text-white/75 font-medium">Admin / Ops Reserve</span> is the extra amount you intentionally set aside for handling, freight, support, packaging, and other operating costs not already covered by product cost, direct referral, or SMB reserve.
+              {' '}Custom budget columns let you add package-specific reserve wallets for any other operating or product budget you want to track.
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-3">
@@ -312,8 +467,90 @@ export default function Finance() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
+      {(packageGraphRows.length > 0 || walletGraphRows.length > 0) && (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <BarChartCard
+            title="Package Sales Graph"
+            subtitle="Zoho-inspired view of which packages are carrying the gross package sales for the selected year."
+            rows={packageGraphRows}
+          />
+          <BarChartCard
+            title="Wallet Allocation Graph"
+            subtitle="Reserve and payout buckets derived from the accounting snapshot and existing encashment records."
+            rows={walletGraphRows}
+          />
+        </div>
+      )}
+
+      <div className="space-y-6">
         <div className="glass-card rounded-2xl p-6 overflow-hidden">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 mb-5">
+            <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-white">Custom reserve columns</p>
+                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  Add package budgets like reserve wallet, logistics, promo budget, or other finance columns and make them affect package margin math immediately. Column editors are kept here too so labels and order are easy to update.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 xl:min-w-[360px]">
+                <input
+                  type="text"
+                  value={newColumnLabel}
+                  onChange={(event) => setNewColumnLabel(event.target.value)}
+                  className="glass-input rounded-xl px-4 py-2.5 text-sm min-w-[220px]"
+                  placeholder="New column label"
+                />
+                <button
+                  type="button"
+                  onClick={createBudgetColumn}
+                  disabled={savingCustomColumnId === 'new'}
+                  className="gold-btn rounded-xl py-2.5 px-5 text-sm disabled:opacity-50"
+                >
+                  {savingCustomColumnId === 'new' ? 'Adding...' : 'Add Column'}
+                </button>
+              </div>
+            </div>
+            {customColumns.length > 0 && (
+              <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-3">
+                {customColumns.map((column) => (
+                  <div
+                    key={`editor-${column.id}`}
+                    className="rounded-2xl border border-white/10 bg-white/[0.025] p-3.5"
+                  >
+                    <p className="text-[11px] uppercase tracking-wide mb-2" style={{ color: 'rgba(147,197,253,0.85)' }}>
+                      Edit column
+                    </p>
+                    <div className="space-y-2.5">
+                      <input
+                        type="text"
+                        value={column.label}
+                        onChange={(event) => updateCustomColumnDraft(column.id, 'label', event.target.value)}
+                        className="glass-input rounded-xl px-3 py-2 text-xs w-full"
+                        placeholder="Column label"
+                      />
+                      <input
+                        type="number"
+                        value={column.sortOrder ?? 0}
+                        onChange={(event) => updateCustomColumnDraft(column.id, 'sortOrder', Number(event.target.value || 0))}
+                        className="glass-input rounded-xl px-3 py-2 text-xs w-full"
+                        placeholder="Display order"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => saveBudgetColumnLabel(column)}
+                        disabled={savingCustomColumnId === `label-${column.id}`}
+                        className="rounded-xl px-3 py-2 text-xs font-medium border disabled:opacity-50 w-full"
+                        style={{ borderColor: 'rgba(212,175,55,0.22)', color: saveText, background: 'rgba(212,175,55,0.08)' }}
+                      >
+                        {savingCustomColumnId === `label-${column.id}` ? 'Saving...' : 'Update Column'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center justify-between mb-4 gap-4">
             <div>
               <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
@@ -345,6 +582,7 @@ export default function Finance() {
                       'Sales Match Reserve',
                       'Direct Referral',
                       'Admin / Ops Reserve',
+                      ...customColumns.map((column) => column.label),
                       'Reserve / Code',
                       'Reserve Total',
                       'Projected Margin',
@@ -409,6 +647,17 @@ export default function Finance() {
                             className="glass-input rounded-xl px-3 py-2 text-xs w-full"
                           />
                         </td>
+                        {customColumns.map((column) => (
+                          <td key={`${row.packageType}-${column.id}`} className="py-3 px-3 min-w-[170px]">
+                            <input
+                              type="number"
+                              value={column.valuesByPackage?.[row.packageType] ?? 0}
+                              onChange={(event) => updateCustomColumnValueDraft(column.id, row.packageType, event.target.value)}
+                              onBlur={(event) => saveBudgetColumnValue(column.id, row.packageType, event.target.value)}
+                              className="glass-input rounded-xl px-3 py-2 text-xs w-full"
+                            />
+                          </td>
+                        ))}
                         <td className="py-3 px-3" style={{ color: strongText }}>PHP {fmtMoney(row.reservePerCode)}</td>
                         <td className="py-3 px-3 font-medium" style={{ color: reserveTotalText }}>PHP {fmtMoney(row.reserveTotal)}</td>
                         <td className="py-3 px-3 font-medium" style={{ color: marginText }}>PHP {fmtMoney(row.projectedOperatingMargin)}</td>
@@ -441,42 +690,57 @@ export default function Finance() {
           )}
         </div>
 
-        <div className="glass-card rounded-2xl p-5 xl:sticky xl:top-24">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <div>
-              <p className="text-sm font-semibold text-white">{detailPanel?.title || 'Finance details'}</p>
-              <p className="text-xs mt-1 leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                {detailPanel?.subtitle || 'Select a card or package row to inspect its reserve math and export actions.'}
+        <div className="grid grid-cols-1 2xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] gap-6 items-start">
+          <div className="glass-card rounded-2xl p-5">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <p className="text-sm font-semibold text-white">{selectedSummaryPanel?.title || 'Finance calculations'}</p>
+                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  {selectedSummaryPanel?.subtitle || 'Select a top finance card to inspect the calculation summary for that bucket.'}
+                </p>
+              </div>
+            </div>
+
+            <DetailList items={selectedSummaryPanel?.details || []} />
+
+            <div className="mt-4 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'rgba(212,175,55,0.7)' }}>
+                Quick actions
               </p>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleExport('xlsx')}
+                  disabled={Boolean(exporting)}
+                  className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50"
+                  style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
+                >
+                  {exporting === 'xlsx' ? 'Exporting XLSX...' : 'Export current year to XLSX'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExport('pdf')}
+                  disabled={Boolean(exporting)}
+                  className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50"
+                  style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
+                >
+                  {exporting === 'pdf' ? 'Preparing PDF report...' : 'Export current year to PDF'}
+                </button>
+              </div>
             </div>
           </div>
 
-          <DetailList items={detailPanel?.details || []} />
-
-          <div className="mt-4 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'rgba(212,175,55,0.7)' }}>
-              Quick actions
-            </p>
-            <div className="grid grid-cols-1 gap-2">
-              <button
-                type="button"
-                onClick={() => handleExport('xlsx')}
-                disabled={Boolean(exporting)}
-                className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50"
-                style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
-              >
-                {exporting === 'xlsx' ? 'Exporting XLSX...' : 'Export current year to XLSX'}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleExport('pdf')}
-                disabled={Boolean(exporting)}
-                className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50"
-                style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
-              >
-                {exporting === 'pdf' ? 'Preparing PDF report...' : 'Export current year to PDF'}
-              </button>
+          <div className="glass-card rounded-2xl p-5">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <p className="text-sm font-semibold text-white">{selectedPackagePanel?.title || 'Package breakdown'}</p>
+                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  {selectedPackagePanel?.subtitle || 'Click a package row above to inspect the full reserve math for that package beside the calculation summary.'}
+                </p>
+              </div>
             </div>
+
+            <DetailList items={selectedPackagePanel?.details || []} />
           </div>
         </div>
       </div>

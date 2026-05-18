@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../api';
+import { useAuth } from '../../contexts/AuthContext';
+import { getMemberCache, setMemberCache } from '../../utils/memberWarmCache';
 import {
   HiOutlineChartBar,
   HiOutlineClock,
@@ -67,18 +69,26 @@ function buildRequirementStatusText(data) {
 }
 
 export default function RankingProgress() {
+  const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [user?.uid]);
 
   async function loadData() {
-    setLoading(true);
+    const cached = getMemberCache(user?.uid, 'ranking');
+    if (cached) {
+      setData(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     try {
       const res = await api.get('/ranking');
       setData(res.data);
+      setMemberCache(user?.uid, 'ranking', res.data);
     } catch {
       setData(null);
     } finally {

@@ -9,8 +9,10 @@ import {
   HiOutlineStar,
   HiOutlineTrendingUp,
   HiOutlineUsers,
+  HiOutlineDownload,
 } from 'react-icons/hi';
 import api from '../../api';
+import { formatDateTimeManila } from '../../utils/dateTime';
 
 const fmtMoney = (n) => `PHP ${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -86,7 +88,7 @@ function IncomeEntryCard({ row, accent, metric }) {
             {metric === 'direct-referral' && row.fullname ? row.fullname : 'Income Entry'}
           </p>
           <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
-            {dateValue ? new Date(dateValue).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Date not available'}
+            {dateValue ? formatDateTimeManila(dateValue) : 'Date not available'}
           </p>
         </div>
         <div className="text-sm font-bold" style={{ color: accent }}>
@@ -103,6 +105,26 @@ function IncomeEntryCard({ row, accent, metric }) {
           <div>
             <p style={{ color: 'rgba(255,255,255,0.45)' }}>Account Username</p>
             <p className="text-white">{row.username || 'Not available'}</p>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Package</p>
+            <p className="text-white">{row.accountType || 'Not available'}</p>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Credit Source</p>
+            <p className="text-white">{row.rowType === 'upgrade_incentive' ? 'Upgrade incentive from referral' : 'Referral signup package'}</p>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Entry Audit</p>
+            <p className="text-white">{row.entryType || 'Not available'}</p>
+          </div>
+          <div className="sm:col-span-2">
+            <p style={{ color: 'rgba(255,255,255,0.45)' }}>Sponsor Credit Rule</p>
+            <p className="text-white">
+              {row.sponsorCreditEligible
+                ? 'This referral entry currently counts toward sponsor direct-referral credit.'
+                : 'This referral entry is currently excluded from sponsor direct-referral credit.'}
+            </p>
           </div>
         </div>
       )}
@@ -172,6 +194,7 @@ export default function DashboardMetricDetail() {
   const config = METRIC_CONFIG[metric];
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -179,7 +202,10 @@ export default function DashboardMetricDetail() {
     async function loadBreakdown() {
       setLoading(true);
       try {
-        const res = await api.get(`/dashboard/breakdown/${metric}`);
+        const params = metric === 'leadership-bonus'
+          ? `?page=${page}&perPage=50`
+          : '';
+        const res = await api.get(`/dashboard/breakdown/${metric}${params}`);
         if (!cancelled) setData(res.data);
       } catch {
         if (!cancelled) setData(null);
@@ -190,7 +216,23 @@ export default function DashboardMetricDetail() {
 
     loadBreakdown();
     return () => { cancelled = true; };
-  }, [metric]);
+  }, [metric, page]);
+
+  async function handleExportXlsx() {
+    const res = await api.get(`/dashboard/breakdown/${metric}/export?format=xlsx`, {
+      responseType: 'blob',
+    });
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${metric}-breakdown.xlsx`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  function handleExportPdf() {
+    window.print();
+  }
 
   if (!config) {
     return (
@@ -232,20 +274,44 @@ export default function DashboardMetricDetail() {
               {data.formula}
             </p>
           </div>
-          <Link
-            to={config.cta.to}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold"
-            style={{ background: `${config.accent}16`, color: config.accent, border: `1px solid ${config.accent}33` }}
-          >
-            {config.cta.label}
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            {metric === 'leadership-bonus' ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleExportXlsx}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+                  style={{ background: `${config.accent}16`, color: config.accent, border: `1px solid ${config.accent}33` }}
+                >
+                  <HiOutlineDownload className="w-4 h-4" />
+                  Export XLSX
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportPdf}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: '#fff', border: '1px solid rgba(255,255,255,0.12)' }}
+                >
+                  <HiOutlineDownload className="w-4 h-4" />
+                  Export PDF
+                </button>
+              </>
+            ) : null}
+            <Link
+              to={config.cta.to}
+              className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold"
+              style={{ background: `${config.accent}16`, color: config.accent, border: `1px solid ${config.accent}33` }}
+            >
+              {config.cta.label}
+            </Link>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <SummaryCard label="Total" value={typeof data.total === 'number' ? fmtMoney(data.total) : data.total} accent={config.accent} />
         <SummaryCard label="Entries Shown" value={fmtInt(rows.length)} accent="#fff" />
-        <SummaryCard label="As Of" value={data.asOf ? new Date(data.asOf).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'Now'} accent="#fff" />
+        <SummaryCard label="As Of" value={data.asOf ? formatDateTimeManila(data.asOf) : 'Now'} accent="#fff" />
         <SummaryCard
           label="Traceability"
           value={metric === 'leadership-bonus' ? `${fmtInt(data.summary?.directReferralCount || 0)} direct referrals` : 'Readable breakdown'}
@@ -265,13 +331,35 @@ export default function DashboardMetricDetail() {
         <div className="flex items-center justify-between gap-3 mb-4">
           <div>
             <h2 className="font-display text-lg font-semibold text-white">Entries Behind This Number</h2>
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              Each row below is translated into a simple human-readable card instead of raw JSON.
-            </p>
           </div>
+          {metric === 'leadership-bonus' && data?.pagination ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={page <= 1}
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+                style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+              >
+                Prev
+              </button>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                {data.pagination.page} / {data.pagination.totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.min(Number(data.pagination.totalPages || 1), current + 1))}
+                disabled={page >= Number(data.pagination.totalPages || 1)}
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+                style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+              >
+                Next
+              </button>
+            </div>
+          ) : null}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[34rem] overflow-y-auto pr-1">
           {rows.length > 0 ? rows.map((row, index) => (
             <IncomeEntryCard
               key={`${row.pid || row.id || row.uid || row.processKey || index}`}
@@ -288,29 +376,40 @@ export default function DashboardMetricDetail() {
         </div>
       </div>
 
-      <div className="glass-card rounded-2xl p-5">
-        <h2 className="font-display text-lg font-semibold text-white">How To Read This</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
-          <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
-            <p className="font-semibold text-white">Total</p>
-            <p className="mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              This is the same number shown on your dashboard card.
-            </p>
-          </div>
-          <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
-            <p className="font-semibold text-white">Entries</p>
-            <p className="mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              These are the payout or source rows currently used to explain how that number was built.
-            </p>
-          </div>
-          <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
-            <p className="font-semibold text-white">Next Step</p>
-            <p className="mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              Use the button above if you want to open the full member page tied to this metric.
-            </p>
+      {metric === 'leadership-bonus' ? (
+        <div className="glass-card rounded-2xl p-5">
+          <h2 className="font-display text-lg font-semibold text-white">Leadership Summary</h2>
+          <div className="overflow-x-auto mt-4">
+            <table className="w-full text-sm min-w-[720px]">
+              <thead>
+                <tr>
+                  {['#', 'Member', 'Level', 'Rate', 'Source Pairing', 'Leadership Bonus', 'Direct Referrals'].map((heading) => (
+                    <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, index) => (
+                  <tr key={`${row.uid || row.username || index}-summary`} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <td className="py-3 px-3 text-white/55">{((Number(data?.pagination?.page || 1) - 1) * 50) + index + 1}</td>
+                    <td className="py-3 px-3 text-white">{row.fullname || row.username}</td>
+                    <td className="py-3 px-3 text-white/75">Level {row.level}</td>
+                    <td className="py-3 px-3 text-white/75">{Number(row.ratePercent || 0)}%</td>
+                    <td className="py-3 px-3 text-white/75">{fmtMoney(row.pairingIncome || 0)}</td>
+                    <td className="py-3 px-3 font-semibold" style={{ color: config.accent }}>{fmtMoney(row.amount || 0)}</td>
+                    <td className="py-3 px-3 text-white/75">{fmtInt(row.directReferralCount || 0)}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td className="py-3 px-3 font-semibold text-white" colSpan="5">Overall Total</td>
+                  <td className="py-3 px-3 font-bold" style={{ color: config.accent }}>{fmtMoney(data.total || 0)}</td>
+                  <td className="py-3 px-3 text-white/75">{fmtInt(data.summary?.directReferralCount || 0)}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import api from '../../api';
+import usePublicStats from '../../hooks/usePublicStats';
 
 /* ── SVG Icons ────────────────────────────────────────────── */
 const CheckIcon = () => (
@@ -47,12 +48,6 @@ const features = [
   'View pairing & referral reports',
 ];
 
-const stats = [
-  { value: '5.9K+', label: 'Active Members' },
-  { value: '5.9K+', label: 'Networks Built' },
-  { value: '99.9%', label: 'Uptime' },
-];
-
 export default function Login() {
   const [username, setUsername]       = useState('');
   const [password, setPassword]       = useState('');
@@ -63,6 +58,13 @@ export default function Login() {
   const [resetLoading, setResetLoading] = useState(false);
   const { loginMember } = useAuth();
   const navigate = useNavigate();
+  const { stats: publicStats } = usePublicStats();
+
+  const stats = [
+    { value: `${Number(publicStats.activeMembers || 0).toLocaleString()}+`, label: 'Active Members' },
+    { value: `${Number(publicStats.networksBuilt || 0).toLocaleString()}+`, label: 'Networks Built' },
+    { value: '99.9%', label: 'Uptime' },
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();

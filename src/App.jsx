@@ -21,6 +21,7 @@ import RankingProgress from './pages/member/RankingProgress';
 import Leaderboard from './pages/member/Leaderboard';
 import Vouchers from './pages/member/Vouchers';
 import Transactions from './pages/member/Transactions';
+import TransactionDetails from './pages/member/TransactionDetails';
 import UpgradeAccount from './pages/member/UpgradeAccount';
 import Registration from './pages/member/Registration';
 import SupportContact from './pages/member/SupportContact';
@@ -123,6 +124,7 @@ export default function App() {
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="vouchers" element={<Vouchers />} />
           <Route path="transactions" element={<Transactions />} />
+          <Route path="transactions/:pid" element={<TransactionDetails />} />
           <Route path="upgrade" element={<UpgradeAccount />} />
           <Route path="register" element={<Registration />} />
           <Route path="referral-invite" element={<ReferralInvite />} />

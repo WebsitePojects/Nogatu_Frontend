@@ -3,6 +3,7 @@ import api from '../../api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { formatDateTimeManila } from '../../utils/dateTime';
 
 export default function ManageCodes() {
   const { admin } = useAuth();
@@ -15,6 +16,7 @@ export default function ManageCodes() {
   const [historyTotalPages, setHistoryTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(true);
+  const [codesExpanded, setCodesExpanded] = useState(false);
   const [selected, setSelected] = useState([]);
   const [selectMode, setSelectMode] = useState(false);
   const [codeSearch, setCodeSearch] = useState('');
@@ -36,20 +38,35 @@ export default function ManageCodes() {
   const greenText = isDarkMode ? '#34d399' : '#047857';
   const greenSoft = isDarkMode ? '#a7f3d0' : '#065f46';
 
-  useEffect(() => { loadCodes(); }, [page]);
+  useEffect(() => { loadCodes(); }, [page, codesExpanded]);
   useEffect(() => { loadHistory(); }, [historyPage]);
 
   async function loadCodes() {
     setLoading(true);
     try {
       const q = codeSearch.trim();
+      const perPage = codesExpanded ? 100 : 40;
       const url = q
-        ? `/admin/codes?page=${page}&q=${encodeURIComponent(q)}`
-        : `/admin/codes?page=${page}`;
+        ? `/admin/codes?page=${page}&perPage=${perPage}&q=${encodeURIComponent(q)}`
+        : `/admin/codes?page=${page}&perPage=${perPage}`;
       const res = await api.get(url);
       setCodes(res.data.codes);
       setTotalPages(res.data.totalPages);
     } catch { } finally { setLoading(false); }
+  }
+
+  async function exportHistory(format = 'xlsx') {
+    try {
+      const q = codeSearch.trim();
+      const url = `/api/admin/codes/history/export?format=${format}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+      const link = document.createElement('a');
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch {
+      toast.error('Failed to export activation code history');
+    }
   }
 
   async function loadHistory() {
@@ -290,6 +307,21 @@ export default function ManageCodes() {
               : 'Select codes below'}
           </p>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setCodesExpanded((current) => !current);
+                setPage(1);
+              }}
+              className="text-sm py-1.5 px-3 rounded-lg font-medium"
+              style={{
+                background: isDarkMode ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.12)',
+                color: blueText,
+                border: '1px solid rgba(59,130,246,0.22)',
+              }}
+            >
+              {codesExpanded ? 'Retract to 40 Rows' : 'Expand to 100 Rows'}
+            </button>
             <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
             <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{page} / {totalPages}</span>
             <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
@@ -372,6 +404,22 @@ export default function ManageCodes() {
             <p className="text-xs mt-1" style={{ color: textMuted }}>Generated, released, transferred, upgraded, and maintenance usage events.</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => exportHistory('xlsx')}
+              className="rounded-xl px-4 py-2 text-xs font-semibold border"
+              style={{ background: 'rgba(59,130,246,0.08)', color: blueText, border: '1px solid rgba(59,130,246,0.22)' }}
+            >
+              Export XLSX
+            </button>
+            <button
+              type="button"
+              onClick={() => exportHistory('pdf')}
+              className="rounded-xl px-4 py-2 text-xs font-semibold border"
+              style={{ background: 'rgba(16,185,129,0.08)', color: greenText, border: '1px solid rgba(16,185,129,0.22)' }}
+            >
+              Export PDF
+            </button>
             <PaginationBtn onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage <= 1}>Prev</PaginationBtn>
             <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{historyPage} / {historyTotalPages}</span>
             <PaginationBtn onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))} disabled={historyPage >= historyTotalPages}>Next</PaginationBtn>
@@ -414,7 +462,7 @@ export default function ManageCodes() {
                     </td>
                     <td className="py-3 px-4" style={{ color: textSubtle }}>{row.summary}</td>
                     <td className="py-3 px-4 text-xs" style={{ color: dateColor }}>
-                      {row.createdAt ? new Date(row.createdAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : '-'}
+                      {formatDateTimeManila(row.createdAt)}
                     </td>
                   </tr>
                 ))}

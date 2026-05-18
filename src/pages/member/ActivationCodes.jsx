@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { HiOutlineKey, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
 import { useAuth } from '../../contexts/AuthContext';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
+import { formatDateTimeManila } from '../../utils/dateTime';
 
 const STATUS_STYLES = {
   0: { label: 'Unreleased', bg: 'rgba(100,116,139,0.1)', color: '#64748b', border: 'rgba(100,116,139,0.2)' },
@@ -126,7 +127,7 @@ export default function ActivationCodes() {
       onConfirm: () => performMaintenance(code, transType),
       details: [
         { label: 'Code', value: code },
-        { label: 'Account type', value: codeRow?.accountLabel || codeRow?.producttypeName || 'Maintenance code' },
+        { label: 'Product', value: codeRow?.producttypeName || 'Maintenance code' },
         { label: 'Use', value: transType === 2 ? 'Hi-Five product maintenance' : 'Monthly maintenance' },
       ],
     });
@@ -396,7 +397,7 @@ export default function ActivationCodes() {
                     </td>
                     <td className="py-3 px-4 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>{row.summary}</td>
                     <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                      {row.createdAt ? new Date(row.createdAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : '-'}
+                      {formatDateTimeManila(row.createdAt)}
                     </td>
                   </tr>
                 ))}

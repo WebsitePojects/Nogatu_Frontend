@@ -138,7 +138,7 @@ export default function Dashboard() {
     { label: 'Uni-Level', metric: 'uni-level', value: `PHP ${fmt(data.uniLevel)}`, icon: HiOutlineTrendingUp, actionLabel: 'View eligibility and payout history' },
     { label: 'Leadership Bonus', metric: 'leadership-bonus', value: `PHP ${fmt(data.leadershipBonus)}`, icon: HiOutlineStar, actionLabel: 'See leadership bonus entries' },
     { label: 'Hi-Five Bonus', metric: 'hi-five-bonus', path: '/hifive', value: `PHP ${fmt(data.hiFiveBonus)}`, icon: HiOutlineGift, actionLabel: 'Open Hi-Five bonus page' },
-    { label: 'Ranking Bonus (LPC)', metric: 'ranking-bonus', value: `PHP ${fmt(data.rankingBonus)}`, icon: HiOutlineShieldCheck, actionLabel: 'See ranking bonus entries' },
+    { label: 'Ranking Bonus', metric: 'ranking-bonus', value: `PHP ${fmt(data.rankingBonus)}`, icon: HiOutlineShieldCheck, actionLabel: 'See ranking bonus entries' },
     { label: 'Left Accounts', metric: 'left-accounts', path: '/pairing', value: `${fmtInt(data.leftAccounts)} accts | ${fmtInt(data.leftPoints)} pts`, icon: HiOutlineArrowLeft, actionLabel: 'Open pairing reports' },
     { label: 'Right Accounts', metric: 'right-accounts', path: '/pairing', value: `${fmtInt(data.rightAccounts)} accts | ${fmtInt(data.rightPoints)} pts`, icon: HiOutlineArrowRight, actionLabel: 'Open pairing reports' },
   ];

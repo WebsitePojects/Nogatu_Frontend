@@ -5,12 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
-
-const TIN_REGEX = /^[0-9-]{9,30}$/;
-
-function normalizeTin(value) {
-  return String(value || '').trim();
-}
+import { formatTin, isValidTin } from '../../utils/tin';
 
 function Spinner() {
   return <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>;
@@ -67,6 +62,7 @@ export default function Registration() {
     lastname:       '',
     middlename:     '',
     email:          '',
+    address:        '',
     tin:            '',
     contactno:      '',
     dob:            '',
@@ -182,7 +178,7 @@ export default function Registration() {
     try {
       await api.post('/registration/register', {
         ...form,
-        tin: normalizeTin(form.tin),
+        tin: formatTin(form.tin),
       });
       toast.success('Account registered successfully!');
       setConfirmModal(null);
@@ -217,9 +213,9 @@ export default function Registration() {
     }
     if (usernameValid === false)  return toast.error('Username already taken');
 
-    const normalizedTin = normalizeTin(form.tin);
-    if (!TIN_REGEX.test(normalizedTin)) {
-      return toast.error('TIN must be 9-30 characters using digits and dashes only');
+    const normalizedTin = formatTin(form.tin);
+    if (!isValidTin(normalizedTin)) {
+      return toast.error('TIN must contain 9-15 digits');
     }
 
     setConfirmModal({
@@ -379,6 +375,18 @@ export default function Registration() {
             />
           </div>
 
+          <div>
+            <label className="label">Address</label>
+            <input
+              type="text"
+              value={form.address}
+              onChange={(e) => handleChange('address', e.target.value)}
+              className="glass-input"
+              placeholder="Complete address"
+              required
+            />
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="label">Contact Number</label>
@@ -409,7 +417,7 @@ export default function Registration() {
             <input
               type="text"
               value={form.tin}
-              onChange={(e) => handleChange('tin', e.target.value)}
+              onChange={(e) => handleChange('tin', formatTin(e.target.value))}
               className="glass-input"
               placeholder="e.g. 123-456-789-000"
               required

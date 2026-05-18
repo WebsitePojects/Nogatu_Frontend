@@ -150,8 +150,21 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
                     <div>
                       <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{d.name}</span>
                       <span className="text-xs font-mono ml-2" style={{ color: 'var(--text-muted)' }}>{d.username}</span>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        {d.entryType ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.18)' }}>
+                            {d.entryType}
+                          </span>
+                        ) : null}
+                        <span className="text-[10px]" style={{ color: d.sponsorCreditEligible ? '#4ade80' : 'rgba(255,255,255,0.4)' }}>
+                          {d.sponsorCreditEligible ? 'Sponsor credit eligible' : 'Sponsor credit blocked'}
+                        </span>
+                      </div>
                     </div>
-                    {d.pkg && <PkgBadge pkg={d.pkg} />}
+                    <div className="text-right">
+                      {d.pkg && <PkgBadge pkg={d.pkg} />}
+                      <p className="mt-1 text-[10px]" style={{ color: 'rgba(255,255,255,0.45)' }}>₱{fmt(d.directReferralAmount || 0)}</p>
+                    </div>
                   </div>
                 ))}
               </div>

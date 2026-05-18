@@ -8,6 +8,7 @@ import Organizations from './pages/Organizations';
 import Certifications from './pages/Certifications';
 import Contact from './pages/Contact';
 import Join from './pages/Join';
+import RouteUnavailable from './pages/RouteUnavailable';
 
 export default function LandingApp() {
   return (
@@ -21,8 +22,8 @@ export default function LandingApp() {
         <Route path="/certifications" element={<Certifications />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/join/:token" element={<Join />} />
+        <Route path="*" element={<RouteUnavailable />} />
       </Route>
-      <Route path="*" element={<Home />} />
     </Routes>
   );
 }

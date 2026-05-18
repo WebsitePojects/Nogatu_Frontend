@@ -406,7 +406,7 @@ export default function CDAccounts() {
                     cdAmount > 0
                       ? Math.min(100, Math.round((cdPaid / cdAmount) * 100))
                       : 0;
-                  const isFullyPaid = Boolean(a.isRecoveredFullyPaid);
+                  const isFullyPaid = Boolean(a.isCdStatusPaid);
                   const packageName =
                     PACKAGE_NAMES[a.accttype] || `Type ${a.accttype}`;
 
@@ -525,7 +525,7 @@ export default function CDAccounts() {
                                 }
                           }
                         >
-                          {a.cdstatusLabel || (isFullyPaid ? 'Fully Paid' : 'Paying')}
+                          {a.cdstatusLabel || (isFullyPaid ? 'CD - Paid' : 'Paying')}
                         </span>
                       </td>
                       <td className="py-3 px-3 text-xs" style={{ color: mutedText }}>

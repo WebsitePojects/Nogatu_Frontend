@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import { HiOutlineChartBar, HiOutlineArrowLeft, HiOutlineArrowRight } from 'react-icons/hi';
+import { formatDateTimeManila } from '../../utils/dateTime';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+const BP_PESO_VALUE = 250;
+const toBp = (pesoValue) => Number(Number(pesoValue || 0) / BP_PESO_VALUE);
 
 function Spinner() {
   return (
@@ -15,9 +18,9 @@ function Spinner() {
 
 const SUMMARY_CARDS = (counts) => [
   { label: 'Left Accounts', value: counts?.totalLeft || 0, icon: HiOutlineArrowLeft, color: '#D4AF37' },
-  { label: 'Left Points', value: fmt(counts?.totalPointsLeft), icon: HiOutlineChartBar, color: '#F2D06B' },
+  { label: 'Left Points', value: `${fmtInt(toBp(counts?.totalPointsLeft))} BP`, icon: HiOutlineChartBar, color: '#F2D06B' },
   { label: 'Right Accounts', value: counts?.totalRight || 0, icon: HiOutlineArrowRight, color: '#D4AF37' },
-  { label: 'Right Points', value: fmt(counts?.totalPointsRight), icon: HiOutlineChartBar, color: '#F2D06B' },
+  { label: 'Right Points', value: `${fmtInt(toBp(counts?.totalPointsRight))} BP`, icon: HiOutlineChartBar, color: '#F2D06B' },
 ];
 
 function traceStatus(traceRow) {
@@ -59,7 +62,7 @@ export default function PairingReports() {
   const traceSummary = data.trace?.summary || {};
   const traceRows = data.trace?.rows || [];
   const packagePolicy = data.packagePolicy || null;
-  const eligibility = data.eligibility || { canEarnPairing: true, reason: null };
+  const eligibility = data.eligibility || { canEarnPairing: true, sourceEligible: true, reason: null };
 
   return (
     <div className="space-y-6">
@@ -90,7 +93,7 @@ export default function PairingReports() {
         </div>
         <div className="glass-card rounded-2xl p-5">
           <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Matched BP</p>
-          <p className="text-xl font-bold text-white">{fmt(traceSummary.totalPairPoints)}</p>
+          <p className="text-xl font-bold text-white">{fmtInt(toBp(traceSummary.totalPairPoints))} BP</p>
         </div>
         <div className="glass-card rounded-2xl p-5">
           <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Credited Pairing</p>
@@ -102,11 +105,11 @@ export default function PairingReports() {
         </div>
       </div>
 
-      {!eligibility.canEarnPairing && (
-        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid rgba(248,113,113,0.16)', background: 'rgba(248,113,113,0.06)' }}>
-          <p className="text-sm font-semibold text-white">Sales matched bonus is currently locked for this account</p>
+      {!eligibility.sourceEligible && (
+        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid rgba(212,175,55,0.18)', background: 'rgba(212,175,55,0.06)' }}>
+          <p className="text-sm font-semibold text-white">This account is currently blocked from passing its own BP upward</p>
           <p className="text-xs mt-2 leading-6" style={{ color: 'rgba(255,255,255,0.68)' }}>
-            {eligibility.reason || 'This account is not pairing-eligible right now.'}
+            {eligibility.reason || 'This account cannot contribute its own BP upstream yet, but eligible downlines can still generate pairing for this account.'}
           </p>
         </div>
       )}
@@ -230,12 +233,12 @@ export default function PairingReports() {
                   }}
                   className="hover:bg-white/[0.03] transition-colors"
                 >
-                  <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{r.transdate || '-'}</td>
+                  <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{formatDateTimeManila(r.transdate)}</td>
                   <td className="py-3 px-4 text-white/70">{r.totalleft}</td>
-                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.7)' }}>{fmt(r.totalpointsleft)}</td>
+                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.7)' }}>{fmtInt(toBp(r.totalpointsleft))} BP</td>
                   <td className="py-3 px-4 text-white/70">{r.totalright}</td>
-                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.7)' }}>{fmt(r.totalpointsright)}</td>
-                  <td className="py-3 px-4 font-medium text-white/85">{fmt(r.totalpoints)}</td>
+                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.7)' }}>{fmtInt(toBp(r.totalpointsright))} BP</td>
+                  <td className="py-3 px-4 font-medium text-white/85">{fmtInt(toBp(r.totalpoints))} BP</td>
                   <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(r.totalbpay)}</td>
                 </tr>
               ))}
@@ -254,13 +257,13 @@ export default function PairingReports() {
           {(data.reports || []).map((r, i) => (
             <div key={i} className="glass-card rounded-2xl p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-white/80">{r.transdate || '-'}</span>
+                <span className="text-xs font-semibold text-white/80">{formatDateTimeManila(r.transdate)}</span>
                 <span className="text-xs font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(r.totalbpay)}</span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                <div>Left: {r.totalleft} / {fmt(r.totalpointsleft)}</div>
-                <div>Right: {r.totalright} / {fmt(r.totalpointsright)}</div>
-                <div>Pair: {fmt(r.totalpoints)}</div>
+                <div>Left: {r.totalleft} / {fmtInt(toBp(r.totalpointsleft))} BP</div>
+                <div>Right: {r.totalright} / {fmtInt(toBp(r.totalpointsright))} BP</div>
+                <div>Pair: {fmtInt(toBp(r.totalpoints))} BP</div>
                 <div>Total: {fmt(r.totalbpay)}</div>
               </div>
             </div>
@@ -299,7 +302,7 @@ export default function PairingReports() {
                   }}
                   className="hover:bg-white/[0.03] transition-colors"
                 >
-                  <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{row.pairedAt || '-'}</td>
+                  <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{formatDateTimeManila(row.pairedAt)}</td>
                   <td className="py-3 px-4">
                     <div className="text-white/80 text-xs">{row.left?.fullName || '-'}</div>
                     <div className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>{row.left?.username || ''}</div>
@@ -308,7 +311,7 @@ export default function PairingReports() {
                     <div className="text-white/80 text-xs">{row.right?.fullName || '-'}</div>
                     <div className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>{row.right?.username || ''}</div>
                   </td>
-                  <td className="py-3 px-4 text-white/85 font-medium">{fmt(row.pairPoints)}</td>
+                  <td className="py-3 px-4 text-white/85 font-medium">{fmtInt(toBp(row.pairPoints))} BP</td>
                   <td className="py-3 px-4 text-white/70">PHP {fmt(row.grossIncome)}</td>
                   <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
                   <td className="py-3 px-4" style={{ color: row.blockedIncome > 0 ? '#f87171' : 'rgba(255,255,255,0.35)' }}>
@@ -344,7 +347,7 @@ export default function PairingReports() {
             <div key={row.ledgerUid || index} className="glass-card rounded-2xl p-4 space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-xs font-semibold text-white/80">{row.pairedAt || '-'}</div>
+                  <div className="text-xs font-semibold text-white/80">{formatDateTimeManila(row.pairedAt)}</div>
                   <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
                     {row.left?.username || '-'} x {row.right?.username || '-'}
                   </div>
@@ -361,7 +364,7 @@ export default function PairingReports() {
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                <div>BP: {fmt(row.pairPoints)}</div>
+                <div>BP: {fmtInt(toBp(row.pairPoints))}</div>
                 <div>Gross: PHP {fmt(row.grossIncome)}</div>
                 <div>Credited: PHP {fmt(row.creditedIncome)}</div>
                 <div>Blocked: PHP {fmt(row.blockedIncome)}</div>

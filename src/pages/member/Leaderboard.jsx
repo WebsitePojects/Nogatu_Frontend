@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../../api';
 import { HiOutlineStar, HiOutlineSparkles } from 'react-icons/hi';
+import { useAuth } from '../../contexts/AuthContext';
+import { getMemberCache, setMemberCache } from '../../utils/memberWarmCache';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', {
   minimumFractionDigits: 0,
@@ -8,6 +10,7 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-US', {
 });
 
 export default function Leaderboard() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [data, setData] = useState(null);
@@ -17,10 +20,18 @@ export default function Leaderboard() {
   }, [page]);
 
   async function loadData() {
-    setLoading(true);
+    const cacheKey = `leaderboard:${page}`;
+    const cached = getMemberCache(user?.uid, cacheKey);
+    if (cached) {
+      setData(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     try {
       const res = await api.get(`/leaderboard?page=${page}&perPage=25`);
       setData(res.data);
+      setMemberCache(user?.uid, cacheKey, res.data);
     } catch {
       setData(null);
     } finally {
@@ -35,6 +46,9 @@ export default function Leaderboard() {
   const userConsumed = Number(data?.userConsumedPoints || 0);
   const nextRankPoints = Number(data?.nextRankPoints || 0);
   const needed = Math.max(0, nextRankPoints - userRemaining);
+  const currentUserRow = (data?.leaderboard || []).find((row) => row.isCurrentUser) || null;
+  const currentUserName = currentUserRow?.fullname || user?.fullname || user?.shortname || user?.username || 'Current member';
+  const currentUserUsername = currentUserRow?.username || user?.username || '';
 
   return (
     <div className="space-y-6">
@@ -52,6 +66,9 @@ export default function Leaderboard() {
             <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.6)' }}>Your current standing</p>
             <p className="mt-1 text-2xl font-bold text-white">
               {userRank > 0 ? `#${userRank}` : 'Not ranked yet'}
+            </p>
+            <p className="text-sm mt-1 text-white/80">
+              {currentUserName}{currentUserUsername ? ` (${currentUserUsername})` : ''}
             </p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>{pointsBasis}: {fmt(userPoints)}</p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>
@@ -129,7 +146,10 @@ export default function Leaderboard() {
                         >
                           {(row.username || '?').slice(0, 1).toUpperCase()}
                         </span>
-                        <span>{row.username}</span>
+                        <span>
+                          <span className="block text-white/90">{row.fullname || row.username}</span>
+                          <span className="block text-[11px] text-white/45">{row.username}</span>
+                        </span>
                       </span>
                     </td>
                     <td className="py-3 px-3 text-white/60">{row.package}</td>

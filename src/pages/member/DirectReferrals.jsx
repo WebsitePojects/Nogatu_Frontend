@@ -7,11 +7,12 @@ const PKG_COLORS = {
   Platinum: '#6C757D', Garnet: '#9B2335', Diamond: '#4FC3F7',
 };
 
-const CODE_LABELS = { 1: 'PD', 2: 'FS', 3: 'CD' };
-const CODE_STYLES = {
-  1: { bg: 'rgba(34,197,94,0.1)',  border: 'rgba(34,197,94,0.25)',  color: '#4ade80' },
-  2: { bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.25)', color: '#fbbf24' },
-  3: { bg: 'rgba(148,163,184,0.1)',border: 'rgba(148,163,184,0.2)', color: '#94a3b8' },
+const ENTRY_STYLES = {
+  PD: { bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.25)', color: '#4ade80' },
+  FS: { bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.25)', color: '#fbbf24' },
+  CD: { bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.22)', color: '#f87171' },
+  'CD-PAID': { bg: 'rgba(96,165,250,0.1)', border: 'rgba(96,165,250,0.24)', color: '#60a5fa' },
+  UNKNOWN: { bg: 'rgba(148,163,184,0.1)', border: 'rgba(148,163,184,0.2)', color: '#94a3b8' },
 };
 
 function Spinner() {
@@ -68,7 +69,7 @@ export default function DirectReferrals() {
             <tbody>
               {referrals.map((r, i) => {
                 const pkgColor = PKG_COLORS[r.accttypeName] || '#D4AF37';
-                const codeStyle = CODE_STYLES[r.codeid] || CODE_STYLES[3];
+                const entryStyle = ENTRY_STYLES[r.entryCode] || ENTRY_STYLES.UNKNOWN;
                 return (
                   <tr
                     key={r.uid}
@@ -92,10 +93,13 @@ export default function DirectReferrals() {
                     <td className="py-3 px-4">
                       <span
                         className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
-                        style={{ background: codeStyle.bg, color: codeStyle.color, border: `1px solid ${codeStyle.border}` }}
+                        style={{ background: entryStyle.bg, color: entryStyle.color, border: `1px solid ${entryStyle.border}` }}
                       >
-                        {CODE_LABELS[r.codeid] || r.entryType}
+                        {r.entryType}
                       </span>
+                      <p className="mt-1 text-[10px]" style={{ color: 'rgba(255,255,255,0.38)' }}>
+                        {r.sponsorCreditEligible ? 'Counts for sponsor referral credit' : 'Does not count for sponsor referral credit'}
+                      </p>
                     </td>
                     <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
                       {r.datereg ? new Date(r.datereg).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}

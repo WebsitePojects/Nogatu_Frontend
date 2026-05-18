@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
+import { formatTin, isValidTin } from '../../utils/tin';
 
 export default function Join() {
   const { token } = useParams();
@@ -19,6 +20,7 @@ export default function Join() {
     lastname: '',
     middlename: '',
     email: '',
+    address: '',
     tin: '',
     contactno: '',
     dob: '',
@@ -97,6 +99,11 @@ export default function Join() {
       return;
     }
 
+    if (!isValidTin(form.tin)) {
+      setMessage({ type: 'error', text: 'TIN must contain 9-15 digits.' });
+      return;
+    }
+
     setConfirmModal({
       tone: 'gold',
       title: 'Consume this code and create the account?',
@@ -157,6 +164,7 @@ export default function Join() {
                   { key: 'lastname', label: 'Last Name', type: 'text' },
                   { key: 'middlename', label: 'Middle Name', type: 'text', optional: true },
                   { key: 'email', label: 'Email', type: 'email' },
+                  { key: 'address', label: 'Address', type: 'text' },
                   { key: 'contactno', label: 'Contact Number', type: 'text' },
                   { key: 'dob', label: 'Date of Birth', type: 'date' },
                   { key: 'tin', label: 'TIN', type: 'text' },
@@ -186,7 +194,7 @@ export default function Join() {
                       <input
                         type={field.type}
                         value={form[field.key]}
-                        onChange={(e) => updateField(field.key, e.target.value)}
+                        onChange={(e) => updateField(field.key, field.key === 'tin' ? formatTin(e.target.value) : e.target.value)}
                         onBlur={field.key === 'activationCode' ? () => validateCode(true) : undefined}
                         required={!field.optional}
                         className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"

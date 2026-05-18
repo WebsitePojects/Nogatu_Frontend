@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import { useTheme } from '../../contexts/ThemeContext';
 
 function statusStyle(status) {
-  if (status === 'frozen') {
-    return { background: 'rgba(59,130,246,0.1)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' };
-  }
   if (status === 'suspended') {
     return { background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.25)' };
   }
@@ -16,11 +13,18 @@ function statusStyle(status) {
 
 export default function AccountMasterlist() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isDarkMode } = useTheme();
   const [accounts, setAccounts] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
+  const [monitorRange, setMonitorRange] = useState(searchParams.get('monitorRange') || 'all');
+  const [monitorSort, setMonitorSort] = useState(searchParams.get('monitorSort') || 'newest');
+  const [monitorAccounts, setMonitorAccounts] = useState([]);
+  const [monitorPage, setMonitorPage] = useState(1);
+  const [monitorTotalPages, setMonitorTotalPages] = useState(1);
+  const [monitorSummary, setMonitorSummary] = useState({ weeklyRegistrations: 0, monthlyRegistrations: 0 });
   const [loading, setLoading] = useState(true);
   const [statusLoadingUid, setStatusLoadingUid] = useState(null);
   const [statusModal, setStatusModal] = useState(null);
@@ -30,22 +34,45 @@ export default function AccountMasterlist() {
   const blueText = isDarkMode ? '#93c5fd' : '#1d4ed8';
   const redText = isDarkMode ? '#fca5a5' : '#b91c1c';
 
-  useEffect(() => { loadAccounts(); }, [page]);
+  useEffect(() => { loadAccounts(); }, [page, monitorPage]);
 
-  async function loadAccounts(searchTerm) {
+  async function loadAccounts(searchTerm, monitorOverrides = {}) {
     setLoading(true);
     try {
       const q = searchTerm !== undefined ? searchTerm : search;
-      const res = await api.get(`/admin/accounts?page=${page}&search=${q}`);
+      const activeMonitorRange = monitorOverrides.range ?? monitorRange;
+      const activeMonitorSort = monitorOverrides.sort ?? monitorSort;
+      const activeMonitorPage = monitorOverrides.page ?? monitorPage;
+      const res = await api.get(`/admin/accounts?page=${page}&search=${encodeURIComponent(q)}&monitorPage=${activeMonitorPage}&monitorRange=${activeMonitorRange}&monitorSort=${activeMonitorSort}`);
       setAccounts(res.data.accounts);
       setTotalPages(res.data.totalPages);
+      setMonitorAccounts(res.data.monitoring?.accounts || []);
+      setMonitorTotalPages(res.data.monitoring?.totalPages || 1);
+      setMonitorSummary({
+        weeklyRegistrations: Number(res.data.monitoring?.weeklyRegistrations || 0),
+        monthlyRegistrations: Number(res.data.monitoring?.monthlyRegistrations || 0),
+      });
     } catch { } finally { setLoading(false); }
   }
 
   function handleSearch(e) {
     e.preventDefault();
     setPage(1);
+    setMonitorPage(1);
     loadAccounts(search);
+  }
+
+  function applyMonitorFilter(nextRange, nextSort = monitorSort) {
+    setMonitorRange(nextRange);
+    setMonitorSort(nextSort);
+    setMonitorPage(1);
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current);
+      params.set('monitorRange', nextRange);
+      params.set('monitorSort', nextSort);
+      return params;
+    });
+    window.setTimeout(() => loadAccounts(undefined, { range: nextRange, sort: nextSort, page: 1 }), 0);
   }
 
   async function submitStatusChange(account, nextStatus, reason) {
@@ -189,7 +216,7 @@ export default function AccountMasterlist() {
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit"
                           style={statusStyle(a.accountStatus)}
                         >
-                          {a.accountStatus === 'active' ? 'Active' : a.accountStatus === 'frozen' ? 'Frozen' : 'Suspended'}
+                          {a.accountStatus === 'active' ? 'Active' : 'Suspended'}
                         </span>
                         {a.accountStatusReason ? (
                           <span className="text-[10px] text-white/35 max-w-[150px] truncate" title={a.accountStatusReason}>
@@ -240,14 +267,6 @@ export default function AccountMasterlist() {
                             >
                               Suspend
                             </button>
-                            <button
-                              onClick={() => openStatusModal(a, 'frozen')}
-                              disabled={statusLoadingUid === a.uid}
-                              className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer disabled:opacity-50"
-                              style={{ background: 'rgba(59,130,246,0.1)', color: blueText, border: '1px solid rgba(59,130,246,0.25)' }}
-                            >
-                              Freeze
-                            </button>
                           </>
                         ) : (
                           <button
@@ -296,7 +315,7 @@ export default function AccountMasterlist() {
                   Account Controls
                 </p>
                 <h2 className="mt-2 font-display text-xl font-bold text-white">
-                  {statusModal.nextStatus === 'suspended' ? 'Suspend account' : 'Freeze account'}
+                  Suspend account
                 </h2>
               </div>
               <button
@@ -314,9 +333,7 @@ export default function AccountMasterlist() {
             </div>
 
             <p className="mt-3 text-sm leading-6" style={{ color: 'rgba(255,255,255,0.65)' }}>
-              {statusModal.nextStatus === 'suspended'
-                ? `Suspend ${statusModal.account.username} to block login and member access until the account is reviewed and reactivated.`
-                : `Freeze ${statusModal.account.username} to stop member access while preserving the account for admin investigation and support.`}
+              {`Suspend ${statusModal.account.username} to block login and member access until the account is reviewed and reactivated.`}
             </p>
 
             <div
@@ -324,7 +341,7 @@ export default function AccountMasterlist() {
               style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)', color: 'rgba(255,255,255,0.72)' }}
             >
               Active account <span className="text-white/90">{'->'}</span>{' '}
-              {statusModal.nextStatus === 'suspended' ? 'Suspended' : 'Frozen'} account
+              Suspended account
               <br />
               Member sessions are revoked immediately and the reason is kept in the account audit trail.
             </div>
@@ -363,22 +380,119 @@ export default function AccountMasterlist() {
                 disabled={statusLoadingUid === statusModal.account.uid}
                 className="flex-1 rounded-xl py-2.5 text-sm font-semibold disabled:opacity-60"
                 style={{
-                  background: statusModal.nextStatus === 'suspended'
-                    ? 'linear-gradient(135deg, rgba(239,68,68,0.9), rgba(248,113,113,0.9))'
-                    : 'linear-gradient(135deg, rgba(59,130,246,0.9), rgba(96,165,250,0.9))',
+                  background: 'linear-gradient(135deg, rgba(239,68,68,0.9), rgba(248,113,113,0.9))',
                   color: 'white',
                 }}
               >
                 {statusLoadingUid === statusModal.account.uid
                   ? 'Saving...'
-                  : statusModal.nextStatus === 'suspended'
-                    ? 'Confirm Suspension'
-                    : 'Confirm Freeze'}
+                  : 'Confirm Suspension'}
               </button>
             </div>
           </form>
         </div>
       ) : null}
+      <div className="glass-card rounded-2xl p-6 mt-6 overflow-hidden">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between mb-5">
+          <div>
+            <h2 className="font-display text-xl font-bold text-white">Registration Monitoring</h2>
+            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Weekly and monthly registration drilldown stays separate from the account masterlist for monitoring.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { key: 'all', label: 'All Monitoring' },
+              { key: 'week', label: `Weekly New Register (${monitorSummary.weeklyRegistrations})` },
+              { key: 'month', label: `Monthly Register (${monitorSummary.monthlyRegistrations})` },
+            ].map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => applyMonitorFilter(option.key)}
+                className="rounded-xl px-4 py-2 text-xs font-semibold border transition-colors"
+                style={monitorRange === option.key
+                  ? { background: 'rgba(212,175,55,0.16)', color: goldText, border: '1px solid rgba(212,175,55,0.3)' }
+                  : { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}
+              >
+                {option.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => applyMonitorFilter(monitorRange, monitorSort === 'newest' ? 'oldest' : 'newest')}
+              className="rounded-xl px-4 py-2 text-xs font-semibold border"
+              style={{ background: 'rgba(59,130,246,0.08)', color: blueText, border: '1px solid rgba(59,130,246,0.25)' }}
+            >
+              Sort: {monitorSort === 'newest' ? 'Newest First' : 'Oldest First'}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Filtered registrations
+          </p>
+          <div className="flex items-center gap-2">
+            <PaginationBtn onClick={() => setMonitorPage((p) => Math.max(1, p - 1))} disabled={monitorPage <= 1}>Prev</PaginationBtn>
+            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{monitorPage} / {monitorTotalPages}</span>
+            <PaginationBtn onClick={() => setMonitorPage((p) => Math.min(monitorTotalPages, p + 1))} disabled={monitorPage >= monitorTotalPages}>Next</PaginationBtn>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                {['Account Name', 'Username', 'Type', 'Entry', 'Status', 'Date Registered', 'Actions'].map((h) => (
+                  <th key={h} className="table-header py-3 px-4 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {monitorAccounts.map((account, idx) => (
+                <tr key={`${account.uid}-${account.datereg}`} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                  <td className="py-3 px-4 font-medium text-white/80">{account.fullname}</td>
+                  <td className="py-3 px-4 text-white/60">{account.username}</td>
+                  <td className="py-3 px-4 text-white/70">{account.accttypeName}</td>
+                  <td className="py-3 px-4 text-white/45">{account.entryType}</td>
+                  <td className="py-3 px-4">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit" style={statusStyle(account.accountStatus)}>
+                      {account.accountStatus === 'active' ? 'Active' : 'Suspended'}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-xs text-white/45">{account.datereg}</td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => navigate(`/admin/accounts/${account.uid}`)}
+                        className="text-xs px-2.5 py-1 rounded-lg font-medium"
+                        style={{ background: 'rgba(212,175,55,0.12)', color: goldText, border: '1px solid rgba(212,175,55,0.2)' }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => navigate(`/admin/genealogy?id=${account.uid}`)}
+                        className="text-xs px-2.5 py-1 rounded-lg font-medium"
+                        style={{ background: 'rgba(16,185,129,0.1)', color: greenText, border: '1px solid rgba(16,185,129,0.2)' }}
+                      >
+                        Tree
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {monitorAccounts.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    No registrations matched the current monitoring filter.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

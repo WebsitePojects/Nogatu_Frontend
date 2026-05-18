@@ -1,5 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api';
+import {
+  bumpAuthEpoch,
+  clearAllMemberWarmCache,
+  setMemberCache,
+} from '../utils/memberWarmCache';
 
 const AuthContext = createContext(null);
 
@@ -11,6 +16,32 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     checkSession();
   }, []);
+
+  useEffect(() => {
+    if (!user?.uid) return undefined;
+
+    const epoch = bumpAuthEpoch();
+    const controller = new AbortController();
+    let cancelled = false;
+
+    async function warmMemberData() {
+      try {
+        const rankingRes = await api.get('/ranking', { signal: controller.signal });
+        if (cancelled || String(epoch) !== String(sessionStorage.getItem('nogatu-member-warm:auth-epoch'))) return;
+        setMemberCache(user.uid, 'ranking', rankingRes.data);
+
+        const leaderboardRes = await api.get('/leaderboard?page=1&perPage=25', { signal: controller.signal });
+        if (cancelled || String(epoch) !== String(sessionStorage.getItem('nogatu-member-warm:auth-epoch'))) return;
+        setMemberCache(user.uid, 'leaderboard:1', leaderboardRes.data);
+      } catch {}
+    }
+
+    warmMemberData();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [user?.uid]);
 
   async function checkSession() {
     try {
@@ -25,6 +56,9 @@ export function AuthProvider({ children }) {
         ? adminRes.value.data.admin
         : null;
 
+      if ((nextUser?.uid || null) !== (user?.uid || null)) {
+        clearAllMemberWarmCache();
+      }
       setUser(nextUser);
       setAdmin(nextAdmin);
     } catch {
@@ -51,6 +85,7 @@ export function AuthProvider({ children }) {
 
   async function loginMember(username, password) {
     const res = await api.post('/auth/login', { username, password });
+    clearAllMemberWarmCache();
     setUser(res.data.user);
     setAdmin(null);
     return res.data;
@@ -58,12 +93,14 @@ export function AuthProvider({ children }) {
 
   async function logoutMember() {
     await api.post('/auth/logout');
+    clearAllMemberWarmCache();
     setUser(null);
     setAdmin(null);
   }
 
   async function loginAdmin(username, password) {
     const res = await api.post('/admin/auth/login', { username, password });
+    clearAllMemberWarmCache();
     setAdmin(res.data.admin);
     setUser(null);
     return res.data;
@@ -71,6 +108,7 @@ export function AuthProvider({ children }) {
 
   async function logoutAdmin() {
     await api.post('/admin/auth/logout');
+    clearAllMemberWarmCache();
     setAdmin(null);
     setUser(null);
   }

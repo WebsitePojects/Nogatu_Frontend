@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { MAINTENANCE_PRODUCT_OPTIONS } from '../../constants/maintenanceProducts';
 
 const PRODUCT_OPTIONS = [
   { value: 10, label: 'Bronze (PHP 2,500)', color: '#CD7F32' },
@@ -9,16 +10,7 @@ const PRODUCT_OPTIONS = [
   { value: 40, label: 'Platinum (PHP 25,000)', color: '#E5E4E2' },
   { value: 50, label: 'Garnet (PHP 50,000)', color: '#733635' },
   { value: 60, label: 'Diamond (PHP 150,000)', color: '#B9F2FF' },
-  { value: 100, label: 'Nogatu Barley Juice (Maintenance)', color: '#6b7280' },
-  { value: 101, label: 'Nogatu Glow (Maintenance)', color: '#6b7280' },
-  { value: 102, label: 'Nogatu Collagen Vitamin C (Maintenance)', color: '#6b7280' },
-  { value: 103, label: 'Nogatu Coffee Mix (Maintenance)', color: '#6b7280' },
-  { value: 104, label: 'Chocolate Drink Mix (Maintenance)', color: '#6b7280' },
-  { value: 105, label: 'Mangosteen Coffee Mix (Maintenance)', color: '#6b7280' },
-  { value: 106, label: 'Vitamin C (Maintenance)', color: '#6b7280' },
-  { value: 107, label: 'Max Fuel Coffee Drink Mix (Maintenance)', color: '#6b7280' },
-  { value: 108, label: 'Black Coffee (Maintenance)', color: '#6b7280' },
-  { value: 109, label: 'Berry NAD+ (Maintenance)', color: '#6b7280' },
+  ...MAINTENANCE_PRODUCT_OPTIONS,
 ];
 
 const CODE_TYPES = [

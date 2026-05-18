@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLocationMarker, HiOutlinePhone, HiOutlineCreditCard, HiOutlineMail } from 'react-icons/hi';
+import { formatTin, isValidTin } from '../../utils/tin';
 
 const PAYOUT_OPTIONS = [
   { id: 1, label: 'Pickup' },
@@ -53,13 +54,19 @@ export default function AccountDetails() {
     e.preventDefault();
     setSaving(true);
     try {
+      const normalizedTin = formatTin(data.tin || data.tinno || '');
+      if (normalizedTin && !isValidTin(normalizedTin)) {
+        toast.error('TIN must contain 9-15 digits');
+        setSaving(false);
+        return;
+      }
       await api.put('/account', {
         address:       data.address,
         password:      newPassword || '',
         payoutdetails: data.payoutdetails,
         payoutoptions: Number(data.payoutid) || '',
         contactnos:    data.contactnos,
-        tin:           data.tin || data.tinno || '',
+        tin:           normalizedTin,
         email:         data.email || '',
       });
       toast.success('Account updated successfully');
@@ -118,7 +125,7 @@ export default function AccountDetails() {
               type="text"
               value={data.tin || data.tinno || ''}
               onChange={(e) => {
-                const nextTin = e.target.value;
+                const nextTin = formatTin(e.target.value);
                 handleChange('tin', nextTin);
                 handleChange('tinno', nextTin);
               }}

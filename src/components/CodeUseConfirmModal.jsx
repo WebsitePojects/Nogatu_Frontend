@@ -36,7 +36,16 @@ export default function CodeUseConfirmModal({
 
   return (
     <div className="portal-overlay fixed inset-0 z-[130] flex items-center justify-center px-4">
-      <div className="portal-modal-panel rounded-2xl w-full max-w-lg p-6 shadow-2xl">
+      <div
+        className="portal-modal-panel rounded-2xl w-full max-w-lg p-6 shadow-2xl"
+        style={{
+          backgroundColor: 'var(--portal-modal-bg)',
+          opacity: 1,
+          position: 'relative',
+          isolation: 'isolate',
+          boxShadow: '0 28px 64px rgba(15,23,42,0.22)',
+        }}
+      >
         <div
           className="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
           style={{

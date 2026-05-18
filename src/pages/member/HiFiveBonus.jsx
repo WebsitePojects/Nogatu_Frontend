@@ -11,6 +11,7 @@ import {
   HiOutlineUsers,
   HiOutlineX,
 } from 'react-icons/hi';
+import { HIFIVE_PRODUCT_IMAGES } from '../../constants/maintenanceProducts';
 
 const fmtMoney = (n) => Number(n || 0).toLocaleString('en-US', {
   minimumFractionDigits: 2,
@@ -20,19 +21,6 @@ const fmtMoney = (n) => Number(n || 0).toLocaleString('en-US', {
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', {
   maximumFractionDigits: 0,
 });
-
-const PRODUCT_IMAGES = {
-  bl: '/legacy-img/Barley-Mix.png',
-  gl: '/legacy-img/Glow-Pill.png',
-  glc: '/legacy-img/Vitamin-C-Collagen.png',
-  cm: '/legacy-img/Coffee-Mix.png',
-  cd: '/legacy-img/Chox-Mix.png',
-  mgt: '/legacy-img/Mangoosteen_1.png',
-  vz: '/legacy-img/vitamin-zinc.png',
-  cmm: '/legacy-img/Max-Fuel.png',
-  bkc: '/legacy-img/blck-coffee.png',
-  bnad: '/legacy-img/Berry-Nad.png',
-};
 
 const PACKAGE_ACCENTS = {
   bronze: '#CD7F32',
@@ -104,15 +92,23 @@ function ContributorModal({ open, title, contributors, accent, onClose }) {
         </div>
 
         <div className="mt-5 max-h-[58vh] overflow-y-auto pr-1 space-y-3">
-          {contributors.map((contributor) => (
+          {contributors.map((contributor, index) => (
             <div
               key={`${contributor.uid}-${contributor.username}-${contributor.count ?? contributor.packageName}`}
               className="rounded-2xl p-4 flex items-center justify-between gap-4"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.08)' }}
             >
-              <div className="min-w-0">
+              <div className="min-w-0 flex items-start gap-3">
+                <span
+                  className="inline-flex h-8 min-w-8 items-center justify-center rounded-full text-xs font-bold"
+                  style={{ background: `${accent}18`, color: accent, border: `1px solid ${accent}25` }}
+                >
+                  {index + 1}
+                </span>
+                <div className="min-w-0">
                 <p className="text-sm sm:text-base font-semibold text-white truncate">{contributor.fullName}</p>
                 <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.42)' }}>{contributor.username}</p>
+                </div>
               </div>
               <div className="text-right flex-shrink-0">
                 {typeof contributor.count === 'number' ? (
@@ -166,13 +162,21 @@ function ContributorList({ title, contributors, accent, onViewAll }) {
         )}
       </div>
       <div className="space-y-2 mt-2">
-        {contributors.slice(0, 3).map((contributor) => (
+        {contributors.slice(0, 3).map((contributor, index) => (
           <div key={`${contributor.uid}-${contributor.username}`} className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
+            <div className="min-w-0 flex items-center gap-2">
+              <span
+                className="inline-flex h-6 min-w-6 items-center justify-center rounded-full text-[10px] font-bold"
+                style={{ background: `${accent}18`, color: accent, border: `1px solid ${accent}25` }}
+              >
+                {index + 1}
+              </span>
+              <div className="min-w-0">
               <p className="text-sm font-semibold text-white truncate">{contributor.fullName}</p>
               <p className="text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.42)' }}>
                 {contributor.username}
               </p>
+              </div>
             </div>
             <div className="text-right">
               {typeof contributor.count === 'number' ? (
@@ -302,13 +306,13 @@ function ProductCard({ item, productEligible, pointsNeeded, onRedeem, onViewCont
         </div>
       </div>
 
-      {PRODUCT_IMAGES[item.key] && (
+      {HIFIVE_PRODUCT_IMAGES[item.key] && (
         <div
           className="mt-4 rounded-xl flex items-center justify-center p-4 sm:p-5"
           style={{ minHeight: '12rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.08)' }}
         >
           <img
-            src={PRODUCT_IMAGES[item.key]}
+            src={HIFIVE_PRODUCT_IMAGES[item.key]}
             alt={item.name}
             className="w-auto max-w-full h-28 sm:h-32 object-contain"
             onError={(e) => { e.currentTarget.style.display = 'none'; }}

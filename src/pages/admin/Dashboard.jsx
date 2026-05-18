@@ -67,7 +67,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
       iconShadow: '0 10px 24px rgba(124,58,237,0.3)',
       accentClass: 'bg-violet-100/90 text-violet-800 dark:bg-violet-500/20 dark:text-violet-200',
-      link: '/admin/accounts',
+      link: '/admin/accounts?monitorRange=week',
     },
     {
       label: 'Pending Encashments',
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
       iconGradient: 'linear-gradient(135deg, #4f46e5, #818cf8)',
       iconShadow: '0 10px 24px rgba(79,70,229,0.28)',
       accentClass: 'bg-indigo-100/90 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-200',
-      link: '/admin/accounts',
+      link: '/admin/accounts?monitorRange=month',
     },
   ];
 
