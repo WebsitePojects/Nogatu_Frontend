@@ -5,6 +5,61 @@ import { formatDateTimeManila } from '../../utils/dateTime';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+function normalizeTransaction(data) {
+  const candidate = data?.transaction || data?.details?.transaction || data?.record || data?.payload?.transaction || null;
+  if (!candidate || (candidate.pid == null && candidate.transdate == null && candidate.transactionType == null && candidate.transactiontype == null)) {
+    return null;
+  }
+
+  return {
+    pid: candidate.pid ?? candidate.id ?? null,
+    transactionTypeName: candidate.transactionTypeName || candidate.transaction_type_name || (
+      Number(candidate.transactionType ?? candidate.transactiontype ?? 0) === 1
+        ? 'Income'
+        : Number(candidate.transactionType ?? candidate.transactiontype ?? 0) === 10
+          ? 'Encashment'
+          : Number(candidate.transactionType ?? candidate.transactiontype ?? 0) === 11
+            ? 'Voucher'
+            : 'Other'
+    ),
+    transdate: candidate.transdate || candidate.transactionDate || candidate.cashtransdate || null,
+    beginningBalance: candidate.beginningBalance ?? candidate.beginningbalance ?? 0,
+    endingBalance: candidate.endingBalance ?? candidate.endingbalance ?? 0,
+    directReferral: candidate.directReferral ?? candidate.income1 ?? 0,
+    pairing: candidate.pairing ?? candidate.income2 ?? 0,
+    leadership: candidate.leadership ?? candidate.income3 ?? 0,
+    unilevel: candidate.unilevel ?? candidate.income4 ?? 0,
+    hifive: candidate.hifive ?? candidate.income5 ?? 0,
+    rankingBonus: candidate.rankingBonus ?? candidate.income6 ?? 0,
+    encashment: candidate.encashment ?? candidate.encashment1 ?? 0,
+    deductions: candidate.deductions ?? 0,
+  };
+}
+
+function normalizeAccount(data) {
+  const candidate = data?.account || data?.details?.account || {};
+  return {
+    entryState: candidate.entryState || candidate.accountState || '-',
+    cdAmount: candidate.cdAmount ?? candidate.cdamount ?? 0,
+    cdTotal: candidate.cdTotal ?? candidate.cdtotal ?? 0,
+    cdStatus: candidate.cdStatus ?? candidate.cdstatus ?? 0,
+  };
+}
+
+function normalizeSupporting(data) {
+  const supporting = data?.supporting || data?.details?.supporting || {};
+  return {
+    directReferrals: Array.isArray(supporting.directReferrals) ? supporting.directReferrals.filter(Boolean) : [],
+    leadershipSources: Array.isArray(supporting.leadershipSources) ? supporting.leadershipSources.filter(Boolean) : [],
+    pairingTrace: Array.isArray(supporting.pairingTrace) ? supporting.pairingTrace.filter(Boolean) : [],
+    hiFiveSources: Array.isArray(supporting.hiFiveSources) ? supporting.hiFiveSources.filter(Boolean) : [],
+    hiFiveSummary: supporting.hiFiveSummary || null,
+    unilevelSources: Array.isArray(supporting.unilevelSources) ? supporting.unilevelSources.filter(Boolean) : [],
+    rankingSources: Array.isArray(supporting.rankingSources) ? supporting.rankingSources.filter(Boolean) : [],
+    notes: supporting.notes || {},
+  };
+}
+
 function EmptySupportMessage({ message }) {
   return <div className="text-sm text-white/45">{message}</div>;
 }
@@ -51,14 +106,14 @@ export default function TransactionDetails() {
     return <p className="portal-card-muted">Loading transaction details...</p>;
   }
 
-  if (!data) {
+  const tx = normalizeTransaction(data);
+  const account = normalizeAccount(data);
+  const supporting = normalizeSupporting(data);
+  const notes = supporting.notes || {};
+
+  if (!data || !tx) {
     return <p className="portal-card-muted">Unable to load this transaction detail.</p>;
   }
-
-  const tx = data.transaction;
-  const account = data.account;
-  const supporting = data.supporting || {};
-  const notes = supporting.notes || {};
 
   return (
     <div className="space-y-6">
