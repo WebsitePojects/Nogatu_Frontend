@@ -11,6 +11,24 @@ const LEADERS = [
     message:
       'Focused on field support, operations, and a cleaner member experience that helps every branch and distributor move with confidence.',
   },
+  {
+    name: 'Yoren Abihay',
+    role: 'President',
+    message:
+      'Helping steer the organization with clear direction, people-first leadership, and a strong commitment to sustainable company growth.',
+  },
+  {
+    name: 'Cecilia Haspe',
+    role: 'Vice President',
+    message:
+      'Supporting company leadership through dependable coordination, practical decision-making, and steady guidance for the wider network.',
+  },
+  {
+    name: 'Dino S. Erfe',
+    role: 'Manager',
+    message:
+      'Focused on day-to-day execution, branch support, and keeping distributor operations organized, responsive, and efficient.',
+  },
 ];
 
 export default function Organizations() {
@@ -31,7 +49,7 @@ export default function Organizations() {
           </p>
         </div>
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {LEADERS.map((leader) => (
             <article
               key={leader.name}

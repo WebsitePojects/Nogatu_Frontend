@@ -389,6 +389,21 @@ function OrganizationsPreview() {
       role: 'Chief Executive Officer',
       message: 'Focused on field support, operations, and a cleaner member experience that helps every branch and distributor move with confidence.',
     },
+    {
+      name: 'Yoren Abihay',
+      role: 'President',
+      message: 'Helping steer the organization with clear direction, people-first leadership, and a strong commitment to sustainable company growth.',
+    },
+    {
+      name: 'Cecilia Haspe',
+      role: 'Vice President',
+      message: 'Supporting company leadership through dependable coordination, practical decision-making, and steady guidance for the wider network.',
+    },
+    {
+      name: 'Dino S. Erfe',
+      role: 'Manager',
+      message: 'Focused on day-to-day execution, branch support, and keeping distributor operations organized, responsive, and efficient.',
+    },
   ];
 
   return (
@@ -406,7 +421,7 @@ function OrganizationsPreview() {
           </p>
 
           <div className="rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm p-6 sm:p-8 lg:p-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 text-left">
               {leaders.map((leader) => (
                 <article
                   key={leader.name}
