@@ -41,6 +41,7 @@ export default function Leaderboard() {
 
   const pointsBasis = data?.pointsBasis || 'Repurchase points';
   const userRank = Number(data?.userRank || 0);
+  const userCurrentRankLabel = data?.userCurrentRankLabel || 'Unranked';
   const userPoints = Number((data?.userGrossRankablePoints ?? data?.userRepurchasePoints ?? data?.userPoints) || 0);
   const userRemaining = Number(data?.userRemainingRankablePoints || 0);
   const userConsumed = Number(data?.userConsumedPoints || 0);
@@ -69,6 +70,9 @@ export default function Leaderboard() {
             </p>
             <p className="text-sm mt-1 text-white/80">
               {currentUserName}{currentUserUsername ? ` (${currentUserUsername})` : ''}
+            </p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              Current race title: {userCurrentRankLabel}
             </p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>{pointsBasis}: {fmt(userPoints)}</p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>

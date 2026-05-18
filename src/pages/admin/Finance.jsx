@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../api';
 import { useTheme } from '../../contexts/ThemeContext';
+import { apiUrl } from '../../utils/apiBase';
 
 const fmtMoney = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -219,7 +220,7 @@ export default function Finance() {
   async function handleExport(format) {
     setExporting(format);
     try {
-      triggerBrowserDownload(`/api/admin/finance/export?year=${year}&format=${format}`);
+      triggerBrowserDownload(apiUrl(`/admin/finance/export?year=${year}&format=${format}`));
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to export finance report');
     } finally {

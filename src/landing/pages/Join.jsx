@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
 import { formatTin, isValidTin } from '../../utils/tin';
+import { apiUrl } from '../../utils/apiBase';
 
 export default function Join() {
   const { token } = useParams();
@@ -29,7 +30,7 @@ export default function Join() {
   useEffect(() => {
     async function loadInvite() {
       try {
-        const res = await fetch(`/api/registration/referral/${token}`);
+        const res = await fetch(apiUrl(`/registration/referral/${token}`), { credentials: 'include' });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Referral invite not found.');
         setInvite(data.invite);
@@ -46,7 +47,7 @@ export default function Join() {
 
   async function validateCode(showFeedback = true) {
     if (!form.activationCode) return null;
-    const res = await fetch(`/api/registration/validate-code?code=${encodeURIComponent(form.activationCode)}`);
+    const res = await fetch(apiUrl(`/registration/validate-code?code=${encodeURIComponent(form.activationCode)}`), { credentials: 'include' });
     const data = await res.json();
     setCodePreview(data);
     if (showFeedback && (!data.valid || !data.canRegister)) {
@@ -67,8 +68,9 @@ export default function Join() {
     setSubmitting(true);
     setMessage({ type: '', text: '' });
     try {
-      const res = await fetch('/api/registration/public-register', {
+      const res = await fetch(apiUrl('/registration/public-register'), {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, token, slug: invite?.reusable ? token : undefined }),
       });

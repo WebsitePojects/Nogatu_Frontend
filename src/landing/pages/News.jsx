@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
+import { apiUrl } from '../../utils/apiBase';
 
 const TYPE_LABELS = { news: 'News', announcement: 'Announcement', promo: 'Promo', memo: 'Memo' };
 const TYPE_COLORS = {
@@ -71,7 +72,7 @@ export default function News() {
   const lightbox = useLightbox();
 
   useEffect(() => {
-    fetch('/api/news').then(r => r.json()).then(data => setPosts(data.posts || [])).catch(() => {}).finally(() => setLoading(false));
+    fetch(apiUrl('/news'), { credentials: 'include' }).then(r => r.json()).then(data => setPosts(data.posts || [])).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const filtered = filter === 'all' ? posts : posts.filter(p => p.type === filter);

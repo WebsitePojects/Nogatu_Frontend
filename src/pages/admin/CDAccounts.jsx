@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import { useTheme } from '../../contexts/ThemeContext';
+import { apiUrl } from '../../utils/apiBase';
 import {
   HiOutlineCreditCard,
   HiOutlineBadgeCheck,
@@ -88,7 +89,7 @@ export default function CDAccounts() {
   async function handleExport(format = 'xlsx') {
     setExporting(true);
     try {
-      const url = `/api/admin/cd-accounts/export?format=${encodeURIComponent(format)}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&packageType=${encodeURIComponent(packageType)}`;
+      const url = apiUrl(`/admin/cd-accounts/export?format=${encodeURIComponent(format)}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&packageType=${encodeURIComponent(packageType)}`);
       triggerBrowserDownload(url);
     } catch {
       toast.error('Failed to export CD accounts');

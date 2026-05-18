@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { formatDateTimeManila } from '../../utils/dateTime';
+import { apiUrl } from '../../utils/apiBase';
 
 export default function ManageCodes() {
   const { admin } = useAuth();
@@ -58,7 +59,7 @@ export default function ManageCodes() {
   async function exportHistory(format = 'xlsx') {
     try {
       const q = codeSearch.trim();
-      const url = `/api/admin/codes/history/export?format=${format}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+      const url = apiUrl(`/admin/codes/history/export?format=${format}${q ? `&q=${encodeURIComponent(q)}` : ''}`);
       const link = document.createElement('a');
       link.href = url;
       document.body.appendChild(link);

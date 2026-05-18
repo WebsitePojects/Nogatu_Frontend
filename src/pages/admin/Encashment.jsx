@@ -4,6 +4,7 @@ import api from '../../api';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { useTheme } from '../../contexts/ThemeContext';
+import { apiUrl } from '../../utils/apiBase';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -67,7 +68,7 @@ export default function Encashment() {
       if (startDate) url += `&startDate=${startDate}`;
       if (endDate) url += `&endDate=${endDate}`;
       if (keyword.trim()) url += `&q=${encodeURIComponent(keyword.trim())}`;
-      triggerBrowserDownload(`/api${url}`);
+      triggerBrowserDownload(apiUrl(url));
     } catch {
       toast.error('Failed to export encashment report');
     } finally {

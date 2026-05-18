@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
 import usePublicStats from '../../hooks/usePublicStats';
+import { apiUrl } from '../../utils/apiBase';
 
 const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
 
@@ -550,8 +551,9 @@ function ApplicationForm() {
     setSubmitting(true);
     setStatus({ type: '', message: '' });
     try {
-      const res = await fetch('/api/applications', {
+      const res = await fetch(apiUrl('/applications'), {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
