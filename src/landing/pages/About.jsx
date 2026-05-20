@@ -84,7 +84,7 @@ export default function About() {
                     </svg>
                   </div>
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Satellite Branch</p>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Reserved space for branch address and contact details.</p>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605</p>
                 </div>
               </div>
               <div className="flex gap-6">

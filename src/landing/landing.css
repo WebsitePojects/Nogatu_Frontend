@@ -481,6 +481,13 @@
   .product-lineup-card {
     position: relative;
   }
+  .product-grid-centered {
+    justify-items: center;
+  }
+  .product-grid-centered > * {
+    width: 100%;
+    max-width: 24rem;
+  }
   .product-card-ambient {
     position: absolute;
     width: 9rem;

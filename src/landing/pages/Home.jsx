@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
-import usePublicStats from '../../hooks/usePublicStats';
 import { apiUrl } from '../../utils/apiBase';
 
 const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
@@ -131,24 +130,12 @@ function Hero() {
 
 /* ────────────────────────── Stats Bar ───────────────────── */
 function StatsBar() {
-  const { stats } = usePublicStats();
-  const membersRef = useCountUp(Number(stats.activeMembers || 0), 2000);
-  const networksRef = useCountUp(Number(stats.networksBuilt || 0), 2000);
-
   const ref = useScrollReveal();
   return (
     <section className="py-14 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 50%, #592219 100%)' }}>
       {/* Diagonal line pattern */}
       <div className="absolute inset-0 pointer-events-none bg-diagonal-lines" />
-      <div ref={ref} className="reveal section-container grid grid-cols-2 lg:grid-cols-4 gap-8 text-center relative z-10">
-        <div>
-          <p className="text-3xl lg:text-4xl font-extrabold text-brand-gold-light"><span ref={membersRef}>0</span>+</p>
-          <p className="text-sm text-white/60 mt-1 font-medium">Active Members</p>
-        </div>
-        <div>
-          <p className="text-3xl lg:text-4xl font-extrabold text-brand-gold-light"><span ref={networksRef}>0</span>+</p>
-          <p className="text-sm text-white/60 mt-1 font-medium">Networks Built</p>
-        </div>
+      <div ref={ref} className="reveal section-container max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-8 text-center relative z-10">
         <div>
           <p className="text-3xl lg:text-4xl font-extrabold" style={{ color: '#FDE68A' }}>10</p>
           <p className="text-sm mt-1 font-semibold" style={{ color: '#FDE68A' }}>Product Lines</p>
@@ -219,7 +206,7 @@ function AboutPreview() {
                   </svg>
                 </div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Satellite Branch</p>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Reserved space for your satellite branch address and contact details.</p>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605</p>
               </div>
             </div>
             <div className="relative inline-block product-mini-frame">
@@ -309,17 +296,39 @@ function WhyUs() {
 /* ────────────────────────── Products ─────────────────────── */
 function Products() {
   const lightbox = useLightbox();
-  const products = [
-    { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/Barley-Mix.png', imgLg: '/legacy-img/Barley-Mix.png' },
-    { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png' },
-    { name: 'Vitamin C with Collagen & Glutathione', desc: 'Radiance and antioxidant support formula', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png' },
-    { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/Chox-Mix.png', imgLg: '/legacy-img/Chox-Mix.png' },
-    { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png', imgLg: '/legacy-img/Coffee-Mix.png' },
-    { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/Mangoosteen_1.png', imgLg: '/legacy-img/Mangoosteen_1.png' },
-    { name: 'Vitamin C with Zinc & Mangosteen', desc: 'Vitamin support blend with mangosteen extract', price: '580.00', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png' },
-    { name: 'Nogatu Black Coffee', desc: 'Premium black coffee drink mix', price: '250.00', img: '/legacy-img/blck-coffee.png', imgLg: '/legacy-img/blck-coffee.png' },
-    { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png' },
-    { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png' },
+  const productGroups = [
+    {
+      title: 'New Products',
+      centered: true,
+      items: [
+        { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png', badge: 'New Product' },
+        { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png', badge: 'New Product' },
+      ],
+    },
+    {
+      title: 'Capsules and Supplements',
+      items: [
+        { name: 'Vitamin C with Zinc & Mangosteen', desc: 'Vitamin support blend with mangosteen extract', price: '580.00', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png', badge: 'Wellness Pick' },
+        { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png', badge: 'Beauty Blend' },
+        { name: 'Vitamin C with Collagen & Glutathione', desc: 'Radiance and antioxidant support formula', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png', badge: 'Daily Support' },
+      ],
+    },
+    {
+      title: 'Coffee Products',
+      items: [
+        { name: 'Nogatu Coffee Mix', desc: 'Herbal coffee mix for immunity and energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png', imgLg: '/legacy-img/Coffee-Mix.png', badge: 'Coffee Blend' },
+        { name: 'Mangosteen Coffee Mix', desc: 'Coffee drink mix with mangosteen', price: '375.00', img: '/legacy-img/Mangoosteen_1.png', imgLg: '/legacy-img/Mangoosteen_1.png', badge: 'Coffee Blend' },
+        { name: 'Nogatu Black Coffee', desc: 'Premium black coffee drink mix', price: '250.00', img: '/legacy-img/blck-coffee.png', imgLg: '/legacy-img/blck-coffee.png', badge: 'Coffee Blend' },
+      ],
+    },
+    {
+      title: 'Barley Juice and Chocolate Drink Mix',
+      centered: true,
+      items: [
+        { name: 'Nogatu Barley Juice', desc: 'Pure energy and naturally refreshing', price: '850.00', img: '/legacy-img/Barley-Mix.png', imgLg: '/legacy-img/Barley-Mix.png', badge: 'Wellness Pick' },
+        { name: 'Chocolate Drink Mix', desc: 'Healthy chocolate with herbal and vegetable mix', price: '710.00', img: '/legacy-img/Chox-Mix.png', imgLg: '/legacy-img/Chox-Mix.png', badge: 'Comfort Blend' },
+      ],
+    },
   ];
 
   return (
@@ -329,43 +338,45 @@ function Products() {
       <div className="absolute inset-0 pointer-events-none product-lineup-wash" />
       <div className="section-container relative z-10">
         <SectionHeader badge="Products" title="Our Line-up" />
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-          {products.map((p, i) => {
-            const ref = useScrollReveal({ delay: i * 80 });
+        <div className="space-y-10 sm:space-y-12">
+          {productGroups.map((group, groupIndex) => {
+            const sectionRef = useScrollReveal({ delay: groupIndex * 80 });
             return (
-              <div key={p.name} ref={ref} className="reveal group text-center product-lineup-card">
-                <div
-                  className="relative overflow-hidden rounded-[1.75rem] p-4 sm:p-8 flex items-center justify-center h-44 sm:h-56 mb-4 cursor-pointer border border-primary-200/30 motion-safe:transition-all motion-safe:duration-500 group-hover:shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #FFFDF5, #FFF8E1)' }}
-                  onClick={() => p.imgLg && lightbox.open(p.imgLg)}
-                >
-                  <div className="product-card-ambient product-card-ambient-left" />
-                  <div className="product-card-ambient product-card-ambient-right" />
-                  <div className="product-card-sheen" />
-                  <div className="product-card-grid" />
-                  {p.placeholder ? (
-                    <div className="w-full h-full rounded-xl border-2 border-dashed border-brand-gold/35 bg-white/45 flex flex-col items-center justify-center text-brand-brown">
-                      <svg className="w-10 h-10 text-brand-gold-dark mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      <span className="text-sm font-semibold">Image Slot</span>
-                    </div>
-                  ) : (
-                    <img
-                      src={p.imgLg}
-                      alt={p.name}
-                      className="relative z-10 max-h-44 object-contain group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500 product-card-image"
-                      loading="lazy"
-                    />
-                  )}
-                  <div className="product-card-badge">Wellness Pick</div>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 motion-safe:transition-colors motion-safe:duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-300 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-md">
-                      <svg className="w-5 h-5 text-brand-gold-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
-                    </div>
-                  </div>
+              <div key={group.title} ref={sectionRef} className="reveal">
+                <div className="mb-5 sm:mb-6 text-center">
+                  <p className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/70 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-brand-gold-dark shadow-sm">
+                    {group.title}
+                  </p>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">{p.name}</h4>
-                <p className="text-xs sm:text-sm text-gray-500 mb-1">{p.desc}</p>
-                <p className="text-lg font-bold text-brand-gold-dark">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
+                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7 ${group.centered ? 'product-grid-centered' : ''}`}>
+                  {group.items.map((p) => (
+                    <article key={p.name} className="group h-full rounded-[1.9rem] border border-brand-gold/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,248,225,0.98)_100%)] p-4 sm:p-5 text-center shadow-[0_18px_42px_rgba(89,34,25,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(184,134,11,0.16)] product-lineup-card">
+                      <div
+                        className="relative mb-4 flex h-52 sm:h-56 cursor-pointer items-center justify-center overflow-hidden rounded-[1.65rem] border border-brand-gold/15 bg-[linear-gradient(135deg,#FFFDF5,#FFF8E1)] px-4"
+                        onClick={() => p.imgLg && lightbox.open(p.imgLg)}
+                      >
+                        <div className="product-card-ambient product-card-ambient-left" />
+                        <div className="product-card-ambient product-card-ambient-right" />
+                        <div className="product-card-sheen" />
+                        <div className="product-card-grid" />
+                        <div className="product-card-badge">{p.badge}</div>
+                        <img
+                          src={p.imgLg}
+                          alt={p.name}
+                          className="relative z-10 max-h-40 sm:max-h-44 object-contain transition-transform duration-500 group-hover:scale-110 product-card-image"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="flex min-h-[132px] flex-col justify-between">
+                        <div>
+                          <h4 className="text-base sm:text-lg font-bold text-gray-900">{p.name}</h4>
+                          <p className="mt-2 text-sm leading-6 text-gray-500">{p.desc}</p>
+                        </div>
+                        <p className="mt-4 text-xl font-bold text-brand-gold-dark">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               </div>
             );
           })}
