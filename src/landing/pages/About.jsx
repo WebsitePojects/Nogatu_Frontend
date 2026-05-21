@@ -134,10 +134,8 @@ export default function About() {
       {/* Stats */}
       <section className="py-16 bg-diagonal-lines" style={{ backgroundColor: '#FFF8E1' }}>
         <div className="section-container">
-          <div ref={ref3} className="reveal grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <StatBlock value={5900} suffix="+" label="Active Members" />
-            <StatBlock value={5900} suffix="+" label="Networks Built" />
-            <StatBlock value={6} suffix="" label="Product Lines" />
+          <div ref={ref3} className="reveal mx-auto grid max-w-3xl grid-cols-1 gap-8 text-center sm:grid-cols-2 sm:gap-12">
+            <StatBlock value={10} suffix="" label="Product Lines" />
             <StatBlock value={5} suffix="+" label="Years of Trust" />
           </div>
         </div>

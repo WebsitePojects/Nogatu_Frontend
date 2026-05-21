@@ -1,33 +1,24 @@
 const LEADERS = [
   {
     name: 'Harold M. Tugano',
+    initials: 'HM',
     role: 'Chairman',
     message:
       'Guiding the company with steady leadership, product discipline, and a long-term vision for every distributor community we build.',
   },
   {
-    name: 'Sherwin Catera',
+    name: 'Sherwin Catena',
+    initials: 'SC',
     role: 'Chief Executive Officer',
     message:
       'Focused on field support, operations, and a cleaner member experience that helps every branch and distributor move with confidence.',
   },
   {
     name: 'Yoren Abihay',
+    initials: 'YA',
     role: 'President',
     message:
       'Helping steer the organization with clear direction, people-first leadership, and a strong commitment to sustainable company growth.',
-  },
-  {
-    name: 'Cecilia Haspe',
-    role: 'Vice President',
-    message:
-      'Supporting company leadership through dependable coordination, practical decision-making, and steady guidance for the wider network.',
-  },
-  {
-    name: 'Dino S. Erfe',
-    role: 'Manager',
-    message:
-      'Focused on day-to-day execution, branch support, and keeping distributor operations organized, responsive, and efficient.',
   },
 ];
 
@@ -49,34 +40,29 @@ export default function Organizations() {
           </p>
         </div>
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
           {LEADERS.map((leader) => (
             <article
               key={leader.name}
-              className="group rounded-[2rem] border border-brand-gold/25 bg-white/90 p-5 sm:p-6 shadow-[0_24px_60px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
+              className="group flex h-full flex-col rounded-[2rem] border border-brand-gold/25 bg-white/90 p-5 shadow-[0_24px_60px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1 sm:p-6"
             >
-              <div className="rounded-[1.6rem] border border-brand-gold/20 bg-gradient-to-br from-[#FFF9E8] via-white to-[#F4E5BF] p-4 sm:p-5">
-                <div className="relative min-h-[280px] sm:min-h-[360px] overflow-hidden rounded-[1.35rem] border border-brand-gold/25 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.20),transparent_52%),linear-gradient(160deg,#fffdf4_0%,#f8ecd0_100%)] flex items-center justify-center">
+              <div className="flex flex-1 flex-col rounded-[1.6rem] border border-brand-gold/20 bg-gradient-to-br from-[#FFF9E8] via-white to-[#F4E5BF] p-4 sm:p-5">
+                <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-[1.35rem] border border-brand-gold/25 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.20),transparent_52%),linear-gradient(160deg,#fffdf4_0%,#f8ecd0_100%)] px-6 py-8 text-center">
                   <div className="absolute inset-x-6 top-6 h-px bg-gradient-to-r from-transparent via-brand-gold/45 to-transparent" />
                   <div className="absolute bottom-6 inset-x-10 h-24 rounded-full bg-brand-gold/10 blur-2xl" />
-                  <div className="text-center px-6 relative z-10">
+                  <div className="relative z-10">
                     <span className="inline-flex rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-gold-dark">
                       Leadership
                     </span>
                     <div className="mx-auto mt-6 flex h-24 w-24 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-4xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
-                    {leader.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
-                  </div>
-                    <p className="mt-6 text-xs font-bold uppercase tracking-[0.32em] text-brand-gold-dark">Official Portrait</p>
-                    <p className="mt-2 text-sm text-gray-600">Reserved for the final company photo.</p>
+                      {leader.initials}
+                    </div>
+                    <p className="mt-6 text-xs font-bold uppercase tracking-[0.3em] text-brand-gold-dark">{leader.role}</p>
+                    <h2 className="mt-3 text-2xl sm:text-[1.9rem] font-black tracking-tight text-brand-brown">{leader.name}</h2>
+                    <div className="mt-5 h-px w-16 mx-auto bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
+                    <p className="mt-5 text-sm sm:text-base text-[#5B4A3A] leading-7">{leader.message}</p>
                   </div>
                 </div>
-              </div>
-
-              <div className="px-2 pt-6 pb-3 text-center">
-                <h2 className="text-2xl sm:text-[1.9rem] font-black tracking-tight text-brand-brown">{leader.name}</h2>
-                <p className="mt-3 text-xs font-bold uppercase tracking-[0.3em] text-brand-gold-dark">{leader.role}</p>
-                <div className="mt-5 h-px w-16 mx-auto bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
-                <p className="mt-5 text-sm sm:text-base text-[#5B4A3A] leading-7">{leader.message}</p>
               </div>
             </article>
           ))}

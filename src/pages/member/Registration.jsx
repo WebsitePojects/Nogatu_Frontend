@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi';
+import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
 import { formatTin, isValidTin } from '../../utils/tin';
 
@@ -77,8 +77,26 @@ export default function Registration() {
   const [placementMeta, setPlacementMeta] = useState(null);
   const [showPlacementPolicyModal, setShowPlacementPolicyModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
+  const requiredFields = [
+    ['activationCode', 'Activation Code'],
+    ['firstname', 'First Name'],
+    ['middlename', 'Middle Name'],
+    ['lastname', 'Last Name'],
+    ['email', 'Email'],
+    ['address', 'Address'],
+    ['contactno', 'Contact Number'],
+    ['dob', 'Date of Birth'],
+    ['username', 'Username'],
+    ['password', 'Password'],
+  ];
+
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => ({ ...prev, [field]: '' }));
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -190,6 +208,20 @@ export default function Registration() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    const nextErrors = requiredFields.reduce((errors, [field, label]) => {
+      if (!String(form[field] || '').trim()) {
+        errors[field] = `${label} is required.`;
+      }
+      return errors;
+    }, {});
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      toast.error('Please complete all required fields.');
+      return;
+    }
+
+    setFieldErrors({});
     let preview = codePreview;
     if (!preview || String(preview.code || '').toLowerCase() !== String(form.activationCode || '').trim().toLowerCase()) {
       preview = await validateCode(false);
@@ -214,7 +246,7 @@ export default function Registration() {
     if (usernameValid === false)  return toast.error('Username already taken');
 
     const normalizedTin = formatTin(form.tin);
-    if (!isValidTin(normalizedTin)) {
+    if (normalizedTin && !isValidTin(normalizedTin)) {
       return toast.error('TIN must contain 9-15 digits');
     }
 
@@ -239,6 +271,8 @@ export default function Registration() {
   const userBorder    = usernameValid === true ? validBorder : usernameValid === false ? invalidBorder : undefined;
   const placementPolicyMode = placementMeta?.placementPolicy?.mode || 'manual';
   const placementPolicyMessage = placementMeta?.placementPolicy?.message || placementMeta?.note;
+  const inputClassName = (field, extra = '') => `glass-input ${fieldErrors[field] ? 'portal-input-error' : ''} ${extra}`.trim();
+  const RequiredMark = () => <span className="portal-required">*</span>;
 
   return (
     <div className="space-y-6">
@@ -262,8 +296,9 @@ export default function Registration() {
 
       {/* Heading */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">Register New Account</h1>
+        <h1 className="portal-page-title font-display text-2xl font-bold">Register New Account</h1>
         <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+        <p className="portal-field-hint">Fields marked with an asterisk are required. If you do not have a TIN yet, you may type `000-000-000-000` or leave it blank for now.</p>
       </div>
 
       <div className="glass-card rounded-2xl p-7 max-w-2xl">
@@ -271,15 +306,16 @@ export default function Registration() {
 
           {/* Activation Code */}
           <div>
-            <label className="label">Activation Code</label>
+            <label className="label">Activation Code <RequiredMark /></label>
             <div className="relative">
               <input
                 type="text"
                 value={form.activationCode}
                 onChange={(e) => handleChange('activationCode', e.target.value)}
                 onBlur={() => validateCode(true)}
-                className="glass-input pr-9"
+                className={inputClassName('activationCode', 'pr-9')}
                 placeholder="Enter activation code"
+                aria-invalid={fieldErrors.activationCode ? 'true' : 'false'}
                 required
                 style={codeBorder ? { borderColor: codeBorder } : {}}
               />
@@ -287,6 +323,7 @@ export default function Registration() {
                 <ValidationIcon state={codeValid} />
               </span>
             </div>
+            {fieldErrors.activationCode ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.activationCode}</p> : null}
           </div>
 
           {/* Sponsor (read-only) */}
@@ -345,69 +382,80 @@ export default function Registration() {
           {/* Name fields */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="label">First Name</label>
-              <input type="text" value={form.firstname} onChange={(e) => handleChange('firstname', e.target.value)} className="glass-input" required />
+              <label className="label">First Name <RequiredMark /></label>
+              <input type="text" value={form.firstname} onChange={(e) => handleChange('firstname', e.target.value)} className={inputClassName('firstname')} aria-invalid={fieldErrors.firstname ? 'true' : 'false'} required />
+              {fieldErrors.firstname ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.firstname}</p> : null}
             </div>
             <div>
-              <label className="label">Last Name</label>
-              <input type="text" value={form.lastname} onChange={(e) => handleChange('lastname', e.target.value)} className="glass-input" required />
+              <label className="label">Last Name <RequiredMark /></label>
+              <input type="text" value={form.lastname} onChange={(e) => handleChange('lastname', e.target.value)} className={inputClassName('lastname')} aria-invalid={fieldErrors.lastname ? 'true' : 'false'} required />
+              {fieldErrors.lastname ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.lastname}</p> : null}
             </div>
             <div>
-              <label className="label">Middle Name</label>
-              <input type="text" value={form.middlename} onChange={(e) => handleChange('middlename', e.target.value)} className="glass-input" />
+              <label className="label">Middle Name <RequiredMark /></label>
+              <input type="text" value={form.middlename} onChange={(e) => handleChange('middlename', e.target.value)} className={inputClassName('middlename')} aria-invalid={fieldErrors.middlename ? 'true' : 'false'} required />
+              {fieldErrors.middlename ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.middlename}</p> : null}
             </div>
             {codePreview?.accountLabel && codeValid === true && (
-              <p className="mt-2 text-xs text-white/55">
+              <p className="mt-2 text-xs portal-card-muted">
                 This code will consume: <span className="font-semibold text-brand-gold">{codePreview.accountLabel}</span>
               </p>
             )}
           </div>
 
           <div>
-            <label className="label">Email</label>
+            <label className="label">Email <RequiredMark /></label>
             <input
               type="email"
               value={form.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              className="glass-input"
+              className={inputClassName('email')}
               placeholder="you@example.com"
+              aria-invalid={fieldErrors.email ? 'true' : 'false'}
               required
             />
+            {fieldErrors.email ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.email}</p> : null}
           </div>
 
           <div>
-            <label className="label">Address</label>
+            <label className="label">Address <RequiredMark /></label>
             <input
               type="text"
               value={form.address}
               onChange={(e) => handleChange('address', e.target.value)}
-              className="glass-input"
+              className={inputClassName('address')}
               placeholder="Complete address"
+              aria-invalid={fieldErrors.address ? 'true' : 'false'}
               required
             />
+            {fieldErrors.address ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.address}</p> : null}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label">Contact Number</label>
+              <label className="label">Contact Number <RequiredMark /></label>
               <input
                 type="text"
                 value={form.contactno}
                 onChange={(e) => handleChange('contactno', e.target.value)}
-                className="glass-input"
+                className={inputClassName('contactno')}
                 placeholder="09XXXXXXXXX"
+                aria-invalid={fieldErrors.contactno ? 'true' : 'false'}
                 required
               />
+              {fieldErrors.contactno ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.contactno}</p> : null}
             </div>
             <div>
-              <label className="label">Date of Birth</label>
+              <label className="label">Date of Birth <RequiredMark /></label>
               <input
                 type="date"
                 value={form.dob}
                 onChange={(e) => handleChange('dob', e.target.value)}
-                className="glass-input"
+                className={inputClassName('dob')}
+                aria-invalid={fieldErrors.dob ? 'true' : 'false'}
                 required
               />
+              {fieldErrors.dob ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.dob}</p> : null}
             </div>
           </div>
 
@@ -420,20 +468,21 @@ export default function Registration() {
               onChange={(e) => handleChange('tin', formatTin(e.target.value))}
               className="glass-input"
               placeholder="e.g. 123-456-789-000"
-              required
             />
+            <p className="portal-field-hint">Optional. If you do not have a TIN yet, type `000-000-000-000`.</p>
           </div>
 
           {/* Username */}
           <div>
-            <label className="label">Username</label>
+            <label className="label">Username <RequiredMark /></label>
             <div className="relative">
               <input
                 type="text"
                 value={form.username}
                 onChange={(e) => handleChange('username', e.target.value)}
                 onBlur={validateUsername}
-                className="glass-input pr-9"
+                className={inputClassName('username', 'pr-9')}
+                aria-invalid={fieldErrors.username ? 'true' : 'false'}
                 required
                 style={userBorder ? { borderColor: userBorder } : {}}
               />
@@ -441,18 +490,31 @@ export default function Registration() {
                 <ValidationIcon state={usernameValid} />
               </span>
             </div>
+            {fieldErrors.username ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.username}</p> : null}
           </div>
 
           {/* Password */}
           <div>
-            <label className="label">Password</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => handleChange('password', e.target.value)}
-              className="glass-input"
-              required
-            />
+            <label className="label">Password <RequiredMark /></label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={(e) => handleChange('password', e.target.value)}
+                className={inputClassName('password', 'pr-11')}
+                aria-invalid={fieldErrors.password ? 'true' : 'false'}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 portal-card-muted transition-colors hover:text-[var(--portal-title)]"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <HiOutlineEyeOff className="h-5 w-5" /> : <HiOutlineEye className="h-5 w-5" />}
+              </button>
+            </div>
+            {fieldErrors.password ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.password}</p> : null}
           </div>
 
           <div className="pt-1">

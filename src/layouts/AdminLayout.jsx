@@ -92,8 +92,6 @@ export default function AdminLayout() {
   );
 
   const roleLabel = rights === 1 ? 'Administrator' : rights === 2 ? 'Cashier' : 'BOD';
-  const topbarText = isDarkMode ? 'rgba(255,255,255,0.8)' : '#334155';
-  const topbarMuted = isDarkMode ? 'rgba(255,255,255,0.4)' : '#64748b';
   const topbarGold = isDarkMode ? '#D4AF37' : '#7a5c08';
 
   return (
@@ -164,10 +162,8 @@ export default function AdminLayout() {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium motion-safe:transition-colors cursor-pointer"
-            style={{ color: 'rgba(255,255,255,0.4)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
+            className="nav-item w-full text-left"
+            style={{ color: 'var(--portal-card-muted)' }}
           >
             <HiOutlineLogout className="w-[18px] h-[18px]" />
             Sign Out
@@ -193,29 +189,24 @@ export default function AdminLayout() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 rounded-xl motion-safe:transition-colors cursor-pointer"
-              style={{ color: topbarGold }}
+              className="portal-card-muted lg:hidden p-2 -ml-2 rounded-xl transition-colors hover:text-[var(--portal-gold-text)] cursor-pointer"
               aria-label="Open menu"
             >
               <HiOutlineMenu className="w-5 h-5" />
             </button>
-            <h2 className="text-sm font-semibold" style={{ color: topbarText }}>{currentPage?.label || 'Admin Dashboard'}</h2>
+            <h2 className="portal-page-title text-sm font-semibold">{currentPage?.label || 'Admin Dashboard'}</h2>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl transition-colors"
-              style={{ color: topbarMuted }}
+              className="portal-card-muted p-2 rounded-xl transition-colors hover:text-[var(--portal-gold-text)]"
               title="Toggle Theme"
             >
               {isDarkMode ? <HiOutlineSun className="w-5 h-5" /> : <HiOutlineMoon className="w-5 h-5" />}
             </button>
             <button
-              className="relative p-2 rounded-xl motion-safe:transition-colors cursor-pointer"
-              style={{ color: topbarMuted }}
+              className="portal-card-muted relative p-2 rounded-xl transition-colors hover:text-[var(--portal-gold-text)] cursor-pointer"
               aria-label="Notifications"
-              onMouseEnter={e => e.currentTarget.style.color = topbarGold}
-              onMouseLeave={e => e.currentTarget.style.color = topbarMuted}
             >
               <HiOutlineBell className="w-5 h-5" />
               <span

@@ -22,40 +22,40 @@
 }
 
 :root {
-  --app-bg: #f6f8fb;
-  --text-primary: #111827;
-  --text-secondary: #374151;
-  --text-muted: #6b7280;
+  --app-bg: #eef2f6;
+  --text-primary: #18212f;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
   --brand-gold: #7A5C08;
   --brand-gold-light: #7A5C08;
   --brand-gold-dark: #493606;
   --table-header-color: #8B6914;
-  --surface-1: rgba(255, 255, 255, 0.88);
-  --surface-2: rgba(255, 255, 255, 0.78);
-  --surface-border: rgba(148, 163, 184, 0.35);
-  --sidebar-bg: rgba(248, 250, 252, 0.95);
-  --topbar-bg: rgba(255, 255, 255, 0.9);
-  --portal-base: #eef2f7;
-  --portal-title: #1f2937;
-  --portal-card-title: #1f2937;
+  --surface-1: rgba(247, 249, 252, 0.92);
+  --surface-2: rgba(240, 244, 249, 0.9);
+  --surface-border: rgba(148, 163, 184, 0.28);
+  --sidebar-bg: rgba(242, 246, 250, 0.96);
+  --topbar-bg: rgba(244, 247, 251, 0.92);
+  --portal-base: #edf1f5;
+  --portal-title: #18212f;
+  --portal-card-title: #18212f;
   --portal-card-text: #334155;
-  --portal-card-muted: #5b6472;
+  --portal-card-muted: #5f6b7a;
   --portal-gold-text: #8b6508;
-  --portal-soft-bg: rgba(248, 250, 252, 0.96);
+  --portal-soft-bg: rgba(242, 245, 249, 0.96);
   --portal-soft-border: rgba(203, 213, 225, 0.9);
   --portal-row-border: rgba(203, 213, 225, 0.7);
-  --portal-modal-bg: #ffffff;
+  --portal-modal-bg: #f4f7fb;
   --portal-modal-border: rgba(212, 175, 55, 0.28);
-  --portal-modal-title: #1f2937;
+  --portal-modal-title: #18212f;
   --portal-modal-text: #475569;
   --portal-modal-muted: #64748b;
   --portal-overlay: rgba(15, 23, 42, 0.38);
-  --portal-button-muted-bg: rgba(241, 245, 249, 0.95);
+  --portal-button-muted-bg: rgba(235, 240, 246, 0.96);
   --portal-button-muted-text: #334155;
   --portal-button-muted-border: rgba(148, 163, 184, 0.45);
   --portal-accent-bg: rgba(212, 175, 55, 0.12);
   --portal-accent-border: rgba(212, 175, 55, 0.26);
-  --portal-zebra-bg: rgba(148, 163, 184, 0.08);
+  --portal-zebra-bg: rgba(226, 232, 240, 0.44);
   --portal-success-text: #0f8f66;
   --portal-danger-text: #b91c1c;
   --portal-info-text: #1d4ed8;
@@ -68,7 +68,7 @@
   --portal-info-border: rgba(59, 130, 246, 0.24);
   --portal-warning-bg: rgba(212, 175, 55, 0.14);
   --portal-warning-border: rgba(212, 175, 55, 0.26);
-  --portal-box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  --portal-box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
 @keyframes modal-pop {
@@ -143,21 +143,21 @@ html:not(.dark) .portal-bg {
 html:not(.dark) .glass {
   background: var(--surface-2);
   border-color: var(--surface-border);
-  box-shadow: 0 6px 26px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
 html:not(.dark) .glass-card,
 html:not(.dark) .card,
 html:not(.dark) .stat-card {
-  background: linear-gradient(155deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.82) 52%, rgba(241, 245, 249, 0.9) 100%);
+  background: linear-gradient(155deg, rgba(247, 249, 252, 0.96) 0%, rgba(239, 243, 248, 0.92) 52%, rgba(232, 238, 245, 0.96) 100%);
   border-color: var(--surface-border);
-  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.76);
 }
 
 html:not(.dark) .glass-sidebar {
   background: var(--sidebar-bg);
   border-right-color: rgba(148, 163, 184, 0.35);
-  box-shadow: 4px 0 28px rgba(15, 23, 42, 0.1);
+  box-shadow: 4px 0 30px rgba(15, 23, 42, 0.08);
 }
 
 html:not(.dark) .glass-topbar {
@@ -186,7 +186,7 @@ html:not(.dark) .nav-item.active {
 html:not(.dark) .input-field,
 html:not(.dark) .glass-input {
   color: #0f172a;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(245, 247, 250, 0.94);
   border-color: rgba(148, 163, 184, 0.38);
 }
 
@@ -742,6 +742,74 @@ html:not(.dark) .label {
     border-color: rgba(239, 68, 68, 0.2);
   }
 
+  .portal-required {
+    margin-left: 0.25rem;
+    color: #d97706;
+    font-weight: 700;
+  }
+
+  html.dark .portal-required {
+    color: #fbbf24;
+  }
+
+  .portal-field-hint {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--portal-card-muted);
+  }
+
+  .portal-input-error {
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+  }
+
+  .portal-detail-card {
+    background: var(--portal-soft-bg);
+    border: 1px solid var(--portal-soft-border);
+    box-shadow: var(--portal-box-shadow);
+  }
+
+  .portal-detail-label {
+    color: var(--portal-card-muted);
+    font-size: 0.75rem;
+  }
+
+  .portal-detail-value {
+    color: var(--portal-card-title);
+    font-weight: 600;
+  }
+
+  .portal-support-card {
+    background: color-mix(in srgb, var(--portal-soft-bg) 92%, transparent);
+    border: 1px solid var(--portal-soft-border);
+  }
+
+  .portal-table-icon-button {
+    border: 1px solid var(--portal-soft-border);
+    background: color-mix(in srgb, var(--portal-soft-bg) 94%, transparent);
+    color: var(--portal-card-muted);
+  }
+
+  .portal-table-icon-button:hover {
+    background: color-mix(in srgb, var(--portal-soft-bg) 74%, var(--portal-accent-bg));
+    color: var(--portal-card-title);
+  }
+
+  .portal-table-row-hover:hover {
+    background: color-mix(in srgb, var(--portal-zebra-bg) 62%, var(--portal-accent-bg)) !important;
+  }
+
+  .portal-table-action {
+    background: var(--portal-info-bg);
+    color: var(--portal-info-text);
+    border: 1px solid var(--portal-info-border);
+  }
+
+  .portal-table-action:hover {
+    filter: brightness(0.97);
+  }
+
   .ewallet-balance-card {
     background: linear-gradient(135deg, #FFFDF5 0%, #FFF9E6 50%, #FFF4CC 100%);
     border: 1px solid rgba(212,175,55,0.35);
@@ -876,11 +944,11 @@ html:not(.dark) .label {
   }
 
   html:not(.dark) .genealogy-fullscreen-shell {
-    background: #ffffff;
+    background: #eff3f7;
   }
 
   html:not(.dark) .genealogy-canvas-shell {
-    background-color: #ffffff;
+    background-color: #eff3f7;
     background-image:
       linear-gradient(rgba(212, 175, 55, 0.16) 1px, transparent 1px),
       linear-gradient(90deg, rgba(212, 175, 55, 0.16) 1px, transparent 1px),

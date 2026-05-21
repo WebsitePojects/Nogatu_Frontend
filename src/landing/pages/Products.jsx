@@ -34,12 +34,12 @@ const WAYS_OF_WEALTH = [
 ];
 
 const TIERS = [
-  { name: 'Bronze', price: '2,500', color: 'from-amber-700 to-amber-600', badge: 'bg-amber-100 text-amber-700', features: ['Entry package products', 'Binary genealogy placement', 'Direct referral bonus', 'Basic member portal'] },
-  { name: 'Silver', price: '5,000', color: 'from-gray-400 to-gray-500', badge: 'bg-gray-100 text-gray-600', features: ['Silver package products', 'Higher pairing bonus', 'Direct referral bonus', 'Unilevel income'] },
-  { name: 'Gold', price: '10,000', color: 'from-yellow-500 to-amber-500', badge: 'bg-yellow-50 text-yellow-700', popular: true, features: ['Gold package products', 'Maximum pairing bonus', 'Leadership bonus eligible', 'Hi-Five bonus eligible', 'Full income streams'] },
-  { name: 'Platinum', price: '25,000', color: 'from-slate-500 to-slate-600', badge: 'bg-slate-100 text-slate-600', features: ['Platinum package products', 'Highest earning potential', 'All income streams', 'Priority support', 'Leadership ranking'] },
-  { name: 'Garnet', price: '50,000', color: 'from-rose-600 to-red-500', badge: 'bg-rose-50 text-rose-600', features: ['Garnet package products', 'Premium earning potential', 'All income streams', 'VIP support', 'Top leadership ranking'] },
   { name: 'Diamond', price: '150,000', color: 'from-cyan-500 to-blue-500', badge: 'bg-cyan-50 text-cyan-700', features: ['Diamond package products', 'Maximum earning potential', 'All income streams', 'Exclusive events access', 'Elite leadership ranking'] },
+  { name: 'Garnet', price: '50,000', color: 'from-rose-600 to-red-500', badge: 'bg-rose-50 text-rose-600', features: ['Garnet package products', 'Premium earning potential', 'All income streams', 'VIP support', 'Top leadership ranking'] },
+  { name: 'Platinum', price: '25,000', color: 'from-[#355C7D] to-[#4F6D91]', badge: 'bg-sky-50 text-sky-700', features: ['Platinum package products', 'Highest earning potential', 'All income streams', 'Priority support', 'Leadership ranking'] },
+  { name: 'Gold', price: '10,000', color: 'from-yellow-500 to-amber-500', badge: 'bg-yellow-50 text-yellow-700', popular: true, features: ['Gold package products', 'Maximum pairing bonus', 'Leadership bonus eligible', 'Hi-Five bonus eligible', 'Full income streams'] },
+  { name: 'Silver', price: '5,000', color: 'from-gray-400 to-gray-500', badge: 'bg-gray-100 text-gray-600', features: ['Silver package products', 'Higher pairing bonus', 'Direct referral bonus', 'Unilevel income'] },
+  { name: 'Bronze', price: '2,500', color: 'from-amber-700 to-amber-600', badge: 'bg-amber-100 text-amber-700', features: ['Entry package products', 'Binary genealogy placement', 'Direct referral bonus', 'Basic member portal'] },
 ];
 
 const PRODUCTS = [
@@ -177,7 +177,7 @@ export default function Opportunities() {
             <div className="w-16 h-1 rounded-full mx-auto mt-4" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+          <div className="grid grid-cols-1 min-[520px]:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             {PRODUCTS.map((p, i) => (
               <ProductCard key={p.name} product={p} delay={i * 80} onLightbox={lightbox.open} />
             ))}

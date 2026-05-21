@@ -74,7 +74,7 @@ export default function Contact() {
       <section className="section-padding bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
         <div className="section-container">
           <div ref={ref1} className="reveal mb-20 rounded-3xl overflow-hidden shadow-2xl relative" style={{ border: '1px solid rgba(184,134,11,0.15)' }}>
-            <iframe title="NOGATU Alliance Location" className="w-full h-80 lg:h-[450px]" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15434.165296844101!2d121.04096931858975!3d14.738505023977073!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b1188e0f3527%3A0xc254c53128e33cca!2sMaligaya%20park!5e0!3m2!1sfil!2sph!4v1753781291095!5m2!1sfil!2sph" loading="lazy" referrerPolicy="no-referrer-when-downgrade" style={{ border: 0 }} />
+            <iframe title="NOGATU Alliance Location" className="w-full h-80 lg:h-[450px]" src="https://www.google.com/maps?q=Nogatu%20Alliance%20Worldwide%20Inc.%2C%2094%20Navarro%20Street%2C%20Barangay%20177%2C%20Caloocan%20City%2C%20Metro%20Manila&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" style={{ border: 0 }} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-24 items-start">

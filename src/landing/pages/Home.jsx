@@ -337,7 +337,12 @@ function Products() {
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
       <div className="absolute inset-0 pointer-events-none product-lineup-wash" />
       <div className="section-container relative z-10">
-        <SectionHeader badge="Products" title="Our Line-up" />
+        <SectionHeader badge="Products" title="Our Product Line-up" />
+        <div className="mx-auto mb-10 max-w-3xl text-center sm:mb-12">
+          <p className="text-base leading-relaxed text-[#6d3028] sm:text-lg">
+            Explore our healthy and wealthy options in a cleaner, mobile-friendly showcase built to keep every product card easy to browse on any screen.
+          </p>
+        </div>
         <div className="space-y-10 sm:space-y-12">
           {productGroups.map((group, groupIndex) => {
             const sectionRef = useScrollReveal({ delay: groupIndex * 80 });
@@ -348,11 +353,11 @@ function Products() {
                     {group.title}
                   </p>
                 </div>
-                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7 ${group.centered ? 'product-grid-centered' : ''}`}>
+                <div className={`grid grid-cols-1 min-[560px]:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7 ${group.centered ? 'product-grid-centered' : ''}`}>
                   {group.items.map((p) => (
-                    <article key={p.name} className="group h-full rounded-[1.9rem] border border-brand-gold/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,248,225,0.98)_100%)] p-4 sm:p-5 text-center shadow-[0_18px_42px_rgba(89,34,25,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(184,134,11,0.16)] product-lineup-card">
+                    <article key={p.name} className="product-lineup-card group mx-auto flex h-full w-full max-w-[24rem] flex-col rounded-[1.9rem] border border-brand-gold/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,248,225,0.98)_100%)] p-4 text-center shadow-[0_18px_42px_rgba(89,34,25,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(184,134,11,0.16)] sm:p-5">
                       <div
-                        className="relative mb-4 flex h-52 sm:h-56 cursor-pointer items-center justify-center overflow-hidden rounded-[1.65rem] border border-brand-gold/15 bg-[linear-gradient(135deg,#FFFDF5,#FFF8E1)] px-4"
+                        className="relative mb-4 flex h-44 cursor-pointer items-center justify-center overflow-hidden rounded-[1.65rem] border border-brand-gold/15 bg-[linear-gradient(135deg,#FFFDF5,#FFF8E1)] px-4 sm:h-52 md:h-56"
                         onClick={() => p.imgLg && lightbox.open(p.imgLg)}
                       >
                         <div className="product-card-ambient product-card-ambient-left" />
@@ -363,13 +368,13 @@ function Products() {
                         <img
                           src={p.imgLg}
                           alt={p.name}
-                          className="relative z-10 max-h-40 sm:max-h-44 object-contain transition-transform duration-500 group-hover:scale-110 product-card-image"
+                          className="product-card-image relative z-10 max-h-36 object-contain transition-transform duration-500 group-hover:scale-110 sm:max-h-40 md:max-h-44"
                           loading="lazy"
                         />
                       </div>
-                      <div className="flex min-h-[132px] flex-col justify-between">
+                      <div className="flex flex-1 flex-col justify-between">
                         <div>
-                          <h4 className="text-base sm:text-lg font-bold text-gray-900">{p.name}</h4>
+                          <h4 className="text-base font-bold text-gray-900 sm:text-lg">{p.name}</h4>
                           <p className="mt-2 text-sm leading-6 text-gray-500">{p.desc}</p>
                         </div>
                         <p className="mt-4 text-xl font-bold text-brand-gold-dark">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
@@ -393,28 +398,21 @@ function OrganizationsPreview() {
   const leaders = [
     {
       name: 'Harold M. Tugano',
+      initials: 'HM',
       role: 'Chairman',
       message: 'Guiding the company with steady leadership, product discipline, and a long-term vision for every distributor community we build.',
     },
     {
-      name: 'Sherwin Catera',
+      name: 'Sherwin Catena',
+      initials: 'SC',
       role: 'Chief Executive Officer',
       message: 'Focused on field support, operations, and a cleaner member experience that helps every branch and distributor move with confidence.',
     },
     {
       name: 'Yoren Abihay',
+      initials: 'YA',
       role: 'President',
       message: 'Helping steer the organization with clear direction, people-first leadership, and a strong commitment to sustainable company growth.',
-    },
-    {
-      name: 'Cecilia Haspe',
-      role: 'Vice President',
-      message: 'Supporting company leadership through dependable coordination, practical decision-making, and steady guidance for the wider network.',
-    },
-    {
-      name: 'Dino S. Erfe',
-      role: 'Manager',
-      message: 'Focused on day-to-day execution, branch support, and keeping distributor operations organized, responsive, and efficient.',
     },
   ];
 
@@ -432,34 +430,30 @@ function OrganizationsPreview() {
             Meet the key leaders behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
           </p>
 
-          <div className="rounded-[2rem] bg-gray-50 border border-gray-100 shadow-sm p-6 sm:p-8 lg:p-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 text-left">
+          <div className="rounded-[2rem] border border-gray-100 bg-gray-50 p-6 shadow-sm sm:p-8 lg:p-10">
+            <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 text-left md:grid-cols-3">
               {leaders.map((leader) => (
                 <article
                   key={leader.name}
-                  className="group rounded-[1.75rem] border border-brand-gold/25 bg-white/90 p-4 sm:p-5 shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
+                  className="group flex h-full flex-col rounded-[1.75rem] border border-brand-gold/25 bg-white/90 p-4 shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1 sm:p-5"
                 >
-                  <div className="rounded-[1.4rem] border border-brand-gold/20 bg-gradient-to-br from-[#FFF9E8] via-white to-[#F4E5BF] p-4">
-                    <div className="relative min-h-[240px] sm:min-h-[300px] overflow-hidden rounded-[1.1rem] border border-brand-gold/25 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.18),transparent_50%),linear-gradient(160deg,#fffdf4_0%,#f8ecd0_100%)] flex items-center justify-center">
+                  <div className="flex flex-1 flex-col rounded-[1.4rem] border border-brand-gold/20 bg-gradient-to-br from-[#FFF9E8] via-white to-[#F4E5BF] p-5">
+                    <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-[1.1rem] border border-brand-gold/25 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.18),transparent_50%),linear-gradient(160deg,#fffdf4_0%,#f8ecd0_100%)] px-6 py-8 text-center">
                       <div className="absolute inset-x-6 top-5 h-px bg-gradient-to-r from-transparent via-brand-gold/45 to-transparent" />
                       <div className="absolute bottom-5 inset-x-8 h-20 rounded-full bg-brand-gold/10 blur-2xl" />
-                      <div className="text-center px-6 relative z-10">
+                      <div className="relative z-10">
                         <span className="inline-flex rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-gold-dark">
                           Leadership
                         </span>
                         <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-3xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
-                        {leader.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
-                      </div>
-                        <p className="mt-5 text-xs font-bold uppercase tracking-[0.32em] text-brand-gold-dark">Official Portrait</p>
-                        <p className="mt-2 text-sm text-gray-600">Ready for the final company photo.</p>
+                          {leader.initials}
+                        </div>
+                        <p className="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-brand-gold-dark">{leader.role}</p>
+                        <h3 className="mt-3 text-xl font-black tracking-tight text-brand-brown">{leader.name}</h3>
+                        <div className="mt-4 h-px w-14 mx-auto bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
+                        <p className="mt-5 text-sm leading-7 text-[#5B4A3A]">{leader.message}</p>
                       </div>
                     </div>
-                  </div>
-                  <div className="px-2 pt-5 pb-2 text-center">
-                    <h3 className="text-xl font-black tracking-tight text-brand-brown">{leader.name}</h3>
-                    <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-brand-gold-dark">{leader.role}</p>
-                    <div className="mt-4 h-px w-14 mx-auto bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
-                    <p className="mt-5 text-sm leading-7 text-[#5B4A3A]">{leader.message}</p>
                   </div>
                 </article>
               ))}
@@ -551,22 +545,49 @@ function DownloadableMaterials() {
 
 function ApplicationForm() {
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [status, setStatus] = useState({ type: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [showApplicationPrompt, setShowApplicationPrompt] = useState(false);
   const ref = useScrollReveal();
-  const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+  const requiredFields = [
+    { key: 'name', label: 'Full Name', type: 'text' },
+    { key: 'phone', label: 'Contact No.', type: 'tel' },
+    { key: 'email', label: 'Email Address', type: 'email' },
+  ];
+
+  const updateField = (field, value) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    setFieldErrors((current) => ({ ...current, [field]: '' }));
+  };
 
   async function submitApplication(e) {
     e.preventDefault();
+    const cleanedForm = Object.fromEntries(
+      Object.entries(form).map(([key, value]) => [key, String(value || '').trim()])
+    );
+    const nextErrors = requiredFields.reduce((errors, field) => {
+      if (!cleanedForm[field.key]) {
+        errors[field.key] = `${field.label} is required.`;
+      }
+      return errors;
+    }, {});
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      setStatus({ type: 'error', message: 'Please fill up all required fields before submitting.' });
+      return;
+    }
+
     setSubmitting(true);
+    setFieldErrors({});
     setStatus({ type: '', message: '' });
     try {
       const res = await fetch(apiUrl('/applications'), {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(cleanedForm),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Unable to submit application.');
@@ -596,12 +617,8 @@ function ApplicationForm() {
               <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Print the form and submit it to the nearest NOGATU branch office if you want to proceed.</span></div>
             </div>
           </div>
-          <form onSubmit={submitApplication} className="rounded-2xl border border-primary-200/40 bg-white p-6 sm:p-8 shadow-lg space-y-4">
-            {[
-              { key: 'name', label: 'Full Name', type: 'text' },
-              { key: 'phone', label: 'Contact No.', type: 'tel' },
-              { key: 'email', label: 'Email Address', type: 'email' },
-            ].map((field) => (
+          <form onSubmit={submitApplication} noValidate className="rounded-2xl border border-primary-200/40 bg-white p-6 shadow-lg space-y-4 sm:p-8">
+            {requiredFields.map((field) => (
               <label key={field.key} className="block">
                 <span className="block text-sm font-semibold text-brand-brown mb-2">{field.label}</span>
                 <input
@@ -609,8 +626,12 @@ function ApplicationForm() {
                   value={form[field.key]}
                   onChange={(e) => updateField(field.key, e.target.value)}
                   required
-                  className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+                  aria-invalid={fieldErrors[field.key] ? 'true' : 'false'}
+                  className={`w-full rounded-xl border bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20 ${fieldErrors[field.key] ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-primary-200/70'}`}
                 />
+                {fieldErrors[field.key] && (
+                  <p className="mt-2 text-sm text-red-600">{fieldErrors[field.key]}</p>
+                )}
               </label>
             ))}
             {status.message && (
