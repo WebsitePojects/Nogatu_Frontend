@@ -36,7 +36,7 @@ function Hero() {
 
   return (
     <section
-      className="relative min-h-[100svh] overflow-hidden"
+      className="landing-home-hero relative overflow-hidden"
       style={{
         backgroundImage: 'url(/img/landing-bg-clean.png)',
         backgroundSize: 'cover',
@@ -47,41 +47,40 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 sm:pt-24 pb-6 sm:pb-10">
-        <div className="min-h-[calc(100svh-120px)] lg:min-h-[78vh] flex flex-col lg:flex-row gap-6 lg:gap-8 items-center justify-between">
-          <div className="order-2 lg:order-1 w-full lg:w-[38%] pb-4 lg:pb-0 mt-auto motion-safe:animate-fade-up text-left z-20 flex flex-col items-start">
-            <h1 className="text-[clamp(1.9rem,4.2vw,3.8rem)] font-extrabold leading-[1.08] tracking-tight text-white mb-4 sm:mb-5 drop-shadow-2xl">
+        <div className="landing-home-hero-inner flex flex-col lg:flex-row gap-5 lg:gap-8 items-center justify-between">
+          <div className="order-1 w-full lg:w-[38%] pb-1 lg:pb-0 lg:mt-auto motion-safe:animate-fade-up text-left z-20 flex flex-col items-start">
+            <h1 className="landing-home-title font-extrabold leading-[1.08] tracking-tight text-white mb-3 sm:mb-5 drop-shadow-2xl">
               Enjoy Our Healthy<br />
               <span className="text-brand-gold-light drop-shadow-lg">&amp; Wealthy Lifestyle</span>
             </h1>
-            <p className="mb-5 sm:mb-6 text-white/90 text-sm sm:text-lg font-medium max-w-md drop-shadow-md">
+            <p className="mb-4 sm:mb-6 text-white/90 text-sm sm:text-lg font-medium max-w-md drop-shadow-md">
               Wellness You Can Taste, Quality You Can Trust.
             </p>
-            <a
-              href="/portal/login"
-              className="inline-block px-6 sm:px-10 py-3 sm:py-3.5 text-white text-sm sm:text-[clamp(1rem,1.6vw,1.25rem)] font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-none hover:scale-105 hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
-              style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
-            >
-              Be the One. Register Now!
-            </a>
-            <a
-              href="#stockist-apply"
-              className="mt-3 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
-              style={{
-                border: '1px solid rgba(255,255,255,0.42)',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(212,165,40,0.16))',
-                boxShadow: '0 10px 28px rgba(89,34,25,0.18), inset 0 1px 0 rgba(255,255,255,0.32)',
-              }}
-            >
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/25 bg-white/15">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
-                </svg>
-              </span>
-              Become a Distributor
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </a>
+            <div className="landing-hero-actions flex w-full max-w-sm flex-col gap-2 sm:w-auto sm:max-w-none sm:flex-row sm:gap-3">
+              <a
+                href="/portal/login"
+                className="inline-flex min-h-11 items-center justify-center px-6 sm:px-8 py-3 text-white text-sm sm:text-base font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-none hover:scale-105 hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
+                style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
+              >
+                Be the One. Register Now!
+              </a>
+              <a
+                href="#stockist-apply"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
+                style={{
+                  border: '1px solid rgba(255,255,255,0.42)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(212,165,40,0.16))',
+                  boxShadow: '0 10px 28px rgba(89,34,25,0.18), inset 0 1px 0 rgba(255,255,255,0.32)',
+                }}
+              >
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/25 bg-white/15">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+                  </svg>
+                </span>
+                Become a Distributor
+              </a>
+            </div>
             <div className="mt-5 hidden sm:flex items-center justify-start gap-3 text-white/90">
               <svg className="w-6 h-6 text-brand-gold-light drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -90,7 +89,7 @@ function Hero() {
             </div>
           </div>
 
-          <div className="order-1 lg:order-2 w-full lg:w-[62%] flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 lg:mt-0 flex-1 lg:flex-none items-center">
+          <div className="order-2 w-full lg:w-[62%] flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 lg:mt-0 flex-1 lg:flex-none items-center">
             <div className="hero-carousel-shell relative w-full max-w-[600px] sm:max-w-[760px] lg:max-w-[1080px] xl:max-w-[1240px] mx-auto lg:mx-0">
               <div className="hero-carousel-card">
                 <div className="hero-carousel-stage">
@@ -132,10 +131,10 @@ function Hero() {
 function StatsBar() {
   const ref = useScrollReveal();
   return (
-    <section className="py-14 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 50%, #592219 100%)' }}>
+    <section className="py-8 sm:py-14 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 50%, #592219 100%)' }}>
       {/* Diagonal line pattern */}
       <div className="absolute inset-0 pointer-events-none bg-diagonal-lines" />
-      <div ref={ref} className="reveal section-container max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-8 text-center relative z-10">
+      <div ref={ref} className="reveal section-container max-w-4xl grid grid-cols-2 gap-5 sm:gap-8 text-center relative z-10">
         <div>
           <p className="text-3xl lg:text-4xl font-extrabold" style={{ color: '#FDE68A' }}>10</p>
           <p className="text-sm mt-1 font-semibold" style={{ color: '#FDE68A' }}>Product Lines</p>
@@ -161,7 +160,7 @@ function AboutPreview() {
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
       <div className="section-container relative z-10">
         <SectionHeader badge="About Us" title="Learn More About Us" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center">
           <div ref={ref1} className="reveal-left">
             <div className="relative about-photo-frame">
               <div className="about-photo-glow" />
@@ -185,10 +184,10 @@ function AboutPreview() {
             <p className="text-gray-600 leading-relaxed mb-6">
               Nogatu Alliance is a supplier and distributor of exclusively manufactured health food supplements as well as skin care products. It is committed to helping empower people in building a sustainable livelihood through marketing and selling of high-quality products that promote improved health and wellness.
             </p>
-            <p className="text-gray-500 leading-relaxed mb-8">
+            <p className="hidden sm:block text-gray-500 leading-relaxed mb-8">
               It also provides its members with competitive marketing incentives.
             </p>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 mb-6 sm:mb-8">
               <div className="about-info-card">
                 <div className="about-info-icon">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,7 +208,7 @@ function AboutPreview() {
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605</p>
               </div>
             </div>
-            <div className="relative inline-block product-mini-frame">
+            <div className="relative hidden sm:inline-block product-mini-frame">
               <div className="product-mini-glow" />
               <img
                 src="/landing/img/about-2.jpg"
@@ -266,11 +265,11 @@ function WhyUs() {
           </div>
 
           {/* Feature boxes */}
-          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             {features.map((f, i) => {
               const cardRef = useScrollReveal({ delay: i * 100 });
               return (
-                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-5 sm:p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
                   <div className="feature-story-shine" />
                   <div className="feature-story-aura" />
                   <div
@@ -299,7 +298,7 @@ function Products() {
   const productGroups = [
     {
       title: 'New Products',
-      centered: true,
+      layout: 'featured',
       items: [
         { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png', badge: 'New Product' },
         { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png', badge: 'New Product' },
@@ -323,7 +322,7 @@ function Products() {
     },
     {
       title: 'Barley Juice and Chocolate Drink Mix',
-      centered: true,
+      layout: 'featured',
       items: [
         { name: 'Nogatu Barley Juice', desc: 'Pure energy and naturally refreshing', price: '850.00', img: '/legacy-img/Barley-Mix.png', imgLg: '/legacy-img/Barley-Mix.png', badge: 'Wellness Pick' },
         { name: 'Chocolate Drink Mix', desc: 'Healthy chocolate with herbal and vegetable mix', price: '710.00', img: '/legacy-img/Chox-Mix.png', imgLg: '/legacy-img/Chox-Mix.png', badge: 'Comfort Blend' },
@@ -353,11 +352,11 @@ function Products() {
                     {group.title}
                   </p>
                 </div>
-                <div className={`grid grid-cols-1 min-[560px]:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7 ${group.centered ? 'product-grid-centered' : ''}`}>
+                <div className={`product-lineup-grid ${group.layout === 'featured' ? 'product-grid-featured' : 'product-grid-standard'}`}>
                   {group.items.map((p) => (
-                    <article key={p.name} className="product-lineup-card group mx-auto flex h-full w-full max-w-[24rem] flex-col rounded-[1.9rem] border border-brand-gold/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,248,225,0.98)_100%)] p-4 text-center shadow-[0_18px_42px_rgba(89,34,25,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(184,134,11,0.16)] sm:p-5">
+                    <article key={p.name} className="product-lineup-card group mx-auto flex h-full w-full flex-col rounded-[1.9rem] border border-brand-gold/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,248,225,0.98)_100%)] p-4 text-center shadow-[0_18px_42px_rgba(89,34,25,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(184,134,11,0.16)] sm:p-5">
                       <div
-                        className="relative mb-4 flex h-44 cursor-pointer items-center justify-center overflow-hidden rounded-[1.65rem] border border-brand-gold/15 bg-[linear-gradient(135deg,#FFFDF5,#FFF8E1)] px-4 sm:h-52 md:h-56"
+                        className="product-card-media relative mb-4 flex cursor-pointer items-center justify-center overflow-hidden rounded-[1.65rem] border border-brand-gold/15 bg-[linear-gradient(135deg,#FFFDF5,#FFF8E1)] px-4"
                         onClick={() => p.imgLg && lightbox.open(p.imgLg)}
                       >
                         <div className="product-card-ambient product-card-ambient-left" />
@@ -368,16 +367,16 @@ function Products() {
                         <img
                           src={p.imgLg}
                           alt={p.name}
-                          className="product-card-image relative z-10 max-h-36 object-contain transition-transform duration-500 group-hover:scale-110 sm:max-h-40 md:max-h-44"
+                          className="product-card-image relative z-10 object-contain transition-transform duration-500 group-hover:scale-110"
                           loading="lazy"
                         />
                       </div>
-                      <div className="flex flex-1 flex-col justify-between">
+                      <div className="flex flex-1 flex-col justify-between gap-4">
                         <div>
-                          <h4 className="text-base font-bold text-gray-900 sm:text-lg">{p.name}</h4>
-                          <p className="mt-2 text-sm leading-6 text-gray-500">{p.desc}</p>
+                          <h4 className="text-lg font-bold leading-snug text-gray-900">{p.name}</h4>
+                          <p className="mt-2 text-sm leading-6 text-gray-500 sm:text-[0.95rem]">{p.desc}</p>
                         </div>
-                        <p className="mt-4 text-xl font-bold text-brand-gold-dark">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
+                        <p className="text-[1.35rem] font-bold text-brand-gold-dark sm:text-2xl">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
                       </div>
                     </article>
                   ))}
@@ -398,21 +397,17 @@ function OrganizationsPreview() {
   const leaders = [
     {
       name: 'Harold M. Tugano',
-      initials: 'HM',
+      image: '/landing/img/chairman%20Harold%20M.%20Tugano.png',
       role: 'Chairman',
-      message: 'Guiding the company with steady leadership, product discipline, and a long-term vision for every distributor community we build.',
+      motto: 'I lead with vision, stand with integrity and build with courage.',
+      message: 'So every member, leader, every family and every dream can rise with NOGATU Alliance Worldwide, Inc. (NAWI).',
     },
     {
-      name: 'Sherwin Catena',
-      initials: 'SC',
-      role: 'Chief Executive Officer',
-      message: 'Focused on field support, operations, and a cleaner member experience that helps every branch and distributor move with confidence.',
-    },
-    {
-      name: 'Yoren Abihay',
-      initials: 'YA',
-      role: 'President',
-      message: 'Helping steer the organization with clear direction, people-first leadership, and a strong commitment to sustainable company growth.',
+      name: 'Sherwin A. Catera',
+      image: '/landing/img/CEO%20Sherwin%20A.%20Catera.jpg',
+      role: 'CEO',
+      motto: 'Fear no limit.',
+      message: 'One should not be constrained by fear. Overcoming it allows greater freedom and the realization of one\'s full potential.',
     },
   ];
 
@@ -426,41 +421,38 @@ function OrganizationsPreview() {
         <SectionHeader badge="People" title="People Behind the Company" />
 
         <div ref={ref} className="reveal max-w-5xl mx-auto text-center">
-          <p className="text-gray-600 leading-relaxed mb-12">
-            Meet the key leaders behind NOGATU Alliance who guide the company, support the network, and help move the community forward.
+          <p className="mx-auto mb-8 max-w-2xl text-base leading-relaxed text-gray-600 sm:mb-10 sm:text-lg">
+            Meet the leaders guiding NOGATU Alliance with vision, service, and steady purpose.
           </p>
 
-          <div className="rounded-[2rem] border border-gray-100 bg-gray-50 p-6 shadow-sm sm:p-8 lg:p-10">
-            <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 text-left md:grid-cols-3">
+          <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-4 shadow-sm sm:p-7 lg:p-8">
+            <div className="organization-preview-grid mx-auto max-w-5xl text-left">
               {leaders.map((leader) => (
                 <article
                   key={leader.name}
-                  className="group flex h-full flex-col rounded-[1.75rem] border border-brand-gold/25 bg-white/90 p-4 shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1 sm:p-5"
+                  className="leader-portrait-card group overflow-hidden rounded-[1.5rem] border border-brand-gold/25 bg-white/90 shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
                 >
-                  <div className="flex flex-1 flex-col rounded-[1.4rem] border border-brand-gold/20 bg-gradient-to-br from-[#FFF9E8] via-white to-[#F4E5BF] p-5">
-                    <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-[1.1rem] border border-brand-gold/25 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.18),transparent_50%),linear-gradient(160deg,#fffdf4_0%,#f8ecd0_100%)] px-6 py-8 text-center">
-                      <div className="absolute inset-x-6 top-5 h-px bg-gradient-to-r from-transparent via-brand-gold/45 to-transparent" />
-                      <div className="absolute bottom-5 inset-x-8 h-20 rounded-full bg-brand-gold/10 blur-2xl" />
-                      <div className="relative z-10">
-                        <span className="inline-flex rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-gold-dark">
-                          Leadership
-                        </span>
-                        <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-3xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
-                          {leader.initials}
-                        </div>
-                        <p className="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-brand-gold-dark">{leader.role}</p>
-                        <h3 className="mt-3 text-xl font-black tracking-tight text-brand-brown">{leader.name}</h3>
-                        <div className="mt-4 h-px w-14 mx-auto bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
-                        <p className="mt-5 text-sm leading-7 text-[#5B4A3A]">{leader.message}</p>
-                      </div>
-                    </div>
+                  <div className="leader-portrait-media">
+                    <img
+                      src={leader.image}
+                      alt={leader.name}
+                      className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${leader.name.includes('Sherwin') ? 'leader-photo-sherwin' : 'leader-photo-harold'}`}
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="leader-portrait-body">
+                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-gold-dark">{leader.role}</p>
+                    <h3 className="mt-2 text-2xl font-black leading-tight tracking-tight text-brand-brown">{leader.name}</h3>
+                    <div className="my-4 h-px w-16 bg-gradient-to-r from-brand-gold/60 to-transparent" />
+                    <p className="text-base font-extrabold uppercase leading-6 text-[#3A1000]">{leader.motto}</p>
+                    <p className="mt-3 text-sm leading-6 text-[#5B4A3A]">{leader.message}</p>
                   </div>
                 </article>
               ))}
             </div>
 
             <div className="mt-8 relative z-20 text-center">
-              <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
+              <NavLink to="/organizations" className="inline-flex min-h-11 items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
                 View People Behind the Company
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </NavLink>
@@ -482,27 +474,27 @@ function BusinessPreview() {
       <div className="absolute bottom-10 right-10 w-24 h-24 border-[3px] border-[#B8860B]/20 rounded-full border-dashed -rotate-6 motion-safe:animate-spin-slow pointer-events-none" />
       
       <div ref={ref} className="reveal section-container text-center relative z-10 max-w-[1000px] mx-auto">
-        <div className="bg-white rounded-[2.5rem] p-10 md:p-16 shadow-[0_20px_50px_rgba(184,134,11,0.15)] border border-[#D4A528]/20 relative overflow-hidden group">
+        <div className="bg-white rounded-[1.75rem] sm:rounded-[2.5rem] p-6 sm:p-10 md:p-16 shadow-[0_20px_50px_rgba(184,134,11,0.15)] border border-[#D4A528]/20 relative overflow-hidden group">
           {/* Inner card gradient highlight */}
           <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-[#D4A528] to-transparent opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-opacity duration-700 group-hover:opacity-20" />
           <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-[#B8860B] to-transparent opacity-5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none transition-opacity duration-700 group-hover:opacity-15" />
           
           <div className="relative z-10">
-            <span className="inline-block px-5 py-2 rounded-full bg-[#FFF8E1] text-[#B8860B] border border-[#B8860B]/20 text-xs md:text-sm font-bold tracking-widest uppercase mb-6 shadow-sm">
+            <span className="inline-block px-4 sm:px-5 py-2 rounded-full bg-[#FFF8E1] text-[#B8860B] border border-[#B8860B]/20 text-xs md:text-sm font-bold tracking-widest uppercase mb-4 sm:mb-6 shadow-sm">
               Business Opportunities
             </span>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#3A1000] tracking-tight mb-6 leading-tight">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-[#3A1000] tracking-tight mb-4 sm:mb-6 leading-tight">
               Ready to Start Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B8860B] to-[#D4A528] drop-shadow-sm">Journey?</span>
             </h2>
-            <p className="text-[#6d3028] text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+            <p className="text-[#6d3028] text-base md:text-xl max-w-2xl mx-auto mb-7 sm:mb-10 leading-relaxed font-medium">
               Join thousands of members building healthier lives and sustainable income with NOGATU Alliance.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-              <a href="/portal/login" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 rounded-xl text-white font-bold text-lg hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_20px_rgba(184,134,11,0.4)] hover:shadow-[0_12px_25px_rgba(184,134,11,0.6)]" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
+              <a href="/portal/login" className="w-full sm:w-auto inline-flex min-h-12 items-center justify-center gap-2 px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-white font-bold text-base sm:text-lg hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_20px_rgba(184,134,11,0.4)] hover:shadow-[0_12px_25px_rgba(184,134,11,0.6)]" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
                 Join Now
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
               </a>
-              <NavLink to="/products#packages" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl text-[#B8860B] font-bold text-lg border-2 border-[#D4A528]/30 hover:border-[#D4A528] hover:bg-[#FFF8E1] transition-all duration-300">
+              <NavLink to="/products#packages" className="w-full sm:w-auto inline-flex min-h-12 items-center justify-center px-7 sm:px-8 py-3 sm:py-4 rounded-xl text-[#B8860B] font-bold text-base sm:text-lg border-2 border-[#D4A528]/30 hover:border-[#D4A528] hover:bg-[#FFF8E1] transition-all duration-300">
                 View Business Plans &rarr;
               </NavLink>
             </div>
@@ -713,13 +705,13 @@ function CertificationsPreview() {
 function SectionHeader({ badge, title }) {
   const ref = useScrollReveal();
   return (
-    <div ref={ref} className="reveal text-center mb-14 lg:mb-16">
+    <div ref={ref} className="reveal text-center mb-8 sm:mb-12 lg:mb-16">
       {badge && (
         <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4" style={{ backgroundColor: 'rgba(212,165,40,0.1)', color: '#B8860B' }}>
           {badge}
         </span>
       )}
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance text-gray-900">
+      <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance text-gray-900">
         {title}
       </h2>
       <div className="mt-4 w-16 h-1 rounded-full mx-auto" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />

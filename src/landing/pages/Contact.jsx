@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 function PageHero({ title, subtitle }) {
   return (
-    <section className="relative pt-36 pb-14 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
+    <section className="landing-page-hero relative pt-28 pb-10 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
       <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }} />
@@ -15,8 +15,8 @@ function PageHero({ title, subtitle }) {
             <div className="h-0.5 w-8 rounded-full" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
             <span className="text-xs font-bold tracking-widest uppercase" style={{ color: '#B8860B' }}>NOGATU Alliance</span>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight leading-tight mb-4 motion-safe:animate-fade-up" style={{ color: '#3A1000', animationDelay: '0.05s' }}>{title}</h1>
-          {subtitle && <p className="text-lg leading-relaxed max-w-xl motion-safe:animate-fade-up" style={{ color: '#6d3028', animationDelay: '0.15s' }}>{subtitle}</p>}
+          <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight leading-tight mb-3 sm:mb-4 motion-safe:animate-fade-up" style={{ color: '#3A1000', animationDelay: '0.05s' }}>{title}</h1>
+          {subtitle && <p className="text-base sm:text-lg leading-relaxed max-w-xl motion-safe:animate-fade-up" style={{ color: '#6d3028', animationDelay: '0.15s' }}>{subtitle}</p>}
           <div className="mt-6 w-16 h-1 rounded-full motion-safe:animate-fade-up" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)', animationDelay: '0.2s' }} />
         </div>
       </div>
@@ -73,22 +73,22 @@ export default function Contact() {
 
       <section className="section-padding bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
         <div className="section-container">
-          <div ref={ref1} className="reveal mb-20 rounded-3xl overflow-hidden shadow-2xl relative" style={{ border: '1px solid rgba(184,134,11,0.15)' }}>
-            <iframe title="NOGATU Alliance Location" className="w-full h-80 lg:h-[450px]" src="https://www.google.com/maps?q=Nogatu%20Alliance%20Worldwide%20Inc.%2C%2094%20Navarro%20Street%2C%20Barangay%20177%2C%20Caloocan%20City%2C%20Metro%20Manila&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" style={{ border: 0 }} />
+          <div ref={ref1} className="reveal mb-10 sm:mb-20 rounded-3xl overflow-hidden shadow-2xl relative" style={{ border: '1px solid rgba(184,134,11,0.15)' }}>
+            <iframe title="NOGATU Alliance Location" className="w-full h-64 sm:h-80 lg:h-[450px]" src="https://www.google.com/maps?q=Nogatu%20Alliance%20Worldwide%20Inc.%2C%2094%20Navarro%20Street%2C%20Barangay%20177%2C%20Caloocan%20City%2C%20Metro%20Manila&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" style={{ border: 0 }} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-24 items-start">
-            <div ref={ref2} className="reveal-left space-y-8 mb-12 lg:mb-0">
+            <div ref={ref2} className="reveal-left space-y-6 sm:space-y-8 mb-10 lg:mb-0">
               <div>
                 <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-4 shadow-sm" style={{ backgroundColor: '#FFF8E1', color: '#B8860B', border: '1px solid rgba(184,134,11,0.2)' }}>Get in Touch</span>
                 <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4" style={{ color: '#3A1000' }}>Contact Information</h2>
                 <div className="w-20 h-1.5 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
                 <p className="text-base leading-relaxed" style={{ color: '#6d3028' }}>Feel free to reach out through any of the channels below. We are here to answer your queries and provide support.</p>
               </div>
-              <div className="space-y-8">
+              <div className="space-y-5 sm:space-y-8">
                 {INFO_ITEMS.map(item => (
                   <div key={item.label} className="flex gap-5 group items-start">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm motion-safe:transition-all motion-safe:duration-300 group-hover:-translate-y-1" style={{ backgroundColor: '#FFF8E1', color: '#B8860B', border: '1px solid rgba(184,134,11,0.15)' }}>
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm motion-safe:transition-all motion-safe:duration-300 group-hover:-translate-y-1" style={{ backgroundColor: '#FFF8E1', color: '#B8860B', border: '1px solid rgba(184,134,11,0.15)' }}>
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.iconD} />
                         {item.iconD2 && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.iconD2} />}
