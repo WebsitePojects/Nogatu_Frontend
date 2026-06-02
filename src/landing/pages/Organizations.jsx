@@ -9,13 +9,15 @@ const LEADERS = [
   },
   {
     name: 'Sherwin A. Catera',
-    image: '/landing/img/CEO%20Sherwin%20A.%20Catera.jpg',
+    image: '/landing/img/CEO%20Sherwin%20A.%20Catera.png',
     role: 'CEO',
     motto: 'Fear no limit.',
     message:
       'One should not be constrained by fear. Overcoming it allows greater freedom and the realization of one\'s full potential.',
   },
 ];
+
+const TESTIMONIAL_VIDEO_PATH = '/landing/img/nogatu-testimonials.mp4';
 
 export default function Organizations() {
   return (
@@ -70,20 +72,23 @@ export default function Organizations() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             <div className="rounded-2xl bg-white/85 border border-gray-100 shadow-xl p-4 sm:p-5">
-              <div className="aspect-video rounded-xl bg-[#3A1000] flex items-center justify-center text-white/70">
-                <div className="text-center">
-                  <svg className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 text-brand-gold-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.868v4.264a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <p className="text-sm font-semibold">Testimonial video placeholder</p>
-                </div>
-              </div>
+              <video
+                className="w-full aspect-video rounded-xl bg-[#3A1000] object-cover"
+                src={TESTIMONIAL_VIDEO_PATH}
+                controls
+                autoPlay
+                muted
+                playsInline
+                preload="metadata"
+              />
             </div>
             <div className="rounded-2xl bg-white/85 border border-gray-100 shadow-xl p-6 sm:p-8 flex flex-col justify-center">
               <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
                 "NOGATU Alliance gave us a practical way to introduce wellness products while building a disciplined distributor community."
               </p>
               <div className="mt-6">
-                <p className="font-bold text-brand-brown">Distributor Testimonial</p>
-                <p className="text-sm text-gray-500">Video and full text can be uploaded here.</p>
+                <p className="font-bold text-brand-brown">Nogatu Testimonials</p>
+                <p className="text-sm text-gray-500">Now playing from the uploaded community testimonial video.</p>
               </div>
             </div>
           </div>

@@ -59,14 +59,14 @@ function Hero() {
             <div className="landing-hero-actions flex w-full max-w-sm flex-col gap-2 sm:w-auto sm:max-w-none sm:flex-row sm:gap-3">
               <a
                 href="/portal/login"
-                className="inline-flex min-h-11 items-center justify-center px-6 sm:px-8 py-3 text-white text-sm sm:text-base font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-none hover:scale-105 hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
+                className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-3 text-center text-white text-sm sm:text-base font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-tight hover:scale-[1.02] hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
                 style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
               >
                 Be the One. Register Now!
               </a>
               <a
                 href="#stockist-apply"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
+                className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center gap-2 rounded-full px-5 sm:px-6 py-3 text-center text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
                 style={{
                   border: '1px solid rgba(255,255,255,0.42)',
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(212,165,40,0.16))',
@@ -240,20 +240,20 @@ function WhyUs() {
       {/* Dot grid bg */}
       <div className="absolute inset-0 pointer-events-none bg-dot-grid" style={{ opacity: 0.06 }} />
       <div className="section-container relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-12 lg:gap-8">
           {/* Why box */}
-          <div ref={ref} className="reveal lg:col-span-4">
-            <div className="h-full rounded-2xl p-8 lg:p-10 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
+          <div ref={ref} className="reveal col-span-1 lg:col-span-4">
+            <div className="h-full rounded-2xl p-5 sm:p-7 lg:p-10 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
               {/* Subtle diagonal overlay */}
               <div className="absolute inset-0 pointer-events-none" style={{
                 backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(212,165,40,0.04) 10px, rgba(212,165,40,0.04) 11px)',
               }} />
               <div className="relative z-10">
-                <h3 className="text-2xl font-bold mb-4">Why Choose <span className="text-brand-gold-light">NOGATU?</span></h3>
-                <p className="text-white/70 leading-relaxed mb-6">
+                <h3 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4">Why Choose <span className="text-brand-gold-light">NOGATU?</span></h3>
+                <p className="text-sm sm:text-base text-white/70 leading-relaxed mb-4 sm:mb-6">
                   At Nogatu Alliance, we don't just sell products, we build partnerships. When you choose us, you become our valued partner, working alongside us to achieve your success.
                 </p>
-                <p className="text-white/70 leading-relaxed mb-6">
+                <p className="text-sm sm:text-base text-white/70 leading-relaxed mb-4 sm:mb-6">
                   You are not alone in this journey. Our exceptional customer support team is dedicated to your success.
                 </p>
                 <NavLink to="/about" className="inline-flex items-center gap-2 text-brand-gold-light hover:text-brand-yellow-light font-medium text-sm motion-safe:transition-colors">
@@ -265,23 +265,23 @@ function WhyUs() {
           </div>
 
           {/* Feature boxes */}
-          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <div className="contents lg:grid lg:col-span-8 lg:grid-cols-3 lg:gap-6">
             {features.map((f, i) => {
               const cardRef = useScrollReveal({ delay: i * 100 });
               return (
-                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-5 sm:p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-4 sm:p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
                   <div className="feature-story-shine" />
                   <div className="feature-story-aura" />
                   <div
-                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110 feature-story-icon"
+                    className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl mx-auto mb-4 sm:mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110 feature-story-icon"
                     style={{ color: '#B8860B', backgroundColor: 'rgba(212,165,40,0.08)' }}
                   >
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={f.icon} />
                     </svg>
                   </div>
-                  <h4 className="font-bold text-brand-brown mb-3 text-lg">{f.title}</h4>
-                  <p className="text-sm leading-7 text-[#6d3028] font-medium max-w-[15rem] mx-auto">{f.desc}</p>
+                  <h4 className="font-bold text-brand-brown mb-2 sm:mb-3 text-base sm:text-lg">{f.title}</h4>
+                  <p className="text-xs sm:text-sm leading-6 sm:leading-7 text-[#6d3028] font-medium max-w-[15rem] mx-auto">{f.desc}</p>
                 </div>
               );
             })}
@@ -394,6 +394,7 @@ function Products() {
 /* ────────────────────── Organizations Preview ───────────── */
 function OrganizationsPreview() {
   const ref = useScrollReveal();
+  const testimonialVideoSrc = '/landing/img/nogatu-testimonials.mp4';
   const leaders = [
     {
       name: 'Harold M. Tugano',
@@ -404,7 +405,7 @@ function OrganizationsPreview() {
     },
     {
       name: 'Sherwin A. Catera',
-      image: '/landing/img/CEO%20Sherwin%20A.%20Catera.jpg',
+      image: '/landing/img/CEO%20Sherwin%20A.%20Catera.png',
       role: 'CEO',
       motto: 'Fear no limit.',
       message: 'One should not be constrained by fear. Overcoming it allows greater freedom and the realization of one\'s full potential.',
@@ -430,25 +431,43 @@ function OrganizationsPreview() {
               {leaders.map((leader) => (
                 <article
                   key={leader.name}
-                  className="leader-portrait-card group overflow-hidden rounded-[1.5rem] border border-brand-gold/25 bg-white/90 shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
+                  className="leader-portrait-card group overflow-hidden rounded-[1.5rem] border border-brand-gold/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(255,248,225,0.99)_100%)] shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
                 >
                   <div className="leader-portrait-media">
                     <img
                       src={leader.image}
                       alt={leader.name}
-                      className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${leader.name.includes('Sherwin') ? 'leader-photo-sherwin' : 'leader-photo-harold'}`}
+                      className={`h-full w-full object-cover ${leader.name.includes('Sherwin') ? 'leader-photo-sherwin' : 'leader-photo-harold'}`}
                       loading="lazy"
                     />
                   </div>
                   <div className="leader-portrait-body">
-                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-gold-dark">{leader.role}</p>
-                    <h3 className="mt-2 text-2xl font-black leading-tight tracking-tight text-brand-brown">{leader.name}</h3>
+                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#8A6300]">{leader.role}</p>
+                    <h3 className="mt-2 text-2xl font-black leading-tight tracking-tight text-[#421100]">{leader.name}</h3>
                     <div className="my-4 h-px w-16 bg-gradient-to-r from-brand-gold/60 to-transparent" />
-                    <p className="text-base font-extrabold uppercase leading-6 text-[#3A1000]">{leader.motto}</p>
-                    <p className="mt-3 text-sm leading-6 text-[#5B4A3A]">{leader.message}</p>
+                    <p className="text-base font-extrabold uppercase leading-6 text-[#2B0A00]">{leader.motto}</p>
+                    <p className="mt-3 text-sm leading-6 text-[#3F3125]">{leader.message}</p>
                   </div>
                 </article>
               ))}
+            </div>
+
+            <div className="mt-8 rounded-[1.5rem] border border-brand-gold/15 bg-white p-4 shadow-sm sm:p-6">
+              <div className="mb-4 text-left sm:mb-5">
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-gold-dark">Video Testimonials</p>
+                <h3 className="mt-2 text-xl font-black tracking-tight text-[#421100] sm:text-2xl">Now Playing</h3>
+              </div>
+              <div className="overflow-hidden rounded-[1.25rem] border border-brand-gold/15 bg-black shadow-[0_16px_40px_rgba(89,34,25,0.14)]">
+                <video
+                  className="w-full aspect-video object-cover"
+                  src={testimonialVideoSrc}
+                  controls
+                  autoPlay
+                  muted
+                  playsInline
+                  preload="metadata"
+                />
+              </div>
             </div>
 
             <div className="mt-8 relative z-20 text-center">

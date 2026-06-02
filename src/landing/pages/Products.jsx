@@ -58,15 +58,15 @@ const PRODUCTS = [
 function ProductCard({ product, delay, onLightbox }) {
   const ref = useScrollReveal({ delay });
   return (
-    <div ref={ref} className="reveal group text-center">
-      <div className="relative overflow-hidden rounded-2xl p-4 sm:p-8 flex items-center justify-center h-44 sm:h-56 mb-4 cursor-pointer" style={{ background: 'linear-gradient(135deg, #FFF8E1, #FFFDF5)' }} onClick={() => product.img && onLightbox(product.img)}>
+    <div ref={ref} className="reveal group min-w-0 text-center">
+      <div className="relative overflow-hidden rounded-2xl p-3 sm:p-8 flex items-center justify-center h-36 sm:h-56 mb-3 sm:mb-4 cursor-pointer" style={{ background: 'linear-gradient(135deg, #FFF8E1, #FFFDF5)' }} onClick={() => product.img && onLightbox(product.img)}>
         {product.placeholder ? (
           <div className="w-full h-full rounded-xl border-2 border-dashed border-brand-gold/35 bg-white/45 flex flex-col items-center justify-center text-brand-brown">
             <svg className="w-10 h-10 text-brand-gold-dark mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             <span className="text-sm font-semibold">Image Slot</span>
           </div>
         ) : (
-          <img src={product.img} alt={product.name} className="max-h-44 object-contain motion-safe:group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500" loading="lazy" />
+          <img src={product.img} alt={product.name} className="max-h-32 sm:max-h-44 object-contain motion-safe:group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500" loading="lazy" />
         )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 motion-safe:transition-colors motion-safe:duration-300 flex items-center justify-center">
           <div className="opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-300 w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,253,245,0.9)' }}>
@@ -74,9 +74,11 @@ function ProductCard({ product, delay, onLightbox }) {
           </div>
         </div>
       </div>
-      <h4 className="font-semibold mb-1 text-sm sm:text-base" style={{ color: '#3A1000' }}>{product.name}</h4>
-      <p className="text-xs sm:text-sm mb-1" style={{ color: '#6d3028' }}>{product.desc}</p>
-      <p className="text-lg font-bold" style={{ color: '#B8860B' }}>{product.price === 'TBA' ? product.price : `Php ${product.price}`}</p>
+      <div className="mx-auto flex max-w-[13rem] flex-col items-center">
+        <h4 className="min-h-[2.6rem] font-semibold mb-1 text-[0.92rem] sm:text-base leading-tight" style={{ color: '#3A1000' }}>{product.name}</h4>
+        <p className="min-h-[2.2rem] text-[0.76rem] sm:text-sm mb-1 leading-snug" style={{ color: '#6d3028' }}>{product.desc}</p>
+        <p className="text-lg sm:text-lg font-bold" style={{ color: '#B8860B' }}>{product.price === 'TBA' ? product.price : `Php ${product.price}`}</p>
+      </div>
     </div>
   );
 }
@@ -177,7 +179,7 @@ export default function Opportunities() {
             <div className="w-16 h-1 rounded-full mx-auto mt-4" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
           </div>
 
-          <div className="grid grid-cols-1 min-[520px]:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-5 sm:gap-8">
             {PRODUCTS.map((p, i) => (
               <ProductCard key={p.name} product={p} delay={i * 80} onLightbox={lightbox.open} />
             ))}
