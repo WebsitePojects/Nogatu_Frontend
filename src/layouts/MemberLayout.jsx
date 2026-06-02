@@ -7,9 +7,10 @@ import {
   HiOutlineUsers, HiOutlineChartBar, HiOutlineGift, HiOutlineDocumentText,
   HiOutlineArrowUp, HiOutlineUserAdd, HiOutlineLogout, HiOutlineMenu,
   HiOutlineX, HiOutlineBell, HiOutlineSun, HiOutlineMoon,
-  HiOutlineSupport, HiOutlineShieldCheck,
+  HiOutlineSupport, HiOutlineShieldCheck, HiOutlineTrendingUp, HiOutlineStar,
 } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
+import CodeUseConfirmModal from '../components/CodeUseConfirmModal';
 
 const NAV_GROUPS = [
   {
@@ -25,6 +26,9 @@ const NAV_GROUPS = [
       { to: '/referrals',    label: 'Direct Referrals', icon: HiOutlineUsers },
       { to: '/genealogy',    label: 'Genealogy Tree',   icon: FaSitemap },
       { to: '/pairing',      label: 'Pairing Reports',  icon: HiOutlineChartBar },
+      { to: '/dashboard/details/uni-level', label: 'Uni-Level Breakdown', icon: HiOutlineTrendingUp },
+      { to: '/dashboard/details/leadership-bonus', label: 'Leadership Breakdown', icon: HiOutlineStar },
+      { to: '/dashboard/details/ranking-bonus', label: 'Ranking Bonus Breakdown', icon: HiOutlineShieldCheck },
       { to: '/hifive',       label: 'Hi-Five Bonus',    icon: HiOutlineGift },
       { to: '/ranking',      label: 'Ranking Progress', icon: HiOutlineShieldCheck },
       { to: '/leaderboard',  label: 'Leaderboard',      icon: HiOutlineChartBar },
@@ -66,6 +70,7 @@ export default function MemberLayout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     const el = document.querySelector('.main-scroll');
@@ -88,15 +93,25 @@ export default function MemberLayout() {
   const acctInitial = user?.shortname?.charAt(0)?.toUpperCase() || 'M';
 
   return (
-    <div className="flex h-screen overflow-hidden portal-bg">
+    <>
+      <CodeUseConfirmModal
+        open={showLogoutConfirm}
+        tone="gold"
+        title="Sign out now?"
+        message="You will be signed out of the member portal and returned to the login screen."
+        confirmLabel="Sign Out"
+        cancelLabel="Stay Signed In"
+        onConfirm={async () => {
+          setShowLogoutConfirm(false);
+          await handleLogout();
+        }}
+        onClose={() => setShowLogoutConfirm(false)}
+      />
+      <div className="flex h-screen overflow-hidden portal-bg">
 
       {/* ── SIDEBAR ─────────────────────────────────────────── */}
       <aside
-        className={`
-          fixed inset-y-0 left-0 z-50 w-[268px] glass-sidebar flex flex-col
-          motion-safe:transition-transform motion-safe:duration-300 ease-out
-          lg:translate-x-0 lg:static lg:flex-shrink-0
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        className={`fixed inset-y-0 left-0 z-50 w-[268px] glass-sidebar flex flex-col motion-safe:transition-transform motion-safe:duration-300 ease-out lg:translate-x-0 lg:static lg:flex-shrink-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         {/* Decorative orbs */}
@@ -104,12 +119,12 @@ export default function MemberLayout() {
         <GoldOrb size="160px" top="60%"    left="60%"    opacity={0.4} />
 
         {/* Logo area */}
-        <div className="relative flex items-center gap-3.5 px-5 py-5 border-b" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
+        <div className="relative flex items-center gap-3.5 p-5 border-b" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
           <div className="relative flex-shrink-0">
               <img
                 src="/img/nogatu_logo.png"
                 alt="NOGATU Alliance"
-                className="w-11 h-11 rounded-xl object-contain"
+                className="size-11 rounded-xl object-contain"
                 style={{
                   border: '1px solid rgba(212,175,55,0.25)',
                   background: 'rgba(212,175,55,0.06)',
@@ -117,7 +132,7 @@ export default function MemberLayout() {
                 }}
               />
             {/* Online indicator */}
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-obsidian-900" style={{ background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,0.6)' }} />
+            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-obsidian-900" style={{ background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,0.6)' }} />
           </div>
           <div>
             <h1 className="font-brand text-[13px] font-semibold tracking-wide" style={{ color: 'var(--brand-gold)' }}>
@@ -131,8 +146,8 @@ export default function MemberLayout() {
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden ml-auto p-1.5 rounded-lg portal-card-muted hover:text-[var(--portal-title)] hover:bg-white/[0.05] transition-colors"
-          >
-            <HiOutlineX className="w-4 h-4" />
+           type="button">
+            <HiOutlineX className="size-4" />
           </button>
         </div>
 
@@ -154,7 +169,7 @@ export default function MemberLayout() {
                     }}
                     className={`nav-item w-full text-left${isItemActive(item.to) ? ' active' : ''}`}
                   >
-                    <item.icon className="w-[17px] h-[17px] flex-shrink-0" />
+                    <item.icon className="size-[17px] flex-shrink-0" />
                     {item.label}
                   </button>
                 ))}
@@ -166,9 +181,9 @@ export default function MemberLayout() {
         {/* User info + sign out */}
         <div className="border-t p-3.5" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
           {/* User row */}
-          <div className="flex items-center gap-3 px-2 py-2 mb-1">
+          <div className="flex items-center gap-3 p-2 mb-1">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-always-white font-bold text-sm flex-shrink-0"
+              className="size-9 rounded-xl flex items-center justify-center text-always-white font-bold text-sm flex-shrink-0"
               style={{
                 background: 'linear-gradient(135deg, #9A7B0A 0%, #D4AF37 50%, #F2D06B 100%)',
                 boxShadow: '0 4px 12px rgba(212,175,55,0.3)',
@@ -186,11 +201,11 @@ export default function MemberLayout() {
 
           {/* Sign out */}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className="nav-item w-full cursor-pointer"
             style={{ color: 'var(--portal-card-muted)' }}
-          >
-            <HiOutlineLogout className="w-[17px] h-[17px]" />
+           type="button">
+            <HiOutlineLogout className="size-[17px]" />
             Sign Out
           </button>
         </div>
@@ -210,7 +225,7 @@ export default function MemberLayout() {
 
         {/* Topbar */}
         <header
-          className={`glass-topbar px-4 lg:px-7 h-15 flex items-center justify-between flex-shrink-0 transition-shadow duration-300 ${scrolled ? 'shadow-obsidian' : ''}`}
+          className={`gglass-topbar px-4 lg:px-7 h-15 flex items-center justify-between flex-shrink-0 transition-shadow duration-300 ${scrolled ? 'shadow-obsidian' : ''}`}
           style={{ height: '60px' }}
         >
           {/* Left: menu + page title */}
@@ -219,8 +234,8 @@ export default function MemberLayout() {
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 -ml-1.5 rounded-xl portal-card-muted hover:text-[var(--portal-title)] hover:bg-white/[0.05] transition-colors"
               aria-label="Open menu"
-            >
-              <HiOutlineMenu className="w-5 h-5" />
+             type="button">
+              <HiOutlineMenu className="size-5" />
             </button>
             <div>
               <p className="portal-page-title text-sm font-semibold leading-none">{currentPage?.label || 'Dashboard'}</p>
@@ -237,8 +252,8 @@ export default function MemberLayout() {
               onClick={toggleTheme}
               className="p-2 rounded-xl portal-card-muted hover:text-[var(--portal-gold-text)] transition-colors"
               title="Toggle Theme"
-            >
-              {isDarkMode ? <HiOutlineSun className="w-[18px] h-[18px]" /> : <HiOutlineMoon className="w-[18px] h-[18px]" />}
+             type="button">
+              {isDarkMode ? <HiOutlineSun className="size-[18px]" /> : <HiOutlineMoon className="size-[18px]" />}
             </button>
             
             {/* Notification bell */}
@@ -246,10 +261,10 @@ export default function MemberLayout() {
               className="relative p-2 rounded-xl portal-card-muted hover:text-[var(--portal-gold-text)] transition-colors"
               style={{ '--tw-ring-color': 'rgba(212,175,55,0.2)' }}
               aria-label="Notifications"
-            >
-              <HiOutlineBell className="w-[18px] h-[18px]" />
+             type="button">
+              <HiOutlineBell className="size-[18px]" />
               <span
-                className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full"
+                className="absolute top-2 right-2 size-1.5 rounded-full"
                 style={{ background: '#D4AF37', boxShadow: '0 0 6px rgba(212,175,55,0.8)' }}
               />
             </button>
@@ -261,7 +276,7 @@ export default function MemberLayout() {
                 <p className="topbar-account-tier text-[10.5px] mt-0.5">{user?.caccttype}</p>
               </div>
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-always-white"
+                className="size-8 rounded-xl flex items-center justify-center text-sm font-bold text-always-white"
                 style={{
                   background: 'linear-gradient(135deg, #9A7B0A, #D4AF37)',
                   boxShadow: '0 2px 8px rgba(212,175,55,0.25)',
@@ -278,6 +293,7 @@ export default function MemberLayout() {
           <Outlet />
         </main>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

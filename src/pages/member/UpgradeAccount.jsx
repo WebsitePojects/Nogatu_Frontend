@@ -11,7 +11,7 @@ const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDi
 function Spinner() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-3">
-      <div className="w-10 h-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+      <div className="size-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
     </div>
   );
 }
@@ -179,7 +179,7 @@ export default function UpgradeAccount() {
 
       <div className="glass-card rounded-2xl p-5 flex items-center gap-4">
         <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center text-[#080604] font-bold text-lg flex-shrink-0"
+          className="size-14 rounded-2xl flex items-center justify-center text-[#080604] font-bold text-lg flex-shrink-0"
           style={{
             background: 'linear-gradient(135deg, #9A7B0A, #D4AF37)',
             boxShadow: '0 6px 20px rgba(212,175,55,0.3)',
@@ -203,10 +203,10 @@ export default function UpgradeAccount() {
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-start gap-3">
           <span
-            className="inline-flex items-center justify-center w-10 h-10 rounded-2xl"
+            className="inline-flex items-center justify-center size-10 rounded-2xl"
             style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.18)', color: '#D4AF37' }}
           >
-            <HiOutlineShieldCheck className="w-5 h-5" />
+            <HiOutlineShieldCheck className="size-5" />
           </span>
           <div>
             <h3 className="font-display text-base font-semibold text-white">Package Benefit Ladder</h3>
@@ -284,7 +284,7 @@ export default function UpgradeAccount() {
 
                 <div className="rounded-xl p-4 mt-4" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.12)' }}>
                   <div className="flex items-start gap-2">
-                    <HiOutlineSparkles className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#D4AF37' }} />
+                    <HiOutlineSparkles className="size-4 mt-0.5 flex-shrink-0" style={{ color: '#D4AF37' }} />
                     <div>
                       <p className="text-sm font-semibold text-white">
                         {pkg.rankingEligible ? `Ranking ceiling: ${pkg.rankingMaxLabel || 'Published ceiling'}` : 'Ranking locked for this package'}
@@ -320,7 +320,7 @@ export default function UpgradeAccount() {
             type="submit"
             className="gold-btn-outline px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 whitespace-nowrap"
           >
-            <HiOutlineSearch className="w-4 h-4" />
+            <HiOutlineSearch className="size-4" />
             Search
           </button>
         </form>
@@ -330,7 +330,7 @@ export default function UpgradeAccount() {
             className="flex items-center gap-2.5 p-3 rounded-xl mb-2 text-sm"
             style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}
           >
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#4ade80', boxShadow: '0 0 6px rgba(74,222,128,0.6)' }} />
+            <span className="size-2 rounded-full flex-shrink-0" style={{ background: '#4ade80', boxShadow: '0 0 6px rgba(74,222,128,0.6)' }} />
             <span style={{ color: '#4ade80' }}>Target: <strong>{targetInfo.username}</strong></span>
           </div>
         )}
@@ -368,8 +368,8 @@ export default function UpgradeAccount() {
                   style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(212,175,55,0.18)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(212,175,55,0.1)'; }}
-                >
-                  <HiOutlineArrowUp className="w-3.5 h-3.5" />
+                 type="button">
+                  <HiOutlineArrowUp className="size-3.5" />
                   Upgrade
                 </button>
               </div>
@@ -377,14 +377,14 @@ export default function UpgradeAccount() {
           </div>
 
           {targetInfo && selected.length > 0 && (
-              <button onClick={handleTransfer} className="gold-btn py-2.5 px-6 rounded-xl text-sm mt-4">
+              <button onClick={handleTransfer} className="gold-btn py-2.5 px-6 rounded-xl text-sm mt-4" type="button">
                 Transfer {selected.length} Code{selected.length > 1 ? 's' : ''}
               </button>
           )}
         </div>
       ) : (
         <div className="glass-card rounded-2xl p-12 text-center">
-          <HiOutlineArrowUp className="w-8 h-8 mx-auto mb-3" style={{ color: 'rgba(212,175,55,0.2)' }} />
+          <HiOutlineArrowUp className="size-8 mx-auto mb-3" style={{ color: 'rgba(212,175,55,0.2)' }} />
           <p style={{ color: 'rgba(255,255,255,0.3)' }}>No upgrade codes available.</p>
         </div>
       )}

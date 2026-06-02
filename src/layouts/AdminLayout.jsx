@@ -98,14 +98,14 @@ export default function AdminLayout() {
     <div className="flex h-screen overflow-hidden portal-bg">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[272px] glass-sidebar transform motion-safe:transition-transform motion-safe:duration-300 ease-out lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`ffixed inset-y-0 left-0 z-50 w-[272px] glass-sidebar transform motion-safe:transition-transform motion-safe:duration-300 ease-out lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Logo area */}
         <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
           <img
             src="/img/nogatu_logo.png"
             alt="NOGATU Alliance"
-            className="w-12 h-12 rounded-xl object-contain"
+            className="size-12 rounded-xl object-contain"
             style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(255,255,255,0.05)' }}
           />
           <div>
@@ -115,7 +115,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-thin">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin">
           {filteredGroups.map((group) => (
             <div key={group.label}>
               <p
@@ -132,7 +132,7 @@ export default function AdminLayout() {
                     onClick={() => setSidebarOpen(false)}
                     className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
                   >
-                    <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
+                    <item.icon className="size-[18px] flex-shrink-0" />
                     {item.label}
                   </NavLink>
                 ))}
@@ -143,9 +143,9 @@ export default function AdminLayout() {
 
         {/* Admin info + Sign out */}
         <div className="p-4" style={{ borderTop: '1px solid rgba(212,175,55,0.10)' }}>
-          <div className="flex items-center gap-3 px-2 py-2 mb-2">
+          <div className="flex items-center gap-3 p-2 mb-2">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-always-white font-bold text-xs shadow-md"
+              className="size-9 rounded-xl flex items-center justify-center text-white text-always-white font-bold text-xs shadow-md"
               style={{ background: 'linear-gradient(135deg, #7f1d1d, #991b1b)' }}
             >
               {admin?.name?.[0]?.toUpperCase() || 'A'}
@@ -164,8 +164,8 @@ export default function AdminLayout() {
             onClick={handleLogout}
             className="nav-item w-full text-left"
             style={{ color: 'var(--portal-card-muted)' }}
-          >
-            <HiOutlineLogout className="w-[18px] h-[18px]" />
+           type="button">
+            <HiOutlineLogout className="size-[18px]" />
             Sign Out
           </button>
         </div>
@@ -191,8 +191,8 @@ export default function AdminLayout() {
               onClick={() => setSidebarOpen(true)}
               className="portal-card-muted lg:hidden p-2 -ml-2 rounded-xl transition-colors hover:text-[var(--portal-gold-text)] cursor-pointer"
               aria-label="Open menu"
-            >
-              <HiOutlineMenu className="w-5 h-5" />
+             type="button">
+              <HiOutlineMenu className="size-5" />
             </button>
             <h2 className="portal-page-title text-sm font-semibold">{currentPage?.label || 'Admin Dashboard'}</h2>
           </div>
@@ -201,16 +201,16 @@ export default function AdminLayout() {
               onClick={toggleTheme}
               className="portal-card-muted p-2 rounded-xl transition-colors hover:text-[var(--portal-gold-text)]"
               title="Toggle Theme"
-            >
-              {isDarkMode ? <HiOutlineSun className="w-5 h-5" /> : <HiOutlineMoon className="w-5 h-5" />}
+             type="button">
+              {isDarkMode ? <HiOutlineSun className="size-5" /> : <HiOutlineMoon className="size-5" />}
             </button>
             <button
               className="portal-card-muted relative p-2 rounded-xl transition-colors hover:text-[var(--portal-gold-text)] cursor-pointer"
               aria-label="Notifications"
-            >
-              <HiOutlineBell className="w-5 h-5" />
+             type="button">
+              <HiOutlineBell className="size-5" />
               <span
-                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
+                className="absolute top-1.5 right-1.5 size-2 rounded-full"
                 style={{ background: topbarGold }}
               />
             </button>
@@ -223,7 +223,7 @@ export default function AdminLayout() {
                 <p className="topbar-account-tier text-[11px]">{roleLabel}</p>
               </div>
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm text-white text-always-white"
+                className="size-9 rounded-xl flex items-center justify-center font-bold text-sm text-white text-always-white"
                 style={{ background: 'linear-gradient(135deg, #7f1d1d, #991b1b)' }}
               >
                 {admin?.name?.[0]?.toUpperCase() || 'A'}

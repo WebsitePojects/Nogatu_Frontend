@@ -5,8 +5,8 @@ import Lightbox, { useLightbox } from '../components/Lightbox';
 function PageHero({ title, subtitle }) {
   return (
     <section className="relative pt-36 pb-14 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
+      <div className="absolute top-0 right-0 size-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
+      <div className="absolute bottom-0 left-0 size-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
       <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }} />
       <div className="section-container relative z-10">
         <div className="max-w-3xl">
@@ -55,8 +55,8 @@ export default function About() {
                 <div className="about-photo-orb about-photo-orb-left" />
                 <div className="about-photo-orb about-photo-orb-right" />
                 <img src="/landing/assets/img/about.jpg" alt="About NOGATU Alliance" className="relative z-10 rounded-2xl shadow-2xl w-full object-cover cursor-pointer about-photo-main" style={{ boxShadow: '0 25px 50px rgba(89,34,25,0.15)' }} loading="lazy" onClick={() => lightbox.open('/landing/assets/img/about.jpg')} />
-                <div className="absolute -bottom-6 -right-6 w-40 h-40 rounded-2xl shadow-xl overflow-hidden hidden lg:block cursor-pointer z-20" style={{ border: '4px solid #E7C679' }} onClick={() => lightbox.open('/landing/img/about-2.jpg')}>
-                  <img src="/landing/img/about-2.jpg" alt="NOGATU Products" className="w-full h-full object-cover product-mini-image" loading="lazy" />
+                <div className="absolute -bottom-6 -right-6 size-40 rounded-2xl shadow-xl overflow-hidden hidden lg:block cursor-pointer z-20" style={{ border: '4px solid #E7C679' }} onClick={() => lightbox.open('/landing/img/about-2.jpg')}>
+                  <img src="/landing/img/about-2.jpg" alt="NOGATU Products" className="size-full object-cover product-mini-image" loading="lazy" />
                 </div>
               </div>
             </div>
@@ -69,7 +69,7 @@ export default function About() {
               <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
                 <div className="about-info-card">
                   <div className="about-info-icon">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -79,7 +79,7 @@ export default function About() {
                 </div>
                 <div className="about-info-card">
                   <div className="about-info-icon">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
                     </svg>
                   </div>
@@ -90,8 +90,8 @@ export default function About() {
               <div className="flex gap-6">
                 {['FDA Approved', 'Member-First'].map((t) => (
                   <div key={t} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    <div className="size-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>
+                      <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                     </div>
                     <span className="text-sm font-medium" style={{ color: '#3A1000' }}>{t}</span>
                   </div>
@@ -147,8 +147,8 @@ export default function About() {
           <div ref={ref4} className="reveal grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="mission-vision-card mission-vision-card-gold group p-8 lg:p-10 rounded-2xl border motion-safe:hover:shadow-xl motion-safe:transition-all motion-safe:duration-300">
               <div className="mission-vision-glow" />
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 motion-safe:transition-colors motion-safe:duration-300 mission-vision-icon" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <div className="size-14 rounded-2xl flex items-center justify-center mb-6 motion-safe:transition-colors motion-safe:duration-300 mission-vision-icon" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>
+                <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
               <h3 className="text-2xl font-bold mb-2" style={{ color: '#3A1000' }}>Our Mission</h3>
               <div className="w-14 h-1 rounded-full mb-4" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
@@ -156,8 +156,8 @@ export default function About() {
             </div>
             <div className="mission-vision-card mission-vision-card-brown group p-8 lg:p-10 rounded-2xl border motion-safe:hover:shadow-xl motion-safe:transition-all motion-safe:duration-300">
               <div className="mission-vision-glow" />
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 motion-safe:transition-colors motion-safe:duration-300 mission-vision-icon" style={{ backgroundColor: 'rgba(89,34,25,0.08)', color: '#592219' }}>
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              <div className="size-14 rounded-2xl flex items-center justify-center mb-6 motion-safe:transition-colors motion-safe:duration-300 mission-vision-icon" style={{ backgroundColor: 'rgba(89,34,25,0.08)', color: '#592219' }}>
+                <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
               </div>
               <h3 className="text-2xl font-bold mb-2" style={{ color: '#3A1000' }}>Our Vision</h3>
               <div className="w-14 h-1 rounded-full mb-4" style={{ background: 'linear-gradient(90deg, #592219, #6d3028)' }} />

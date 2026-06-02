@@ -12,7 +12,7 @@ const PACKAGE_LABELS = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum',
 function Spinner() {
   return (
     <div className="flex justify-center py-14">
-      <div className="w-10 h-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+      <div className="size-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
     </div>
   );
 }
@@ -28,6 +28,26 @@ function statusStyle(status) {
     return { color: '#f87171', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' };
   }
   return { color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' };
+}
+
+function getExpiryModeLabel(row) {
+  if (row?.expiry_mode === 'used') return 'Used-voucher expiry';
+  return 'Unused-voucher expiry';
+}
+
+function getExpiryDescription(row) {
+  const label = row?.expiry_label || 'Active';
+  if (row?.expiry_mode === 'used') {
+    return row?.first_used_at
+      ? `${getExpiryModeLabel(row)}: ${label} after first use on ${row.first_used_at}`
+      : `${getExpiryModeLabel(row)}: ${label}`;
+  }
+  return `${getExpiryModeLabel(row)}: ${label}`;
+}
+
+function getExpiryDateDisplay(row) {
+  if (row?.expiry_mode === 'used' && row?.use_expires_at) return row.use_expires_at;
+  return row?.expiry_date || 'N/A';
 }
 
 export default function Vouchers() {
@@ -229,7 +249,7 @@ export default function Vouchers() {
       {suspendedVoucher && (
         <div className="rounded-xl p-4" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
           <div className="flex items-start gap-3">
-            <HiOutlineExclamation className="w-6 h-6 mt-0.5 flex-shrink-0" style={{ color: '#f87171' }} />
+            <HiOutlineExclamation className="size-6 mt-0.5 flex-shrink-0" style={{ color: '#f87171' }} />
             <div>
               <p className="font-semibold text-sm" style={{ color: '#f87171' }}>Voucher Suspended</p>
               <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
@@ -243,8 +263,8 @@ export default function Vouchers() {
       {/* Info banner */}
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-start gap-3">
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}>
-            <HiOutlineSparkles className="w-6 h-6" style={{ color: '#D4AF37' }} />
+          <div className="size-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}>
+            <HiOutlineSparkles className="size-6" style={{ color: '#D4AF37' }} />
           </div>
           <div>
             <p className="portal-card-title font-semibold text-base">PRODUCT + PRODUCT VOUCHER = DOBLE SULIT</p>
@@ -277,9 +297,9 @@ export default function Vouchers() {
             onClick={refreshAllContent}
             className="text-xs px-2.5 py-1.5 rounded-lg"
             style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}
-          >
+           type="button">
             <span className="inline-flex items-center gap-1.5">
-              <HiOutlineRefresh className="w-3.5 h-3.5" /> Refresh
+              <HiOutlineRefresh className="size-3.5" /> Refresh
             </span>
           </button>
         </div>
@@ -305,8 +325,8 @@ export default function Vouchers() {
                       <td className="py-2.5 px-2 text-white/80">P{fmt(r.remaining_balance)}</td>
                       <td className="py-2.5 px-2 text-white/60">{r.issued_date}</td>
                       <td className="py-2.5 px-2 text-white/60">
-                        <div>{r.expiry_date}</div>
-                        <div className="text-[11px] text-white/40">{r.expiry_label || 'Active'}</div>
+                        <div>{getExpiryDateDisplay(r)}</div>
+                        <div className="text-[11px] text-white/40">{getExpiryDescription(r)}</div>
                       </td>
                       <td className="py-2.5 px-2">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs" style={statusStyle(r.status)}>
@@ -333,7 +353,8 @@ export default function Vouchers() {
                     <p>Amount: P{fmt(r.voucher_amount)}</p>
                     <p>Remaining: P{fmt(r.remaining_balance)}</p>
                     <p>Issued: {r.issued_date}</p>
-                    <p>Expiry: {r.expiry_date} <span className="text-white/40">({r.expiry_label || 'Active'})</span></p>
+                    <p>Expiry: {getExpiryDateDisplay(r)}</p>
+                    <p className="text-white/40">{getExpiryDescription(r)}</p>
                   </div>
                 </div>
               ))}
@@ -341,7 +362,7 @@ export default function Vouchers() {
 
             {rows.length === 0 && (
               <div className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                <HiOutlineGift className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.45)' }} />
+                <HiOutlineGift className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.45)' }} />
                 No vouchers yet.
               </div>
             )}
@@ -352,7 +373,7 @@ export default function Vouchers() {
       {/* Available Products */}
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
-          <HiOutlineShoppingCart className="w-5 h-5" style={{ color: '#D4AF37' }} />
+          <HiOutlineShoppingCart className="size-5" style={{ color: '#D4AF37' }} />
           <h2 className="font-display text-lg text-white">Available Products</h2>
         </div>
         <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
@@ -372,7 +393,7 @@ export default function Vouchers() {
               <div
                 key={p.name}
                 onClick={canCheckout && !checkoutLocked ? () => handleProductCheckout(p) : undefined}
-                className={`rounded-xl p-4 text-center transition ${canCheckout && !checkoutLocked ? 'cursor-pointer hover:-translate-y-0.5' : ''}`}
+                className={`rrounded-xl p-4 text-center transition ${canCheckout && !checkoutLocked ? 'cursor-pointer hover:-translate-y-0.5' : ''}`}
                 style={{
                   border: canCheckout ? '1px solid rgba(16,185,129,0.25)' : '1px solid rgba(255,255,255,0.08)',
                   background: canCheckout ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)',
@@ -389,8 +410,8 @@ export default function Vouchers() {
                     }}
                   />
                 ) : (
-                  <div className="w-14 h-14 mx-auto mb-2 rounded-xl flex items-center justify-center" style={{ background: 'rgba(212,175,55,0.08)' }}>
-                    <HiOutlineGift className="w-7 h-7" style={{ color: canCheckout ? '#34d399' : 'rgba(255,255,255,0.3)' }} />
+                  <div className="size-14 mx-auto mb-2 rounded-xl flex items-center justify-center" style={{ background: 'rgba(212,175,55,0.08)' }}>
+                    <HiOutlineGift className="size-7" style={{ color: canCheckout ? '#34d399' : 'rgba(255,255,255,0.3)' }} />
                   </div>
                 )}
                 <p className="text-sm font-medium text-white/80">{p.name}</p>
@@ -438,18 +459,52 @@ export default function Vouchers() {
       {/* Voucher Transaction History */}
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
-          <HiOutlineDocumentText className="w-5 h-5" style={{ color: '#D4AF37' }} />
+          <HiOutlineDocumentText className="size-5" style={{ color: '#D4AF37' }} />
           <h2 className="font-display text-lg text-white">Voucher Transaction History</h2>
         </div>
         {contentLoading ? (
           <Spinner />
         ) : transactions.length === 0 ? (
           <div className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            <HiOutlineDocumentText className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.3)' }} />
+            <HiOutlineDocumentText className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.3)' }} />
             No voucher transactions yet.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="space-y-3 md:hidden">
+            {transactions.map((t, i) => (
+              <div
+                key={t.id || i}
+                className="rounded-xl p-4"
+                style={{ border: '1px solid rgba(212,175,55,0.12)', background: 'rgba(255,255,255,0.02)' }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{t.transaction_date}</p>
+                    <p className="text-sm mt-2 text-white/80">Voucher #{t.voucher_id}</p>
+                  </div>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)' }}>
+                    Voucher
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-3 text-sm">
+                  <div>
+                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Cash Paid</p>
+                    <p className="text-white/80 mt-1">P{fmt(t.cash_paid)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Voucher Used</p>
+                    <p className="mt-1" style={{ color: '#f87171' }}>-P{fmt(t.voucher_used)}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Total Value</p>
+                    <p className="font-semibold mt-1" style={{ color: '#D4AF37' }}>P{fmt(t.total_value)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr>
@@ -476,12 +531,13 @@ export default function Vouchers() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
       <div className="rounded-xl p-4" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)' }}>
         <div className="flex items-start gap-2">
-          <HiOutlineCash className="w-5 h-5 mt-0.5" style={{ color: '#fbbf24' }} />
+          <HiOutlineCash className="size-5 mt-0.5" style={{ color: '#fbbf24' }} />
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
             Voucher is for product use only and is not convertible to cash. Expired vouchers can no longer be used. Vouchers are issued once upon registration.
           </p>
@@ -518,11 +574,11 @@ export default function Vouchers() {
                 type="button"
                 onClick={closeCheckoutModal}
                 disabled={Boolean(processingProduct)}
-                className="w-8 h-8 rounded-lg inline-flex items-center justify-center"
+                className="size-8 rounded-lg inline-flex items-center justify-center"
                 style={{ background: modalStyles.closeBg, color: modalStyles.closeColor }}
                 aria-label="Close confirmation dialog"
               >
-                <HiOutlineX className="w-5 h-5" />
+                <HiOutlineX className="size-5" />
               </button>
             </div>
 

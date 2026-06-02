@@ -160,7 +160,7 @@ export default function VoucherGrant() {
             border: '1px solid rgba(255,255,255,0.1)',
             color: 'rgba(255,255,255,0.75)',
           }}
-        >
+         type="button">
           Voucher List
         </button>
         <button
@@ -170,7 +170,7 @@ export default function VoucherGrant() {
             border: '1px solid rgba(212,175,55,0.3)',
             color: '#D4AF37',
           }}
-        >
+         type="button">
           Grant Vouchers
         </button>
       </div>
@@ -178,21 +178,21 @@ export default function VoucherGrant() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="glass-card rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <HiOutlineUsers className="w-5 h-5" style={{ color: '#93c5fd' }} />
+            <HiOutlineUsers className="size-5" style={{ color: '#93c5fd' }} />
             <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>Eligible Accounts</p>
           </div>
           <p className="text-2xl font-bold text-white">{Number(total || 0).toLocaleString()}</p>
         </div>
         <div className="glass-card rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <HiOutlineCheckCircle className="w-5 h-5" style={{ color: '#34d399' }} />
+            <HiOutlineCheckCircle className="size-5" style={{ color: '#34d399' }} />
             <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>Selected</p>
           </div>
           <p className="text-2xl font-bold text-white">{selected.length}</p>
         </div>
         <div className="glass-card rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <HiOutlineTicket className="w-5 h-5" style={{ color: '#D4AF37' }} />
+            <HiOutlineTicket className="size-5" style={{ color: '#D4AF37' }} />
             <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>Selection Mode</p>
           </div>
           <p className="text-base font-semibold text-white">{multiSelect ? 'Multi Select' : 'Single Select'}</p>
@@ -202,7 +202,7 @@ export default function VoucherGrant() {
       <div className="glass-card rounded-2xl p-4 space-y-3">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
-            <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'rgba(255,255,255,0.35)' }} />
+            <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4" style={{ color: 'rgba(255,255,255,0.35)' }} />
             <input
               type="text"
               value={searchInput}
@@ -238,7 +238,7 @@ export default function VoucherGrant() {
                 ? { background: 'rgba(212,175,55,0.16)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }
                 : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }
             }
-          >
+           type="button">
             {multiSelect ? 'Exit Multi Select' : 'Multi Select'}
           </button>
 
@@ -247,7 +247,7 @@ export default function VoucherGrant() {
               onClick={toggleSelectAllPage}
               className="text-xs px-3 py-1.5 rounded-lg font-semibold"
               style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
-            >
+             type="button">
               {selectedOnPage === rows.length && rows.length > 0 ? 'Unselect Page' : 'Select Page'}
             </button>
           )}
@@ -257,7 +257,7 @@ export default function VoucherGrant() {
             disabled={selected.length === 0 || granting}
             className="text-xs px-3 py-1.5 rounded-lg font-semibold disabled:opacity-50"
             style={{ background: 'rgba(16,185,129,0.16)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}
-          >
+           type="button">
             {granting ? 'Granting...' : `Review & Grant${selected.length > 0 ? ` (${selected.length})` : ''}`}
           </button>
         </div>
@@ -266,7 +266,7 @@ export default function VoucherGrant() {
       <div className="glass-card rounded-2xl p-6 overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-10">
-            <div className="w-8 h-8 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
+            <div className="size-8 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -274,7 +274,7 @@ export default function VoucherGrant() {
               <thead>
                 <tr>
                   {['', 'UID', 'Username', 'Full Name', 'Package', 'Voucher Amount', 'Date Registered'].map((h) => (
-                    <th key={h} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{h}</th>
+                    <th key={h} className="table-header p-3 text-left text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -294,7 +294,7 @@ export default function VoucherGrant() {
                             : 'transparent',
                       }}
                     >
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <input
                           type="checkbox"
                           checked={active}
@@ -303,12 +303,12 @@ export default function VoucherGrant() {
                           style={{ accentColor: '#D4AF37' }}
                         />
                       </td>
-                      <td className="py-3 px-3 text-white/70 font-mono text-xs">{row.uid}</td>
-                      <td className="py-3 px-3 text-white/85 font-semibold">{row.username}</td>
-                      <td className="py-3 px-3 text-white/70">{row.fullname || 'N/A'}</td>
-                      <td className="py-3 px-3 text-white/70">{PACKAGE_LABELS[row.accttype] || row.accttype}</td>
-                      <td className="py-3 px-3 font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(row.voucherAmount)}</td>
-                      <td className="py-3 px-3 text-white/50 text-xs">{row.datereg || '—'}</td>
+                      <td className="p-3 text-white/70 font-mono text-xs">{row.uid}</td>
+                      <td className="p-3 text-white/85 font-semibold">{row.username}</td>
+                      <td className="p-3 text-white/70">{row.fullname || 'N/A'}</td>
+                      <td className="p-3 text-white/70">{PACKAGE_LABELS[row.accttype] || row.accttype}</td>
+                      <td className="p-3 font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(row.voucherAmount)}</td>
+                      <td className="p-3 text-white/50 text-xs">{row.datereg || '—'}</td>
                     </tr>
                   );
                 })}
@@ -330,7 +330,7 @@ export default function VoucherGrant() {
             disabled={page <= 1}
             className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
             style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-          >
+           type="button">
             Prev
           </button>
           <span className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{page} / {totalPages || 1}</span>
@@ -339,7 +339,7 @@ export default function VoucherGrant() {
             disabled={page >= Number(totalPages || 1)}
             className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
             style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-          >
+           type="button">
             Next
           </button>
         </div>
@@ -354,8 +354,8 @@ export default function VoucherGrant() {
                 onClick={() => setConfirmOpen(false)}
                 className="text-white/60 hover:text-white p-1"
                 aria-label="Close confirmation modal"
-              >
-                <HiOutlineX className="w-5 h-5" />
+               type="button">
+                <HiOutlineX className="size-5" />
               </button>
             </div>
 
@@ -404,7 +404,7 @@ export default function VoucherGrant() {
                 onClick={() => setConfirmOpen(false)}
                 className="text-xs px-3 py-2 rounded-lg"
                 style={{ background: 'rgba(255,255,255,0.1)', color: '#f3f4f6', border: '1px solid rgba(255,255,255,0.2)' }}
-              >
+               type="button">
                 Cancel
               </button>
               <button
@@ -412,7 +412,7 @@ export default function VoucherGrant() {
                 disabled={granting}
                 className="text-xs px-4 py-2 rounded-lg font-semibold disabled:opacity-50"
                 style={{ background: 'rgba(16,185,129,0.16)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}
-              >
+               type="button">
                 {granting ? 'Granting...' : 'Confirm Grant'}
               </button>
             </div>

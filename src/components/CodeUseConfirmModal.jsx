@@ -6,12 +6,15 @@ export default function CodeUseConfirmModal({
   details = [],
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
+  showCancel = true,
   onConfirm,
   onClose,
   busy = false,
   confirmDisabled = false,
 }) {
   if (!open) return null;
+  const isDarkTheme = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  const panelBackground = isDarkTheme ? '#141008' : '#ffffff';
 
   const tones = {
     gold: {
@@ -26,28 +29,41 @@ export default function CodeUseConfirmModal({
       badgeBg: 'rgba(248,113,113,0.12)',
       badgeColor: '#fca5a5',
       badgeBorder: 'rgba(248,113,113,0.25)',
-      confirmBg: 'rgba(248,113,113,0.12)',
-      confirmColor: '#fecaca',
-      confirmBorder: 'rgba(248,113,113,0.25)',
+      confirmBg: 'linear-gradient(135deg, #b91c1c, #ef4444)',
+      confirmColor: '#fff5f5',
+      confirmBorder: 'rgba(248,113,113,0.55)',
     },
   };
 
   const currentTone = tones[tone] || tones.gold;
 
   return (
-    <div className="portal-overlay fixed inset-0 z-[130] flex items-center justify-center px-4">
+    <div
+      className="portal-overlay fixed inset-0 z-[130] flex items-center justify-center px-4"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.72)', backdropFilter: 'none' }}
+      onMouseDown={onClose}
+    >
       <div
         className="portal-modal-panel rounded-2xl w-full max-w-lg p-6 shadow-2xl"
         style={{
-          backgroundColor: 'var(--portal-modal-bg)',
+          backgroundColor: panelBackground,
+          backgroundImage: 'none',
           opacity: 1,
           position: 'relative',
           isolation: 'isolate',
-          boxShadow: '0 28px 64px rgba(15,23,42,0.22)',
+          mixBlendMode: 'normal',
+          overflow: 'hidden',
+          boxShadow: '0 28px 64px rgba(15,23,42,0.32)',
         }}
+        onMouseDown={(event) => event.stopPropagation()}
       >
         <div
-          className="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0))' }}
+        />
+        <div
+          className="relative inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
           style={{
             background: currentTone.badgeBg,
             color: currentTone.badgeColor,
@@ -56,11 +72,11 @@ export default function CodeUseConfirmModal({
         >
           Code Confirmation
         </div>
-        <h2 className="portal-modal-title mt-3 text-xl font-display font-bold">{title}</h2>
-        <p className="portal-modal-text mt-3 text-sm leading-6">{message}</p>
+        <h2 className="portal-modal-title relative mt-3 text-xl font-display font-bold">{title}</h2>
+        <p className="portal-modal-text relative mt-3 text-sm leading-6">{message}</p>
 
         {details.length > 0 && (
-          <div className="portal-soft-panel mt-4 rounded-2xl p-4 space-y-2">
+          <div className="portal-soft-panel relative mt-4 rounded-2xl p-4 space-y-2">
             {details.map((detail) => (
               <div key={detail.label} className="flex items-start justify-between gap-4 text-sm">
                 <span className="portal-card-muted">{detail.label}</span>
@@ -70,14 +86,16 @@ export default function CodeUseConfirmModal({
           </div>
         )}
 
-        <div className="mt-5 flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="portal-muted-button rounded-xl px-4 py-2.5 text-sm font-medium"
-          >
-            {cancelLabel}
-          </button>
+        <div className="relative mt-5 flex flex-wrap justify-end gap-2">
+          {showCancel ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="portal-muted-button rounded-xl px-4 py-2.5 text-sm font-medium"
+            >
+              {cancelLabel}
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={onConfirm}

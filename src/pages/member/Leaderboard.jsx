@@ -9,6 +9,30 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-US', {
   maximumFractionDigits: 0,
 });
 
+function Pager({ page = 1, totalPages = 1, onPrev, onNext, className = '' }) {
+  return (
+    <div className={`fflex items-center justify-between sm:justify-end gap-2 flex-nowrap whitespace-nowrap overflow-x-auto ${className}`}>
+      <button
+        onClick={onPrev}
+        disabled={page <= 1}
+        className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40 shrink-0"
+        style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
+       type="button">
+        Prev
+      </button>
+      <span className="text-sm shrink-0" style={{ color: 'rgba(255,255,255,0.55)' }}>{page} / {totalPages}</span>
+      <button
+        onClick={onNext}
+        disabled={page >= totalPages}
+        className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40 shrink-0"
+        style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
+       type="button">
+        Next
+      </button>
+    </div>
+  );
+}
+
 export default function Leaderboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -39,7 +63,7 @@ export default function Leaderboard() {
     }
   }
 
-  const pointsBasis = data?.pointsBasis || 'Repurchase points';
+  const pointsBasis = data?.pointsBasis || 'Product Repurchase Points';
   const userRank = Number(data?.userRank || 0);
   const userCurrentRankLabel = data?.userCurrentRankLabel || 'Unranked';
   const userPoints = Number((data?.userGrossRankablePoints ?? data?.userRepurchasePoints ?? data?.userPoints) || 0);
@@ -74,16 +98,16 @@ export default function Leaderboard() {
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Current race title: {userCurrentRankLabel}
             </p>
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>{pointsBasis}: {fmt(userPoints)}</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Gross recorded points: {fmt(userPoints)}</p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>
-              Remaining race points: {fmt(userRemaining)} | Consumed: {fmt(userConsumed)}
+              {pointsBasis}: {fmt(userRemaining)} | Consumed: {fmt(userConsumed)}
             </p>
           </div>
           <div
             className="px-3 py-2 rounded-xl text-xs font-semibold"
             style={{ background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.25)', color: '#D4AF37' }}
           >
-            <HiOutlineSparkles className="inline w-4 h-4 mr-1" />
+            <HiOutlineSparkles className="inline size-4 mr-1" />
             {needed > 0 ? `${fmt(needed)} more fresh race points to the next rank` : 'Next rank point target reached'}
           </div>
         </div>
@@ -92,40 +116,66 @@ export default function Leaderboard() {
       <div className="glass-card rounded-2xl p-6 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Top members</p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
-              style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-            >
-              Prev
-            </button>
-            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              {data?.pagination?.page || page} / {data?.pagination?.totalPages || 1}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(Number(data?.pagination?.totalPages || 1), p + 1))}
-              disabled={page >= Number(data?.pagination?.totalPages || 1)}
-              className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
-              style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-            >
-              Next
-            </button>
-          </div>
+          <Pager
+            page={data?.pagination?.page || page}
+            totalPages={data?.pagination?.totalPages || 1}
+            onPrev={() => setPage((p) => Math.max(1, p - 1))}
+            onNext={() => setPage((p) => Math.min(Number(data?.pagination?.totalPages || 1), p + 1))}
+          />
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10">
-            <div className="w-8 h-8 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
+            <div className="size-8 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="space-y-3 md:hidden">
+            {(data?.leaderboard || []).map((row) => (
+              <div
+                key={`${row.uid}-${row.rank}`}
+                className="rounded-2xl p-4 space-y-3"
+                style={
+                  row.isCurrentUser
+                    ? { background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)' }
+                    : { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.08)' }
+                }
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold" style={{ color: '#D4AF37' }}>#{row.rank}</p>
+                    <p className="text-white/90 mt-1">{row.fullname || row.username}</p>
+                    <p className="text-[11px] mt-1 text-white/45">{row.username}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-white/60">{row.package}</p>
+                    <p className="text-xs mt-1 text-white/70">{row.currentRankLabel}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <p className="text-[11px] text-white/45">Gross Recorded Points</p>
+                    <p className="text-white font-semibold mt-1">{fmt(row.grossRankablePoints ?? row.repurchasePoints)}</p>
+                  </div>
+                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <p className="text-[11px] text-white/45">Product Repurchase Points</p>
+                    <p className="text-white font-semibold mt-1">{fmt(row.remainingRankablePoints)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {(!data?.leaderboard || data.leaderboard.length === 0) && (
+              <div className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                No leaderboard records found.
+              </div>
+            )}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Top', 'Member', 'Package', 'Current Rank', 'Gross Points', 'Remaining Points'].map((heading) => (
-                    <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
+                  {['Top', 'Member', 'Package', 'Current Rank', 'Gross Recorded Points', 'Product Repurchase Points'].map((heading) => (
+                    <th key={heading} className="table-header p-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
               </thead>
@@ -139,13 +189,13 @@ export default function Leaderboard() {
                         : {}
                     }
                   >
-                    <td className="py-3 px-3 font-semibold" style={{ color: '#D4AF37' }}>
+                    <td className="p-3 font-semibold" style={{ color: '#D4AF37' }}>
                       #{row.rank}
                     </td>
-                    <td className="py-3 px-3 text-white/80">
+                    <td className="p-3 text-white/80">
                       <span className="inline-flex items-center gap-2">
                         <span
-                          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                          className="size-7 rounded-full flex items-center justify-center text-xs font-bold"
                           style={{ background: 'rgba(255,255,255,0.08)', color: '#F3D98C' }}
                         >
                           {(row.username || '?').slice(0, 1).toUpperCase()}
@@ -156,13 +206,13 @@ export default function Leaderboard() {
                         </span>
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-white/60">{row.package}</td>
-                    <td className="py-3 px-3 text-white/70">
-                      <HiOutlineStar className="inline w-4 h-4 mr-1" />
+                    <td className="p-3 text-white/60">{row.package}</td>
+                    <td className="p-3 text-white/70">
+                      <HiOutlineStar className="inline size-4 mr-1" />
                       {row.currentRankLabel}
                     </td>
-                    <td className="py-3 px-3 font-semibold text-white">{fmt(row.grossRankablePoints ?? row.repurchasePoints)}</td>
-                    <td className="py-3 px-3 text-white/70">{fmt(row.remainingRankablePoints)}</td>
+                    <td className="p-3 font-semibold text-white">{fmt(row.grossRankablePoints ?? row.repurchasePoints)}</td>
+                    <td className="p-3 text-white/70">{fmt(row.remainingRankablePoints)}</td>
                   </tr>
                 ))}
                 {(!data?.leaderboard || data.leaderboard.length === 0) && (
@@ -175,6 +225,15 @@ export default function Leaderboard() {
               </tbody>
             </table>
           </div>
+          <div className="mt-4">
+            <Pager
+              page={data?.pagination?.page || page}
+              totalPages={data?.pagination?.totalPages || 1}
+              onPrev={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(Number(data?.pagination?.totalPages || 1), p + 1))}
+            />
+          </div>
+          </>
         )}
       </div>
 

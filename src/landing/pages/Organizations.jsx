@@ -54,7 +54,7 @@ export default function Organizations() {
                     <span className="inline-flex rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-gold-dark">
                       Leadership
                     </span>
-                    <div className="mx-auto mt-6 flex h-24 w-24 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-4xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
+                    <div className="mx-auto mt-6 flex size-24 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-4xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
                       {leader.initials}
                     </div>
                     <p className="mt-6 text-xs font-bold uppercase tracking-[0.3em] text-brand-gold-dark">{leader.role}</p>
@@ -80,7 +80,7 @@ export default function Organizations() {
             <div className="rounded-2xl bg-white/85 border border-gray-100 shadow-xl p-4 sm:p-5">
               <div className="aspect-video rounded-xl bg-[#3A1000] flex items-center justify-center text-white/70">
                 <div className="text-center">
-                  <svg className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 text-brand-gold-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.868v4.264a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <svg className="size-12 sm:size-14 mx-auto mb-3 text-brand-gold-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.868v4.264a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   <p className="text-sm font-semibold">Testimonial video placeholder</p>
                 </div>
               </div>

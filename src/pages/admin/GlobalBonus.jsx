@@ -92,21 +92,21 @@ export default function GlobalBonus() {
               The PPT rule is annual. The current year cannot be distributed until the year is complete.
             </p>
           </div>
-          <button onClick={() => { setPage(1); loadReport(year, 1); }} className="gold-btn rounded-xl py-2.5 px-5 text-sm">
+          <button onClick={() => { setPage(1); loadReport(year, 1); }} className="gold-btn rounded-xl py-2.5 px-5 text-sm" type="button">
             Load Annual Report
           </button>
           <button
             onClick={loadLatest}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
             style={{ borderColor: 'rgba(59,130,246,0.35)', color: '#93c5fd', background: 'rgba(59,130,246,0.1)' }}
-          >
+           type="button">
             Latest Distributed
           </button>
           <button
             onClick={distribute}
             disabled={processing || !canDistribute}
             className="btn-success rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+           type="button">
             {processing ? 'Distributing...' : 'Distribute Annual Pool'}
           </button>
         </div>
@@ -148,7 +148,7 @@ export default function GlobalBonus() {
               disabled={page <= 1}
               className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
               style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-            >
+             type="button">
               Prev
             </button>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
@@ -157,7 +157,7 @@ export default function GlobalBonus() {
               disabled={page >= totalPages}
               className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
               style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-            >
+             type="button">
               Next
             </button>
           </div>
@@ -165,7 +165,7 @@ export default function GlobalBonus() {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
+            <div className="animate-spin rounded-full size-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -173,7 +173,7 @@ export default function GlobalBonus() {
               <thead>
                 <tr>
                   {['Member', 'Username', 'Member Type', 'Portions', 'Share Amount', 'Distributed Date'].map((header) => (
-                    <th key={header} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{header}</th>
+                    <th key={header} className="table-header p-3 text-left text-xs uppercase tracking-wide">{header}</th>
                   ))}
                 </tr>
               </thead>
@@ -184,12 +184,12 @@ export default function GlobalBonus() {
                     style={{ background: index % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}
                     className="motion-safe:transition-colors hover:bg-white/[0.04]"
                   >
-                    <td className="py-3 px-3 font-medium text-white/85">{recipient.fullname || `UID ${recipient.uid}`}</td>
-                    <td className="py-3 px-3 text-white/60">{recipient.username || '-'}</td>
-                    <td className="py-3 px-3 text-white/70">{recipient.memberType || 'Qualified'}</td>
-                    <td className="py-3 px-3 text-white/70">{fmtInt(recipient.portions)}</td>
-                    <td className="py-3 px-3 font-semibold" style={{ color: '#D4AF37' }}>P{fmtMoney(recipient.shareAmount)}</td>
-                    <td className="py-3 px-3 text-xs text-white/45">{recipient.distributedDate || '-'}</td>
+                    <td className="p-3 font-medium text-white/85">{recipient.fullname || `UID ${recipient.uid}`}</td>
+                    <td className="p-3 text-white/60">{recipient.username || '-'}</td>
+                    <td className="p-3 text-white/70">{recipient.memberType || 'Qualified'}</td>
+                    <td className="p-3 text-white/70">{fmtInt(recipient.portions)}</td>
+                    <td className="p-3 font-semibold" style={{ color: '#D4AF37' }}>P{fmtMoney(recipient.shareAmount)}</td>
+                    <td className="p-3 text-xs text-white/45">{recipient.distributedDate || '-'}</td>
                   </tr>
                 ))}
 

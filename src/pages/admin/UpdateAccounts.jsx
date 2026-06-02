@@ -9,6 +9,7 @@ const PAYOUT_OPTIONS = [
   { id: 3, label: 'Remittance Center' },
   { id: 4, label: 'Bank Deposit' },
   { id: 5, label: 'Others' },
+  { id: 6, label: 'PSBank' },
 ];
 
 export default function UpdateAccounts() {
@@ -47,7 +48,7 @@ export default function UpdateAccounts() {
   if (loading) return (
     <div className="flex justify-center py-20">
       <div
-        className="animate-spin rounded-full h-10 w-10 border-4"
+        className="animate-spin rounded-full size-10 border-4"
         style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
       />
     </div>
@@ -63,7 +64,7 @@ export default function UpdateAccounts() {
         <button
           onClick={() => navigate('/admin/accounts')}
           className="gold-btn rounded-lg py-1.5 px-4 text-sm"
-        >
+         type="button">
           Back
         </button>
         <div>

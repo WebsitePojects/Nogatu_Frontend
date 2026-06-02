@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { PaginationButton } from '../../components/PaginationButton';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All Statuses' },
@@ -21,6 +22,7 @@ export default function HiFivePackageClaims() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detail, setDetail] = useState(null);
   const [packageFilter, setPackageFilter] = useState('');
+  const [actionModal, setActionModal] = useState({ open: false, mode: 'approve', claim: null, notes: '' });
 
   useEffect(() => {
     loadData();
@@ -56,13 +58,28 @@ export default function HiFivePackageClaims() {
     }
   }
 
-  async function handleApprove(claim) {
-    const adminNotes = window.prompt('Optional admin note for approval:', claim.adminNotes || '') ?? '';
+  function openActionModal(mode, claim) {
+    setActionModal({
+      open: true,
+      mode,
+      claim,
+      notes: claim?.adminNotes || detail?.claim?.adminNotes || '',
+    });
+  }
+
+  function closeActionModal() {
+    setActionModal({ open: false, mode: 'approve', claim: null, notes: '' });
+  }
+
+  async function handleApprove(claim, adminNotes = '') {
     setBusyId(claim.qualificationUid);
     try {
       await api.put(`/admin/hifive/package-claims/${claim.qualificationUid}/approve`, { adminNotes });
       toast.success('Package claim approved and paid.');
       await loadData();
+      if (detail?.claim?.qualificationUid === claim.qualificationUid) {
+        await openDetails(claim);
+      }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to approve package claim.');
     } finally {
@@ -70,15 +87,15 @@ export default function HiFivePackageClaims() {
     }
   }
 
-  async function handleReject(claim) {
-    const adminNotes = window.prompt('Rejection reason / admin note:', claim.adminNotes || '');
-    if (adminNotes === null) return;
-
+  async function handleReject(claim, adminNotes = '') {
     setBusyId(claim.qualificationUid);
     try {
       await api.put(`/admin/hifive/package-claims/${claim.qualificationUid}/reject`, { adminNotes });
       toast.success('Package claim rejected.');
       await loadData();
+      if (detail?.claim?.qualificationUid === claim.qualificationUid) {
+        await openDetails(claim);
+      }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to reject package claim.');
     } finally {
@@ -86,20 +103,16 @@ export default function HiFivePackageClaims() {
     }
   }
 
-  const PaginationBtn = ({ onClick, disabled, children }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-      style={{
-        background: 'rgba(212,175,55,0.08)',
-        color: 'rgba(212,175,55,0.8)',
-        border: '1px solid rgba(212,175,55,0.15)',
-      }}
-    >
-      {children}
-    </button>
-  );
+  async function confirmActionModal() {
+    if (!actionModal.claim) return;
+    const payload = actionModal;
+    closeActionModal();
+    if (payload.mode === 'approve') {
+      await handleApprove(payload.claim, payload.notes);
+      return;
+    }
+    await handleReject(payload.claim, payload.notes);
+  }
 
   return (
     <div>
@@ -159,7 +172,7 @@ export default function HiFivePackageClaims() {
           <button
             onClick={() => { setPage(1); loadData(); }}
             className="gold-btn rounded-xl py-2.5 px-5 text-sm"
-          >
+           type="button">
             Filter
           </button>
         </div>
@@ -169,16 +182,16 @@ export default function HiFivePackageClaims() {
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Package Claim Queue</p>
           <div className="flex items-center gap-2 ml-auto">
-            <PaginationBtn onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+            <PaginationButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
-            <PaginationBtn onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+            <PaginationButton onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Next</PaginationButton>
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10">
             <div
-              className="animate-spin rounded-full h-8 w-8 border-4"
+              className="animate-spin rounded-full size-8 border-4"
               style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
             />
           </div>
@@ -231,26 +244,26 @@ export default function HiFivePackageClaims() {
                         {isPending ? (
                           <div className="flex flex-wrap gap-2">
                             <button
-                              onClick={(event) => { event.stopPropagation(); handleApprove(claim); }}
+                              onClick={(event) => { event.stopPropagation(); openActionModal('approve', claim); }}
                               disabled={isBusy}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors disabled:opacity-40"
                               style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
-                            >
+                             type="button">
                               Approve
                             </button>
                             <button
-                              onClick={(event) => { event.stopPropagation(); handleReject(claim); }}
+                              onClick={(event) => { event.stopPropagation(); openActionModal('reject', claim); }}
                               disabled={isBusy}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors disabled:opacity-40"
                               style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
-                            >
+                             type="button">
                               Reject
                             </button>
                             <button
                               onClick={(event) => { event.stopPropagation(); openDetails(claim); }}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                               style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}
-                            >
+                             type="button">
                               View Details
                             </button>
                           </div>
@@ -259,7 +272,7 @@ export default function HiFivePackageClaims() {
                             onClick={(event) => { event.stopPropagation(); openDetails(claim); }}
                             className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                             style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}
-                          >
+                           type="button">
                             View Details
                           </button>
                         )}
@@ -305,7 +318,7 @@ export default function HiFivePackageClaims() {
             <div className="p-6 overflow-y-auto max-h-[calc(88vh-5rem)]">
               {detailLoading || !detail ? (
                 <div className="flex justify-center py-10">
-                  <div className="animate-spin rounded-full h-8 w-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
+                  <div className="animate-spin rounded-full size-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
                 </div>
               ) : (
                 <div className="space-y-5">
@@ -328,29 +341,75 @@ export default function HiFivePackageClaims() {
                     </div>
                   </div>
 
+                  {detail.claim?.status === 'pending_review' ? (
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => openActionModal('approve', detail.claim)}
+                        disabled={busyId === detail.claim?.qualificationUid}
+                        className="rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
+                        style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
+                      >
+                        Approve Claim
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openActionModal('reject', detail.claim)}
+                        disabled={busyId === detail.claim?.qualificationUid}
+                        className="rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
+                        style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
+                      >
+                        Reject Claim
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {detail.claim?.status === 'pending_review' ? (
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => openActionModal('approve', detail.claim)}
+                        disabled={busyId === detail.claim?.qualificationUid}
+                        className="rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
+                        style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
+                      >
+                        Approve Claim
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openActionModal('reject', detail.claim)}
+                        disabled={busyId === detail.claim?.qualificationUid}
+                        className="rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
+                        style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
+                      >
+                        Reject Claim
+                      </button>
+                    </div>
+                  ) : null}
+
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm min-w-[1100px]">
                       <thead>
                         <tr>
                           {['#', 'Contributor', 'Username', 'Joined', 'Activation Code', 'Referral Token', 'Placement', 'Process Key'].map((heading) => (
-                            <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
+                            <th key={heading} className="table-header p-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {(detail.contributors || []).map((row) => (
                           <tr key={`${row.uid}-${row.orderNo}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                            <td className="py-3 px-3 text-white/55">{row.orderNo}</td>
-                            <td className="py-3 px-3 text-white">{row.fullName}</td>
-                            <td className="py-3 px-3 text-white/70">{row.username}</td>
-                            <td className="py-3 px-3 text-white/55">{row.joinedAt ? new Date(row.joinedAt).toLocaleString() : '—'}</td>
-                            <td className="py-3 px-3 text-white/70">{row.registrationAudit?.activationCode || row.codeUsage?.code || '—'}</td>
-                            <td className="py-3 px-3 text-white/55">{row.registrationAudit?.referralSlug || row.codeUsage?.referralToken || '—'}</td>
-                            <td className="py-3 px-3 text-white/55">
+                            <td className="p-3 text-white/55">{row.orderNo}</td>
+                            <td className="p-3 text-white">{row.fullName}</td>
+                            <td className="p-3 text-white/70">{row.username}</td>
+                            <td className="p-3 text-white/55">{row.joinedAt ? new Date(row.joinedAt).toLocaleString() : '—'}</td>
+                            <td className="p-3 text-white/70">{row.registrationAudit?.activationCode || row.codeUsage?.code || '—'}</td>
+                            <td className="p-3 text-white/55">{row.registrationAudit?.referralSlug || row.codeUsage?.referralToken || '—'}</td>
+                            <td className="p-3 text-white/55">
                               {row.registrationAudit?.requestedPosition ? `Requested ${row.registrationAudit.requestedPosition}` : '—'}
-                              {row.registrationAudit?.enforcedPosition ? ` / Enforced ${row.registrationAudit.enforcedPosition}` : ''}
+                              {row.registrationAudit?.enforcedPosition ? ` / Enforced ${row.registrationAudit.enforcedPosition}` : ' / Auto placement'}
                             </td>
-                            <td className="py-3 px-3 text-[11px] text-white/40">{row.codeUsage?.processKey || '—'}</td>
+                            <td className="p-3 text-[11px] text-white/40">{row.codeUsage?.processKey || '—'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -358,6 +417,71 @@ export default function HiFivePackageClaims() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {actionModal.open ? (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4" onMouseDown={closeActionModal}>
+          <div
+            className="portal-modal-panel w-full max-w-xl rounded-3xl p-6 shadow-[0_28px_64px_rgba(15,23,42,0.22)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.45)]"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="portal-modal-title font-display text-xl">
+                  {actionModal.mode === 'approve' ? 'Approve Hi-Five Claim' : 'Reject Hi-Five Claim'}
+                </h2>
+                <p className="portal-modal-text mt-2 text-sm leading-6">
+                  {actionModal.mode === 'approve'
+                    ? 'Please confirm you want to approve this Hi-Five package claim and release the payout.'
+                    : 'Please confirm you want to reject this Hi-Five package claim. You can leave an admin note for the audit trail.'}
+                </p>
+              </div>
+              <button onClick={closeActionModal} className="portal-modal-muted hover:opacity-80 text-sm font-medium" type="button">Close</button>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div className="rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Member</p>
+                <p className="portal-modal-title">{actionModal.claim?.fullname || detail?.claim?.fullname || '-'}</p>
+              </div>
+              <div className="rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Package / Payout</p>
+                <p className="portal-modal-title">{actionModal.claim?.packageName || detail?.claim?.packageName || '-'} / PHP {Number(actionModal.claim?.totalPayout || detail?.claim?.totalPayout || 0).toLocaleString()}</p>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="portal-modal-muted block text-xs font-medium mb-1.5">Admin Note</label>
+              <textarea
+                value={actionModal.notes}
+                onChange={(event) => setActionModal((current) => ({ ...current, notes: event.target.value }))}
+                rows={4}
+                placeholder={actionModal.mode === 'approve' ? 'Optional note for approval' : 'Reason or note for rejection'}
+                className="w-full px-3 py-2 rounded-2xl text-sm portal-modal-title outline-none resize-none bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)] placeholder:text-[color:var(--portal-modal-muted)]"
+              />
+            </div>
+
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeActionModal}
+                className="portal-muted-button rounded-xl px-4 py-2.5 text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmActionModal}
+                className="rounded-xl px-4 py-2.5 text-sm font-semibold"
+                style={actionModal.mode === 'approve'
+                  ? { background: 'linear-gradient(135deg, #0f766e, #10b981)', color: '#f0fdf4', border: '1px solid rgba(16,185,129,0.35)' }
+                  : { background: 'linear-gradient(135deg, #b91c1c, #ef4444)', color: '#fff5f5', border: '1px solid rgba(248,113,113,0.45)' }}
+              >
+                {actionModal.mode === 'approve' ? 'Confirm Approval' : 'Confirm Rejection'}
+              </button>
             </div>
           </div>
         </div>

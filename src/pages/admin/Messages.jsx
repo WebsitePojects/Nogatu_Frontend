@@ -108,7 +108,7 @@ export default function Messages() {
                   ? { background: 'rgba(212,175,55,0.16)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }
                   : { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.08)' }
               }
-            >
+             type="button">
               {f.label} ({counts[f.key] || 0})
             </button>
           ))}
@@ -118,7 +118,7 @@ export default function Messages() {
       <div className="glass-card rounded-2xl p-6 overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-10">
-            <div className="w-8 h-8 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
+            <div className="size-8 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -126,18 +126,18 @@ export default function Messages() {
               <thead>
                 <tr>
                   {['Name', 'Email', 'Subject', 'Date', 'Status', 'Action'].map((h) => (
-                    <th key={h} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{h}</th>
+                    <th key={h} className="table-header p-3 text-left text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id} className="hover:bg-white/[0.04] transition-colors">
-                    <td className="py-3 px-3 text-white/80">{r.name}</td>
-                    <td className="py-3 px-3 text-white/60">{r.email || 'N/A'}</td>
-                    <td className="py-3 px-3 text-white/70">{r.subject || 'No subject'}</td>
-                    <td className="py-3 px-3 text-white/50 text-xs">{r.submittedAt}</td>
-                    <td className="py-3 px-3">
+                    <td className="p-3 text-white/80">{r.name}</td>
+                    <td className="p-3 text-white/60">{r.email || 'N/A'}</td>
+                    <td className="p-3 text-white/70">{r.subject || 'No subject'}</td>
+                    <td className="p-3 text-white/50 text-xs">{r.submittedAt}</td>
+                    <td className="p-3">
                       <span
                         className="inline-block text-xs px-2.5 py-0.5 rounded-full"
                         style={
@@ -153,12 +153,12 @@ export default function Messages() {
                         {r.statusLabel}
                       </span>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="p-3">
                       <button
                         onClick={() => setActive(r)}
                         className="text-xs px-2.5 py-1 rounded-lg"
                         style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)' }}
-                      >
+                       type="button">
                         View
                       </button>
                     </td>
@@ -182,7 +182,7 @@ export default function Messages() {
             disabled={pagination.page <= 1}
             className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
             style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-          >
+           type="button">
             Prev
           </button>
           <span className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{pagination.page} / {pagination.totalPages || 1}</span>
@@ -191,7 +191,7 @@ export default function Messages() {
             disabled={pagination.page >= Number(pagination.totalPages || 1)}
             className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
             style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-          >
+           type="button">
             Next
           </button>
         </div>
@@ -202,7 +202,7 @@ export default function Messages() {
           <div className="w-full max-w-2xl rounded-2xl p-6" style={{ background: '#141008', border: '1px solid rgba(212,175,55,0.25)' }}>
             <div className="flex items-center justify-between">
               <h2 className="font-display text-xl text-white">Message Details</h2>
-              <button onClick={() => setActive(null)} className="text-white/60 hover:text-white">Close</button>
+              <button onClick={() => setActive(null)} className="text-white/60 hover:text-white" type="button">Close</button>
             </div>
             <div className="mt-4 space-y-2 text-sm">
               <p style={{ color: 'rgba(255,255,255,0.75)' }}><strong>Name:</strong> {active.name}</p>
@@ -217,28 +217,28 @@ export default function Messages() {
                 onClick={() => markRead(active.id)}
                 className="text-xs px-3 py-2 rounded-lg"
                 style={{ background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
-              >
+               type="button">
                 Mark Read
               </button>
               <button
                 onClick={() => markDone(active.id)}
                 className="text-xs px-3 py-2 rounded-lg"
                 style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
-              >
+               type="button">
                 Mark Done
               </button>
               <button
                 onClick={() => blockUser(active.id)}
                 className="text-xs px-3 py-2 rounded-lg"
                 style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.25)' }}
-              >
+               type="button">
                 Block User
               </button>
               <button
                 onClick={() => deleteMessage(active.id)}
                 className="text-xs px-3 py-2 rounded-lg"
                 style={{ background: 'rgba(255,255,255,0.1)', color: '#f3f4f6', border: '1px solid rgba(255,255,255,0.2)' }}
-              >
+               type="button">
                 Delete
               </button>
               <a

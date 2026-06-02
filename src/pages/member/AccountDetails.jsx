@@ -10,12 +10,13 @@ const PAYOUT_OPTIONS = [
   { id: 3, label: 'Remittance Center' },
   { id: 4, label: 'Bank Deposit' },
   { id: 5, label: 'Others' },
+  { id: 6, label: 'PSBank' },
 ];
 
 function Spinner() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-3">
-      <div className="w-10 h-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+      <div className="size-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
     </div>
   );
 }
@@ -24,7 +25,7 @@ function FieldRow({ icon: Icon, label, children }) {
   return (
     <div>
       <label className="label flex items-center gap-1.5">
-        <Icon className="w-3.5 h-3.5" style={{ color: 'rgba(212,175,55,0.5)' }} />
+        <Icon className="size-3.5" style={{ color: 'rgba(212,175,55,0.5)' }} />
         {label}
       </label>
       {children}

@@ -4,8 +4,8 @@ import Lightbox, { useLightbox } from '../components/Lightbox';
 function PageHero({ title, subtitle }) {
   return (
     <section className="relative pt-36 pb-14 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
+      <div className="absolute top-0 right-0 size-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
+      <div className="absolute bottom-0 left-0 size-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
       <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }} />
       <div className="section-container relative z-10">
         <div className="max-w-3xl">
@@ -61,16 +61,16 @@ function ProductCard({ product, delay, onLightbox }) {
     <div ref={ref} className="reveal group text-center">
       <div className="relative overflow-hidden rounded-2xl p-4 sm:p-8 flex items-center justify-center h-44 sm:h-56 mb-4 cursor-pointer" style={{ background: 'linear-gradient(135deg, #FFF8E1, #FFFDF5)' }} onClick={() => product.img && onLightbox(product.img)}>
         {product.placeholder ? (
-          <div className="w-full h-full rounded-xl border-2 border-dashed border-brand-gold/35 bg-white/45 flex flex-col items-center justify-center text-brand-brown">
-            <svg className="w-10 h-10 text-brand-gold-dark mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          <div className="size-full rounded-xl border-2 border-dashed border-brand-gold/35 bg-white/45 flex flex-col items-center justify-center text-brand-brown">
+            <svg className="size-10 text-brand-gold-dark mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             <span className="text-sm font-semibold">Image Slot</span>
           </div>
         ) : (
           <img src={product.img} alt={product.name} className="max-h-44 object-contain motion-safe:group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-500" loading="lazy" />
         )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 motion-safe:transition-colors motion-safe:duration-300 flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-300 w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,253,245,0.9)' }}>
-            <svg className="w-5 h-5" style={{ color: '#B8860B' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+          <div className="opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-300 size-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,253,245,0.9)' }}>
+            <svg className="size-5" style={{ color: '#B8860B' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
           </div>
         </div>
       </div>
@@ -87,7 +87,7 @@ function WealthCard({ item, delay }) {
     <div ref={ref} className={`reveal group p-6 rounded-2xl border motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300`} style={{ backgroundColor: '#FFFDF5', borderColor: item.outside ? undefined : 'rgba(184,134,11,0.15)', ...(item.outside ? { borderColor: 'rgba(251,191,36,0.3)' } : {}) }}>
       <div className="flex items-start justify-between mb-4">
         <div
-          className="w-12 h-12 rounded-2xl text-white flex items-center justify-center font-bold text-lg shadow-lg motion-safe:group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
+          className="size-12 rounded-2xl text-white flex items-center justify-center font-bold text-lg shadow-lg motion-safe:group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
           style={item.outside
             ? { background: 'linear-gradient(135deg, #b45309, #f59e0b)', boxShadow: '0 8px 20px rgba(245,158,11,0.2)' }
             : { background: 'linear-gradient(135deg, #B8860B, #D4A528)', boxShadow: '0 8px 20px rgba(184,134,11,0.25)' }}
@@ -111,14 +111,14 @@ function TierCard({ tier, delay }) {
   return (
     <div
       ref={ref}
-      className={`reveal relative rounded-2xl border overflow-hidden motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-1 ${tier.popular ? 'shadow-lg' : ''}`}
+      className={`rreveal relative rounded-2xl border overflow-hidden motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-1 ${tier.popular ? 'shadow-lg' : ''}`}
       style={{ backgroundColor: '#FFFDF5', borderColor: tier.popular ? '#D4A528' : 'rgba(184,134,11,0.15)', ...(tier.popular ? { boxShadow: '0 0 0 1px rgba(212,165,40,0.3)' } : {}) }}
     >
       {tier.popular && (
         <div className="absolute top-0 right-0 px-4 py-1 text-white text-xs font-bold rounded-bl-xl" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>Popular</div>
       )}
-      <div className={`p-6 bg-gradient-to-br ${tier.color} text-white`}>
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${tier.badge} mb-3`}>{tier.name}</span>
+      <div className={`pp-6 bg-gradient-to-br ${tier.color} text-whitee`}>
+        <span className={`iinline-block px-3 py-1 rounded-full text-xs font-bold ${tier.badge} mb-33`}>{tier.name}</span>
         <div className="flex items-baseline gap-1">
           <span className="text-sm opacity-80">&#8369;</span>
           <span className="text-3xl font-extrabold">{tier.price}</span>
@@ -128,14 +128,14 @@ function TierCard({ tier, delay }) {
         <ul className="space-y-3">
           {tier.features.map((f) => (
             <li key={f} className="flex items-start gap-3 text-sm" style={{ color: '#6d3028' }}>
-              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#B8860B' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              <svg className="size-5 flex-shrink-0 mt-0.5" style={{ color: '#B8860B' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               {f}
             </li>
           ))}
         </ul>
         <a
           href="/portal/login"
-          className={`mt-6 block text-center py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-all motion-safe:duration-200 cursor-pointer ${tier.popular ? 'text-white shadow-md' : 'text-brand-brown hover:opacity-90'}`}
+          className={`mmt-6 block text-center py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-all motion-safe:duration-200 cursor-pointer ${tier.popular ? 'text-white shadow-md' : 'text-brand-brown hover:opacity-90'}`}
           style={tier.popular ? { background: 'linear-gradient(135deg, #B8860B, #D4A528)' } : { backgroundColor: '#FFF8E1', color: '#592219' }}
         >
           Get Started
@@ -149,7 +149,7 @@ function HowItWorksCard({ item, delay }) {
   const ref = useScrollReveal({ delay });
   return (
     <div ref={ref} className="reveal text-center">
-      <div className="w-16 h-16 rounded-2xl text-white flex items-center justify-center font-extrabold text-xl mx-auto mb-5 shadow-lg" style={{ background: 'linear-gradient(135deg, #592219, #6d3028)', boxShadow: '0 8px 20px rgba(89,34,25,0.2)' }}>
+      <div className="size-16 rounded-2xl text-white flex items-center justify-center font-extrabold text-xl mx-auto mb-5 shadow-lg" style={{ background: 'linear-gradient(135deg, #592219, #6d3028)', boxShadow: '0 8px 20px rgba(89,34,25,0.2)' }}>
         {item.step}
       </div>
       <h3 className="text-lg font-bold mb-2" style={{ color: '#3A1000' }}>{item.title}</h3>

@@ -83,7 +83,7 @@ export default function Applications() {
               style={status === filter.key
                 ? { background: 'rgba(212,175,55,0.16)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }
                 : { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.08)' }}
-            >
+             type="button">
               {filter.label} ({counts[filter.key] || 0})
             </button>
           ))}
@@ -93,7 +93,7 @@ export default function Applications() {
       <div className="glass-card rounded-2xl p-6 overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-10">
-            <div className="w-8 h-8 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
+            <div className="size-8 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -101,28 +101,28 @@ export default function Applications() {
               <thead>
                 <tr>
                   {['Name', 'Contact No.', 'Email', 'Submitted', 'Follow Up', 'Action'].map((heading) => (
-                    <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
+                    <th key={heading} className="table-header p-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id} className="hover:bg-white/[0.04] transition-colors">
-                    <td className="py-3 px-3 text-white/80">{row.name}</td>
-                    <td className="py-3 px-3 text-white/60">{row.phone}</td>
-                    <td className="py-3 px-3 text-white/60">{row.email}</td>
-                    <td className="py-3 px-3 text-white/50 text-xs">{row.submittedAt}</td>
-                    <td className="py-3 px-3">
+                    <td className="p-3 text-white/80">{row.name}</td>
+                    <td className="p-3 text-white/60">{row.phone}</td>
+                    <td className="p-3 text-white/60">{row.email}</td>
+                    <td className="p-3 text-white/50 text-xs">{row.submittedAt}</td>
+                    <td className="p-3">
                       <span className="inline-block text-xs px-2.5 py-0.5 rounded-full" style={statusStyle(row.followUpStatus)}>
                         {statusLabel(row.followUpStatus)}
                       </span>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="p-3">
                       <button
                         onClick={() => { setActive(row); setNote(row.adminNote || ''); }}
                         className="text-xs px-2.5 py-1 rounded-lg"
                         style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)' }}
-                      >
+                       type="button">
                         Review
                       </button>
                     </td>
@@ -146,7 +146,7 @@ export default function Applications() {
             disabled={pagination.page <= 1}
             className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
             style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-          >
+           type="button">
             Prev
           </button>
           <span className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{pagination.page} / {pagination.totalPages || 1}</span>
@@ -155,7 +155,7 @@ export default function Applications() {
             disabled={pagination.page >= Number(pagination.totalPages || 1)}
             className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
             style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-          >
+           type="button">
             Next
           </button>
         </div>
@@ -166,7 +166,7 @@ export default function Applications() {
           <div className="portal-modal-panel w-full max-w-2xl rounded-3xl p-6 shadow-[0_28px_64px_rgba(15,23,42,0.22)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.45)]">
             <div className="flex items-center justify-between gap-4">
               <h2 className="portal-modal-title font-display text-xl">Application Review</h2>
-              <button onClick={() => setActive(null)} className="portal-modal-muted text-sm font-medium hover:opacity-80">Close</button>
+              <button onClick={() => setActive(null)} className="portal-modal-muted text-sm font-medium hover:opacity-80" type="button">Close</button>
             </div>
             <div className="portal-modal-text mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <p><strong className="portal-modal-title">Name:</strong> {active.name}</p>
@@ -189,19 +189,19 @@ export default function Applications() {
               <button
                 onClick={() => updateFollowUp(active.id, 'followed_up')}
                 className="portal-button portal-info-button text-xs px-3.5 py-2.5"
-              >
+               type="button">
                 Followed Up
               </button>
               <button
                 onClick={() => updateFollowUp(active.id, 'cancelled')}
                 className="portal-button portal-danger-button text-xs px-3.5 py-2.5"
-              >
+               type="button">
                 Cancelled
               </button>
               <button
                 onClick={() => updateFollowUp(active.id, 'done')}
                 className="portal-button portal-success-button text-xs px-3.5 py-2.5"
-              >
+               type="button">
                 Done
               </button>
             </div>

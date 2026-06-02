@@ -14,8 +14,8 @@ export default function RouteUnavailable() {
             'radial-gradient(circle at 15% 20%, rgba(212,165,40,0.14), transparent 28%), radial-gradient(circle at 85% 18%, rgba(89,34,25,0.08), transparent 24%), linear-gradient(135deg, rgba(255,255,255,0.66) 0%, rgba(255,248,225,0.2) 100%)',
         }}
       />
-      <div className="pointer-events-none absolute right-[-8%] top-16 h-[26rem] w-[26rem] rounded-full blur-3xl" style={{ background: 'rgba(212,165,40,0.12)' }} />
-      <div className="pointer-events-none absolute bottom-[-6rem] left-[-4rem] h-[20rem] w-[20rem] rounded-full blur-3xl" style={{ background: 'rgba(89,34,25,0.08)' }} />
+      <div className="pointer-events-none absolute right-[-8%] top-16 size-[26rem] rounded-full blur-3xl" style={{ background: 'rgba(212,165,40,0.12)' }} />
+      <div className="pointer-events-none absolute bottom-[-6rem] left-[-4rem] size-[20rem] rounded-full blur-3xl" style={{ background: 'rgba(89,34,25,0.08)' }} />
 
       <div className="section-container relative z-10">
         <div className="mb-8 max-w-3xl">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { PaginationButton } from '../../components/PaginationButton';
 import { useTheme } from '../../contexts/ThemeContext';
 import { apiUrl } from '../../utils/apiBase';
 import {
@@ -98,21 +99,6 @@ export default function CDAccounts() {
     }
   }
 
-  const PaginationBtn = ({ onClick, disabled, children }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-      style={{
-        background: 'rgba(212,175,55,0.08)',
-        color: 'rgba(212,175,55,0.8)',
-        border: '1px solid rgba(212,175,55,0.15)',
-      }}
-    >
-      {children}
-    </button>
-  );
-
   const statCards = stats
     ? [
         {
@@ -198,10 +184,10 @@ export default function CDAccounts() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  className="size-8 rounded-lg flex items-center justify-center"
                   style={{ background: card.bg }}
                 >
-                  <card.icon className="w-4 h-4" style={{ color: card.color }} />
+                  <card.icon className="size-4" style={{ color: card.color }} />
                 </div>
               </div>
               <p
@@ -304,7 +290,7 @@ export default function CDAccounts() {
               <thead>
                 <tr>
                   {['Package', 'Accounts', 'Fully Paid', 'Paying', 'CD Amount', 'Paid', 'Remaining', 'Net Encashment'].map((h) => (
-                    <th key={h} className="table-header py-3 px-3 text-left font-semibold text-xs uppercase tracking-wide">
+                    <th key={h} className="table-header p-3 text-left font-semibold text-xs uppercase tracking-wide">
                       {h}
                     </th>
                   ))}
@@ -313,14 +299,14 @@ export default function CDAccounts() {
               <tbody>
                 {packageBreakdown.map((row, idx) => (
                   <tr key={row.package} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
-                    <td className="py-3 px-3 font-medium" style={{ color: rowStrong }}>{row.package}</td>
-                    <td className="py-3 px-3" style={{ color: rowSoft }}>{row.totalAccounts}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: greenText }}>{row.fullyPaid}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: amberText }}>{row.stillPaying}</td>
-                    <td className="py-3 px-3" style={{ color: rowStrong }}>PHP {fmt(row.totalCdAmount)}</td>
-                    <td className="py-3 px-3" style={{ color: rowStrong }}>PHP {fmt(row.totalPaid)}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: redText }}>PHP {fmt(row.totalRemaining)}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: blueText }}>PHP {fmt(row.totalNetEncashment)}</td>
+                    <td className="p-3 font-medium" style={{ color: rowStrong }}>{row.package}</td>
+                    <td className="p-3" style={{ color: rowSoft }}>{row.totalAccounts}</td>
+                    <td className="p-3 font-medium" style={{ color: greenText }}>{row.fullyPaid}</td>
+                    <td className="p-3 font-medium" style={{ color: amberText }}>{row.stillPaying}</td>
+                    <td className="p-3" style={{ color: rowStrong }}>PHP {fmt(row.totalCdAmount)}</td>
+                    <td className="p-3" style={{ color: rowStrong }}>PHP {fmt(row.totalPaid)}</td>
+                    <td className="p-3 font-medium" style={{ color: redText }}>PHP {fmt(row.totalRemaining)}</td>
+                    <td className="p-3 font-medium" style={{ color: blueText }}>PHP {fmt(row.totalNetEncashment)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -338,31 +324,31 @@ export default function CDAccounts() {
             CD Accounts
           </p>
           <div className="flex items-center gap-2">
-            <PaginationBtn
+            <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
             >
               Prev
-            </PaginationBtn>
+            </PaginationButton>
             <span
               className="text-sm"
               style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : '#64748b' }}
             >
               {page} / {totalPages}
             </span>
-            <PaginationBtn
+            <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
             >
               Next
-            </PaginationBtn>
+            </PaginationButton>
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10">
             <div
-              className="animate-spin rounded-full h-8 w-8 border-4"
+              className="animate-spin rounded-full size-8 border-4"
               style={{
                 borderColor: 'rgba(212,175,55,0.15)',
                 borderTopColor: 'rgba(212,175,55,0.75)',
@@ -391,7 +377,7 @@ export default function CDAccounts() {
                   ].map((h) => (
                     <th
                       key={h}
-                      className="table-header py-3 px-3 text-left font-semibold text-xs uppercase tracking-wide"
+                      className="table-header p-3 text-left font-semibold text-xs uppercase tracking-wide"
                     >
                       {h}
                     </th>
@@ -432,13 +418,13 @@ export default function CDAccounts() {
                             : 'transparent')
                       }
                     >
-                      <td className="py-3 px-3 font-mono text-sm" style={{ color: rowSoft }}>
+                      <td className="p-3 font-mono text-sm" style={{ color: rowSoft }}>
                         {a.username}
                       </td>
-                      <td className="py-3 px-3 font-medium" style={{ color: rowStrong }}>
+                      <td className="p-3 font-medium" style={{ color: rowStrong }}>
                         {a.fullname}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                           style={{
@@ -450,21 +436,21 @@ export default function CDAccounts() {
                           {packageName}
                         </span>
                       </td>
-                      <td className="py-3 px-3 font-medium" style={{ color: rowSoft }}>
+                      <td className="p-3 font-medium" style={{ color: rowSoft }}>
                         PHP {fmt(cdAmount)}
                       </td>
-                      <td className="py-3 px-3" style={{ color: rowSoft }}>
+                      <td className="p-3" style={{ color: rowSoft }}>
                         PHP {fmt(cdPaid)}
                       </td>
                       <td
-                        className="py-3 px-3 font-medium"
+                        className="p-3 font-medium"
                         style={{
                           color: isFullyPaid ? greenText : redText,
                         }}
                       >
                         PHP {fmt(cdRemaining)}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <div className="flex items-center gap-2 min-w-[120px]">
                           <div
                             className="flex-1 h-2 rounded-full overflow-hidden"
@@ -500,16 +486,16 @@ export default function CDAccounts() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 px-3" style={{ color: rowSoft }}>
+                      <td className="p-3" style={{ color: rowSoft }}>
                         {a.deductionCount} deductions / {a.encashmentCount} encashments
                       </td>
-                      <td className="py-3 px-3 font-medium" style={{ color: blueText }}>
+                      <td className="p-3 font-medium" style={{ color: blueText }}>
                         PHP {fmt(a.netEncashment)}
                       </td>
-                      <td className="py-3 px-3 text-xs" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : '#64748b' }}>
+                      <td className="p-3 text-xs" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : '#64748b' }}>
                         {a.lastDeductionDate || '-'}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={
@@ -529,10 +515,10 @@ export default function CDAccounts() {
                           {a.cdstatusLabel || (isFullyPaid ? 'CD - Paid' : 'Paying')}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-xs" style={{ color: mutedText }}>
+                      <td className="p-3 text-xs" style={{ color: mutedText }}>
                         {a.datereg}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <div className="flex gap-1.5 flex-wrap">
                           <button
                             onClick={() =>
@@ -544,7 +530,7 @@ export default function CDAccounts() {
                               color: goldText,
                               border: '1px solid rgba(212,175,55,0.2)',
                             }}
-                          >
+                           type="button">
                             Details
                           </button>
                           <button
@@ -557,7 +543,7 @@ export default function CDAccounts() {
                               color: blueText,
                               border: '1px solid rgba(59,130,246,0.25)',
                             }}
-                          >
+                           type="button">
                             Edit
                           </button>
                           <button
@@ -570,7 +556,7 @@ export default function CDAccounts() {
                               color: greenText,
                               border: '1px solid rgba(16,185,129,0.2)',
                             }}
-                          >
+                           type="button">
                             Tree
                           </button>
                         </div>

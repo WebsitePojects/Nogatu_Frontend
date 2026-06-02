@@ -416,7 +416,7 @@ export default function Finance() {
                 className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5 w-[140px]"
               />
             </div>
-            <button onClick={() => loadFinance(year)} className="gold-btn rounded-xl py-2.5 px-5 text-sm">
+            <button onClick={() => loadFinance(year)} className="gold-btn rounded-xl py-2.5 px-5 text-sm" type="button">
               Load Year
             </button>
             <button
@@ -568,7 +568,7 @@ export default function Finance() {
 
           {loading ? (
             <div className="flex justify-center py-10">
-              <div className="animate-spin rounded-full h-8 w-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
+              <div className="animate-spin rounded-full size-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -590,7 +590,7 @@ export default function Finance() {
                       'Notes',
                       'Save',
                     ].map((header) => (
-                      <th key={header} className="table-header py-3 px-3 text-left font-semibold text-xs uppercase tracking-wide">
+                      <th key={header} className="table-header p-3 text-left font-semibold text-xs uppercase tracking-wide">
                         {header}
                       </th>
                     ))}
@@ -611,7 +611,7 @@ export default function Finance() {
                               : 'transparent',
                         }}
                       >
-                        <td className="py-3 px-3">
+                        <td className="p-3">
                           <button
                             type="button"
                             onClick={() => setSelectedPackageType(row.packageType)}
@@ -621,9 +621,9 @@ export default function Finance() {
                             {row.packageLabel}
                           </button>
                         </td>
-                        <td className="py-3 px-3" style={{ color: softText }}>{fmtInt(row.soldCount)}</td>
-                        <td className="py-3 px-3" style={{ color: strongText }}>PHP {fmtMoney(row.grossSales)}</td>
-                        <td className="py-3 px-3 min-w-[140px]">
+                        <td className="p-3" style={{ color: softText }}>{fmtInt(row.soldCount)}</td>
+                        <td className="p-3" style={{ color: strongText }}>PHP {fmtMoney(row.grossSales)}</td>
+                        <td className="p-3 min-w-[140px]">
                           <input
                             type="number"
                             value={draft.productCost ?? 0}
@@ -631,7 +631,7 @@ export default function Finance() {
                             className="glass-input rounded-xl px-3 py-2 text-xs w-full"
                           />
                         </td>
-                        <td className="py-3 px-3 min-w-[160px]">
+                        <td className="p-3 min-w-[160px]">
                           <input
                             type="number"
                             value={draft.salesMatchCeiling ?? row.salesMatchCeiling}
@@ -639,8 +639,8 @@ export default function Finance() {
                             className="glass-input rounded-xl px-3 py-2 text-xs w-full"
                           />
                         </td>
-                        <td className="py-3 px-3 font-medium" style={{ color: directReferralText }}>PHP {fmtMoney(row.directReferralFixed)}</td>
-                        <td className="py-3 px-3 min-w-[150px]">
+                        <td className="p-3 font-medium" style={{ color: directReferralText }}>PHP {fmtMoney(row.directReferralFixed)}</td>
+                        <td className="p-3 min-w-[150px]">
                           <input
                             type="number"
                             value={draft.adminExtraCost ?? 0}
@@ -649,7 +649,7 @@ export default function Finance() {
                           />
                         </td>
                         {customColumns.map((column) => (
-                          <td key={`${row.packageType}-${column.id}`} className="py-3 px-3 min-w-[170px]">
+                          <td key={`${row.packageType}-${column.id}`} className="p-3 min-w-[170px]">
                             <input
                               type="number"
                               value={column.valuesByPackage?.[row.packageType] ?? 0}
@@ -659,10 +659,10 @@ export default function Finance() {
                             />
                           </td>
                         ))}
-                        <td className="py-3 px-3" style={{ color: strongText }}>PHP {fmtMoney(row.reservePerCode)}</td>
-                        <td className="py-3 px-3 font-medium" style={{ color: reserveTotalText }}>PHP {fmtMoney(row.reserveTotal)}</td>
-                        <td className="py-3 px-3 font-medium" style={{ color: marginText }}>PHP {fmtMoney(row.projectedOperatingMargin)}</td>
-                        <td className="py-3 px-3 min-w-[220px]">
+                        <td className="p-3" style={{ color: strongText }}>PHP {fmtMoney(row.reservePerCode)}</td>
+                        <td className="p-3 font-medium" style={{ color: reserveTotalText }}>PHP {fmtMoney(row.reserveTotal)}</td>
+                        <td className="p-3 font-medium" style={{ color: marginText }}>PHP {fmtMoney(row.projectedOperatingMargin)}</td>
+                        <td className="p-3 min-w-[220px]">
                           <input
                             type="text"
                             value={draft.notes ?? ''}
@@ -671,7 +671,7 @@ export default function Finance() {
                             placeholder="Internal notes"
                           />
                         </td>
-                        <td className="py-3 px-3">
+                        <td className="p-3">
                           <button
                             type="button"
                             onClick={() => saveDraft(row.packageType)}

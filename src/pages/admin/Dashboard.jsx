@@ -20,7 +20,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex justify-center py-20">
         <div
-          className="w-10 h-10 border-4 rounded-full animate-spin"
+          className="size-10 border-4 rounded-full animate-spin"
           style={{ borderColor: 'rgba(100,116,139,0.25)', borderTopColor: 'rgba(59,130,246,0.75)' }}
         />
       </div>
@@ -107,8 +107,8 @@ export default function AdminDashboard() {
       <div className="relative flex items-center justify-between rounded-3xl overflow-hidden p-6 sm:p-8 mb-8 mt-2 ring-1 ring-slate-200/60 dark:ring-white/10 shadow-sm">
         {/* Background Images */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <img src="/img/dashboard_img_light.png" alt="Admin Dashboard Hero" className="w-full h-full object-cover dark:hidden" />
-          <img src="/img/dashboard_img_dark.png" alt="Admin Dashboard Hero" className="hidden w-full h-full object-cover dark:block" />
+          <img src="/img/dashboard_img_light.png" alt="Admin Dashboard Hero" className="size-full object-cover dark:hidden" />
+          <img src="/img/dashboard_img_dark.png" alt="Admin Dashboard Hero" className="hidden size-full object-cover dark:block" />
           <div className="absolute inset-0 bg-gradient-to-r from-white/65 via-white/25 to-transparent dark:hidden"></div>
         </div>
 
@@ -133,13 +133,13 @@ export default function AdminDashboard() {
           >
             <div className="flex items-center justify-between mb-5">
               <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-always-white group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
+                className="size-12 rounded-2xl flex items-center justify-center text-white text-always-white group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
                 style={{ background: card.iconGradient, boxShadow: card.iconShadow }}
               >
-                <card.icon className="w-6 h-6" />
+                <card.icon className="size-6" />
               </div>
               <div
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold max-w-[130px] text-right leading-tight ${card.accentClass}`}
+                className={`ppx-2.5 py-1 rounded-lg text-[11px] font-semibold max-w-[130px] text-right leading-tight ${card.accentClass}`}
               >
                 {card.sub}
               </div>

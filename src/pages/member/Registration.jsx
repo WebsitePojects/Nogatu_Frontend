@@ -8,13 +8,17 @@ import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
 import { formatTin, isValidTin } from '../../utils/tin';
 
 function Spinner() {
-  return <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>;
+  return <svg className="animate-spin size-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>;
 }
 
 function ValidationIcon({ state }) {
-  if (state === true)  return <HiOutlineCheckCircle className="w-4 h-4" style={{ color: '#4ade80' }} />;
-  if (state === false) return <HiOutlineXCircle    className="w-4 h-4" style={{ color: '#f87171' }} />;
+  if (state === true)  return <HiOutlineCheckCircle className="size-4" style={{ color: '#4ade80' }} />;
+  if (state === false) return <HiOutlineXCircle    className="size-4" style={{ color: '#f87171' }} />;
   return null;
+}
+
+function RequiredMark() {
+  return <span className="portal-required">*</span>;
 }
 
 function PlacementPolicyModal({ open, placementMeta, onClose }) {
@@ -52,6 +56,8 @@ export default function Registration() {
   const [searchParams] = useSearchParams();
   const explicitPlacementUid = searchParams.get('placement') || '';
   const explicitPosition = searchParams.get('position') || '1';
+  const explicitPlacementUser = searchParams.get('placementUser') || '';
+  const explicitPlacementLabel = searchParams.get('placementLabel') || '';
   const hasExplicitPlacement = Boolean(explicitPlacementUid);
 
   const [form, setForm] = useState({
@@ -77,13 +83,15 @@ export default function Registration() {
   const [placementMeta, setPlacementMeta] = useState(null);
   const [showPlacementPolicyModal, setShowPlacementPolicyModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState(null);
+  const [feedbackModal, setFeedbackModal] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [availableCodes, setAvailableCodes] = useState([]);
+  const [codesLoading, setCodesLoading] = useState(true);
 
   const requiredFields = [
     ['activationCode', 'Activation Code'],
     ['firstname', 'First Name'],
-    ['middlename', 'Middle Name'],
     ['lastname', 'Last Name'],
     ['email', 'Email'],
     ['address', 'Address'],
@@ -96,6 +104,10 @@ export default function Registration() {
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setFieldErrors((prev) => ({ ...prev, [field]: '' }));
+    if (field === 'activationCode') {
+      setCodeValid(null);
+      setCodePreview(null);
+    }
   };
 
   useEffect(() => {
@@ -132,6 +144,8 @@ export default function Registration() {
                     placementUid: explicitPlacementUid,
                     position: explicitPosition,
                     positionLabel: explicitPosition === '2' ? 'Right' : 'Left',
+                    placementUsername: explicitPlacementUser || placement.placementUsername || null,
+                    placementLabel: explicitPlacementLabel || `${explicitPosition === '2' ? 'Right Leg' : 'Left Leg'} of ${explicitPlacementUser || `UID ${explicitPlacementUid}`}`,
                     note: 'Placement was selected from the genealogy tree. The backend will still validate this slot before saving.',
                   }
                 : placement
@@ -153,6 +167,30 @@ export default function Registration() {
     loadDefaultPlacement();
     return () => { cancelled = true; };
   }, [hasExplicitPlacement]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAvailableCodes() {
+      setCodesLoading(true);
+      try {
+        const res = await api.get('/registration/available-codes');
+        if (!cancelled) {
+          setAvailableCodes(Array.isArray(res.data?.codes) ? res.data.codes : []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setAvailableCodes([]);
+          toast.error(err.response?.data?.error || 'Unable to load activation codes.');
+        }
+      } finally {
+        if (!cancelled) setCodesLoading(false);
+      }
+    }
+
+    loadAvailableCodes();
+    return () => { cancelled = true; };
+  }, []);
 
   async function validateCode(showFeedback = true) {
     if (!form.activationCode) return null;
@@ -187,7 +225,15 @@ export default function Registration() {
     try {
       const res = await api.get(`/registration/validate-username?username=${form.username}`);
       setUsernameValid(!res.data.exists);
-      if (res.data.exists) toast.error('Username already taken');
+      if (res.data.exists) {
+        setConfirmModal({
+          tone: 'red',
+          title: 'Username already exists',
+          message: 'Please choose another username before continuing with registration.',
+          confirmLabel: 'Close',
+          onConfirm: () => setConfirmModal(null),
+        });
+      }
     } catch { setUsernameValid(false); }
   }
 
@@ -198,11 +244,26 @@ export default function Registration() {
         ...form,
         tin: formatTin(form.tin),
       });
-      toast.success('Account registered successfully!');
-      setConfirmModal(null);
-      navigate(`/genealogy?id=${form.placementUid}`);
+      setFeedbackModal({
+        tone: 'gold',
+        title: 'Account registered successfully',
+        message: 'The new member account is now saved. You may continue back to the genealogy tree.',
+        confirmLabel: 'Go to Genealogy',
+        onConfirm: () => {
+          setFeedbackModal(null);
+          navigate(`/genealogy?id=${form.placementUid}`);
+        },
+      });
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Registration failed');
+      setFeedbackModal({
+        tone: 'red',
+        title: err.response?.data?.errorCode === 'USERNAME_TAKEN'
+          ? 'Username already exists'
+          : 'Registration failed',
+        message: err.response?.data?.error || 'Registration failed',
+        confirmLabel: 'Close',
+        onConfirm: () => setFeedbackModal(null),
+      });
     } finally { setSubmitting(false); }
   }
 
@@ -217,7 +278,13 @@ export default function Registration() {
 
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
-      toast.error('Please complete all required fields.');
+      setConfirmModal({
+        tone: 'red',
+        title: 'Required fields are missing',
+        message: 'Please complete all required fields before continuing.',
+        confirmLabel: 'Close',
+        onConfirm: () => setConfirmModal(null),
+      });
       return;
     }
 
@@ -243,11 +310,27 @@ export default function Registration() {
       });
       return;
     }
-    if (usernameValid === false)  return toast.error('Username already taken');
+    if (usernameValid === false) {
+      setConfirmModal({
+        tone: 'red',
+        title: 'Username already exists',
+        message: 'Please choose another username before continuing with registration.',
+        confirmLabel: 'Close',
+        onConfirm: () => setConfirmModal(null),
+      });
+      return;
+    }
 
     const normalizedTin = formatTin(form.tin);
     if (normalizedTin && !isValidTin(normalizedTin)) {
-      return toast.error('TIN must contain 9-15 digits');
+      setConfirmModal({
+        tone: 'red',
+        title: 'Invalid TIN',
+        message: 'TIN must contain 9-15 digits.',
+        confirmLabel: 'Close',
+        onConfirm: () => setConfirmModal(null),
+      });
+      return;
     }
 
     setConfirmModal({
@@ -255,11 +338,19 @@ export default function Registration() {
       title: 'Consume this code and register the account?',
       message: 'This activation code will be consumed immediately after confirmation and cannot be reused.',
       confirmLabel: 'Register Account',
-      onConfirm: submitRegistration,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        await submitRegistration();
+      },
       details: [
         { label: 'Code', value: preview.code || form.activationCode },
         { label: 'Account type', value: preview.accountLabel || 'Package entry code' },
-        { label: 'Placement', value: `${placementMeta?.positionLabel || (form.position === '2' ? 'Right' : 'Left')} leg / UID ${form.placementUid}` },
+        {
+          label: 'Placement',
+          value: explicitPlacementLabel
+            ? `Your ${placementMeta?.positionLabel || (form.position === '2' ? 'Right' : 'Left')} Leg / ${explicitPlacementLabel}`
+            : `${placementMeta?.positionLabel || (form.position === '2' ? 'Right' : 'Left')} Leg / ${placementMeta?.placementUsername || `UID ${form.placementUid}`}`,
+        },
       ],
     });
   }
@@ -270,9 +361,17 @@ export default function Registration() {
   const codeBorder    = codeValid === true ? validBorder : codeValid === false ? invalidBorder : undefined;
   const userBorder    = usernameValid === true ? validBorder : usernameValid === false ? invalidBorder : undefined;
   const placementPolicyMode = placementMeta?.placementPolicy?.mode || 'manual';
-  const placementPolicyMessage = placementMeta?.placementPolicy?.message || placementMeta?.note;
   const inputClassName = (field, extra = '') => `glass-input ${fieldErrors[field] ? 'portal-input-error' : ''} ${extra}`.trim();
-  const RequiredMark = () => <span className="portal-required">*</span>;
+  const activationOptions = form.activationCode && !availableCodes.some((item) => String(item.code || '').toLowerCase() === String(form.activationCode || '').trim().toLowerCase())
+    ? [
+        {
+          id: 'legacy-selected',
+          code: form.activationCode,
+          dropdownLabel: codePreview?.dropdownLabel || 'Existing valid code',
+        },
+        ...availableCodes,
+      ]
+    : availableCodes;
 
   return (
     <div className="space-y-6">
@@ -286,6 +385,18 @@ export default function Registration() {
         onConfirm={confirmModal?.onConfirm}
         onClose={() => setConfirmModal(null)}
         busy={submitting}
+      />
+
+      <CodeUseConfirmModal
+        open={Boolean(feedbackModal)}
+        tone={feedbackModal?.tone || 'gold'}
+        title={feedbackModal?.title}
+        message={feedbackModal?.message}
+        details={feedbackModal?.details || []}
+        confirmLabel={feedbackModal?.confirmLabel || 'Close'}
+        showCancel={false}
+        onConfirm={feedbackModal?.onConfirm || (() => setFeedbackModal(null))}
+        onClose={() => setFeedbackModal(null)}
       />
 
       <PlacementPolicyModal
@@ -308,22 +419,33 @@ export default function Registration() {
           <div>
             <label className="label">Activation Code <RequiredMark /></label>
             <div className="relative">
-              <input
-                type="text"
+              <select
                 value={form.activationCode}
                 onChange={(e) => handleChange('activationCode', e.target.value)}
                 onBlur={() => validateCode(true)}
-                className={inputClassName('activationCode', 'pr-9')}
-                placeholder="Enter activation code"
+                className={inputClassName('activationCode', 'pr-9 appearance-none')}
                 aria-invalid={fieldErrors.activationCode ? 'true' : 'false'}
                 required
                 style={codeBorder ? { borderColor: codeBorder } : {}}
-              />
+                disabled={codesLoading}
+              >
+                <option value="">
+                  {codesLoading ? 'Loading available activation codes...' : 'Select an activation code'}
+                </option>
+                {activationOptions.map((item) => (
+                  <option key={item.id || item.code} value={item.code}>
+                    {`${item.code} - ${item.dropdownLabel || item.accountLabel || 'Available code'}`}
+                  </option>
+                ))}
+              </select>
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
                 <ValidationIcon state={codeValid} />
               </span>
             </div>
             {fieldErrors.activationCode ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.activationCode}</p> : null}
+            {!codesLoading && activationOptions.length === 0 ? (
+              <p className="portal-field-hint">No released registration codes are currently available in your inventory.</p>
+            ) : null}
           </div>
 
           {/* Sponsor (read-only) */}
@@ -371,11 +493,8 @@ export default function Registration() {
             </p>
             <p className="text-xs mt-1 text-white/70 leading-relaxed">
               {placementMeta?.placementUsername
-                ? `Placement account: ${placementMeta.placementUsername} (#${form.placementUid})`
+                ? `Placement account: ${placementMeta.placementUsername}`
                 : `Placement account UID: ${form.placementUid || 'Loading...'}`}
-            </p>
-            <p className="text-xs mt-2 text-white/65 leading-relaxed">
-              {placementPolicyMessage || 'The system will validate the live placement policy before saving this registration.'}
             </p>
           </div>
 
@@ -392,8 +511,8 @@ export default function Registration() {
               {fieldErrors.lastname ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.lastname}</p> : null}
             </div>
             <div>
-              <label className="label">Middle Name <RequiredMark /></label>
-              <input type="text" value={form.middlename} onChange={(e) => handleChange('middlename', e.target.value)} className={inputClassName('middlename')} aria-invalid={fieldErrors.middlename ? 'true' : 'false'} required />
+              <label className="label">Middle Name</label>
+              <input type="text" value={form.middlename} onChange={(e) => handleChange('middlename', e.target.value)} className={inputClassName('middlename')} aria-invalid={fieldErrors.middlename ? 'true' : 'false'} />
               {fieldErrors.middlename ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.middlename}</p> : null}
             </div>
             {codePreview?.accountLabel && codeValid === true && (
@@ -511,7 +630,7 @@ export default function Registration() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 portal-card-muted transition-colors hover:text-[var(--portal-title)]"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <HiOutlineEyeOff className="h-5 w-5" /> : <HiOutlineEye className="h-5 w-5" />}
+                {showPassword ? <HiOutlineEyeOff className="size-5" /> : <HiOutlineEye className="size-5" />}
               </button>
             </div>
             {fieldErrors.password ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.password}</p> : null}
@@ -523,7 +642,7 @@ export default function Registration() {
               disabled={submitting || placementLoading || !form.placementUid}
               className="gold-btn w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
             >
-              {submitting ? <><Spinner /> Registering…</> : <><HiOutlineUserAdd className="w-4 h-4" /> Register Account</>}
+              {submitting ? <><Spinner /> Registering…</> : <><HiOutlineUserAdd className="size-4" /> Register Account</>}
             </button>
           </div>
         </form>

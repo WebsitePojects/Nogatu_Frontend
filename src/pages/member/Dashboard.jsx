@@ -43,15 +43,15 @@ function StatCard({ card, idx, onClick }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div
-          className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
+          className="size-10 sm:size-11 rounded-xl flex items-center justify-center group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
           style={{
             background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
             boxShadow: `0 6px 20px ${theme.glow}`,
           }}
         >
-          <card.icon className="w-[18px] h-[18px] sm:w-[19px] sm:h-[19px] text-[#080604]" />
+          <card.icon className="size-[18px] sm:size-[19px] text-[#080604]" />
         </div>
-        <HiOutlineChevronRight className="w-4 h-4 mt-1 flex-shrink-0" style={{ color: 'rgba(212,175,55,0.65)' }} />
+        <HiOutlineChevronRight className="size-4 mt-1 flex-shrink-0" style={{ color: 'rgba(212,175,55,0.65)' }} />
       </div>
 
       <p className="portal-card-muted text-[11px] sm:text-[12px] font-medium mt-4 mb-1">
@@ -117,7 +117,7 @@ export default function Dashboard() {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
         <div
-          className="w-12 h-12 rounded-full border-[3px] animate-spin"
+          className="size-12 rounded-full border-[3px] animate-spin"
           style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }}
         />
         <p className="portal-card-muted text-sm">Loading your dashboard...</p>
@@ -133,8 +133,7 @@ export default function Dashboard() {
     { label: 'Total Cash Incentives', metric: 'total-cash-incentives', path: '/ewallet', value: `PHP ${fmt(data.totalCashIncome)}`, icon: HiOutlineCash, actionLabel: 'Open e-wallet breakdown' },
     { label: 'Current Cash Balance', metric: 'current-cash-balance', path: '/ewallet', value: `PHP ${fmt(data.cashBalance)}`, icon: HiOutlineCash, actionLabel: 'View wallet balance details' },
     { label: 'Direct Referral', metric: 'direct-referral', value: `PHP ${fmt(data.directReferral)}`, icon: HiOutlineUsers, actionLabel: 'See who triggered this income' },
-    { label: 'Sales Volume (Pairing)', metric: 'sales-volume', path: '/pairing', value: `PHP ${fmt(data.salesVolume)}`, icon: HiOutlineChartBar, actionLabel: 'Open pairing reports' },
-    { label: 'Pairing Balance', metric: 'pairing-balance', path: '/pairing', value: `${fmtInt(data.pairingBalance)} pts`, icon: HiOutlineChartBar, actionLabel: 'See left/right carry details' },
+    { label: 'Sales Matched Bonus', metric: 'sales-volume', path: '/pairing', value: `PHP ${fmt(data.salesVolume)}`, icon: HiOutlineChartBar, actionLabel: 'Open pairing reports' },
     { label: 'Uni-Level', metric: 'uni-level', value: `PHP ${fmt(data.uniLevel)}`, icon: HiOutlineTrendingUp, actionLabel: 'View eligibility and payout history' },
     { label: 'Leadership Bonus', metric: 'leadership-bonus', value: `PHP ${fmt(data.leadershipBonus)}`, icon: HiOutlineStar, actionLabel: 'See leadership bonus entries' },
     { label: 'Hi-Five Bonus', metric: 'hi-five-bonus', path: '/hifive', value: `PHP ${fmt(data.hiFiveBonus)}`, icon: HiOutlineGift, actionLabel: 'Open Hi-Five bonus page' },
@@ -149,8 +148,8 @@ export default function Dashboard() {
     <div className="space-y-7">
       <div className="relative flex items-start justify-between rounded-3xl overflow-hidden p-6 sm:p-8 mb-2">
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <img src="/img/dashboard_img_light.png" alt="Dashboard Hero" className="w-full h-full object-cover dark:hidden" />
-          <img src="/img/dashboard_img_dark.png" alt="Dashboard Hero" className="hidden w-full h-full object-cover dark:block" />
+          <img src="/img/dashboard_img_light.png" alt="Dashboard Hero" className="size-full object-cover dark:hidden" />
+          <img src="/img/dashboard_img_dark.png" alt="Dashboard Hero" className="hidden size-full object-cover dark:block" />
           <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-transparent dark:hidden"></div>
           <div className="absolute inset-0 hidden dark:block bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
         </div>
@@ -169,7 +168,7 @@ export default function Dashboard() {
           className="relative z-10 hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl shadow-lg backdrop-blur-sm"
           style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(212,175,55,0.3)' }}
         >
-          <div className="w-2 h-2 rounded-full" style={{ background: '#D4AF37', boxShadow: '0 0 6px rgba(212,175,55,0.8)' }} />
+          <div className="size-2 rounded-full" style={{ background: '#D4AF37', boxShadow: '0 0 6px rgba(212,175,55,0.8)' }} />
           <span className="text-xs font-semibold" style={{ color: '#D4AF37' }}>{user?.caccttype}</span>
         </div>
       </div>
@@ -248,7 +247,7 @@ export default function Dashboard() {
                   style={{ borderBottom: '1px solid var(--portal-row-border)' }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}66` }} />
+                    <div className="size-2.5 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}66` }} />
                     <span className="portal-card-text text-sm">{type}</span>
                   </div>
                   <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}>
@@ -259,7 +258,7 @@ export default function Dashboard() {
             })}
             {Object.keys(data.directReferrals || {}).length === 0 && (
               <div className="text-center py-10">
-                <HiOutlineUsers className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.25)' }} />
+                <HiOutlineUsers className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.25)' }} />
                 <p className="portal-card-muted text-sm">No direct referrals yet.</p>
                 <p className="portal-card-muted text-xs mt-1">Start building your network.</p>
               </div>

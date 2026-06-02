@@ -15,7 +15,7 @@ const STATUS_STYLES = {
 function Spinner() {
   return (
     <div className="flex justify-center py-12">
-      <div className="w-8 h-8 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+      <div className="size-8 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
     </div>
   );
 }
@@ -104,9 +104,9 @@ export default function ActivationCodes() {
     });
   }
 
-  async function performMaintenance(code, transType) {
+  async function performMaintenance(code) {
     try {
-      await api.post('/codes/maintenance', { code, transType });
+      await api.post('/codes/maintenance', { code });
       toast.success('Code activated successfully');
       setConfirmModal(null);
       loadCodes();
@@ -116,19 +116,18 @@ export default function ActivationCodes() {
     }
   }
 
-  function handleMaintenance(code, transType) {
+  function handleMaintenance(code) {
     const codeRow = findCodeRecord(code);
-    const actionLabel = transType === 2 ? 'Hi-Five maintenance' : 'maintenance';
     setConfirmModal({
       tone: 'gold',
-      title: `Use this code for ${actionLabel}?`,
+      title: 'Use this code for repurchase?',
       message: 'This code will be consumed immediately after confirmation and will move into your activation history.',
-      confirmLabel: 'Consume Code',
-      onConfirm: () => performMaintenance(code, transType),
+      confirmLabel: 'Use Repurchase Code',
+      onConfirm: () => performMaintenance(code),
       details: [
         { label: 'Code', value: code },
         { label: 'Product', value: codeRow?.producttypeName || 'Maintenance code' },
-        { label: 'Use', value: transType === 2 ? 'Hi-Five product maintenance' : 'Monthly maintenance' },
+        { label: 'Use', value: 'Repurchase / maintenance points' },
       ],
     });
   }
@@ -197,7 +196,7 @@ export default function ActivationCodes() {
             onClick={handleTransfer}
             disabled={!targetUsername || selected.length === 0}
             className="gold-btn py-2.5 px-5 rounded-xl text-sm whitespace-nowrap disabled:opacity-40"
-          >
+           type="button">
             Transfer ({selected.length})
           </button>
         </div>
@@ -208,7 +207,7 @@ export default function ActivationCodes() {
         {/* Table header bar */}
         <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
           <div className="flex items-center gap-2">
-            <HiOutlineKey className="w-4 h-4" style={{ color: 'rgba(212,175,55,0.5)' }} />
+            <HiOutlineKey className="size-4" style={{ color: 'rgba(212,175,55,0.5)' }} />
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{total} codes total</p>
             {selected.length > 0 && (
               <span className="text-xs px-2 py-0.5 rounded-lg" style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}>
@@ -222,8 +221,8 @@ export default function ActivationCodes() {
               disabled={page <= 1}
               className="p-1.5 rounded-lg disabled:opacity-30 hover:bg-white/[0.06] transition-colors"
               style={{ color: 'rgba(255,255,255,0.5)' }}
-            >
-              <HiOutlineChevronLeft className="w-4 h-4" />
+             type="button">
+              <HiOutlineChevronLeft className="size-4" />
             </button>
             <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.7)' }}>
               {page} / {totalPages}
@@ -233,14 +232,86 @@ export default function ActivationCodes() {
               disabled={page >= totalPages}
               className="p-1.5 rounded-lg disabled:opacity-30 hover:bg-white/[0.06] transition-colors"
               style={{ color: 'rgba(255,255,255,0.5)' }}
-            >
-              <HiOutlineChevronRight className="w-4 h-4" />
+             type="button">
+              <HiOutlineChevronRight className="size-4" />
             </button>
           </div>
         </div>
 
         {loading ? <Spinner /> : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="space-y-3 p-4 md:hidden">
+            {codes.map((c) => {
+              const statusStyle = STATUS_STYLES[c.codestatus] || STATUS_STYLES[0];
+              const isSelected = selected.includes(c.code);
+              return (
+                <div
+                  key={c.code}
+                  className="rounded-2xl p-4 space-y-3"
+                  style={{
+                    background: isSelected ? 'rgba(212,175,55,0.06)' : 'rgba(255,255,255,0.02)',
+                    border: isSelected ? '1px solid rgba(212,175,55,0.28)' : '1px solid rgba(212,175,55,0.08)',
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-mono text-xs break-all" style={{ color: 'rgba(212,175,55,0.8)', letterSpacing: '0.05em' }}>
+                        {c.code}
+                      </p>
+                      <p className="text-sm mt-2 text-white">{c.producttypeName}</p>
+                      <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>{c.accountLabel}</p>
+                    </div>
+                    <span
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold flex-shrink-0"
+                      style={{ background: statusStyle.bg, color: statusStyle.color, border: `1px solid ${statusStyle.border}` }}
+                    >
+                      {c.statusLabel}
+                    </span>
+                  </div>
+
+                  {c.codestatus === 1 && (
+                    <label className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.62)' }}>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelect(c.code)}
+                        style={{ accentColor: '#D4AF37', cursor: 'pointer' }}
+                      />
+                      Select for transfer
+                    </label>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    {c.codestatus === 1 && c.producttype >= 100 && (
+                      <button
+                        onClick={() => handleMaintenance(c.code)}
+                        className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                        style={{ background: 'rgba(34,197,94,0.1)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }}
+                       type="button">
+                        Repurchase
+                      </button>
+                    )}
+                    {c.codestatus === 1 && c.producttype < 100 && Number(c.producttype) > currentAccttype && (
+                      <button
+                        onClick={() => handleUpgrade(c.code)}
+                        className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                        style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
+                       type="button">
+                        Upgrade
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {codes.length === 0 && (
+              <div className="py-10 text-center">
+                <HiOutlineKey className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
+                <p style={{ color: 'rgba(255,255,255,0.3)' }}>No activation codes found.</p>
+              </div>
+            )}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm min-w-[580px]">
               <thead>
                 <tr>
@@ -291,22 +362,13 @@ export default function ActivationCodes() {
                         {c.codestatus === 1 && c.producttype >= 100 && (
                           <div className="flex gap-1.5">
                             <button
-                              onClick={() => handleMaintenance(c.code, 1)}
+                              onClick={() => handleMaintenance(c.code)}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
                               style={{ background: 'rgba(34,197,94,0.1)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }}
                               onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}
                               onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.1)'}
-                            >
-                              Maintenance
-                            </button>
-                            <button
-                              onClick={() => handleMaintenance(c.code, 2)}
-                              className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
-                              style={{ background: 'rgba(99,102,241,0.1)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.2)' }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.18)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.1)'}
-                            >
-                              Hi-Five
+                             type="button">
+                              Repurchase
                             </button>
                           </div>
                         )}
@@ -317,7 +379,7 @@ export default function ActivationCodes() {
                             style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
                             onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,175,55,0.18)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'rgba(212,175,55,0.1)'}
-                          >
+                           type="button">
                             Upgrade
                           </button>
                         )}
@@ -328,14 +390,15 @@ export default function ActivationCodes() {
                 {codes.length === 0 && (
                   <tr>
                     <td colSpan="5" className="py-14 text-center">
-                      <HiOutlineKey className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
+                      <HiOutlineKey className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
                       <p style={{ color: 'rgba(255,255,255,0.3)' }}>No activation codes found.</p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -344,7 +407,7 @@ export default function ActivationCodes() {
           <div>
             <p className="text-sm font-semibold text-white">Code History</p>
             <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Release, transfer, upgrade, and maintenance actions tied to your codes.
+              Release, transfer, upgrade, and repurchase actions tied to your codes.
             </p>
           </div>
           <div className="flex items-center gap-1.5">
@@ -353,8 +416,8 @@ export default function ActivationCodes() {
               disabled={historyPage <= 1}
               className="p-1.5 rounded-lg disabled:opacity-30 hover:bg-white/[0.06] transition-colors"
               style={{ color: 'rgba(255,255,255,0.5)' }}
-            >
-              <HiOutlineChevronLeft className="w-4 h-4" />
+             type="button">
+              <HiOutlineChevronLeft className="size-4" />
             </button>
             <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.7)' }}>
               {historyPage} / {historyTotalPages}
@@ -364,14 +427,43 @@ export default function ActivationCodes() {
               disabled={historyPage >= historyTotalPages}
               className="p-1.5 rounded-lg disabled:opacity-30 hover:bg-white/[0.06] transition-colors"
               style={{ color: 'rgba(255,255,255,0.5)' }}
-            >
-              <HiOutlineChevronRight className="w-4 h-4" />
+             type="button">
+              <HiOutlineChevronRight className="size-4" />
             </button>
           </div>
         </div>
 
         {historyLoading ? <Spinner /> : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="space-y-3 p-4 md:hidden">
+              {historyRows.map((row, i) => (
+                <div
+                  key={`${row.code}-${row.processKey || row.createdAt || i}`}
+                  className="rounded-2xl p-4 space-y-3"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.08)' }}
+                >
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs break-all" style={{ color: 'rgba(212,175,55,0.8)' }}>{row.code}</p>
+                    <span
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold mt-2"
+                      style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.22)' }}
+                    >
+                      {row.eventLabel}
+                    </span>
+                  </div>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>{row.summary}</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    {formatDateTimeManila(row.createdAt)}
+                  </p>
+                </div>
+              ))}
+              {historyRows.length === 0 && (
+                <div className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  No code history found yet.
+                </div>
+              )}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm min-w-[680px]">
               <thead>
                 <tr>
@@ -411,6 +503,7 @@ export default function ActivationCodes() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </div>

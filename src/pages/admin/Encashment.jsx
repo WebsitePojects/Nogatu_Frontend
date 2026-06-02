@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { PaginationButton } from '../../components/PaginationButton';
 import html2canvas from 'html2canvas';
 import { useTheme } from '../../contexts/ThemeContext';
 import { apiUrl } from '../../utils/apiBase';
@@ -115,21 +116,6 @@ export default function Encashment() {
     link.click();
   }
 
-  const PaginationBtn = ({ onClick, disabled, children }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-      style={{
-        background: 'rgba(212,175,55,0.08)',
-        color: 'rgba(212,175,55,0.8)',
-        border: '1px solid rgba(212,175,55,0.15)',
-      }}
-    >
-      {children}
-    </button>
-  );
-
   const dailyPerPage = dailyExpanded ? 100 : 30;
   const dailyRows = summary?.daily || [];
   const dailyTotalPages = Math.max(1, Math.ceil(dailyRows.length / dailyPerPage));
@@ -179,7 +165,7 @@ export default function Encashment() {
               loadData(1);
             }}
             className="gold-btn rounded-xl py-2.5 px-5 text-sm"
-          >
+           type="button">
             Filter
           </button>
           <button
@@ -192,7 +178,7 @@ export default function Encashment() {
             }}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
             style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
-          >
+           type="button">
             Clear
           </button>
           <div className="flex flex-wrap gap-2">
@@ -201,7 +187,7 @@ export default function Encashment() {
               disabled={exporting}
               className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
               style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
-            >
+             type="button">
               {exporting ? 'Exporting...' : 'Export XLSX'}
             </button>
             <button
@@ -209,7 +195,7 @@ export default function Encashment() {
               disabled={exporting}
               className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
               style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
-            >
+             type="button">
               {exporting ? 'Preparing PDF...' : 'Export PDF'}
             </button>
           </div>
@@ -260,9 +246,9 @@ export default function Encashment() {
               Showing {visibleDailyRows.length} rows per page ({dailyPerPage} max)
             </span>
             <div className="flex items-center gap-2">
-              <PaginationBtn onClick={() => setDailyPage((p) => Math.max(1, p - 1))} disabled={dailyPage <= 1}>Prev</PaginationBtn>
+              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setDailyPage((p) => Math.max(1, p - 1))} disabled={dailyPage <= 1}>Prev</PaginationButton>
               <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{dailyPage} / {dailyTotalPages}</span>
-              <PaginationBtn onClick={() => setDailyPage((p) => Math.min(dailyTotalPages, p + 1))} disabled={dailyPage >= dailyTotalPages}>Next</PaginationBtn>
+              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setDailyPage((p) => Math.min(dailyTotalPages, p + 1))} disabled={dailyPage >= dailyTotalPages}>Next</PaginationButton>
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -270,22 +256,22 @@ export default function Encashment() {
               <thead>
                 <tr>
                   {['Date', 'Requests', 'Members', 'Gross', 'Net', 'Deductions', 'CD', 'Paid', 'Pending'].map((h) => (
-                    <th key={h} className="table-header py-3 px-3 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                    <th key={h} className="table-header p-3 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {visibleDailyRows.map((row, idx) => (
                   <tr key={row.date} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
-                    <td className="py-3 px-3 font-medium" style={{ color: textStrong }}>{row.date}</td>
-                    <td className="py-3 px-3" style={{ color: textSoft }}>{row.totalRecords}</td>
-                    <td className="py-3 px-3" style={{ color: textSoft }}>{row.uniqueMembers}</td>
-                    <td className="py-3 px-3" style={{ color: textStrong }}>PHP {fmt(row.grossEncashment)}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: goldText }}>PHP {fmt(row.netReceivable)}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: redText }}>PHP {fmt(row.totalDeductions)}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: amberText }}>PHP {fmt(row.totalCdDeduction)}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: greenText }}>{row.paidCount}</td>
-                    <td className="py-3 px-3 font-medium" style={{ color: amberText }}>{row.pendingCount}</td>
+                    <td className="p-3 font-medium" style={{ color: textStrong }}>{row.date}</td>
+                    <td className="p-3" style={{ color: textSoft }}>{row.totalRecords}</td>
+                    <td className="p-3" style={{ color: textSoft }}>{row.uniqueMembers}</td>
+                    <td className="p-3" style={{ color: textStrong }}>PHP {fmt(row.grossEncashment)}</td>
+                    <td className="p-3 font-medium" style={{ color: goldText }}>PHP {fmt(row.netReceivable)}</td>
+                    <td className="p-3 font-medium" style={{ color: redText }}>PHP {fmt(row.totalDeductions)}</td>
+                    <td className="p-3 font-medium" style={{ color: amberText }}>PHP {fmt(row.totalCdDeduction)}</td>
+                    <td className="p-3 font-medium" style={{ color: greenText }}>{row.paidCount}</td>
+                    <td className="p-3 font-medium" style={{ color: amberText }}>{row.pendingCount}</td>
                   </tr>
                 ))}
               </tbody>
@@ -293,9 +279,9 @@ export default function Encashment() {
           </div>
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
-              <PaginationBtn onClick={() => setDailyPage((p) => Math.max(1, p - 1))} disabled={dailyPage <= 1}>Prev</PaginationBtn>
+              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setDailyPage((p) => Math.max(1, p - 1))} disabled={dailyPage <= 1}>Prev</PaginationButton>
               <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{dailyPage} / {dailyTotalPages}</span>
-              <PaginationBtn onClick={() => setDailyPage((p) => Math.min(dailyTotalPages, p + 1))} disabled={dailyPage >= dailyTotalPages}>Next</PaginationBtn>
+              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setDailyPage((p) => Math.min(dailyTotalPages, p + 1))} disabled={dailyPage >= dailyTotalPages}>Next</PaginationButton>
             </div>
           </div>
         </div>
@@ -306,31 +292,31 @@ export default function Encashment() {
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Encashment Records</p>
           <div className="flex items-center gap-2">
-            <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+            <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
-            <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+            <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10">
             <div
-              className="animate-spin rounded-full h-8 w-8 border-4"
+              className="animate-spin rounded-full size-8 border-4"
               style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
             />
           </div>
         ) : (
           <div className="overflow-x-auto">
             <div className="flex items-center justify-end mb-4 gap-2">
-              <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
               <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
-              <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
             </div>
             <table className="w-full text-sm">
               <thead>
                 <tr>
                   {['Name', 'Username', 'Date', 'Amount', 'Deductions', 'Income Details', 'Payout Details', 'Status', 'Actions'].map(h => (
-                    <th key={h} className="table-header py-3 px-3 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                    <th key={h} className="table-header p-3 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -343,25 +329,25 @@ export default function Encashment() {
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,175,55,0.05)'}
                     onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'}
                   >
-                    <td className="py-3 px-3 font-medium text-white/80">{r.fullname}</td>
-                    <td className="py-3 px-3 text-white/60">{r.username}</td>
-                    <td className="py-3 px-3 text-xs text-white/40">{r.cashtransdate || '-'}</td>
-                    <td className="py-3 px-3 text-white/80 font-medium">&#8369;{fmt(r.encashment)}</td>
-                    <td className="py-3 px-3 text-white/60">&#8369;{fmt(r.deductions)}</td>
-                    <td className="py-3 px-3">
+                    <td className="p-3 font-medium text-white/80">{r.fullname}</td>
+                    <td className="p-3 text-white/60">{r.username}</td>
+                    <td className="p-3 text-xs text-white/40">{r.cashtransdate || '-'}</td>
+                    <td className="p-3 text-white/80 font-medium">&#8369;{fmt(r.encashment)}</td>
+                    <td className="p-3 text-white/60">&#8369;{fmt(r.deductions)}</td>
+                    <td className="p-3">
                       <div className="flex flex-wrap gap-1.5">
                         <button
                           onClick={() => navigate(`/admin/accounts/${r.uid}/income`)}
                           className="text-[11px] px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                           style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}
-                        >
+                         type="button">
                           View Details
                         </button>
                         <button
                           onClick={() => openDetails(r)}
                           className="text-[11px] px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                           style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
-                        >
+                         type="button">
                           Encashment Slip
                         </button>
                         {r.canViewCdDetails && (
@@ -369,14 +355,14 @@ export default function Encashment() {
                             onClick={() => navigate(`/admin/accounts/${r.uid}/cd`)}
                             className="text-[11px] px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                             style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)' }}
-                          >
+                           type="button">
                             CD Details
                           </button>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-white/60">{r.payoutDetails || 'N/A'}</td>
-                    <td className="py-3 px-3">
+                    <td className="p-3 text-white/60">{r.payoutDetails || 'N/A'}</td>
+                    <td className="p-3">
                       <span
                         className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                         style={
@@ -388,13 +374,13 @@ export default function Encashment() {
                         {r.cashStatusLabel}
                       </span>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="p-3">
                       {Number(r.cashStatus) !== 1 && (
                         <button
                           onClick={() => handleProcess(r.pid, r.uid)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                           style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
-                        >
+                         type="button">
                           Set As Paid
                         </button>
                       )}
@@ -411,9 +397,9 @@ export default function Encashment() {
               </tbody>
             </table>
             <div className="flex items-center justify-end mt-4 gap-2">
-              <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
               <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
-              <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
             </div>
           </div>
         )}
@@ -431,7 +417,7 @@ export default function Encashment() {
           >
             {detailsLoading ? (
               <div className="flex justify-center py-10">
-                <div className="animate-spin rounded-full h-8 w-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
+                <div className="animate-spin rounded-full size-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }} />
               </div>
             ) : (
               <>
@@ -503,7 +489,7 @@ export default function Encashment() {
                     onClick={() => navigate(`/admin/accounts/${activeDetails?.uid}/income`)}
                     className="text-xs px-3 py-2 rounded-lg font-medium"
                     style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}
-                  >
+                   type="button">
                     View Income Details
                   </button>
                   {Number(activeDetails?.deductions?.cdDeduction || 0) > 0 && (
@@ -511,7 +497,7 @@ export default function Encashment() {
                       onClick={() => navigate(`/admin/accounts/${activeDetails?.uid}/cd`)}
                       className="text-xs px-3 py-2 rounded-lg font-medium"
                       style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)' }}
-                    >
+                     type="button">
                       CD Details
                     </button>
                   )}
@@ -525,7 +511,7 @@ export default function Encashment() {
                       }}
                       className="text-xs px-3 py-2 rounded-lg font-medium"
                       style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
-                    >
+                     type="button">
                       Set As Paid
                     </button>
                   )}
@@ -533,14 +519,14 @@ export default function Encashment() {
                     onClick={handleDownloadDetails}
                     className="text-xs px-3 py-2 rounded-lg font-medium"
                     style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
-                  >
+                   type="button">
                     Download PNG
                   </button>
                   <button
                     onClick={() => setActiveDetails(null)}
                     className="text-xs px-3 py-2 rounded-lg font-medium"
                     style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}
-                  >
+                   type="button">
                     Close
                   </button>
                 </div>

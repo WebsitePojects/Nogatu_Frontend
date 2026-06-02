@@ -7,13 +7,13 @@ export default function RouteBlockerCard({ invalidPath }) {
         className="absolute inset-x-0 top-0 h-1"
         style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }}
       />
-      <div className="absolute -right-14 top-8 h-40 w-40 rounded-full bg-brand-gold/10 blur-3xl" />
-      <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full blur-3xl" style={{ background: 'rgba(89,34,25,0.08)' }} />
+      <div className="absolute -right-14 top-8 size-40 rounded-full bg-brand-gold/10 blur-3xl" />
+      <div className="absolute -left-10 bottom-0 size-32 rounded-full blur-3xl" style={{ background: 'rgba(89,34,25,0.08)' }} />
 
       <div className="relative z-10">
         <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-brand-gold/20 bg-white/80 px-4 py-2 shadow-sm">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full text-brand-gold-dark" style={{ background: 'rgba(212,165,40,0.12)' }}>
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <span className="flex size-10 items-center justify-center rounded-full text-brand-gold-dark" style={{ background: 'rgba(212,165,40,0.12)' }}>
+            <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 9v4m0 4h.01M10.29 3.86l-7.46 12.92A2 2 0 004.56 20h14.88a2 2 0 001.73-3.22L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
           </span>

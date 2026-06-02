@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { PaginationButton } from '../../components/PaginationButton';
 import { useTheme } from '../../contexts/ThemeContext';
 
 function statusStyle(status) {
@@ -119,21 +120,6 @@ export default function AccountMasterlist() {
     await submitStatusChange(statusModal.account, statusModal.nextStatus, trimmedReason);
   }
 
-  const PaginationBtn = ({ onClick, disabled, children }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-      style={{
-        background: 'rgba(212,175,55,0.08)',
-        color: 'rgba(212,175,55,0.8)',
-        border: '1px solid rgba(212,175,55,0.15)',
-      }}
-    >
-      {children}
-    </button>
-  );
-
   return (
     <div>
       <div className="mb-7">
@@ -165,16 +151,16 @@ export default function AccountMasterlist() {
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Accounts</p>
           <div className="flex items-center gap-2">
-            <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+            <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
-            <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+            <PaginationButton onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Next</PaginationButton>
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10">
             <div
-              className="animate-spin rounded-full h-8 w-8 border-4"
+              className="animate-spin rounded-full size-8 border-4"
               style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
             />
           </div>
@@ -233,28 +219,28 @@ export default function AccountMasterlist() {
                           onClick={() => navigate(`/admin/accounts/${a.uid}`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
                           style={{ background: 'rgba(212,175,55,0.12)', color: goldText, border: '1px solid rgba(212,175,55,0.2)' }}
-                        >
+                         type="button">
                           Edit
                         </button>
                         <button
                           onClick={() => navigate(`/admin/genealogy?id=${a.uid}`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
                           style={{ background: 'rgba(16,185,129,0.1)', color: greenText, border: '1px solid rgba(16,185,129,0.2)' }}
-                        >
+                         type="button">
                           Tree
                         </button>
                         <button
                           onClick={() => navigate(`/admin/accounts/${a.uid}/income`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
                           style={{ background: 'rgba(59,130,246,0.1)', color: blueText, border: '1px solid rgba(59,130,246,0.25)' }}
-                        >
+                         type="button">
                           Income
                         </button>
                         <button
                           onClick={() => navigate(`/admin/accounts/${a.uid}/cd`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
                           style={{ background: 'rgba(239,68,68,0.1)', color: redText, border: '1px solid rgba(239,68,68,0.25)' }}
-                        >
+                         type="button">
                           CD
                         </button>
                         {a.accountStatus === 'active' ? (
@@ -264,7 +250,7 @@ export default function AccountMasterlist() {
                               disabled={statusLoadingUid === a.uid}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer disabled:opacity-50"
                               style={{ background: 'rgba(239,68,68,0.1)', color: redText, border: '1px solid rgba(239,68,68,0.25)' }}
-                            >
+                             type="button">
                               Suspend
                             </button>
                           </>
@@ -274,7 +260,7 @@ export default function AccountMasterlist() {
                             disabled={statusLoadingUid === a.uid}
                             className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer disabled:opacity-50"
                             style={{ background: 'rgba(74,222,128,0.1)', color: greenText, border: '1px solid rgba(74,222,128,0.22)' }}
-                          >
+                           type="button">
                             Reactivate
                           </button>
                         )}
@@ -434,9 +420,9 @@ export default function AccountMasterlist() {
             Filtered registrations
           </p>
           <div className="flex items-center gap-2">
-            <PaginationBtn onClick={() => setMonitorPage((p) => Math.max(1, p - 1))} disabled={monitorPage <= 1}>Prev</PaginationBtn>
+            <PaginationButton onClick={() => setMonitorPage((p) => Math.max(1, p - 1))} disabled={monitorPage <= 1} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{monitorPage} / {monitorTotalPages}</span>
-            <PaginationBtn onClick={() => setMonitorPage((p) => Math.min(monitorTotalPages, p + 1))} disabled={monitorPage >= monitorTotalPages}>Next</PaginationBtn>
+            <PaginationButton onClick={() => setMonitorPage((p) => Math.min(monitorTotalPages, p + 1))} disabled={monitorPage >= monitorTotalPages} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Next</PaginationButton>
           </div>
         </div>
 
@@ -468,14 +454,14 @@ export default function AccountMasterlist() {
                         onClick={() => navigate(`/admin/accounts/${account.uid}`)}
                         className="text-xs px-2.5 py-1 rounded-lg font-medium"
                         style={{ background: 'rgba(212,175,55,0.12)', color: goldText, border: '1px solid rgba(212,175,55,0.2)' }}
-                      >
+                       type="button">
                         Edit
                       </button>
                       <button
                         onClick={() => navigate(`/admin/genealogy?id=${account.uid}`)}
                         className="text-xs px-2.5 py-1 rounded-lg font-medium"
                         style={{ background: 'rgba(16,185,129,0.1)', color: greenText, border: '1px solid rgba(16,185,129,0.2)' }}
-                      >
+                       type="button">
                         Tree
                       </button>
                     </div>

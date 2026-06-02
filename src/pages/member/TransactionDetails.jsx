@@ -152,10 +152,10 @@ export default function TransactionDetails() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Type</p><p className={`mt-1 font-semibold ${detailValueTone}`}>{tx.transactionTypeName}</p></div>
-        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Date</p><p className={`mt-1 font-semibold ${detailValueTone}`}>{formatDateTimeManila(tx.transdate)}</p></div>
-        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Beginning</p><p className={`mt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.beginningBalance)}</p></div>
-        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Ending</p><p className={`mt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.endingBalance)}</p></div>
+        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Type</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{tx.transactionTypeName}</p></div>
+        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Date</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{formatDateTimeManila(tx.transdate)}</p></div>
+        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Beginning</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.beginningBalance)}</p></div>
+        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Ending</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.endingBalance)}</p></div>
       </div>
 
       <div className="glass-card rounded-2xl p-6">
@@ -175,10 +175,10 @@ export default function TransactionDetails() {
       <div className="glass-card rounded-2xl p-6">
         <h2 className="portal-page-title font-display text-lg font-semibold">CD Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">Account State</p><p className={`mt-1 font-semibold ${detailValueTone}`}>{account.entryState}</p></div>
-          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Amount</p><p className={`mt-1 font-semibold ${detailValueTone}`}>PHP {fmt(account.cdAmount)}</p></div>
-          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Recovered</p><p className={`mt-1 font-semibold ${detailValueTone}`}>PHP {fmt(account.cdTotal)}</p></div>
-          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Status</p><p className={`mt-1 font-semibold ${detailValueTone}`}>{Number(account.cdStatus) === 2 ? 'Fully Paid' : Number(account.cdStatus) === 1 ? 'Unpaid' : 'Not CD'}</p></div>
+          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">Account State</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{account.entryState}</p></div>
+          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Amount</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(account.cdAmount)}</p></div>
+          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Recovered</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(account.cdTotal)}</p></div>
+          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Status</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{Number(account.cdStatus) === 2 ? 'Fully Paid' : Number(account.cdStatus) === 1 ? 'Unpaid' : 'Not CD'}</p></div>
         </div>
       </div>
 
@@ -191,8 +191,9 @@ export default function TransactionDetails() {
             note={notes.directReferrals}
             emptyMessage="No direct referral contributors are tied to this record."
             renderRow={(row, index) => (
-              <div key={`${row.uid}-${index}`} className={`text-sm ${supportTextTone}`}>
-                {index + 1}. {row.fullname} <span className={supportMutedTone}>({row.entryType})</span>
+              <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
+                {index + 1}. {row.fullname || row.username} <span className={supportMutedTone}>({row.entryType}{row.username ? ` / @${row.username}` : ''})</span>{' '}
+                <span className="portal-gold-text">PHP {fmt(row.amount || 0)}</span>
               </div>
             )}
           />
@@ -202,7 +203,7 @@ export default function TransactionDetails() {
             note={notes.leadershipSources}
             emptyMessage="No leadership contributors are tied to this record."
             renderRow={(row, index) => (
-              <div key={`${row.uid}-${index}`} className={`text-sm ${supportTextTone}`}>
+              <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
                 {index + 1}. {row.fullName || row.username} - L{row.level} - PHP {fmt(row.leadershipBonus)}
               </div>
             )}
@@ -213,8 +214,8 @@ export default function TransactionDetails() {
             note={notes.pairingTrace}
             emptyMessage="No pairing contributors are tied to this record."
             renderRow={(row, index) => (
-              <div key={`${row.ledgerUid}-${index}`} className={`text-sm ${supportTextTone}`}>
-                {index + 1}. {row.left?.username || '-'} x {row.right?.username || '-'} - PHP {fmt(row.creditedIncome)}
+              <div key={`${row.ledgerUid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
+                {index + 1}. {row.left?.username || '-'} x {row.right?.username || '-'} - PHP {fmt(row.creditedIncome)} <span className={supportMutedTone}>({fmt(row.pairPoints || 0)} matched)</span>
               </div>
             )}
           />
@@ -224,7 +225,7 @@ export default function TransactionDetails() {
             note={notes.hiFiveSources || (supporting.hiFiveSummary ? `Matched from the paid Hi-Five claim for ${supporting.hiFiveSummary.totalContributors || 0} qualifying contributor${Number(supporting.hiFiveSummary.totalContributors || 0) === 1 ? '' : 's'}.` : null)}
             emptyMessage="No Hi-Five contributors are tied to this record."
             renderRow={(row, index) => (
-              <div key={`${row.uid}-${index}`} className={`text-sm ${supportTextTone}`}>
+              <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
                 {index + 1}. {row.fullName || row.username} <span className={supportMutedTone}>({row.packageName || row.registrationAudit?.activationCode || 'Qualifier'})</span>
               </div>
             )}
@@ -235,7 +236,7 @@ export default function TransactionDetails() {
             note={notes.unilevelSources}
             emptyMessage="No unilevel contributors are tied to this record."
             renderRow={(row, index) => (
-              <div key={`${row.uid}-${index}`} className={`text-sm ${supportTextTone}`}>
+              <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
                 {index + 1}. {row.fullName || row.username}
               </div>
             )}
@@ -246,7 +247,7 @@ export default function TransactionDetails() {
             note={notes.rankingSources}
             emptyMessage="No ranking bonus contributors are tied to this record."
             renderRow={(row, index) => (
-              <div key={`${row.uid}-${index}`} className={`text-sm ${supportTextTone}`}>
+              <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
                 {index + 1}. {row.fullName || row.username}
               </div>
             )}

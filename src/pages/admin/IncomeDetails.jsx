@@ -209,7 +209,7 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
             onClick={onClose}
             className="px-5 py-2 rounded-xl text-sm font-semibold cursor-pointer"
             style={{ background: 'rgba(148,163,184,0.14)', color: 'var(--text-secondary)', border: '1px solid rgba(148,163,184,0.26)' }}
-          >
+           type="button">
             Close
           </button>
         </div>
@@ -235,7 +235,7 @@ export default function IncomeDetails() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
+        <div className="animate-spin rounded-full size-8 border-4" style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: '#D4AF37' }} />
       </div>
     );
   }
@@ -267,7 +267,7 @@ export default function IncomeDetails() {
           onClick={() => navigate('/admin/accounts')}
           className="text-sm px-3 py-1.5 rounded-lg cursor-pointer"
           style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}
-        >
+         type="button">
           ← Back
         </button>
         <div>
@@ -466,7 +466,7 @@ export default function IncomeDetails() {
                         onClick={() => setSelectedTx(tx)}
                         className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer"
                         style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
-                      >
+                       type="button">
                         Details
                       </button>
                     </td>

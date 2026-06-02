@@ -140,7 +140,7 @@ export default function GenerateCodes() {
               <button
                 onClick={handleCopyAll}
                 className="gold-btn-outline rounded-lg px-3 py-1.5 text-xs font-medium"
-              >
+               type="button">
                 Copy All
               </button>
             </div>
@@ -163,7 +163,7 @@ export default function GenerateCodes() {
                     onClick={() => { navigator.clipboard.writeText(code); toast.success('Copied!'); }}
                     className="opacity-0 group-hover:opacity-100 text-xs motion-safe:transition-opacity cursor-pointer"
                     style={{ color: 'rgba(212,175,55,0.6)' }}
-                  >
+                   type="button">
                     Copy
                   </button>
                 </div>

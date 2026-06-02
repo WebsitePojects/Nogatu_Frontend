@@ -49,8 +49,8 @@ export default function SupportContact() {
 
         <div className="glass-card rounded-2xl p-6 mb-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}>
-              <FaFacebook className="w-5 h-5" style={{ color: '#60a5fa' }} />
+            <div className="size-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}>
+              <FaFacebook className="size-5" style={{ color: '#60a5fa' }} />
             </div>
             <div>
               <p className="text-sm font-semibold portal-card-title">Facebook - NAWi Help Desk</p>
@@ -64,16 +64,16 @@ export default function SupportContact() {
             className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold"
             style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)' }}
           >
-            <FaFacebook className="w-4 h-4" />
+            <FaFacebook className="size-4" />
             Message NAWi Help Desk
-            <HiOutlineExternalLink className="w-3.5 h-3.5 opacity-60" />
+            <HiOutlineExternalLink className="size-3.5 opacity-60" />
           </a>
         </div>
 
         <div className="glass-card rounded-2xl p-6 mb-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.28)' }}>
-              <HiOutlinePencilAlt className="w-5 h-5" style={{ color: '#34d399' }} />
+            <div className="size-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.28)' }}>
+              <HiOutlinePencilAlt className="size-5" style={{ color: '#34d399' }} />
             </div>
             <div>
               <p className="text-sm font-semibold portal-card-title">In-Portal Support Ticket</p>
@@ -94,8 +94,8 @@ export default function SupportContact() {
 
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}>
-              <HiOutlineMail className="w-5 h-5" style={{ color: '#D4AF37' }} />
+            <div className="size-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}>
+              <HiOutlineMail className="size-5" style={{ color: '#D4AF37' }} />
             </div>
             <div>
               <p className="text-sm font-semibold portal-card-title">Email Support</p>
@@ -107,7 +107,7 @@ export default function SupportContact() {
             className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold"
             style={{ background: 'rgba(212,175,55,0.08)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}
           >
-            <HiOutlineMail className="w-4 h-4" />
+            <HiOutlineMail className="size-4" />
             nogatu.assist@gmail.com
           </a>
         </div>
@@ -128,7 +128,7 @@ export default function SupportContact() {
                 </p>
               </div>
               <button type="button" onClick={() => setOpen(false)} className="portal-close-button p-2 rounded-lg">
-                <HiOutlineX className="w-4 h-4" />
+                <HiOutlineX className="size-4" />
               </button>
             </div>
 

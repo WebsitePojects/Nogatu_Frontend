@@ -6,6 +6,70 @@ import { apiUrl } from '../../utils/apiBase';
 
 const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
 
+function WhyFeatureCard({ feature, delay }) {
+  const cardRef = useScrollReveal({ delay });
+
+  return (
+    <div ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+      <div className="feature-story-shine" />
+      <div className="feature-story-aura" />
+      <div
+        className="size-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110 feature-story-icon"
+        style={{ color: '#B8860B', backgroundColor: 'rgba(212,165,40,0.08)' }}
+      >
+        <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={feature.icon} />
+        </svg>
+      </div>
+      <h4 className="font-bold text-brand-brown mb-3 text-lg">{feature.title}</h4>
+      <p className="text-sm leading-7 text-[#6d3028] font-medium max-w-[15rem] mx-auto">{feature.desc}</p>
+    </div>
+  );
+}
+
+function ProductGroupSection({ group, groupIndex, onOpenLightbox }) {
+  const sectionRef = useScrollReveal({ delay: groupIndex * 80 });
+
+  return (
+    <div ref={sectionRef} className="reveal">
+      <div className="mb-5 sm:mb-6 text-center">
+        <p className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/70 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-brand-gold-dark shadow-sm">
+          {group.title}
+        </p>
+      </div>
+      <div className={`ggrid grid-cols-1 min-[560px]:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7 ${group.centered ? 'product-grid-centered' : ''}`}>
+        {group.items.map((p) => (
+          <article key={p.name} className="product-lineup-card group mx-auto flex size-full max-w-[24rem] flex-col rounded-[1.9rem] border border-brand-gold/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,248,225,0.98)_100%)] p-4 text-center shadow-[0_18px_42px_rgba(89,34,25,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(184,134,11,0.16)] sm:p-5">
+            <div
+              className="relative mb-4 flex h-44 cursor-pointer items-center justify-center overflow-hidden rounded-[1.65rem] border border-brand-gold/15 bg-[linear-gradient(135deg,#FFFDF5,#FFF8E1)] px-4 sm:h-52 md:h-56"
+              onClick={() => p.imgLg && onOpenLightbox(p.imgLg)}
+            >
+              <div className="product-card-ambient product-card-ambient-left" />
+              <div className="product-card-ambient product-card-ambient-right" />
+              <div className="product-card-sheen" />
+              <div className="product-card-grid" />
+              <div className="product-card-badge">{p.badge}</div>
+              <img
+                src={p.imgLg}
+                alt={p.name}
+                className="product-card-image relative z-10 max-h-36 object-contain transition-transform duration-500 group-hover:scale-110 sm:max-h-40 md:max-h-44"
+                loading="lazy"
+              />
+            </div>
+            <div className="flex flex-1 flex-col justify-between">
+              <div>
+                <h4 className="text-base font-bold text-gray-900 sm:text-lg">{p.name}</h4>
+                <p className="mt-2 text-sm leading-6 text-gray-500">{p.desc}</p>
+              </div>
+              <p className="mt-4 text-xl font-bold text-brand-gold-dark">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ────────────────────────── Hero (NogatuDrop-style with BG image) ────────────────────────── */
 function Hero() {
   const heroSlides = [
@@ -72,18 +136,18 @@ function Hero() {
                 boxShadow: '0 10px 28px rgba(89,34,25,0.18), inset 0 1px 0 rgba(255,255,255,0.32)',
               }}
             >
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/25 bg-white/15">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="inline-flex size-6 items-center justify-center rounded-full border border-white/25 bg-white/15">
+                <svg className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
                 </svg>
               </span>
               Become a Distributor
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </a>
             <div className="mt-5 hidden sm:flex items-center justify-start gap-3 text-white/90">
-              <svg className="w-6 h-6 text-brand-gold-light drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="size-6 text-brand-gold-light drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="text-[clamp(0.95rem,1.4vw,1.15rem)] font-semibold leading-none drop-shadow">FDA Approved Products</span>
@@ -94,7 +158,7 @@ function Hero() {
             <div className="hero-carousel-shell relative w-full max-w-[600px] sm:max-w-[760px] lg:max-w-[1080px] xl:max-w-[1240px] mx-auto lg:mx-0">
               <div className="hero-carousel-card">
                 <div className="hero-carousel-stage">
-                  <span className={`hero-carousel-eyebrow ${activeSlide === 1 ? 'is-lower' : 'is-upper'}`}>
+                  <span className={`hhero-carousel-eyebrow ${activeSlide === 1 ? 'is-lower' : 'is-upper'}`}>
                     {heroSlides[activeSlide].eyebrow}
                   </span>
                   <div className="hero-carousel-glow" />
@@ -105,7 +169,7 @@ function Hero() {
                       key={slide.image}
                       src={slide.image}
                       alt={slide.alt}
-                      className={`hero-carousel-image ${index === activeSlide ? 'is-active' : 'is-hidden'} ${index === 0 ? 'is-collection' : 'is-single-product'}`}
+                      className={`hhero-carousel-image ${index === activeSlide ? 'is-active' : 'is-hidden'} ${index === 0 ? 'is-collection' : 'is-single-product'}`}
                     />
                   ))}
 
@@ -113,7 +177,7 @@ function Hero() {
                     {heroSlides.map((slide, index) => (
                       <span
                         key={slide.image}
-                        className={`hero-carousel-dot ${index === activeSlide ? 'is-active' : ''}`}
+                        className={`hhero-carousel-dot ${index === activeSlide ? 'is-active' : ''}`}
                       />
                     ))}
                   </div>
@@ -191,7 +255,7 @@ function AboutPreview() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
               <div className="about-info-card">
                 <div className="about-info-icon">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -201,7 +265,7 @@ function AboutPreview() {
               </div>
               <div className="about-info-card">
                 <div className="about-info-icon">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
                   </svg>
                 </div>
@@ -259,7 +323,7 @@ function WhyUs() {
                 </p>
                 <NavLink to="/about" className="inline-flex items-center gap-2 text-brand-gold-light hover:text-brand-yellow-light font-medium text-sm motion-safe:transition-colors">
                   Learn More
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </NavLink>
               </div>
             </div>
@@ -267,25 +331,9 @@ function WhyUs() {
 
           {/* Feature boxes */}
           <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map((f, i) => {
-              const cardRef = useScrollReveal({ delay: i * 100 });
-              return (
-                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
-                  <div className="feature-story-shine" />
-                  <div className="feature-story-aura" />
-                  <div
-                    className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110 feature-story-icon"
-                    style={{ color: '#B8860B', backgroundColor: 'rgba(212,165,40,0.08)' }}
-                  >
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={f.icon} />
-                    </svg>
-                  </div>
-                  <h4 className="font-bold text-brand-brown mb-3 text-lg">{f.title}</h4>
-                  <p className="text-sm leading-7 text-[#6d3028] font-medium max-w-[15rem] mx-auto">{f.desc}</p>
-                </div>
-              );
-            })}
+            {features.map((feature, index) => (
+              <WhyFeatureCard key={feature.title} feature={feature} delay={index * 100} />
+            ))}
           </div>
         </div>
       </div>
@@ -344,47 +392,14 @@ function Products() {
           </p>
         </div>
         <div className="space-y-10 sm:space-y-12">
-          {productGroups.map((group, groupIndex) => {
-            const sectionRef = useScrollReveal({ delay: groupIndex * 80 });
-            return (
-              <div key={group.title} ref={sectionRef} className="reveal">
-                <div className="mb-5 sm:mb-6 text-center">
-                  <p className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/70 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-brand-gold-dark shadow-sm">
-                    {group.title}
-                  </p>
-                </div>
-                <div className={`grid grid-cols-1 min-[560px]:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7 ${group.centered ? 'product-grid-centered' : ''}`}>
-                  {group.items.map((p) => (
-                    <article key={p.name} className="product-lineup-card group mx-auto flex h-full w-full max-w-[24rem] flex-col rounded-[1.9rem] border border-brand-gold/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,248,225,0.98)_100%)] p-4 text-center shadow-[0_18px_42px_rgba(89,34,25,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(184,134,11,0.16)] sm:p-5">
-                      <div
-                        className="relative mb-4 flex h-44 cursor-pointer items-center justify-center overflow-hidden rounded-[1.65rem] border border-brand-gold/15 bg-[linear-gradient(135deg,#FFFDF5,#FFF8E1)] px-4 sm:h-52 md:h-56"
-                        onClick={() => p.imgLg && lightbox.open(p.imgLg)}
-                      >
-                        <div className="product-card-ambient product-card-ambient-left" />
-                        <div className="product-card-ambient product-card-ambient-right" />
-                        <div className="product-card-sheen" />
-                        <div className="product-card-grid" />
-                        <div className="product-card-badge">{p.badge}</div>
-                        <img
-                          src={p.imgLg}
-                          alt={p.name}
-                          className="product-card-image relative z-10 max-h-36 object-contain transition-transform duration-500 group-hover:scale-110 sm:max-h-40 md:max-h-44"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className="flex flex-1 flex-col justify-between">
-                        <div>
-                          <h4 className="text-base font-bold text-gray-900 sm:text-lg">{p.name}</h4>
-                          <p className="mt-2 text-sm leading-6 text-gray-500">{p.desc}</p>
-                        </div>
-                        <p className="mt-4 text-xl font-bold text-brand-gold-dark">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+          {productGroups.map((group, groupIndex) => (
+            <ProductGroupSection
+              key={group.title}
+              group={group}
+              groupIndex={groupIndex}
+              onOpenLightbox={lightbox.open}
+            />
+          ))}
         </div>
       </div>
       <Lightbox src={lightbox.src} type={lightbox.type} onClose={lightbox.close} />
@@ -445,7 +460,7 @@ function OrganizationsPreview() {
                         <span className="inline-flex rounded-full border border-brand-gold/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-gold-dark">
                           Leadership
                         </span>
-                        <div className="mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-3xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
+                        <div className="mx-auto mt-5 flex size-20 items-center justify-center rounded-full border border-brand-gold/25 bg-brand-gold/15 text-3xl font-black text-brand-brown shadow-[0_10px_30px_rgba(184,134,11,0.18)]">
                           {leader.initials}
                         </div>
                         <p className="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-brand-gold-dark">{leader.role}</p>
@@ -462,7 +477,7 @@ function OrganizationsPreview() {
             <div className="mt-8 relative z-20 text-center">
               <NavLink to="/organizations" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
                 View People Behind the Company
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </NavLink>
             </div>
           </div>
@@ -478,14 +493,14 @@ function BusinessPreview() {
     <section className="section-padding relative overflow-hidden bg-center bg-cover" style={{ backgroundImage: 'linear-gradient(rgba(255, 253, 245, 0.95), rgba(255, 253, 245, 0.95)), url(/img/landing-bg-clean.png)' }}>
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-[#D4A528] to-transparent opacity-50" />
-      <div className="absolute top-10 left-10 w-32 h-32 border-[3px] border-[#D4A528]/20 rounded-full border-dashed rotate-12 motion-safe:animate-spin-slow pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-24 h-24 border-[3px] border-[#B8860B]/20 rounded-full border-dashed -rotate-6 motion-safe:animate-spin-slow pointer-events-none" />
+      <div className="absolute top-10 left-10 size-32 border-[3px] border-[#D4A528]/20 rounded-full border-dashed rotate-12 motion-safe:animate-spin-slow pointer-events-none" />
+      <div className="absolute bottom-10 right-10 size-24 border-[3px] border-[#B8860B]/20 rounded-full border-dashed -rotate-6 motion-safe:animate-spin-slow pointer-events-none" />
       
       <div ref={ref} className="reveal section-container text-center relative z-10 max-w-[1000px] mx-auto">
         <div className="bg-white rounded-[2.5rem] p-10 md:p-16 shadow-[0_20px_50px_rgba(184,134,11,0.15)] border border-[#D4A528]/20 relative overflow-hidden group">
           {/* Inner card gradient highlight */}
-          <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-[#D4A528] to-transparent opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-opacity duration-700 group-hover:opacity-20" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-[#B8860B] to-transparent opacity-5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none transition-opacity duration-700 group-hover:opacity-15" />
+          <div className="absolute top-0 right-0 size-72 bg-gradient-to-br from-[#D4A528] to-transparent opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-opacity duration-700 group-hover:opacity-20" />
+          <div className="absolute bottom-0 left-0 size-72 bg-gradient-to-tr from-[#B8860B] to-transparent opacity-5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none transition-opacity duration-700 group-hover:opacity-15" />
           
           <div className="relative z-10">
             <span className="inline-block px-5 py-2 rounded-full bg-[#FFF8E1] text-[#B8860B] border border-[#B8860B]/20 text-xs md:text-sm font-bold tracking-widest uppercase mb-6 shadow-sm">
@@ -500,7 +515,7 @@ function BusinessPreview() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <a href="/portal/login" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 rounded-xl text-white font-bold text-lg hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_20px_rgba(184,134,11,0.4)] hover:shadow-[0_12px_25px_rgba(184,134,11,0.6)]" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
                 Join Now
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
               </a>
               <NavLink to="/products#packages" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl text-[#B8860B] font-bold text-lg border-2 border-[#D4A528]/30 hover:border-[#D4A528] hover:bg-[#FFF8E1] transition-all duration-300">
                 View Business Plans &rarr;
@@ -529,8 +544,8 @@ function DownloadableMaterials() {
         <div ref={ref} className="reveal grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {materials.map((item) => (
             <div key={item.title} className="rounded-2xl border border-primary-200/40 bg-[#FFFDF5] p-4 sm:p-7">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-4 sm:mb-5">
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
+              <div className="size-10 sm:size-12 rounded-xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-4 sm:mb-5">
+                <svg className="size-5 sm:size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
               </div>
               <h3 className="font-bold text-brand-brown mb-2 text-sm sm:text-base">{item.title}</h3>
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4 sm:mb-5">{item.desc}</p>
@@ -627,7 +642,7 @@ function ApplicationForm() {
                   onChange={(e) => updateField(field.key, e.target.value)}
                   required
                   aria-invalid={fieldErrors[field.key] ? 'true' : 'false'}
-                  className={`w-full rounded-xl border bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20 ${fieldErrors[field.key] ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-primary-200/70'}`}
+                  className={`ww-full rounded-xl border bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20 ${fieldErrors[field.key] ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-primary-200/70'}`}
                 />
                 {fieldErrors[field.key] && (
                   <p className="mt-2 text-sm text-red-600">{fieldErrors[field.key]}</p>
@@ -635,7 +650,7 @@ function ApplicationForm() {
               </label>
             ))}
             {status.message && (
-              <div className={`rounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+              <div className={`rrounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                 {status.message}
               </div>
             )}
@@ -648,8 +663,8 @@ function ApplicationForm() {
       {showApplicationPrompt && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="max-w-lg w-full rounded-2xl bg-white p-7 shadow-2xl border border-brand-gold/30">
-            <div className="w-14 h-14 rounded-2xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-5">
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
+            <div className="size-14 rounded-2xl bg-brand-gold/10 text-brand-gold-dark flex items-center justify-center mb-5">
+              <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" /></svg>
             </div>
             <h3 className="text-2xl font-bold text-brand-brown mb-3">Distributor Inquiry Received</h3>
             <p className="text-gray-600 leading-relaxed">
@@ -659,7 +674,7 @@ function ApplicationForm() {
               <a href="/docs/nogatu-distributor-application-form.pdf" target="_blank" rel="noreferrer" className="btn-landing-primary w-full text-center">
                 Download PDF Form
               </a>
-              <button onClick={() => setShowApplicationPrompt(false)} className="btn-landing-secondary w-full">
+              <button onClick={() => setShowApplicationPrompt(false)} className="btn-landing-secondary w-full" type="button">
                 Got It
               </button>
             </div>

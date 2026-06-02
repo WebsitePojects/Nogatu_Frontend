@@ -35,7 +35,7 @@ function Spinner() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-3">
       <div
-        className="w-10 h-10 rounded-full border-[3px] animate-spin"
+        className="size-10 rounded-full border-[3px] animate-spin"
         style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }}
       />
       <p className="portal-card-muted text-sm">Loading Hi-Five bonuses...</p>
@@ -53,17 +53,17 @@ function SummaryStat({ label, value, subtitle, icon: Icon }) {
           {subtitle && <p className="portal-warning-text text-[11px] mt-2">{subtitle}</p>}
         </div>
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          className="size-10 rounded-xl flex items-center justify-center"
           style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.18)' }}
         >
-          <Icon className="w-5 h-5" style={{ color: '#D4AF37' }} />
+          <Icon className="size-5" style={{ color: '#D4AF37' }} />
         </div>
       </div>
     </div>
   );
 }
 
-function ContributorModal({ open, title, contributors, accent, onClose }) {
+function ContributorModal({ open, title, contributors, accent, onClose, subtitle }) {
   if (!open) return null;
 
   return (
@@ -78,69 +78,76 @@ function ContributorModal({ open, title, contributors, accent, onClose }) {
             <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: accent }}>{title}</p>
             <h3 className="font-display text-xl font-semibold text-white mt-2">All matching contributors</h3>
             <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.42)' }}>
-              Full contributor list for this Hi-Five requirement.
+              {subtitle || 'Full contributor list for this Hi-Five requirement.'}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            className="size-10 rounded-xl flex items-center justify-center"
             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(212,175,55,0.16)' }}
           >
-            <HiOutlineX className="w-5 h-5 text-white" />
+            <HiOutlineX className="size-5 text-white" />
           </button>
         </div>
 
         <div className="mt-5 max-h-[58vh] overflow-y-auto pr-1 space-y-3">
-          {contributors.map((contributor, index) => (
+          {contributors.length === 0 ? (
             <div
-              key={`${contributor.uid}-${contributor.username}-${contributor.count ?? contributor.packageName}`}
-              className="rounded-2xl p-4 flex items-center justify-between gap-4"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.08)' }}
+              className="rounded-2xl p-5 text-sm"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.08)', color: 'rgba(255,255,255,0.42)' }}
             >
-              <div className="min-w-0 flex items-start gap-3">
-                <span
-                  className="inline-flex h-8 min-w-8 items-center justify-center rounded-full text-xs font-bold"
-                  style={{ background: `${accent}18`, color: accent, border: `1px solid ${accent}25` }}
-                >
-                  {index + 1}
-                </span>
-                <div className="min-w-0">
-                <p className="text-sm sm:text-base font-semibold text-white truncate">{contributor.fullName}</p>
-                <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.42)' }}>{contributor.username}</p>
+              No contributors match this section yet.
+            </div>
+          ) : contributors.map((contributor, index) => (
+              <div
+                key={`${contributor.uid}-${contributor.username}-${contributor.count ?? contributor.packageName}`}
+                className="rounded-2xl p-4 flex items-center justify-between gap-4"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.08)' }}
+              >
+                <div className="min-w-0 flex items-start gap-3">
+                  <span
+                    className="inline-flex h-8 min-w-8 items-center justify-center rounded-full text-xs font-bold"
+                    style={{ background: `${accent}18`, color: accent, border: `1px solid ${accent}25` }}
+                  >
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0">
+                  <p className="text-sm sm:text-base font-semibold text-white truncate">{contributor.fullName}</p>
+                  <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.42)' }}>{contributor.username}</p>
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  {typeof contributor.count === 'number' ? (
+                    <span
+                      className="text-xs font-semibold px-2.5 py-1.5 rounded-lg inline-flex items-center"
+                      style={{ color: accent, background: `${accent}18`, border: `1px solid ${accent}25` }}
+                    >
+                      {contributor.count} buys
+                    </span>
+                  ) : (
+                    <span
+                      className="text-xs font-semibold px-2.5 py-1.5 rounded-lg inline-flex items-center"
+                      style={{ color: accent, background: `${accent}18`, border: `1px solid ${accent}25` }}
+                    >
+                      {contributor.packageName}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="text-right flex-shrink-0">
-                {typeof contributor.count === 'number' ? (
-                  <span
-                    className="text-xs font-semibold px-2.5 py-1.5 rounded-lg inline-flex items-center"
-                    style={{ color: accent, background: `${accent}18`, border: `1px solid ${accent}25` }}
-                  >
-                    {contributor.count} buys
-                  </span>
-                ) : (
-                  <span
-                    className="text-xs font-semibold px-2.5 py-1.5 rounded-lg inline-flex items-center"
-                    style={{ color: accent, background: `${accent}18`, border: `1px solid ${accent}25` }}
-                  >
-                    {contributor.packageName}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
   );
 }
 
-function ContributorList({ title, contributors, accent, onViewAll }) {
+function ContributorList({ title, contributors, accent, onViewAll, emptyMessage = 'No qualifying direct referrals yet.' }) {
   if (!contributors?.length) {
     return (
       <div className="rounded-xl p-3 mt-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
         <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{title}</p>
-        <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.28)' }}>No qualifying direct referrals yet.</p>
+        <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.28)' }}>{emptyMessage}</p>
       </div>
     );
   }
@@ -157,7 +164,7 @@ function ContributorList({ title, contributors, accent, onViewAll }) {
             style={{ color: '#D4AF37' }}
           >
             View all
-            <HiOutlineChevronRight className="w-3.5 h-3.5" />
+            <HiOutlineChevronRight className="size-3.5" />
           </button>
         )}
       </div>
@@ -205,7 +212,7 @@ function ContributorList({ title, contributors, accent, onViewAll }) {
             style={{ color: 'rgba(212,175,55,0.8)' }}
           >
             + {contributors.length - 3} more contributor{contributors.length - 3 === 1 ? '' : 's'}
-            <HiOutlineEye className="w-3.5 h-3.5" />
+            <HiOutlineEye className="size-3.5" />
           </button>
         )}
       </div>
@@ -222,7 +229,7 @@ function PackageCard({ item, onClaim, onViewContributors, busy }) {
       className="glass-card rounded-2xl p-5 relative overflow-hidden"
       style={{ borderTop: `2px solid ${accent}` }}
     >
-      <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full pointer-events-none" style={{ background: `radial-gradient(circle at top right, ${accent}18 0%, transparent 70%)` }} />
+      <div className="absolute top-0 right-0 size-24 rounded-bl-full pointer-events-none" style={{ background: `radial-gradient(circle at top right, ${accent}18 0%, transparent 70%)` }} />
 
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -232,8 +239,8 @@ function PackageCard({ item, onClaim, onViewContributors, busy }) {
             Every 5 direct referrals with the same package unlock 1 cash claim.
           </p>
         </div>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}35` }}>
-          <HiOutlineCash className="w-5 h-5" style={{ color: accent }} />
+        <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}35` }}>
+          <HiOutlineCash className="size-5" style={{ color: accent }} />
         </div>
       </div>
 
@@ -258,10 +265,19 @@ function PackageCard({ item, onClaim, onViewContributors, busy }) {
       </div>
 
       <ContributorList
-        title="Top matching direct referrals"
-        contributors={item.contributors}
+        title="Latest direct referrals not yet used in claims"
+        contributors={item.availableContributors}
         accent={accent}
-        onViewAll={() => onViewContributors(item)}
+        onViewAll={() => onViewContributors(item, 'available')}
+        emptyMessage="All currently qualified contributors have already been consumed into submitted or paid cash claims."
+      />
+
+      <ContributorList
+        title="Contributor history already used in claims"
+        contributors={item.contributorHistory}
+        accent={accent}
+        onViewAll={() => onViewContributors(item, 'history')}
+        emptyMessage="No contributor history has been consumed into claims yet."
       />
 
       {hasClaim ? (
@@ -301,8 +317,8 @@ function ProductCard({ item, productEligible, pointsNeeded, onRedeem, onViewCont
             You qualify once 5 different direct referrals have each bought this same product at least once. You also need at least 200 maintenance points.
           </p>
         </div>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}25` }}>
-          <HiOutlineGift className="w-5 h-5" style={{ color: accent }} />
+        <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}25` }}>
+          <HiOutlineGift className="size-5" style={{ color: accent }} />
         </div>
       </div>
 
@@ -351,10 +367,19 @@ function ProductCard({ item, productEligible, pointsNeeded, onRedeem, onViewCont
       </div>
 
       <ContributorList
-        title="Qualifying direct referrals"
-        contributors={item.contributors}
+        title="Latest direct referrals not yet used in claims"
+        contributors={item.availableContributors}
         accent="#D4AF37"
-        onViewAll={() => onViewContributors(item)}
+        onViewAll={() => onViewContributors(item, 'available')}
+        emptyMessage="All currently qualified contributors have already been consumed into redeemed product claims."
+      />
+
+      <ContributorList
+        title="Contributor history already used in claims"
+        contributors={item.contributorHistory}
+        accent="#D4AF37"
+        onViewAll={() => onViewContributors(item, 'history')}
+        emptyMessage="No contributor history has been consumed into product claims yet."
       />
 
       {canRedeem ? (
@@ -432,7 +457,7 @@ export default function HiFiveBonus() {
   if (!data) {
     return (
       <div className="glass-card rounded-2xl p-16 text-center">
-        <HiOutlineGift className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(212,175,55,0.2)' }} />
+        <HiOutlineGift className="size-10 mx-auto mb-3" style={{ color: 'rgba(212,175,55,0.2)' }} />
         <p style={{ color: 'rgba(255,255,255,0.3)' }}>Hi-Five bonus details are unavailable right now.</p>
       </div>
     );
@@ -445,6 +470,7 @@ export default function HiFiveBonus() {
         title={contributorModal?.title}
         contributors={contributorModal?.contributors || []}
         accent={contributorModal?.accent || '#D4AF37'}
+        subtitle={contributorModal?.subtitle}
         onClose={() => setContributorModal(null)}
       />
 
@@ -489,7 +515,7 @@ export default function HiFiveBonus() {
         </div>
       </div>
 
-      <div className={`${activeSection === 'package' ? 'block' : 'hidden lg:block'} glass-card rounded-3xl p-4 sm:p-6`}>
+      <div className={`${activeSection === 'package' ? 'block' : 'hidden lg:block'} glass-card rounded-3xl p-4 sm:p-66`}>
         <div className="flex items-start justify-between gap-4 flex-col lg:flex-row">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: '#D4AF37' }}>Hi-Five Bonus - Package</p>
@@ -510,11 +536,21 @@ export default function HiFiveBonus() {
             <PackageCard
               key={item.key}
               item={item}
-              onViewContributors={(card) => setContributorModal({
-                title: `${card.name} Package Direct Referrals`,
-                contributors: card.contributors,
-                accent: PACKAGE_ACCENTS[card.key] || '#D4AF37',
-              })}
+              onViewContributors={(card, mode) => setContributorModal(
+                mode === 'history'
+                  ? {
+                      title: `${card.name} Package Contributor History`,
+                      subtitle: 'These direct referrals were already consumed by submitted, approved, or paid package Hi-Five cash claims.',
+                      contributors: card.contributorHistory,
+                      accent: PACKAGE_ACCENTS[card.key] || '#D4AF37',
+                    }
+                  : {
+                      title: `${card.name} Package Available Contributors`,
+                      subtitle: 'These are the latest same-package direct referrals that have not yet been consumed by a claim.',
+                      contributors: card.availableContributors,
+                      accent: PACKAGE_ACCENTS[card.key] || '#D4AF37',
+                    }
+              )}
               busy={busyKey === `package-${item.key}`}
               onClaim={handleClaimPackage}
             />
@@ -522,7 +558,7 @@ export default function HiFiveBonus() {
         </div>
       </div>
 
-      <div className={`${activeSection === 'product' ? 'block' : 'hidden lg:block'} glass-card rounded-3xl p-4 sm:p-6`}>
+      <div className={`${activeSection === 'product' ? 'block' : 'hidden lg:block'} glass-card rounded-3xl p-4 sm:p-66`}>
         <div className="flex items-start justify-between gap-4 flex-col lg:flex-row">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: '#D4AF37' }}>Hi-Five Bonus - Products</p>
@@ -577,11 +613,21 @@ export default function HiFiveBonus() {
               item={item}
               productEligible={data.productBonus?.eligible}
               pointsNeeded={data.productBonus?.pointsNeeded}
-              onViewContributors={(card) => setContributorModal({
-                title: `${card.name} Qualifying Direct Referrals`,
-                contributors: card.contributors,
-                accent: '#D4AF37',
-              })}
+              onViewContributors={(card, mode) => setContributorModal(
+                mode === 'history'
+                  ? {
+                      title: `${card.name} Contributor History`,
+                      subtitle: 'These direct referrals were already consumed by redeemed or submitted product Hi-Five claims.',
+                      contributors: card.contributorHistory,
+                      accent: '#D4AF37',
+                    }
+                  : {
+                      title: `${card.name} Available Contributors`,
+                      subtitle: 'These are the latest direct referrals still available to count toward the next product claim.',
+                      contributors: card.availableContributors,
+                      accent: '#D4AF37',
+                    }
+              )}
               busy={busyKey === `product-${item.key}`}
               onRedeem={handleRedeemProduct}
             />

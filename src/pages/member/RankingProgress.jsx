@@ -100,7 +100,7 @@ export default function RankingProgress() {
     return (
       <div className="flex justify-center py-20">
         <div
-          className="w-10 h-10 border-4 rounded-full animate-spin"
+          className="size-10 border-4 rounded-full animate-spin"
           style={{ borderColor: 'rgba(212,175,55,0.2)', borderTopColor: 'rgba(212,175,55,0.8)' }}
         />
       </div>
@@ -192,7 +192,7 @@ export default function RankingProgress() {
       {showPackageGate && (
         <div className="glass-card rounded-2xl p-5">
           <div className="flex items-start gap-3">
-            <HiOutlineShieldCheck className="w-5 h-5 mt-0.5" style={{ color: '#D4AF37' }} />
+            <HiOutlineShieldCheck className="size-5 mt-0.5" style={{ color: '#D4AF37' }} />
             <div>
               <p className="text-sm font-semibold text-white">Package Gate</p>
               <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
@@ -211,7 +211,7 @@ export default function RankingProgress() {
               <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.grossRankablePoints)}</p>
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>self + full downline repurchases</p>
             </div>
-            <HiOutlineChartBar className="w-6 h-6" style={{ color: '#D4AF37' }} />
+            <HiOutlineChartBar className="size-6" style={{ color: '#D4AF37' }} />
           </div>
         </div>
 
@@ -222,7 +222,7 @@ export default function RankingProgress() {
               <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.consumedPoints)}</p>
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>already used by awarded ranks</p>
             </div>
-            <HiOutlineCubeTransparent className="w-6 h-6" style={{ color: '#D4AF37' }} />
+            <HiOutlineCubeTransparent className="size-6" style={{ color: '#D4AF37' }} />
           </div>
         </div>
 
@@ -233,7 +233,7 @@ export default function RankingProgress() {
               <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.remainingRankablePoints)}</p>
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>fresh points left for the next rank</p>
             </div>
-            <HiOutlineTrendingUp className="w-6 h-6" style={{ color: '#D4AF37' }} />
+            <HiOutlineTrendingUp className="size-6" style={{ color: '#D4AF37' }} />
           </div>
         </div>
 
@@ -244,14 +244,14 @@ export default function RankingProgress() {
               <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.pendingAchievementCount)}</p>
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>cash release stays manual</p>
             </div>
-            <HiOutlineClock className="w-6 h-6" style={{ color: '#D4AF37' }} />
+            <HiOutlineClock className="size-6" style={{ color: '#D4AF37' }} />
           </div>
         </div>
       </div>
 
       <div className="glass-card rounded-2xl p-5">
         <div className="flex items-start gap-3">
-          <HiOutlineShieldCheck className="w-5 h-5 mt-0.5" style={{ color: '#D4AF37' }} />
+          <HiOutlineShieldCheck className="size-5 mt-0.5" style={{ color: '#D4AF37' }} />
           <div>
             <p className="text-sm font-semibold text-white">Next Rank Gate</p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
@@ -272,7 +272,7 @@ export default function RankingProgress() {
 
       <div className="glass-card rounded-2xl p-5">
         <div className="flex items-start gap-3">
-          <HiOutlineViewGrid className="w-5 h-5 mt-0.5" style={{ color: '#D4AF37' }} />
+          <HiOutlineViewGrid className="size-5 mt-0.5" style={{ color: '#D4AF37' }} />
           <div>
             <p className="text-sm font-semibold text-white">Rank Ladder</p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>
@@ -307,7 +307,7 @@ export default function RankingProgress() {
                     className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold"
                     style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.28)' }}
                   >
-                    <HiOutlineShieldCheck className="w-3.5 h-3.5" />
+                    <HiOutlineShieldCheck className="size-3.5" />
                     {fmtInt(rankDefinition.points_required)} pts
                   </span>
                   <p className="text-[11px] mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
@@ -327,7 +327,7 @@ export default function RankingProgress() {
 
               <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
                 <div className="flex items-start gap-2 text-sm" style={{ color: 'rgba(242,208,107,0.82)' }}>
-                  <HiOutlineSparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <HiOutlineSparkles className="size-4 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-[11px] uppercase tracking-wide mb-1" style={{ color: 'rgba(212,175,55,0.65)' }}>
                       Incentives
@@ -342,7 +342,7 @@ export default function RankingProgress() {
       </div>
 
       <div className="glass-card rounded-2xl p-5 flex items-start gap-3">
-        <HiOutlineTrendingUp className="w-5 h-5 mt-0.5" style={{ color: '#D4AF37' }} />
+        <HiOutlineTrendingUp className="size-5 mt-0.5" style={{ color: '#D4AF37' }} />
         <div>
           <p className="text-sm font-semibold text-white">Current Incentive Status</p>
           <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>

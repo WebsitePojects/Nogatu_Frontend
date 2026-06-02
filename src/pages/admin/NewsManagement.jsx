@@ -116,7 +116,7 @@ export default function NewsManagement() {
   if (loading) return (
     <div className="flex justify-center py-20">
       <div
-        className="animate-spin rounded-full h-10 w-10 border-4"
+        className="animate-spin rounded-full size-10 border-4"
         style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
       />
     </div>
@@ -135,8 +135,8 @@ export default function NewsManagement() {
         <button
           onClick={openCreate}
           className="gold-btn inline-flex items-center gap-2 rounded-xl py-2.5 px-5 text-sm font-semibold flex-shrink-0 ml-4"
-        >
-          <HiOutlinePlus className="w-5 h-5" />
+         type="button">
+          <HiOutlinePlus className="size-5" />
           New Post
         </button>
       </div>
@@ -144,10 +144,10 @@ export default function NewsManagement() {
       {posts.length === 0 ? (
         <div className="glass-card rounded-2xl p-6 text-center py-16">
           <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            className="size-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
             style={{ background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.15)' }}
           >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'rgba(212,175,55,0.4)' }}>
+            <svg className="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'rgba(212,175,55,0.4)' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
             </svg>
           </div>
@@ -162,7 +162,7 @@ export default function NewsManagement() {
                   {['Title', 'Type', 'Status', 'Date', 'Actions'].map((h, i) => (
                     <th
                       key={h}
-                      className={`table-header px-5 py-3.5 font-semibold text-xs uppercase tracking-wide ${i === 4 ? 'text-right' : 'text-left'}`}
+                      className={`ttable-header px-5 py-3.5 font-semibold text-xs uppercase tracking-wide ${i === 4 ? 'text-right' : 'text-left'}`}
                     >
                       {h}
                     </th>
@@ -203,10 +203,10 @@ export default function NewsManagement() {
                               ? { background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }
                               : { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }
                           }
-                        >
+                         type="button">
                           {post.is_published
-                            ? <HiOutlineEye className="w-3.5 h-3.5" />
-                            : <HiOutlineEyeOff className="w-3.5 h-3.5" />}
+                            ? <HiOutlineEye className="size-3.5" />
+                            : <HiOutlineEyeOff className="size-3.5" />}
                           {post.is_published ? 'Published' : 'Draft'}
                         </button>
                       </td>
@@ -222,8 +222,8 @@ export default function NewsManagement() {
                             onMouseEnter={e => { e.currentTarget.style.color = '#D4AF37'; e.currentTarget.style.background = 'rgba(212,175,55,0.08)'; }}
                             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'transparent'; }}
                             aria-label="Edit"
-                          >
-                            <HiOutlinePencil className="w-4 h-4" />
+                           type="button">
+                            <HiOutlinePencil className="size-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(post.id)}
@@ -232,8 +232,8 @@ export default function NewsManagement() {
                             onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; }}
                             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'transparent'; }}
                             aria-label="Delete"
-                          >
-                            <HiOutlineTrash className="w-4 h-4" />
+                           type="button">
+                            <HiOutlineTrash className="size-4" />
                           </button>
                         </div>
                       </td>
@@ -278,8 +278,8 @@ export default function NewsManagement() {
                 onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'rgba(148,163,184,0.2)'; }}
                 onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                 aria-label="Close"
-              >
-                <HiOutlineX className="w-5 h-5" />
+               type="button">
+                <HiOutlineX className="size-5" />
               </button>
             </div>
             <div className="w-14 h-0.5 ml-6 mt-3" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
@@ -379,7 +379,7 @@ export default function NewsManagement() {
                   type="checkbox"
                   checked={form.is_published}
                   onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
-                  className="w-4 h-4 rounded cursor-pointer"
+                  className="size-4 rounded cursor-pointer"
                   style={{
                     accentColor: '#B8860B',
                     borderColor: 'rgba(148,163,184,0.5)',

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { PaginationButton } from '../../components/PaginationButton';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { formatDateTimeManila } from '../../utils/dateTime';
@@ -123,6 +124,20 @@ export default function ManageCodes() {
     } catch (err) { toast.error(err.response?.data?.error || 'Transfer failed'); }
   }
 
+  async function handleReleaseAndTransfer() {
+    const transferTo = taggedAccount?.username || targetUsername.trim();
+    if (!transferTo || selected.length === 0) return toast.error('Tag an account and select codes');
+    try {
+      const res = await api.post('/admin/codes/release-transfer', { targetUsername: transferTo, codes: selected });
+      toast.success(`${res.data.transferred} code(s) transferred, ${res.data.released} released`);
+      setSelected([]);
+      setTargetUsername('');
+      setTaggedAccount(null);
+      loadCodes();
+      loadHistory();
+    } catch (err) { toast.error(err.response?.data?.error || 'Release and transfer failed'); }
+  }
+
   async function handleTagAccount() {
     const username = targetUsername.trim();
     if (!username) return toast.error('Enter username to search');
@@ -159,21 +174,6 @@ export default function ManageCodes() {
       : { background: 'rgba(99,102,241,0.14)', color: '#4338ca', border: '1px solid rgba(99,102,241,0.32)' };
   };
 
-  const PaginationBtn = ({ onClick, disabled, children }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-      style={{
-        background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)',
-        color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08',
-        border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)',
-      }}
-    >
-      {children}
-    </button>
-  );
-
   return (
     <div>
       <div className="mb-7">
@@ -204,7 +204,7 @@ export default function ManageCodes() {
               color: selectMode ? goldText : textSubtle,
               border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(148,163,184,0.35)',
             }}
-          >
+           type="button">
             {selectMode ? 'Exit Selection Mode' : 'Select Multiple'}
           </button>
         </div>
@@ -222,7 +222,7 @@ export default function ManageCodes() {
           <button
             onClick={() => { setPage(1); setHistoryPage(1); loadCodes(); loadHistory(); }}
             className="gold-btn rounded-xl py-2.5 px-5 text-sm"
-          >
+           type="button">
             Search
           </button>
           <button
@@ -234,7 +234,7 @@ export default function ManageCodes() {
             }}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
             style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
-          >
+           type="button">
             Clear
           </button>
         </div>
@@ -254,28 +254,38 @@ export default function ManageCodes() {
             onClick={handleTagAccount}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
             style={{ borderColor: 'rgba(59,130,246,0.35)', color: blueText, background: 'rgba(59,130,246,0.1)' }}
-          >
+           type="button">
             Search Account
           </button>
           <button
             onClick={clearTag}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
             style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
-          >
+           type="button">
             Clear Tag
           </button>
+          {canRelease && (
+            <button
+              onClick={handleReleaseAndTransfer}
+              disabled={selected.length === 0}
+              className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ borderColor: 'rgba(34,197,94,0.3)', color: greenText, background: 'rgba(34,197,94,0.08)' }}
+             type="button">
+              Release and Transfer ({selected.length})
+            </button>
+          )}
           <button
             onClick={handleTransfer}
             disabled={selected.length === 0}
             className="gold-btn rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+           type="button">
             Transfer ({selected.length})
           </button>
           <button
             onClick={toggleSelectAllCurrentPage}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border"
             style={{ borderColor: 'rgba(212,175,55,0.18)', color: goldText }}
-          >
+           type="button">
             Select All Page
           </button>
           {canRelease && (
@@ -283,7 +293,7 @@ export default function ManageCodes() {
               onClick={handleRelease}
               disabled={selected.length === 0}
               className="btn-success rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+             type="button">
               Release ({selected.length})
             </button>
           )}
@@ -323,16 +333,16 @@ export default function ManageCodes() {
             >
               {codesExpanded ? 'Retract to 40 Rows' : 'Expand to 100 Rows'}
             </button>
-            <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+            <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{page} / {totalPages}</span>
-            <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+            <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10">
             <div
-              className="animate-spin rounded-full h-8 w-8 border-4"
+              className="animate-spin rounded-full size-8 border-4"
               style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
             />
           </div>
@@ -402,7 +412,7 @@ export default function ManageCodes() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-semibold" style={{ color: headingColor }}>Activation Code History</p>
-            <p className="text-xs mt-1" style={{ color: textMuted }}>Generated, released, transferred, upgraded, and maintenance usage events.</p>
+            <p className="text-xs mt-1" style={{ color: textMuted }}>Generated, released, transferred, upgraded, and repurchase usage events.</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -421,16 +431,16 @@ export default function ManageCodes() {
             >
               Export PDF
             </button>
-            <PaginationBtn onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage <= 1}>Prev</PaginationBtn>
+            <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage <= 1}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{historyPage} / {historyTotalPages}</span>
-            <PaginationBtn onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))} disabled={historyPage >= historyTotalPages}>Next</PaginationBtn>
+            <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))} disabled={historyPage >= historyTotalPages}>Next</PaginationButton>
           </div>
         </div>
 
         {historyLoading ? (
           <div className="flex justify-center py-10">
             <div
-              className="animate-spin rounded-full h-8 w-8 border-4"
+              className="animate-spin rounded-full size-8 border-4"
               style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
             />
           </div>

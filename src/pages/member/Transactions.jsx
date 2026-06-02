@@ -14,7 +14,7 @@ function Spinner() {
   return (
     <div className="flex justify-center py-16">
       <div
-        className="w-10 h-10 rounded-full border-[3px] animate-spin"
+        className="size-10 rounded-full border-[3px] animate-spin"
         style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }}
       />
     </div>
@@ -110,8 +110,8 @@ export default function Transactions() {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               className="portal-table-icon-button p-1.5 rounded-lg disabled:opacity-30 transition-colors"
-            >
-              <HiOutlineChevronLeft className="w-4 h-4" />
+             type="button">
+              <HiOutlineChevronLeft className="size-4" />
             </button>
             <span className="portal-accent-chip text-xs px-2 py-1 rounded-lg">
               {page} / {totalPages}
@@ -120,8 +120,8 @@ export default function Transactions() {
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
               className="portal-table-icon-button p-1.5 rounded-lg disabled:opacity-30 transition-colors"
-            >
-              <HiOutlineChevronRight className="w-4 h-4" />
+             type="button">
+              <HiOutlineChevronRight className="size-4" />
             </button>
           </div>
         </div>
@@ -129,16 +129,65 @@ export default function Transactions() {
         {loading ? (
           <Spinner />
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="space-y-3 p-4 md:hidden">
+            {transactions.map((t) => (
+              <div
+                key={t.pid}
+                className="rounded-2xl p-4 space-y-3"
+                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.08)' }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span
+                      className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold"
+                      style={typePillStyle(t.transactionType)}
+                    >
+                      {t.transactionTypeName}
+                    </span>
+                    <p className="text-xs mt-2" style={{ color: dateText }}>
+                      {formatDateTimeManila(t.transdate)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold" style={{ color: amountText }}>PHP {fmt(txAmount(t))}</p>
+                    <p className="text-xs mt-1" style={{ color: detailText }}>
+                      {t.transactionType === 10 || t.transactionType === 11 ? `Taxes & Fees: PHP ${fmt(txDeductions(t))}` : 'No deductions'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                  <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Details</p>
+                  <p className="text-sm mt-1" style={{ color: detailText }}>{t.transactionTypeName}</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate(`/transactions/${encodeURIComponent(t.pid)}`)}
+                  className="portal-table-action w-full text-sm px-3 py-2 rounded-xl font-medium transition-colors"
+                >
+                  View Details
+                </button>
+              </div>
+            ))}
+            {transactions.length === 0 && (
+              <div className="py-14 text-center">
+                <HiOutlineDocumentText className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
+                <p className="portal-card-muted">No transactions found.</p>
+              </div>
+            )}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm min-w-[700px]">
               <thead>
                 <tr>
-                  <th className="table-header py-3 px-3">Type</th>
-                  <th className="table-header py-3 px-3">Date</th>
-                  <th className="table-header py-3 px-3">Amount</th>
-                  <th className="table-header py-3 px-3">Taxes &amp; Fees</th>
-                  <th className="table-header py-3 px-3">Details</th>
-                  <th className="table-header py-3 px-3">Action</th>
+                  <th className="table-header p-3">Type</th>
+                  <th className="table-header p-3">Date</th>
+                  <th className="table-header p-3">Amount</th>
+                  <th className="table-header p-3">Taxes &amp; Fees</th>
+                  <th className="table-header p-3">Details</th>
+                  <th className="table-header p-3">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -149,9 +198,9 @@ export default function Transactions() {
                       background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent',
                       borderBottom: '1px solid var(--portal-row-border)',
                     }}
-                    className={`${rowHoverClass} transition-colors`}
+                    className={`${rowHoverClass} transition-colorss`}
                   >
-                    <td className="py-3 px-3">
+                    <td className="p-3">
                       <span
                         className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold"
                         style={typePillStyle(t.transactionType)}
@@ -159,19 +208,19 @@ export default function Transactions() {
                         {t.transactionTypeName}
                       </span>
                     </td>
-                    <td className="py-3 px-3 whitespace-nowrap text-xs" style={{ color: dateText }}>
+                    <td className="p-3 whitespace-nowrap text-xs" style={{ color: dateText }}>
                       {formatDateTimeManila(t.transdate)}
                     </td>
-                    <td className="py-3 px-3 text-sm font-semibold" style={{ color: amountText }}>
+                    <td className="p-3 text-sm font-semibold" style={{ color: amountText }}>
                       PHP {fmt(txAmount(t))}
                     </td>
-                    <td className="py-3 px-3 text-xs" style={{ color: detailText }}>
+                    <td className="p-3 text-xs" style={{ color: detailText }}>
                       {t.transactionType === 10 || t.transactionType === 11 ? `PHP ${fmt(txDeductions(t))}` : '-'}
                     </td>
-                    <td className="py-3 px-3 text-xs" style={{ color: detailText }}>
+                    <td className="p-3 text-xs" style={{ color: detailText }}>
                       {t.transactionTypeName}
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="p-3">
                       <button
                         type="button"
                         onClick={() => navigate(`/transactions/${encodeURIComponent(t.pid)}`)}
@@ -186,7 +235,7 @@ export default function Transactions() {
                   <tr>
                     <td colSpan="6" className="py-14 text-center">
                       <HiOutlineDocumentText
-                        className="w-8 h-8 mx-auto mb-2"
+                        className="size-8 mx-auto mb-2"
                         style={{ color: 'rgba(212,175,55,0.2)' }}
                       />
                       <p className="portal-card-muted">No transactions found.</p>
@@ -196,6 +245,7 @@ export default function Transactions() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </div>

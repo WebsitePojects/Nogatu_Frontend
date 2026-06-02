@@ -6,8 +6,8 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 function PageHero({ title, subtitle }) {
   return (
     <section className="relative pt-36 pb-14 sm:pt-36 sm:pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-dot-grid" style={{ backgroundColor: '#FFFDF5' }}>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
+      <div className="absolute top-0 right-0 size-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 80% 20%, rgba(212,165,40,0.08), transparent 70%)' }} />
+      <div className="absolute bottom-0 left-0 size-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 80%, rgba(89,34,25,0.05), transparent 70%)' }} />
       <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #D4A528 50%, transparent)' }} />
       <div className="section-container relative z-10">
         <div className="max-w-3xl">
@@ -88,8 +88,8 @@ export default function Contact() {
               <div className="space-y-8">
                 {INFO_ITEMS.map(item => (
                   <div key={item.label} className="flex gap-5 group items-start">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm motion-safe:transition-all motion-safe:duration-300 group-hover:-translate-y-1" style={{ backgroundColor: '#FFF8E1', color: '#B8860B', border: '1px solid rgba(184,134,11,0.15)' }}>
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="size-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm motion-safe:transition-all motion-safe:duration-300 group-hover:-translate-y-1" style={{ backgroundColor: '#FFF8E1', color: '#B8860B', border: '1px solid rgba(184,134,11,0.15)' }}>
+                      <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.iconD} />
                         {item.iconD2 && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.iconD2} />}
                       </svg>
@@ -106,7 +106,7 @@ export default function Contact() {
             <div ref={ref3} className="reveal-right">
               <form onSubmit={handleSubmit} className="relative bg-white rounded-3xl p-8 sm:p-10 shadow-2xl overflow-hidden group" style={{ border: '1px solid rgba(184,134,11,0.15)' }}>
                 {/* Decorative background elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#D4A528] to-transparent opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-opacity group-hover:opacity-10" />
+                <div className="absolute top-0 right-0 size-64 bg-gradient-to-br from-[#D4A528] to-transparent opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-opacity group-hover:opacity-10" />
                 
                 <div className="relative z-10">
                   <h3 className="text-2xl font-extrabold mb-3" style={{ color: '#3A1000' }}>Send us a message</h3>
@@ -140,11 +140,11 @@ export default function Contact() {
                     style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)', boxShadow: '0 8px 20px -6px rgba(184,134,11,0.5)' }}
                   >
                     {sending ? (
-                      <><svg className="motion-safe:animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Sending Message...</>
+                      <><svg className="motion-safe:animate-spin size-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Sending Message...</>
                     ) : sent ? (
-                      <><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Message Sent Successfully!</>
+                      <><svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Message Sent Successfully!</>
                     ) : (
-                      <>Send Message <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg></>
+                      <>Send Message <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg></>
                     )}
                   </button>
                 </div>

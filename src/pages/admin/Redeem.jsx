@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
+import { PaginationButton } from '../../components/PaginationButton';
 
 export default function Redeem() {
   const [records, setRecords] = useState([]);
@@ -31,21 +32,6 @@ export default function Redeem() {
       loadData();
     } catch { toast.error('Failed'); }
   }
-
-  const PaginationBtn = ({ onClick, disabled, children }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="text-sm py-1.5 px-3 rounded-lg font-medium motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-      style={{
-        background: 'rgba(212,175,55,0.08)',
-        color: 'rgba(212,175,55,0.8)',
-        border: '1px solid rgba(212,175,55,0.15)',
-      }}
-    >
-      {children}
-    </button>
-  );
 
   return (
     <div>
@@ -78,7 +64,7 @@ export default function Redeem() {
           <button
             onClick={() => { setPage(1); loadData(); }}
             className="gold-btn rounded-xl py-2.5 px-5 text-sm"
-          >
+           type="button">
             Filter
           </button>
         </div>
@@ -89,16 +75,16 @@ export default function Redeem() {
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Redeem Records</p>
           <div className="flex items-center gap-2 ml-auto">
-            <PaginationBtn onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationBtn>
+            <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
-            <PaginationBtn onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationBtn>
+            <PaginationButton onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Next</PaginationButton>
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10">
             <div
-              className="animate-spin rounded-full h-8 w-8 border-4"
+              className="animate-spin rounded-full size-8 border-4"
               style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
             />
           </div>
@@ -144,7 +130,7 @@ export default function Redeem() {
                           onClick={() => handleProcess(r.pid, r.uid)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                           style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
-                        >
+                         type="button">
                           Mark Redeemed
                         </button>
                       ) : (

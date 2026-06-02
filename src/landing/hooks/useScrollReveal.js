@@ -6,6 +6,7 @@ export function useScrollReveal(options = {}) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    let cleanupTimer = null;
 
     // Respect reduced motion preference
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -17,7 +18,7 @@ export function useScrollReveal(options = {}) {
       ([entry]) => {
         if (entry.isIntersecting) {
           const delay = options.delay || 0;
-          setTimeout(() => {
+          cleanupTimer = window.setTimeout(() => {
             el.classList.add('revealed');
           }, delay);
           observer.unobserve(el);
@@ -27,7 +28,12 @@ export function useScrollReveal(options = {}) {
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (cleanupTimer !== null) {
+        window.clearTimeout(cleanupTimer);
+      }
+    };
   }, [options.delay, options.threshold, options.rootMargin]);
 
   return ref;

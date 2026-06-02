@@ -18,7 +18,7 @@ const INCOME_ITEMS = [
 
 function SpinnerIcon() {
   return (
-    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+    <svg className="animate-spin size-4" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
     </svg>
@@ -70,13 +70,13 @@ function ReceiptModal({ data, onClose, onDownload, receiptRef }) {
             onClick={onDownload}
             className="text-xs px-3 py-2 rounded-lg font-medium"
             style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
-          >
+           type="button">
             Download PNG
           </button>
           <button
             onClick={onClose}
             className="portal-muted-button text-xs px-3 py-2 rounded-lg font-medium"
-          >
+           type="button">
             Close
           </button>
         </div>
@@ -94,10 +94,10 @@ function VerificationRequiredModal({ open, message, onClose }) {
         className="portal-modal-panel w-full max-w-md rounded-2xl p-6 shadow-2xl"
       >
         <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+          className="size-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
           style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.2)' }}
         >
-          <HiOutlineSparkles className="w-7 h-7" style={{ color: '#D4AF37' }} />
+          <HiOutlineSparkles className="size-7" style={{ color: '#D4AF37' }} />
         </div>
         <div className="text-center">
           <h3 className="portal-modal-title font-display text-xl font-bold">Verification Needed</h3>
@@ -271,12 +271,13 @@ export default function EWallet() {
   const previewNet    = Number(encashPreview?.net ?? (previewAmount - previewTax - previewFee - previewMaintenanceFee - previewCdDeduction));
   const bonusPeriodLabel = globalBonus?.periodLabel || (globalBonus?.year ? `Year ${globalBonus.year}` : 'N/A');
   const hasDistributedShare = Number(globalBonus?.distributedShare || 0) > 0;
+  const globalBonusEligible = Boolean(data?.globalBonusStatus?.fullVisibility || globalBonus?.eligible);
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
         <div
-          className="w-12 h-12 rounded-full border-[3px] animate-spin"
+          className="size-12 rounded-full border-[3px] animate-spin"
           style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }}
         />
         <p className="portal-card-muted text-sm">Loading wallet...</p>
@@ -305,7 +306,7 @@ export default function EWallet() {
       >
         {/* Background orb */}
         <div
-          className="absolute top-0 right-0 w-64 h-64 pointer-events-none"
+          className="absolute top-0 right-0 size-64 pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)', filter: 'blur(20px)', transform: 'translate(30%,-30%)' }}
         />
         {/* Dot grid */}
@@ -318,14 +319,14 @@ export default function EWallet() {
         />
 
         {/* 3D ASSET: floating gold coin */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 pointer-events-none opacity-90 mix-blend-screen">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 size-32 md:size-48 pointer-events-none opacity-90 mix-blend-screen">
           <video 
             src="/img/goldcoin3dvid.mp4" 
             autoPlay 
             loop 
             muted 
             playsInline 
-            className="w-full h-full object-contain"
+            className="size-full object-contain"
           />
         </div>
 
@@ -341,14 +342,14 @@ export default function EWallet() {
             </div>
             {/* Wallet icon */}
             <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center"
+              className="size-14 rounded-2xl flex items-center justify-center"
               style={{
                 background: 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.08))',
                 border: '1px solid rgba(212,175,55,0.2)',
                 boxShadow: '0 4px 16px rgba(212,175,55,0.15)',
               }}
             >
-              <HiOutlineCash className="w-7 h-7" style={{ color: '#D4AF37' }} />
+              <HiOutlineCash className="size-7" style={{ color: '#D4AF37' }} />
             </div>
           </div>
 
@@ -379,10 +380,10 @@ export default function EWallet() {
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                    className="size-7 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ background: `${item.color}18`, border: `1px solid ${item.color}28` }}
                   >
-                    <item.icon className="w-3.5 h-3.5" style={{ color: item.color }} />
+                    <item.icon className="size-3.5" style={{ color: item.color }} />
                   </div>
                   <span className="portal-card-text text-sm">{item.label}</span>
                 </div>
@@ -470,36 +471,28 @@ export default function EWallet() {
       </div>
 
       {/* Global Bonus */}
-      <div className="glass-card rounded-2xl p-6">
+      <div
+        className={`gglass-card rounded-2xl p-6 transition-all ${globalBonusEligible ? '' : 'pointer-events-none'}`}
+        style={!globalBonusEligible ? { filter: 'grayscale(1)', opacity: 0.6 } : undefined}
+      >
         <div className="flex items-center justify-between gap-3 mb-5">
           <div>
             <h3 className="portal-card-title font-display text-base font-semibold mb-1">Global Bonus</h3>
             <div className="w-8 h-0.5 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
           </div>
-          <div className="flex items-center gap-2">
+          {globalBonusEligible ? (
             <Link
               to="/leaderboard"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
               style={{ background: 'rgba(212,175,55,0.1)', color: 'var(--portal-gold-text)', border: '1px solid rgba(212,175,55,0.2)' }}
             >
-              <HiOutlineTrendingUp className="w-3.5 h-3.5" />
+              <HiOutlineTrendingUp className="size-3.5" />
               View Leaderboard
             </Link>
-            <span
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
-              style={
-                globalBonus?.eligible
-                  ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
-                  : { background: 'rgba(148,163,184,0.12)', color: '#cbd5e1', border: '1px solid rgba(148,163,184,0.25)' }
-              }
-            >
-              <HiOutlineSparkles className="w-3.5 h-3.5" />
-              {globalBonus?.eligible ? 'Eligible' : 'Not Eligible'}
-            </span>
-          </div>
+          ) : null}
         </div>
 
-        {globalBonus ? (
+        {globalBonusEligible && globalBonus ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
             <div className="rounded-xl p-3.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)' }}>
               <p className="portal-card-muted text-xs">Period</p>
@@ -522,13 +515,23 @@ export default function EWallet() {
               </p>
             </div>
           </div>
-        ) : (
+        ) : globalBonusEligible ? (
           <p className="portal-card-muted text-sm">
             Global bonus details are currently unavailable.
           </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3" aria-hidden="true">
+            {[0, 1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="rounded-xl p-3.5"
+                style={{ background: 'rgba(148,163,184,0.12)', border: '1px solid rgba(148,163,184,0.18)', minHeight: 68 }}
+              />
+            ))}
+          </div>
         )}
 
-        {globalBonus?.latestShare && (
+        {globalBonusEligible && globalBonus?.latestShare && (
           <div className="portal-info-box mt-4 rounded-xl p-3.5 text-sm">
             Latest distributed share: <span className="portal-gold-text" style={{ fontWeight: 700 }}>₱{fmt(globalBonus.latestShare.shareAmount)}</span>
             {' '}({globalBonus.latestShare.periodLabel || `Year ${globalBonus.latestShare.year}`})

@@ -68,7 +68,7 @@ export default function Rankings() {
               disabled={page <= 1}
               className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
               style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-            >
+             type="button">
               Prev
             </button>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
@@ -77,7 +77,7 @@ export default function Rankings() {
               disabled={page >= totalPages}
               className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
               style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.85)', border: '1px solid rgba(212,175,55,0.15)' }}
-            >
+             type="button">
               Next
             </button>
           </div>
@@ -86,7 +86,7 @@ export default function Rankings() {
         {loading ? (
           <div className="flex justify-center py-12">
             <div
-              className="animate-spin rounded-full h-8 w-8 border-4"
+              className="animate-spin rounded-full size-8 border-4"
               style={{ borderColor: 'rgba(212,175,55,0.15)', borderTopColor: 'rgba(212,175,55,0.75)' }}
             />
           </div>
@@ -96,7 +96,7 @@ export default function Rankings() {
               <thead>
                 <tr>
                   {['Top', 'Member', 'Username', 'Package', 'Gate', 'Current Rank', 'Gross', 'Consumed', 'Remaining', 'Qualified Date', 'Claim Status', 'Action'].map((heading) => (
-                    <th key={heading} className="table-header py-3 px-3 text-left text-xs uppercase tracking-wide">{heading}</th>
+                    <th key={heading} className="table-header p-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
               </thead>
@@ -113,7 +113,7 @@ export default function Rankings() {
                       style={{ background: index % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}
                       className="motion-safe:transition-colors hover:bg-white/[0.04]"
                     >
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
@@ -121,9 +121,9 @@ export default function Rankings() {
                           Top {Number(row.position || index + 1)}
                         </span>
                       </td>
-                      <td className="py-3 px-3 font-medium text-white/85">{row.firstname} {row.lastname}</td>
-                      <td className="py-3 px-3 text-white/60">{row.username}</td>
-                      <td className="py-3 px-3">
+                      <td className="p-3 font-medium text-white/85">{row.firstname} {row.lastname}</td>
+                      <td className="p-3 text-white/60">{row.username}</td>
+                      <td className="p-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
@@ -131,7 +131,7 @@ export default function Rankings() {
                           {row.packageLabel || 'Unknown'}
                         </span>
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <div className="flex flex-col gap-1">
                           <span
                             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
@@ -150,7 +150,7 @@ export default function Rankings() {
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={{ background: `${badge.color}22`, color: badge.color, border: `1px solid ${badge.color}55` }}
@@ -158,13 +158,13 @@ export default function Rankings() {
                           {badge.label}
                         </span>
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         <div className="text-white/85 font-medium">{fmtInt(row.grossRankablePoints ?? row.basisPoints)}</div>
                       </td>
-                      <td className="py-3 px-3 text-white/60">{fmtInt(row.consumedPoints)}</td>
-                      <td className="py-3 px-3 text-white/60">{fmtInt(row.remainingRankablePoints)}</td>
-                      <td className="py-3 px-3 text-white/55">{formatQualifiedDate(row.qualifiedDate || row.rank_date)}</td>
-                      <td className="py-3 px-3">
+                      <td className="p-3 text-white/60">{fmtInt(row.consumedPoints)}</td>
+                      <td className="p-3 text-white/60">{fmtInt(row.remainingRankablePoints)}</td>
+                      <td className="p-3 text-white/55">{formatQualifiedDate(row.qualifiedDate || row.rank_date)}</td>
+                      <td className="p-3">
                         <span
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={
@@ -178,13 +178,13 @@ export default function Rankings() {
                             : (Number(row.current_rank || 0) > 0 ? 'Released' : 'Not ranked')}
                         </span>
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="p-3">
                         {Number(row.pendingAchievementCount || 0) > 0 && !row.blockedByPackageGate && (
                           <button
                             onClick={() => processIncentive(row.uid)}
                             className="text-xs px-3 py-1 rounded-lg font-medium"
                             style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
-                          >
+                           type="button">
                             Release Next Claim
                           </button>
                         )}

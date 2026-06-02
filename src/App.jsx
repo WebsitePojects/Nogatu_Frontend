@@ -16,6 +16,7 @@ import ActivationCodes from './pages/member/ActivationCodes';
 import DirectReferrals from './pages/member/DirectReferrals';
 import GenealogyTree from './pages/member/GenealogyTree';
 import PairingReports from './pages/member/PairingReports';
+import PairingLegAccounts from './pages/member/PairingLegAccounts';
 import HiFiveBonus from './pages/member/HiFiveBonus';
 import RankingProgress from './pages/member/RankingProgress';
 import Leaderboard from './pages/member/Leaderboard';
@@ -56,7 +57,7 @@ function ProtectedMember({ children }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen portal-bg">
-        <div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+        <div className="size-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
       </div>
     );
   }
@@ -68,7 +69,7 @@ function ProtectedAdmin({ children }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen portal-bg">
-        <div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+        <div className="size-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
       </div>
     );
   }
@@ -81,7 +82,7 @@ function ProtectedAdminRoles({ allowed, children }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen portal-bg">
-        <div className="w-12 h-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+        <div className="size-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
       </div>
     );
   }
@@ -119,6 +120,7 @@ export default function App() {
           <Route path="referrals" element={<DirectReferrals />} />
           <Route path="genealogy" element={<GenealogyTree />} />
           <Route path="pairing" element={<PairingReports />} />
+          <Route path="pairing/leg/:side" element={<PairingLegAccounts />} />
           <Route path="hifive" element={<HiFiveBonus />} />
           <Route path="ranking" element={<RankingProgress />} />
           <Route path="leaderboard" element={<Leaderboard />} />

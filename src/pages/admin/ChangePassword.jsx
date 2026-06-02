@@ -64,7 +64,7 @@ export default function ChangePassword() {
                 style={{ color: 'var(--text-muted)' }}
                 aria-label={showOldPassword ? 'Hide current password' : 'Show current password'}
               >
-                {showOldPassword ? <HiOutlineEyeOff className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
+                {showOldPassword ? <HiOutlineEyeOff className="size-5" /> : <HiOutlineEye className="size-5" />}
               </button>
             </div>
           </div>
@@ -86,7 +86,7 @@ export default function ChangePassword() {
                 style={{ color: 'var(--text-muted)' }}
                 aria-label={showPassword ? 'Hide new password' : 'Show new password'}
               >
-                {showPassword ? <HiOutlineEyeOff className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
+                {showPassword ? <HiOutlineEyeOff className="size-5" /> : <HiOutlineEye className="size-5" />}
               </button>
             </div>
           </div>

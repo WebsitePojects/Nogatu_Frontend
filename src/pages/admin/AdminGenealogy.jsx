@@ -18,6 +18,8 @@ import {
   JunctionNode,
   PlaceholderNode,
   TreeEdge,
+} from '../../components/genealogyTreeUi';
+import {
   flattenTree,
   fmtInt,
   getAccountStateChipStyle,
@@ -27,7 +29,7 @@ import {
   NODE_HEIGHT,
   NODE_WIDTH,
   PACKAGE_STYLES,
-} from '../../components/genealogyTreeUi';
+} from '../../components/genealogyTreeUiUtils';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const LEVEL_OPTIONS = [3, 5, 7, 10, 12, 15, 20];
@@ -384,7 +386,7 @@ export default function AdminGenealogy() {
 
         <div ref={searchBoxRef} className="relative z-[70] mt-4">
           <div className="relative max-w-xl">
-            <HiOutlineSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: chrome.tertiary }} />
+            <HiOutlineSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2" style={{ color: chrome.tertiary }} />
             <input
               type="text"
               value={searchTerm}
@@ -436,7 +438,7 @@ export default function AdminGenealogy() {
               className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold"
               style={{ background: chrome.surface, color: chrome.panelButtonText, border: `1px solid ${chrome.surfaceBorder}` }}
             >
-              <HiOutlineSparkles className="h-3.5 w-3.5" style={{ color: '#D4AF37' }} />
+              <HiOutlineSparkles className="size-3.5" style={{ color: '#D4AF37' }} />
               Level {level}
             </span>
           )) : (
@@ -449,7 +451,7 @@ export default function AdminGenealogy() {
 
       {!loading && !tree ? (
         <div className="rounded-3xl p-10 text-center" style={panelStyle}>
-          <HiOutlineUsers className="mx-auto mb-4 h-10 w-10" style={{ color: chrome.emptyIcon }} />
+          <HiOutlineUsers className="mx-auto mb-4 size-10" style={{ color: chrome.emptyIcon }} />
           <h2 className="font-display text-xl font-semibold" style={{ color: chrome.heading }}>
             {rootId || rootUsername ? 'Genealogy could not be loaded' : 'Open an account tree'}
           </h2>
@@ -468,7 +470,7 @@ export default function AdminGenealogy() {
               className="mt-6 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
               style={amberButtonStyle}
             >
-              <HiOutlineHome className="h-4 w-4" />
+              <HiOutlineHome className="size-4" />
               Reset Search
             </button>
           )}
@@ -477,7 +479,7 @@ export default function AdminGenealogy() {
         <div className="space-y-5">
           <div
             ref={flowShellRef}
-            className={`relative z-10 overflow-hidden rounded-[1.75rem] ${isFullscreen ? 'genealogy-fullscreen-shell' : ''}`}
+            className={`rrelative z-10 overflow-hidden rounded-[1.75rem] ${isFullscreen ? 'genealogy-fullscreen-shell' : ''}`}
             style={panelStyle}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
@@ -489,7 +491,7 @@ export default function AdminGenealogy() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="hidden items-center gap-2 text-xs sm:flex" style={{ color: chrome.amberButtonText }}>
-                  <HiOutlineZoomIn className="h-4 w-4" />
+                  <HiOutlineZoomIn className="size-4" />
                   Zoom enabled
                 </div>
                 <button
@@ -506,14 +508,14 @@ export default function AdminGenealogy() {
                   className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5"
                   style={amberButtonStyle}
                 >
-                  {isFullscreen ? <HiOutlineMinusSm className="h-4 w-4" /> : <HiOutlineArrowsExpand className="h-4 w-4" />}
+                  {isFullscreen ? <HiOutlineMinusSm className="size-4" /> : <HiOutlineArrowsExpand className="size-4" />}
                   {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
                 </button>
               </div>
             </div>
 
             <div
-              className={`genealogy-canvas-shell relative ${isFullscreen ? 'h-screen min-h-screen' : 'h-[62vh] min-h-[520px]'}`}
+              className={`ggenealogy-canvas-shell relative ${isFullscreen ? 'h-screen min-h-screen' : 'h-[62vh] min-h-[520px]'}`}
               style={{ touchAction: canvasActive ? 'none' : 'pan-y pinch-zoom' }}
             >
               {!canvasActive ? (
@@ -533,7 +535,7 @@ export default function AdminGenealogy() {
                 onInit={(instance) => {
                   reactFlowRef.current = instance;
                 }}
-                className="genealogy-flow h-full w-full"
+                className="genealogy-flow size-full"
                 nodes={nodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
@@ -653,7 +655,7 @@ export default function AdminGenealogy() {
 
                 {network.length === 0 && (
                   <div className="rounded-2xl p-8 text-center" style={insetCardStyle}>
-                    <HiOutlineUsers className="mx-auto mb-3 h-8 w-8" style={{ color: chrome.emptyIcon }} />
+                    <HiOutlineUsers className="mx-auto mb-3 size-8" style={{ color: chrome.emptyIcon }} />
                     <p className="text-sm" style={{ color: chrome.tertiary }}>
                       No affiliated members were returned for this level range yet.
                     </p>

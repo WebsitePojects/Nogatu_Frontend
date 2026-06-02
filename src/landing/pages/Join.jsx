@@ -10,9 +10,9 @@ export default function Join() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
   const [codePreview, setCodePreview] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
+  const [feedbackModal, setFeedbackModal] = useState(null);
   const [form, setForm] = useState({
     activationCode: '',
     username: '',
@@ -35,7 +35,11 @@ export default function Join() {
         if (!res.ok) throw new Error(data.error || 'Referral invite not found.');
         setInvite(data.invite);
       } catch (err) {
-        setMessage({ type: 'error', text: err.message || 'Referral invite not found.' });
+        setFeedbackModal({
+          tone: 'red',
+          title: 'Referral link unavailable',
+          message: err.message || 'Referral invite not found.',
+        });
       } finally {
         setLoading(false);
       }
@@ -66,7 +70,6 @@ export default function Join() {
 
   async function performSubmit() {
     setSubmitting(true);
-    setMessage({ type: '', text: '' });
     try {
       const res = await fetch(apiUrl('/registration/public-register'), {
         method: 'POST',
@@ -76,10 +79,17 @@ export default function Join() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed.');
-      setConfirmModal(null);
-      setMessage({ type: 'success', text: 'Account registered successfully. You may now sign in through the member portal.' });
+      setFeedbackModal({
+        tone: 'gold',
+        title: 'Registration successful',
+        message: 'Account registered successfully. You may now sign in through the member portal.',
+      });
     } catch (err) {
-      setMessage({ type: 'error', text: err.message || 'Registration failed.' });
+      setFeedbackModal({
+        tone: 'red',
+        title: 'Registration failed',
+        message: err.message || 'Registration failed.',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -101,8 +111,12 @@ export default function Join() {
       return;
     }
 
-    if (!isValidTin(form.tin)) {
-      setMessage({ type: 'error', text: 'TIN must contain 9-15 digits.' });
+    if (form.tin && !isValidTin(form.tin)) {
+      setFeedbackModal({
+        tone: 'red',
+        title: 'Invalid TIN',
+        message: 'TIN must contain 9-15 digits.',
+      });
       return;
     }
 
@@ -111,7 +125,10 @@ export default function Join() {
       title: 'Consume this code and create the account?',
       message: 'This code will be consumed immediately after confirmation and cannot be reused.',
       confirmLabel: 'Register Account',
-      onConfirm: performSubmit,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        await performSubmit();
+      },
       details: [
         { label: 'Code', value: preview.code || form.activationCode },
         { label: 'Account type', value: preview.accountLabel || 'Package entry code' },
@@ -133,6 +150,16 @@ export default function Join() {
         onClose={() => setConfirmModal(null)}
         busy={submitting}
       />
+      <CodeUseConfirmModal
+        open={Boolean(feedbackModal)}
+        tone={feedbackModal?.tone || 'gold'}
+        title={feedbackModal?.title}
+        message={feedbackModal?.message}
+        confirmLabel="Close"
+        showCancel={false}
+        onConfirm={() => setFeedbackModal(null)}
+        onClose={() => setFeedbackModal(null)}
+      />
 
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
       <div className="section-container relative z-10">
@@ -153,11 +180,6 @@ export default function Join() {
             <>
               <div className="rounded-xl bg-[#FFF8E1] border border-brand-gold/25 p-4 mb-6 text-sm text-brand-brown">
                 Sponsor: <strong>{invite.sponsor_username}</strong>{invite.reusable ? ' | Reusable sponsor referral' : ` | Placement UID: ${invite.placement_uid} | Position: ${Number(invite.position) === 1 ? 'Left' : 'Right'}`}
-                {invite.placement?.note ? (
-                  <div className="mt-2 text-brand-brown/80">
-                    {invite.placement.note}
-                  </div>
-                ) : null}
               </div>
               <form onSubmit={submit} className="space-y-4">
                 {[
@@ -169,12 +191,15 @@ export default function Join() {
                   { key: 'address', label: 'Address', type: 'text' },
                   { key: 'contactno', label: 'Contact Number', type: 'text' },
                   { key: 'dob', label: 'Date of Birth', type: 'date' },
-                  { key: 'tin', label: 'TIN', type: 'text' },
+                  { key: 'tin', label: 'TIN', type: 'text', optional: true },
                   { key: 'username', label: 'Username', type: 'text' },
                   { key: 'password', label: 'Password', type: 'password' },
                 ].map((field) => (
                   <label key={field.key} className="block">
-                    <span className="block text-sm font-semibold text-brand-brown mb-2">{field.label}</span>
+                    <span className="block text-sm font-semibold text-brand-brown mb-2">
+                      {field.label}
+                      {!field.optional ? <span className="text-red-500"> *</span> : null}
+                    </span>
                     {field.key === 'password' ? (
                       <div className="relative">
                         <input
@@ -209,19 +234,14 @@ export default function Join() {
                     This code will consume: <strong>{codePreview.accountLabel}</strong>
                   </div>
                 ) : null}
-                {message.text && (
-                  <div className={`rounded-xl px-4 py-3 text-sm ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                    {message.text}
-                  </div>
-                )}
-                <button type="submit" disabled={submitting || message.type === 'success'} className="btn-landing-primary w-full disabled:opacity-60">
+                <button type="submit" disabled={submitting} className="btn-landing-primary w-full disabled:opacity-60">
                   {submitting ? 'Registering...' : 'Register Account'}
                 </button>
               </form>
             </>
           ) : (
             <div className="rounded-xl bg-red-50 text-red-700 border border-red-200 px-4 py-3 text-sm">
-              {message.text || 'Referral invite not found.'}
+              Referral invite not found.
             </div>
           )}
         </div>
