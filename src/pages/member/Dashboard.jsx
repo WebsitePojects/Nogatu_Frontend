@@ -39,28 +39,28 @@ function StatCard({ card, idx, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="glass-card rounded-2xl p-4 sm:p-5 group cursor-pointer w-full text-left focus:outline-none focus:ring-2 focus:ring-yellow-500/40"
+      className="glass-card rounded-2xl p-3 sm:p-5 group cursor-pointer w-full min-w-0 text-left focus:outline-none focus:ring-2 focus:ring-yellow-500/40"
     >
       <div className="flex items-start justify-between gap-3">
         <div
-          className="size-10 sm:size-11 rounded-xl flex items-center justify-center group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
+          className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
           style={{
             background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
             boxShadow: `0 6px 20px ${theme.glow}`,
           }}
         >
-          <card.icon className="size-[18px] sm:size-[19px] text-[#080604]" />
+          <card.icon className="w-4 h-4 sm:w-[19px] sm:h-[19px] text-[#080604]" />
         </div>
         <HiOutlineChevronRight className="size-4 mt-1 flex-shrink-0" style={{ color: 'rgba(212,175,55,0.65)' }} />
       </div>
 
-      <p className="portal-card-muted text-[11px] sm:text-[12px] font-medium mt-4 mb-1">
+      <p className="portal-card-muted text-[10px] sm:text-[12px] font-medium mt-3 sm:mt-4 mb-1 leading-snug">
         {card.label}
       </p>
-      <p className="portal-card-title text-[18px] sm:text-[22px] font-bold leading-tight tracking-tight break-words">
+      <p className="portal-card-title text-[16px] sm:text-[22px] font-bold leading-tight tracking-tight break-words">
         {card.value}
       </p>
-      <p className="portal-gold-text text-[11px] mt-2">
+      <p className="portal-gold-text text-[10px] sm:text-[11px] mt-2 leading-snug">
         {card.actionLabel}
       </p>
     </button>
@@ -173,7 +173,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
         {cards.map((card, index) => (
           <StatCard key={card.metric} card={card} idx={index} onClick={() => goToCard(card)} />
         ))}

@@ -20,7 +20,7 @@
     @apply bg-white/70 backdrop-blur-xl border border-white/40 rounded-2xl shadow-lg;
   }
   .section-padding {
-    @apply py-12 md:py-20 lg:py-28;
+    @apply py-10 md:py-20 lg:py-28;
   }
   .section-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
@@ -255,6 +255,18 @@
   background: transparent;
   box-shadow: none;
 }
+  .landing-home-hero {
+    min-height: 100svh;
+  }
+  .landing-home-hero-inner {
+    min-height: calc(100svh - 120px);
+  }
+  .landing-home-title {
+    font-size: clamp(1.9rem, 4.2vw, 3.8rem);
+  }
+  .landing-page-hero {
+    min-height: 0;
+  }
 .hero-carousel-glow {
   position: absolute;
   inset: auto 8% 8% 8%;
@@ -480,13 +492,28 @@
   }
   .product-lineup-card {
     position: relative;
+    min-height: 100%;
   }
-  .product-grid-centered {
-    justify-items: center;
+  .product-lineup-grid {
+    display: grid;
+    gap: 1.25rem;
+    align-items: stretch;
   }
-  .product-grid-centered > * {
+  .product-grid-standard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product-grid-featured {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product-grid-featured > *,
+  .product-grid-standard > * {
     width: 100%;
-    max-width: 24rem;
+    max-width: 100%;
+  }
+  .product-card-media {
+    min-height: 17rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
   .product-card-ambient {
     position: absolute;
@@ -533,6 +560,9 @@
   .product-card-image {
     animation: imageFloat 5.5s ease-in-out infinite;
     filter: drop-shadow(0 18px 24px rgba(89, 34, 25, 0.14));
+    width: auto;
+    max-width: min(100%, 14rem);
+    max-height: min(100%, 12rem);
   }
   .product-card-badge {
     position: absolute;
@@ -584,6 +614,86 @@
     opacity: 1;
     animation: navSheen 1.25s ease forwards;
   }
+  .organization-preview-grid,
+  .organization-page-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    justify-content: center;
+  }
+  .leader-portrait-card {
+    position: relative;
+    isolation: isolate;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(255,248,225,0.98) 100%);
+  }
+  .leader-portrait-media {
+    position: relative;
+    z-index: 1;
+    aspect-ratio: 4 / 5;
+    min-height: 18rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, #FFF9E8, #F4E5BF);
+  }
+  .leader-portrait-body {
+    position: relative;
+    z-index: 2;
+    padding: 1.25rem;
+  }
+  .leader-portrait-body-page {
+    padding: 1.35rem;
+  }
+  .leader-photo-harold {
+    object-position: center top;
+  }
+  .leader-photo-sherwin {
+    object-position: center 18%;
+  }
+
+@media (min-width: 640px) {
+  .product-lineup-grid {
+    gap: 1.75rem;
+  }
+  .product-grid-standard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .product-grid-featured {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .product-card-media {
+    min-height: 18.5rem;
+  }
+  .product-card-image {
+    max-width: min(100%, 15.5rem);
+    max-height: 13.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .organization-preview-grid,
+  .organization-page-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .leader-portrait-card {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  }
+  .leader-portrait-card-page {
+    display: block;
+  }
+  .leader-portrait-media {
+    min-height: 100%;
+  }
+  .leader-portrait-media-page {
+    min-height: 22rem;
+  }
+  .leader-portrait-body {
+    padding: 1.4rem;
+  }
+  .leader-portrait-body-page {
+    padding: 1.6rem;
+  }
+}
 
 @media (max-width: 1023px) {
   .hero-carousel-card {
@@ -607,6 +717,35 @@
 }
 
 @media (max-width: 640px) {
+  .section-padding {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+  .section-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .landing-home-hero {
+    min-height: auto;
+  }
+  .landing-home-hero-inner {
+    min-height: auto;
+  }
+  .landing-home-title {
+    font-size: clamp(1.65rem, 9vw, 2.35rem);
+  }
+  .landing-page-hero > .absolute {
+    display: none;
+  }
+  .landing-page-hero .section-container > div {
+    max-width: 100%;
+  }
+  .landing-page-hero .flex.items-center.gap-3 {
+    margin-bottom: 0.75rem;
+  }
+  .landing-page-hero .mt-6 {
+    margin-top: 1rem;
+  }
   .hero-carousel-shell {
     max-width: 100%;
   }
@@ -626,7 +765,7 @@
     letter-spacing: 0.16em;
   }
   .hero-carousel-stage {
-    min-height: 390px;
+    min-height: 285px;
     border-radius: 0;
   }
   .hero-carousel-image {
@@ -638,13 +777,69 @@
     transform: translateY(0) scale(1.015);
   }
   .hero-carousel-image.is-single-product {
-    inset: 3.15rem 14% 1.45rem 14%;
-    width: 72%;
-    height: calc(100% - 4.6rem);
+    inset: 1.9rem 5% 1.2rem 5%;
+    width: 90%;
+    height: calc(100% - 3.1rem);
   }
   .hero-carousel-indicators {
     bottom: 0.75rem;
     padding: 0.5rem 0.8rem;
+  }
+  .product-card-media {
+    min-height: 11.5rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  .product-card-image {
+    max-width: min(100%, 9.5rem);
+    max-height: 8.5rem;
+  }
+  .product-card-badge {
+    top: 0.8rem;
+    left: 0.8rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+  }
+  .product-grid-standard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+  .product-grid-featured {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .product-lineup-card {
+    border-radius: 1.35rem;
+    padding: 0.75rem;
+  }
+  .product-lineup-card h4 {
+    font-size: 0.9rem;
+    line-height: 1.25;
+  }
+  .product-lineup-card p {
+    line-height: 1.35;
+  }
+  .product-lineup-card p:last-child {
+    font-size: 1.05rem;
+  }
+  .product-card-media {
+    border-radius: 1.15rem;
+  }
+  .leader-portrait-media {
+    aspect-ratio: 16 / 13;
+    min-height: 16rem;
+  }
+  .leader-photo-sherwin {
+    object-position: center top;
+  }
+  .leader-portrait-body {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .product-grid-standard {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 }

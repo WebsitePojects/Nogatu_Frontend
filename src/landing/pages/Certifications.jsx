@@ -6,15 +6,15 @@ export default function Certifications() {
   const ref = useScrollReveal();
 
   return (
-    <div className="pt-32 pb-20 min-h-screen bg-[#FFFDF5] relative overflow-hidden">
+    <div className="pt-24 sm:pt-32 pb-12 sm:pb-20 min-h-screen bg-[#FFFDF5] relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
       <div className="section-container relative z-10">
-        <div className="max-w-3xl mb-10 sm:mb-14">
+        <div className="max-w-3xl mb-8 sm:mb-14">
           <span className="inline-block px-4 py-1.5 rounded-full bg-brand-gold/10 text-brand-gold-dark font-medium text-sm mb-4 border border-brand-gold/20">
             Compliance
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-brand-brown mb-6">Certifications</h1>
-          <p className="text-lg text-gray-600 leading-relaxed">
+          <h1 className="text-3xl md:text-5xl font-bold text-brand-brown mb-3 sm:mb-6">Certifications</h1>
+          <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
             View the uploaded NOGATU product CPR and Halal certification document directly on this page.
           </p>
         </div>
@@ -42,11 +42,11 @@ export default function Certifications() {
             </a>
           </div>
 
-          <div className="rounded-[1.35rem] overflow-hidden border border-brand-gold/15 bg-[#FFFDF7] min-h-[70vh]">
+          <div className="rounded-[1.35rem] overflow-hidden border border-brand-gold/15 bg-[#FFFDF7] min-h-[52vh] sm:min-h-[70vh]">
             <iframe
               src={PDF_PATH}
               title="NOGATU Certifications PDF"
-              className="w-full h-[70vh] sm:h-[78vh]"
+              className="w-full h-[52vh] sm:h-[78vh]"
             />
           </div>
         </section>
