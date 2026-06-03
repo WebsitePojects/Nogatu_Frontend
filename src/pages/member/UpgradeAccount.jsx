@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { HiOutlineArrowUp, HiOutlineSearch, HiOutlineSparkles, HiOutlineShieldCheck } from 'react-icons/hi';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
 
@@ -30,6 +31,7 @@ function packageCardTone(packageName) {
 
 export default function UpgradeAccount() {
   const { user, refreshUser } = useAuth();
+  const { isDarkMode } = useTheme();
   const [codes, setCodes] = useState([]);
   const [packagePolicies, setPackagePolicies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -156,6 +158,13 @@ export default function UpgradeAccount() {
     () => packagePolicies.find((pkg) => Number(pkg.packageType) === currentAccttype) || null,
     [packagePolicies, currentAccttype]
   );
+  const headingTone = isDarkMode ? 'text-white' : 'text-slate-900';
+  const labelTone = isDarkMode ? 'rgba(255,255,255,0.48)' : '#64748b';
+  const bodyTone = isDarkMode ? 'rgba(255,255,255,0.74)' : '#475569';
+  const panelBg = isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(241,245,249,0.92)';
+  const panelBorder = isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(203,213,225,0.78)';
+  const panelText = isDarkMode ? 'text-white' : 'text-slate-900';
+  const nestedPanelBg = isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(248,250,252,0.95)';
 
   if (loading) return <Spinner />;
 
@@ -173,7 +182,7 @@ export default function UpgradeAccount() {
       />
 
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">Upgrade Account</h1>
+        <h1 className={`portal-page-title font-display text-2xl font-bold ${headingTone}`}>Upgrade Account</h1>
         <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
@@ -188,10 +197,22 @@ export default function UpgradeAccount() {
           {user?.caccttype?.charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Current Account Type</p>
-          <p className="text-xl font-bold gold-text">{user?.caccttype}</p>
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: labelTone }}>Current Package</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xl font-bold gold-text">{user?.caccttype}</p>
+            <span
+              className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold"
+              style={{
+                background: isDarkMode ? 'rgba(212,175,55,0.12)' : 'rgba(212,175,55,0.14)',
+                color: isDarkMode ? '#D4AF37' : '#8b6508',
+                border: '1px solid rgba(212,175,55,0.24)',
+              }}
+            >
+              Active Tier
+            </span>
+          </div>
           {currentPolicy && (
-            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.56)' }}>
+            <p className="mt-1 text-sm" style={{ color: bodyTone }}>
               {currentPolicy.rankingEligible
                 ? `Ranks up to ${currentPolicy.rankingMaxLabel || 'published ceiling'}`
                 : 'Ranking is locked until Gold'}
@@ -209,8 +230,8 @@ export default function UpgradeAccount() {
             <HiOutlineShieldCheck className="w-5 h-5" />
           </span>
           <div>
-            <h3 className="font-display text-base font-semibold text-white">Package Benefit Ladder</h3>
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <h3 className={`font-display text-base font-semibold ${panelText}`}>Package Benefit Ladder</h3>
+            <p className="text-sm mt-1" style={{ color: bodyTone }}>
               Each package now has its own benefit ceiling, coverage depth, and upgrade path so members can clearly see why moving upward matters.
             </p>
           </div>
@@ -226,22 +247,22 @@ export default function UpgradeAccount() {
                 key={pkg.packageType}
                 className="rounded-2xl p-5"
                 style={{
-                  background: 'rgba(255,255,255,0.03)',
+                  background: panelBg,
                   border: `1px solid ${isCurrent ? tone.accent : tone.border}`,
                   boxShadow: isCurrent ? `0 0 0 1px ${tone.accent}, 0 16px 32px ${tone.glow}` : `0 10px 24px ${tone.glow}`,
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-lg font-bold text-white">{pkg.packageLabel}</p>
-                    <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>PHP {fmt(pkg.packageAmount)} package</p>
+                    <p className={`text-lg font-bold ${panelText}`}>{pkg.packageLabel}</p>
+                    <p className="text-xs mt-1" style={{ color: labelTone }}>PHP {fmt(pkg.packageAmount)} package</p>
                   </div>
                   <span
                     className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
                     style={{
-                      background: isCurrent ? 'rgba(212,175,55,0.12)' : isUpgradeable ? 'rgba(74,222,128,0.12)' : 'rgba(255,255,255,0.06)',
-                      color: isCurrent ? '#D4AF37' : isUpgradeable ? '#4ADE80' : 'rgba(255,255,255,0.68)',
-                      border: `1px solid ${isCurrent ? 'rgba(212,175,55,0.22)' : isUpgradeable ? 'rgba(74,222,128,0.22)' : 'rgba(255,255,255,0.08)'}`,
+                      background: isCurrent ? 'rgba(212,175,55,0.12)' : isUpgradeable ? 'rgba(74,222,128,0.12)' : (isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(148,163,184,0.12)'),
+                      color: isCurrent ? '#D4AF37' : isUpgradeable ? '#16a34a' : (isDarkMode ? 'rgba(255,255,255,0.68)' : '#475569'),
+                      border: `1px solid ${isCurrent ? 'rgba(212,175,55,0.22)' : isUpgradeable ? 'rgba(74,222,128,0.22)' : panelBorder}`,
                     }}
                   >
                     {isCurrent ? 'Current Package' : isUpgradeable ? 'Upgrade Target' : 'Lower Tier'}
@@ -249,34 +270,34 @@ export default function UpgradeAccount() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
-                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.42)' }}>Direct Referral</p>
-                    <p className="font-semibold text-white mt-1">PHP {fmt(pkg.directReferralBonus)}</p>
+                  <div className="rounded-xl p-3" style={{ background: nestedPanelBg, border: `1px solid ${panelBorder}` }}>
+                    <p style={{ color: labelTone }}>Direct Referral</p>
+                    <p className={`mt-1 font-semibold ${panelText}`}>PHP {fmt(pkg.directReferralBonus)}</p>
                   </div>
-                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.42)' }}>Binary Value</p>
-                    <p className="font-semibold text-white mt-1">{fmtInt(pkg.binaryPoints)} BP</p>
-                    <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>PHP {fmt(pkg.binaryValue)}</p>
+                  <div className="rounded-xl p-3" style={{ background: nestedPanelBg, border: `1px solid ${panelBorder}` }}>
+                    <p style={{ color: labelTone }}>Binary Value</p>
+                    <p className={`mt-1 font-semibold ${panelText}`}>{fmtInt(pkg.binaryPoints)} BP</p>
+                    <p className="text-[11px] mt-1" style={{ color: labelTone }}>PHP {fmt(pkg.binaryValue)}</p>
                   </div>
-                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.42)' }}>Weekly Cap</p>
-                    <p className="font-semibold text-white mt-1">PHP {fmt(pkg.pairingWeeklyCap)}</p>
+                  <div className="rounded-xl p-3" style={{ background: nestedPanelBg, border: `1px solid ${panelBorder}` }}>
+                    <p style={{ color: labelTone }}>Weekly Cap</p>
+                    <p className={`mt-1 font-semibold ${panelText}`}>PHP {fmt(pkg.pairingWeeklyCap)}</p>
                   </div>
-                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.42)' }}>
+                  <div className="rounded-xl p-3" style={{ background: nestedPanelBg, border: `1px solid ${panelBorder}` }}>
+                    <p style={{ color: labelTone }}>
                       {Number(pkg.lifetimeIncomeCeiling || 0) > 0 ? 'Lifetime Ceiling' : 'Monthly Pairing Cap'}
                     </p>
-                    <p className="font-semibold text-white mt-1">
+                    <p className={`mt-1 font-semibold ${panelText}`}>
                       PHP {fmt(Number(pkg.lifetimeIncomeCeiling || 0) > 0 ? pkg.lifetimeIncomeCeiling : pkg.pairingMonthlyCap)}
                     </p>
                   </div>
-                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.42)' }}>Unilevel Reach</p>
-                    <p className="font-semibold text-white mt-1">Level {fmtInt(pkg.unilevelReach)}</p>
+                  <div className="rounded-xl p-3" style={{ background: nestedPanelBg, border: `1px solid ${panelBorder}` }}>
+                    <p style={{ color: labelTone }}>Unilevel Reach</p>
+                    <p className={`mt-1 font-semibold ${panelText}`}>Level {fmtInt(pkg.unilevelReach)}</p>
                   </div>
-                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.42)' }}>Sales Match Coverage</p>
-                    <p className="font-semibold text-white mt-1">
+                  <div className="rounded-xl p-3" style={{ background: nestedPanelBg, border: `1px solid ${panelBorder}` }}>
+                    <p style={{ color: labelTone }}>Sales Match Coverage</p>
+                    <p className={`mt-1 font-semibold ${panelText}`}>
                       {pkg.pairingDepthLimit ? `Up to L${fmtInt(pkg.pairingDepthLimit)}` : 'Full tree'}
                     </p>
                   </div>
@@ -286,13 +307,13 @@ export default function UpgradeAccount() {
                   <div className="flex items-start gap-2">
                     <HiOutlineSparkles className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#D4AF37' }} />
                     <div>
-                      <p className="text-sm font-semibold text-white">
+                      <p className={`text-sm font-semibold ${panelText}`}>
                         {pkg.rankingEligible ? `Ranking ceiling: ${pkg.rankingMaxLabel || 'Published ceiling'}` : 'Ranking locked for this package'}
                       </p>
-                      <p className="text-xs mt-1 leading-6" style={{ color: 'rgba(255,255,255,0.58)' }}>
+                      <p className="text-xs mt-1 leading-6" style={{ color: bodyTone }}>
                         {pkg.salesMatchNote}
                       </p>
-                      <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.48)' }}>
+                      <p className="text-xs mt-2" style={{ color: labelTone }}>
                         {pkg.nextUpgradePackageLabel
                           ? `Next upgrade target: ${pkg.nextUpgradePackageLabel}`
                           : 'This is already the highest package tier in the current ladder.'}

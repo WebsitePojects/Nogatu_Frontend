@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react';
-import api from '../../api';
+import { useEffect, useState } from 'react';
 import { HiOutlineUsers } from 'react-icons/hi';
+import api from '../../api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const PKG_COLORS = {
-  Bronze: '#CD7F32', Silver: '#A8A9AD', Gold: '#DAA520',
-  Platinum: '#6C757D', Garnet: '#9B2335', Diamond: '#4FC3F7',
+  Bronze: '#CD7F32',
+  Silver: '#A8A9AD',
+  Gold: '#DAA520',
+  Platinum: '#6C757D',
+  Garnet: '#9B2335',
+  Diamond: '#4FC3F7',
 };
 
 const ENTRY_STYLES = {
@@ -17,53 +22,127 @@ const ENTRY_STYLES = {
 
 function Spinner() {
   return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4">
-      <div className="w-10 h-10 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+    <div className="flex flex-col items-center justify-center gap-4 py-24">
+      <div className="h-10 w-10 animate-spin rounded-full border-[3px]" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
     </div>
   );
 }
 
+const formatDate = (value) => (
+  value
+    ? new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    : '-'
+);
+
 export default function DirectReferrals() {
+  const { isDarkMode } = useTheme();
   const [referrals, setReferrals] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.get('/referrals')
-      .then(res => setReferrals(res.data.referrals))
+      .then((res) => setReferrals(res.data.referrals))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <Spinner />;
 
+  const headingTone = isDarkMode ? 'text-white' : 'text-slate-900';
+  const summaryText = isDarkMode ? 'rgba(212,175,55,0.9)' : '#8b6508';
+  const rowAlt = isDarkMode ? 'var(--portal-zebra-bg)' : 'rgba(226,232,240,0.42)';
+  const nameText = isDarkMode ? 'rgba(255,255,255,0.86)' : '#18212f';
+  const bodyText = isDarkMode ? 'rgba(255,255,255,0.74)' : '#334155';
+  const mutedText = isDarkMode ? 'rgba(255,255,255,0.56)' : '#5f6b7a';
+  const subtleText = isDarkMode ? 'rgba(255,255,255,0.46)' : '#64748b';
+  const mobileCardStyle = {
+    background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(247,249,252,0.96)',
+    border: isDarkMode ? '1px solid rgba(212,175,55,0.12)' : '1px solid rgba(203,213,225,0.9)',
+    boxShadow: 'var(--portal-box-shadow)',
+  };
+
   return (
     <div className="space-y-6">
-      {/* Heading */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">Direct Referrals</h1>
-        <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+        <h1 className={`portal-page-title font-display text-2xl font-bold ${headingTone}`}>Direct Referrals</h1>
+        <div className="mt-2 h-0.5 w-10 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
-      {/* Summary chip */}
       <div
-        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-sm"
+        className="inline-flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-sm"
         style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)' }}
       >
-        <HiOutlineUsers className="w-4 h-4" style={{ color: '#D4AF37' }} />
-        <span style={{ color: 'rgba(212,175,55,0.85)' }}>{referrals.length} total referrals</span>
+        <HiOutlineUsers className="h-4 w-4" style={{ color: '#D4AF37' }} />
+        <span style={{ color: summaryText }}>{referrals.length} total referrals</span>
       </div>
 
-      {/* Table card */}
-      <div className="glass-card rounded-2xl overflow-hidden">
+      <div className="space-y-3 md:hidden">
+        {referrals.map((r) => {
+          const pkgColor = PKG_COLORS[r.accttypeName] || '#D4AF37';
+          const entryStyle = ENTRY_STYLES[r.entryCode] || ENTRY_STYLES.UNKNOWN;
+          return (
+            <article key={r.uid} className="rounded-2xl p-4" style={mobileCardStyle}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: subtleText }}>Account Name</p>
+                  <p className="mt-1 text-base font-semibold leading-snug" style={{ color: nameText }}>{r.fullname}</p>
+                </div>
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold"
+                  style={{ background: `${pkgColor}18`, color: pkgColor, border: `1px solid ${pkgColor}30` }}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: pkgColor }} />
+                  {r.accttypeName}
+                </span>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: subtleText }}>Username</p>
+                  <p className="mt-1 font-mono text-xs" style={{ color: bodyText }}>{r.username}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: subtleText }}>Date Registered</p>
+                  <p className="mt-1 text-sm" style={{ color: bodyText }}>{formatDate(r.datereg)}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-xl p-3" style={{ background: isDarkMode ? 'rgba(255,255,255,0.025)' : 'rgba(241,245,249,0.85)', border: isDarkMode ? '1px solid rgba(212,175,55,0.08)' : '1px solid rgba(203,213,225,0.7)' }}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: subtleText }}>Entry Type</p>
+                  <span
+                    className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold"
+                    style={{ background: entryStyle.bg, color: entryStyle.color, border: `1px solid ${entryStyle.border}` }}
+                  >
+                    {r.entryType}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-5" style={{ color: mutedText }}>
+                  {r.sponsorCreditEligible ? 'Counts for sponsor referral credit' : 'Does not count for sponsor referral credit'}
+                </p>
+              </div>
+            </article>
+          );
+        })}
+
+        {referrals.length === 0 && (
+          <div className="rounded-2xl p-10 text-center" style={mobileCardStyle}>
+            <HiOutlineUsers className="mx-auto mb-2 h-8 w-8" style={{ color: 'rgba(212,175,55,0.24)' }} />
+            <p className="portal-card-muted">No direct referrals yet.</p>
+          </div>
+        )}
+      </div>
+
+      <div className="glass-card hidden overflow-hidden rounded-2xl md:block">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[600px]">
+          <table className="min-w-[600px] w-full text-sm">
             <thead>
               <tr>
-                <th className="table-header py-3 px-4">Account Name</th>
-                <th className="table-header py-3 px-4">Username</th>
-                <th className="table-header py-3 px-4">Package</th>
-                <th className="table-header py-3 px-4">Entry Type</th>
-                <th className="table-header py-3 px-4">Date Registered</th>
+                <th className="table-header px-4 py-3">Account Name</th>
+                <th className="table-header px-4 py-3">Username</th>
+                <th className="table-header px-4 py-3">Package</th>
+                <th className="table-header px-4 py-3">Entry Type</th>
+                <th className="table-header px-4 py-3">Date Registered</th>
               </tr>
             </thead>
             <tbody>
@@ -73,45 +152,46 @@ export default function DirectReferrals() {
                 return (
                   <tr
                     key={r.uid}
+                    className="portal-table-row-hover transition-colors"
                     style={{
-                      background: i % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'transparent',
-                      borderBottom: '1px solid rgba(212,175,55,0.06)',
+                      background: i % 2 === 0 ? rowAlt : 'transparent',
+                      borderBottom: '1px solid var(--portal-row-border)',
                     }}
-                    className="hover:bg-white/[0.03] transition-colors"
                   >
-                    <td className="py-3 px-4 font-medium text-white/85">{r.fullname}</td>
-                    <td className="py-3 px-4 font-mono text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{r.username}</td>
-                    <td className="py-3 px-4">
+                    <td className="px-4 py-3 font-medium" style={{ color: nameText }}>{r.fullname}</td>
+                    <td className="px-4 py-3 font-mono text-xs" style={{ color: mutedText }}>{r.username}</td>
+                    <td className="px-4 py-3">
                       <span
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold"
                         style={{ background: `${pkgColor}18`, color: pkgColor, border: `1px solid ${pkgColor}30` }}
                       >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: pkgColor }} />
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: pkgColor }} />
                         {r.accttypeName}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="px-4 py-3">
                       <span
-                        className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
+                        className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold"
                         style={{ background: entryStyle.bg, color: entryStyle.color, border: `1px solid ${entryStyle.border}` }}
                       >
                         {r.entryType}
                       </span>
-                      <p className="mt-1 text-[10px]" style={{ color: 'rgba(255,255,255,0.38)' }}>
+                      <p className="mt-1 text-[10px]" style={{ color: subtleText }}>
                         {r.sponsorCreditEligible ? 'Counts for sponsor referral credit' : 'Does not count for sponsor referral credit'}
                       </p>
                     </td>
-                    <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                      {r.datereg ? new Date(r.datereg).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                    <td className="px-4 py-3 text-xs" style={{ color: mutedText }}>
+                      {formatDate(r.datereg)}
                     </td>
                   </tr>
                 );
               })}
+
               {referrals.length === 0 && (
                 <tr>
                   <td colSpan="5" className="py-14 text-center">
-                    <HiOutlineUsers className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
-                    <p style={{ color: 'rgba(255,255,255,0.3)' }}>No direct referrals yet.</p>
+                    <HiOutlineUsers className="mx-auto mb-2 h-8 w-8" style={{ color: 'rgba(212,175,55,0.2)' }} />
+                    <p className="portal-card-muted">No direct referrals yet.</p>
                   </td>
                 </tr>
               )}
