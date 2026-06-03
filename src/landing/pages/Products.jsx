@@ -86,10 +86,10 @@ function ProductCard({ product, delay, onLightbox }) {
 function WealthCard({ item, delay }) {
   const ref = useScrollReveal({ delay });
   return (
-    <div ref={ref} className={`reveal group p-6 rounded-2xl border motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300`} style={{ backgroundColor: '#FFFDF5', borderColor: item.outside ? undefined : 'rgba(184,134,11,0.15)', ...(item.outside ? { borderColor: 'rgba(251,191,36,0.3)' } : {}) }}>
-      <div className="flex items-start justify-between mb-4">
+    <div ref={ref} className={`reveal group rounded-[1.4rem] border p-4 motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-xl sm:p-5`} style={{ backgroundColor: '#FFFDF5', borderColor: item.outside ? 'rgba(251,191,36,0.28)' : 'rgba(184,134,11,0.15)' }}>
+      <div className="flex items-start justify-between gap-3">
         <div
-          className="size-12 rounded-2xl text-white flex items-center justify-center font-bold text-lg shadow-lg motion-safe:group-hover:scale-110 motion-safe:transition-transform motion-safe:duration-300"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl text-base font-bold text-white shadow-lg motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-110"
           style={item.outside
             ? { background: 'linear-gradient(135deg, #b45309, #f59e0b)', boxShadow: '0 8px 20px rgba(245,158,11,0.2)' }
             : { background: 'linear-gradient(135deg, #B8860B, #D4A528)', boxShadow: '0 8px 20px rgba(184,134,11,0.25)' }}
@@ -102,8 +102,22 @@ function WealthCard({ item, delay }) {
           </span>
         )}
       </div>
-      <h3 className="font-semibold mb-2" style={{ color: '#3A1000' }}>{item.name}</h3>
-      <p className="text-sm leading-relaxed" style={{ color: '#6d3028' }}>{item.desc}</p>
+      <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: item.outside ? '#b45309' : '#8A6300' }}>Way {item.num}</p>
+      <h3 className="mt-2 font-semibold leading-snug" style={{ color: '#3A1000' }}>{item.name}</h3>
+      <p className="mt-2 text-sm leading-6" style={{ color: '#6d3028' }}>{item.desc}</p>
+    </div>
+  );
+}
+
+function WealthPairCard({ items, delay }) {
+  const ref = useScrollReveal({ delay });
+  return (
+    <div ref={ref} className="reveal rounded-[1.7rem] border border-[#B8860B]/15 bg-white/70 p-4 shadow-[0_18px_42px_rgba(89,34,25,0.08)] sm:p-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {items.map((item, index) => (
+          <WealthCard key={item.name} item={item} delay={index * 40} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -117,7 +131,7 @@ function TierCard({ tier, delay }) {
       style={{ backgroundColor: '#FFFDF5', borderColor: tier.popular ? '#D4A528' : 'rgba(184,134,11,0.15)', ...(tier.popular ? { boxShadow: '0 0 0 1px rgba(212,165,40,0.3)' } : {}) }}
     >
       {tier.popular && (
-        <div className="absolute top-0 right-0 px-4 py-1 text-white text-xs font-bold rounded-bl-xl" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>Popular</div>
+        <div className="absolute top-0 right-0 rounded-bl-xl px-4 py-1 text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}>Popular</div>
       )}
       <div className={`pp-6 bg-gradient-to-br ${tier.color} text-whitee`}>
         <span className={`iinline-block px-3 py-1 rounded-full text-xs font-bold ${tier.badge} mb-33`}>{tier.name}</span>
@@ -137,8 +151,10 @@ function TierCard({ tier, delay }) {
         </ul>
         <a
           href="/portal/login"
-          className={`mmt-6 block text-center py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-all motion-safe:duration-200 cursor-pointer ${tier.popular ? 'text-white shadow-md' : 'text-brand-brown hover:opacity-90'}`}
-          style={tier.popular ? { background: 'linear-gradient(135deg, #B8860B, #D4A528)' } : { backgroundColor: '#FFF8E1', color: '#592219' }}
+          className="mt-6 block rounded-xl border px-4 py-3 text-center text-sm font-bold text-white shadow-[0_12px_28px_rgba(89,34,25,0.12)] transition-all duration-200 hover:-translate-y-0.5"
+          style={tier.popular
+            ? { background: 'linear-gradient(135deg, #B8860B, #D4A528)', borderColor: 'rgba(122,92,8,0.15)' }
+            : { background: 'linear-gradient(135deg, #3A1000, #6d3028)', borderColor: 'rgba(184,134,11,0.22)' }}
         >
           Get Started
         </a>
@@ -150,12 +166,13 @@ function TierCard({ tier, delay }) {
 function HowItWorksCard({ item, delay }) {
   const ref = useScrollReveal({ delay });
   return (
-    <div ref={ref} className="reveal text-center">
-      <div className="size-16 rounded-2xl text-white flex items-center justify-center font-extrabold text-xl mx-auto mb-5 shadow-lg" style={{ background: 'linear-gradient(135deg, #592219, #6d3028)', boxShadow: '0 8px 20px rgba(89,34,25,0.2)' }}>
-        {item.step}
+    <div ref={ref} className="reveal rounded-[1.5rem] border border-[#B8860B]/15 bg-white/80 p-5 text-left shadow-[0_16px_36px_rgba(89,34,25,0.07)] sm:p-6">
+      <div className="flex items-center gap-3">
+        <span className="text-xl font-black tracking-[0.12em]" style={{ color: '#8A6300' }}>{item.step}</span>
+        <span className="text-lg font-light" style={{ color: '#B8860B' }}>-</span>
+        <h3 className="text-lg font-bold" style={{ color: '#3A1000' }}>{item.title}</h3>
       </div>
-      <h3 className="text-lg font-bold mb-2" style={{ color: '#3A1000' }}>{item.title}</h3>
-      <p className="text-sm leading-relaxed" style={{ color: '#6d3028' }}>{item.desc}</p>
+      <p className="mt-3 text-sm leading-6" style={{ color: '#6d3028' }}>{item.desc}</p>
     </div>
   );
 }
@@ -165,6 +182,7 @@ export default function Opportunities() {
   const ref2 = useScrollReveal();
   const ref3 = useScrollReveal();
   const lightbox = useLightbox();
+  const wealthPairs = Array.from({ length: WAYS_OF_WEALTH.length / 2 }, (_, index) => WAYS_OF_WEALTH.slice(index * 2, index * 2 + 2));
 
   return (
     <>
@@ -197,9 +215,9 @@ export default function Opportunities() {
             <p className="mt-4 text-lg max-w-2xl mx-auto" style={{ color: '#6d3028' }}>Our compensation plan rewards you through multiple income channels.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {WAYS_OF_WEALTH.map((w, i) => (
-              <WealthCard key={w.name} item={w} delay={i * 60} />
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            {wealthPairs.map((pair, i) => (
+              <WealthPairCard key={pair.map((item) => item.num).join('-')} items={pair} delay={i * 70} />
             ))}
           </div>
         </div>
@@ -215,7 +233,7 @@ export default function Opportunities() {
             <p className="mt-4 text-lg max-w-2xl mx-auto" style={{ color: '#6d3028' }}>Start at any level and upgrade anytime as your business grows.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
             {TIERS.map((tier, i) => (
               <TierCard key={tier.name} tier={tier} delay={i * 80} />
             ))}
@@ -231,7 +249,7 @@ export default function Opportunities() {
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: '#3A1000' }}>How It Works</h2>
             <div className="w-16 h-1 rounded-full mx-auto mt-4" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-5 md:grid-cols-3">
             {[
               { step: '01', title: 'Choose a Package', desc: 'Select an entry package from Bronze to Diamond that matches your goals and budget.' },
               { step: '02', title: 'Get Activated', desc: 'Receive your activation code, products, and access to the full member dashboard.' },

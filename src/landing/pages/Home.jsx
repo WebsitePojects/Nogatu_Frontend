@@ -217,6 +217,23 @@ function AboutPreview() {
   const ref1 = useScrollReveal();
   const ref2 = useScrollReveal({ delay: 100 });
   const lightbox = useLightbox();
+  const officeLocations = [
+    {
+      label: 'Main Office',
+      address: '94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City',
+      icon: (
+        <>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </>
+      ),
+    },
+    {
+      label: 'Satellite Branch',
+      address: 'Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605',
+      icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />,
+    },
+  ];
 
   return (
     <section className="section-padding relative overflow-hidden" style={{ background: '#FFFDF5' }}>
@@ -245,32 +262,24 @@ function AboutPreview() {
             </div>
           </div>
           <div ref={ref2} className="reveal-right">
-            <p className="text-gray-600 leading-relaxed mb-6">
-              Nogatu Alliance is a supplier and distributor of exclusively manufactured health food supplements as well as skin care products. It is committed to helping empower people in building a sustainable livelihood through marketing and selling of high-quality products that promote improved health and wellness.
+            <p className="mb-4 text-gray-700 leading-relaxed">
+              Nogatu Alliance delivers health supplements, skin care, and a member-first business model built around wellness and practical income opportunities.
             </p>
-            <p className="hidden sm:block text-gray-500 leading-relaxed mb-8">
-              It also provides its members with competitive marketing incentives.
+            <p className="mb-6 text-sm leading-relaxed text-gray-600 sm:mb-8 sm:text-base">
+              Members get product access, branch support, and a clearer path to growing a sustainable livelihood.
             </p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 mb-6 sm:mb-8">
-              <div className="about-info-card">
-                <div className="about-info-icon">
-                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+            <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8">
+              {officeLocations.map((office) => (
+                <div key={office.label} className="about-info-card h-full p-4 sm:p-5">
+                  <div className="about-info-icon mb-3">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {office.icon}
+                    </svg>
+                  </div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-brand-gold-dark sm:text-xs">{office.label}</p>
+                  <p className="text-[11px] leading-5 text-gray-700 sm:text-sm sm:leading-6">{office.address}</p>
                 </div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Main Office</p>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City</p>
-              </div>
-              <div className="about-info-card">
-                <div className="about-info-icon">
-                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
-                  </svg>
-                </div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Satellite Branch</p>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605</p>
-              </div>
+              ))}
             </div>
             <div className="relative hidden sm:inline-block product-mini-frame">
               <div className="product-mini-glow" />
@@ -293,10 +302,25 @@ function AboutPreview() {
 /* ────────────────────── Why Choose Us ────────────────────── */
 function WhyUs() {
   const ref = useScrollReveal();
-  const features = [
-    { icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', title: 'Our Mission', desc: 'Nogatu Alliance aims to become one of the Philippines\' leading network marketing company that spans locally and abroad.' },
-    { icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z', title: 'Our Vision', desc: 'Empowers people by giving them access to high quality health and wellness products and enables them to earn significant income.' },
-    { icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', title: 'Our Products', desc: 'We pride ourselves on always offering our customers high-quality products. This is a core value of our business.' },
+  const featureCards = [
+    {
+      eyebrow: 'Mission',
+      icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
+      title: 'Our Mission',
+      desc: 'Nogatu Alliance aims to become one of the Philippines\' leading network marketing company that spans locally and abroad.',
+    },
+    {
+      eyebrow: 'Vision',
+      icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+      title: 'Our Vision',
+      desc: 'Nogatu Alliance empowers people by giving them access to high quality health and wellness products and enables them to earn significant income from marketing these products to their network of friends, family and society at large',
+    },
+    {
+      eyebrow: 'Products',
+      icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+      title: 'Our Products',
+      desc: 'We pride ourselves on always offering our customers high-quality products. This is a core value of our business. We are always looking for ways to improve and extend the life cycle of each item we produce.',
+    },
   ];
 
   return (
@@ -304,23 +328,23 @@ function WhyUs() {
       {/* Dot grid bg */}
       <div className="absolute inset-0 pointer-events-none bg-dot-grid" style={{ opacity: 0.06 }} />
       <div className="section-container relative z-10">
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-12 lg:gap-8">
-          {/* Why box */}
-          <div ref={ref} className="reveal col-span-1 lg:col-span-4">
-            <div className="h-full rounded-2xl p-5 sm:p-7 lg:p-10 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
-              {/* Subtle diagonal overlay */}
-              <div className="absolute inset-0 pointer-events-none" style={{
-                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(212,165,40,0.04) 10px, rgba(212,165,40,0.04) 11px)',
-              }} />
-              <div className="relative z-10">
-                <h3 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4">Why Choose <span className="text-brand-gold-light">NOGATU?</span></h3>
-                <p className="text-sm sm:text-base text-white/70 leading-relaxed mb-4 sm:mb-6">
-                  At Nogatu Alliance, we don't just sell products, we build partnerships. When you choose us, you become our valued partner, working alongside us to achieve your success.
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2 xl:grid-cols-4">
+          <div ref={ref} className="reveal">
+            <div className="relative h-full overflow-hidden rounded-[1.6rem] border border-[#7a4a22]/10 p-5 text-white shadow-[0_18px_42px_rgba(89,34,25,0.18)] sm:p-7" style={{ background: 'linear-gradient(145deg, #592219 0%, #6d3028 60%, #7c3a30 100%)' }}>
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(212,165,40,0.05) 10px, rgba(212,165,40,0.05) 11px)' }}
+              />
+              <div className="relative z-10 flex h-full flex-col">
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#E7C679]">Why Choose NOGATU?</p>
+                <h3 className="mt-3 text-2xl font-black leading-tight sm:text-[1.9rem]">Why Choose NOGATU?</h3>
+                <p className="mt-4 text-sm leading-6 text-white/78 sm:text-base">
+                  At Nogau Alliance, we don&apos;t just sell products, we build partnerships. When you choose us, you become our valued partner, working alongside us to achieve your success.
                 </p>
-                <p className="text-sm sm:text-base text-white/70 leading-relaxed mb-4 sm:mb-6">
-                  You are not alone in this journey. Our exceptional customer support team is dedicated to your success.
+                <p className="mt-4 text-sm leading-6 text-white/82 sm:text-base">
+                  You are not alone in this journey. Our exceptional customer support team is dedicated to your success. We provide practical, expert support whenever you need it, and make sure you get the most out of your membership experience.
                 </p>
-                <NavLink to="/about" className="inline-flex items-center gap-2 text-brand-gold-light hover:text-brand-yellow-light font-medium text-sm motion-safe:transition-colors">
+                <NavLink to="/about" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#F5D881] transition-colors hover:text-white">
                   Learn More
                   <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </NavLink>
@@ -328,28 +352,28 @@ function WhyUs() {
             </div>
           </div>
 
-          {/* Feature boxes */}
-          <div className="contents lg:grid lg:col-span-8 lg:grid-cols-3 lg:gap-6">
-            {features.map((f, i) => {
-              const cardRef = useScrollReveal({ delay: i * 100 });
-              return (
-                <div key={f.title} ref={cardRef} className="reveal group feature-story-card bg-white rounded-2xl p-4 sm:p-7 text-center hover:shadow-xl hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300 border border-primary-200/30">
+          {featureCards.map((card, i) => {
+            const cardRef = useScrollReveal({ delay: i * 100 });
+            return (
+              <div key={card.title} ref={cardRef} className="reveal">
+                <article className="feature-story-card group h-full rounded-[1.6rem] border border-primary-200/30 bg-white p-5 shadow-[0_18px_38px_rgba(89,34,25,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_46px_rgba(184,134,11,0.14)] sm:p-6">
                   <div className="feature-story-shine" />
                   <div className="feature-story-aura" />
                   <div
-                    className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl mx-auto mb-4 sm:mb-5 flex items-center justify-center motion-safe:transition-colors motion-safe:duration-300 group-hover:scale-110 feature-story-icon"
-                    style={{ color: '#B8860B', backgroundColor: 'rgba(212,165,40,0.08)' }}
+                    className="feature-story-icon flex h-12 w-12 items-center justify-center rounded-2xl"
+                    style={{ color: '#8A6300', backgroundColor: 'rgba(212,165,40,0.12)' }}
                   >
-                    <svg className="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={f.icon} />
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={card.icon} />
                     </svg>
                   </div>
-                  <h4 className="font-bold text-brand-brown mb-2 sm:mb-3 text-base sm:text-lg">{f.title}</h4>
-                  <p className="text-xs sm:text-sm leading-6 sm:leading-7 text-[#6d3028] font-medium max-w-[15rem] mx-auto">{f.desc}</p>
-                </div>
-              );
-            })}
-          </div>
+                  <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[#8A6300]">{card.eyebrow}</p>
+                  <h4 className="mt-2 text-lg font-black leading-snug text-[#421100]">{card.title}</h4>
+                  <p className="mt-3 text-sm leading-6 text-[#5f4334]">{card.desc}</p>
+                </article>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -533,13 +557,6 @@ function OrganizationsPreview() {
                 />
               </div>
             </div>
-
-            <div className="mt-8 relative z-20 text-center">
-              <NavLink to="/organizations" className="inline-flex min-h-11 items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-200 text-brand-brown font-semibold shadow-sm hover:shadow-md hover:border-brand-gold/40 transition-all duration-300">
-                View People Behind the Company
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-              </NavLink>
-            </div>
           </div>
         </div>
       </div>
@@ -592,7 +609,7 @@ function BusinessPreview() {
 function DownloadableMaterials() {
   const ref = useScrollReveal();
   const materials = [
-    { title: 'ODF Product Presentation', desc: 'Presentation deck placeholder for product education and distributor orientation.' },
+    { title: 'PgotDF Product Presentation', desc: 'Presentation deck placeholder for product education and distributor orientation.' },
     { title: 'PDF Brochures', desc: 'Brochure upload space for product details, benefits, and customer-facing information.' },
     { title: 'Marketing Collateral', desc: 'Flyers, social posts, and campaign materials for field marketing support.' },
   ];

@@ -40,6 +40,23 @@ export default function About() {
   const ref3 = useScrollReveal({ delay: 150 });
   const ref4 = useScrollReveal();
   const lightbox = useLightbox();
+  const officeLocations = [
+    {
+      label: 'Main Office',
+      address: '94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City',
+      icon: (
+        <>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </>
+      ),
+    },
+    {
+      label: 'Satellite Branch',
+      address: 'Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605',
+      icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />,
+    },
+  ];
 
   return (
     <>
@@ -66,28 +83,20 @@ export default function About() {
               <div className="w-16 h-1 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
               <p className="leading-relaxed mb-6" style={{ color: '#6d3028' }}>Nogatu Alliance is a supplier and distributor of exclusively manufactured health food supplements as well as skin care products. We are committed to helping empower people in building a sustainable livelihood through marketing and selling of high-quality products that promote improved health and wellness.</p>
               <p className="leading-relaxed mb-8" style={{ color: '#6d3028' }}>It also provides its members with competitive marketing incentives. When you choose us, you become our valued partner, working alongside us to achieve your success.</p>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
-                <div className="about-info-card">
-                  <div className="about-info-icon">
-                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 mb-8">
+                {officeLocations.map((office) => (
+                  <div key={office.label} className="about-info-card h-full p-4 sm:p-5">
+                    <div className="about-info-icon mb-3">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {office.icon}
+                      </svg>
+                    </div>
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-brand-gold-dark sm:text-xs">{office.label}</p>
+                    <p className="text-sm leading-6 text-gray-700">{office.address}</p>
                   </div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Main Office</p>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City</p>
-                </div>
-                <div className="about-info-card">
-                  <div className="about-info-icon">
-                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
-                    </svg>
-                  </div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-gold-dark mb-2">Satellite Branch</p>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605</p>
-                </div>
+                ))}
               </div>
-              <div className="flex gap-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-6">
                 {['FDA Approved', 'Member-First'].map((t) => (
                   <div key={t} className="flex items-center gap-3">
                     <div className="size-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(184,134,11,0.1)', color: '#B8860B' }}>
@@ -104,16 +113,16 @@ export default function About() {
 
       <section className="section-padding bg-geo-pattern" style={{ backgroundColor: '#FFFDF5' }}>
         <div className="section-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+          <div className="grid grid-cols-1 gap-5 sm:gap-8 lg:grid-cols-2 items-stretch">
             <div className="about-gallery-card group">
               <div className="about-gallery-glow" />
               <div className="relative overflow-hidden rounded-[1.75rem]">
                 <img src="/landing/assets/img/about.jpg" alt="Main office" className="w-full h-72 sm:h-96 object-cover cursor-pointer about-gallery-image" loading="lazy" onClick={() => lightbox.open('/landing/assets/img/about.jpg')} />
                 <div className="about-gallery-label">Main Office</div>
               </div>
-              <div className="p-5 sm:p-6 relative z-10">
-                <p className="font-bold text-brand-brown text-lg">Main Office Photo</p>
-                <p className="text-sm text-gray-600 mt-1">Current office image space with a refreshed showcase treatment.</p>
+              <div className="relative z-10 p-4 sm:p-6">
+                <p className="text-base font-bold text-brand-brown sm:text-lg">Main Office Photo</p>
+                <p className="mt-1 text-sm leading-6 text-gray-600">Current office image space with a refreshed showcase treatment.</p>
               </div>
             </div>
             <div className="about-gallery-card group">
@@ -122,9 +131,9 @@ export default function About() {
                 <img src="/landing/img/about-2.jpg" alt="Satellite branch placeholder" className="w-full h-72 sm:h-96 object-cover cursor-pointer about-gallery-image" loading="lazy" onClick={() => lightbox.open('/landing/img/about-2.jpg')} />
                 <div className="about-gallery-label">Satellite Branch</div>
               </div>
-              <div className="p-5 sm:p-6 relative z-10">
-                <p className="font-bold text-brand-brown text-lg">Satellite Branch Photo</p>
-                <p className="text-sm text-gray-600 mt-1">Reserved upload space for the satellite branch photo.</p>
+              <div className="relative z-10 p-4 sm:p-6">
+                <p className="text-base font-bold text-brand-brown sm:text-lg">Satellite Branch Photo</p>
+                <p className="mt-1 text-sm leading-6 text-gray-600">A wider exterior view of the satellite branch, showing the building frontage, parking area, and vehicle access space used for day-to-day branch operations.</p>
               </div>
             </div>
           </div>
@@ -134,7 +143,7 @@ export default function About() {
       {/* Stats */}
       <section className="py-16 bg-diagonal-lines" style={{ backgroundColor: '#FFF8E1' }}>
         <div className="section-container">
-          <div ref={ref3} className="reveal mx-auto grid max-w-3xl grid-cols-1 gap-8 text-center sm:grid-cols-2 sm:gap-12">
+          <div ref={ref3} className="reveal mx-auto grid max-w-3xl grid-cols-2 gap-8 text-center sm:gap-12">
             <StatBlock value={10} suffix="" label="Product Lines" />
             <StatBlock value={5} suffix="+" label="Years of Trust" />
           </div>
