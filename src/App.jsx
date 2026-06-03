@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -6,51 +7,57 @@ import { Toaster } from 'react-hot-toast';
 import MemberLayout from './layouts/MemberLayout';
 import AdminLayout from './layouts/AdminLayout';
 
-// Member Pages
-import Login from './pages/member/Login';
-import Dashboard from './pages/member/Dashboard';
-import DashboardMetricDetail from './pages/member/DashboardMetricDetail';
-import EWallet from './pages/member/EWallet';
-import AccountDetails from './pages/member/AccountDetails';
-import ActivationCodes from './pages/member/ActivationCodes';
-import DirectReferrals from './pages/member/DirectReferrals';
-import GenealogyTree from './pages/member/GenealogyTree';
-import PairingReports from './pages/member/PairingReports';
-import PairingLegAccounts from './pages/member/PairingLegAccounts';
-import HiFiveBonus from './pages/member/HiFiveBonus';
-import RankingProgress from './pages/member/RankingProgress';
-import Leaderboard from './pages/member/Leaderboard';
-import Vouchers from './pages/member/Vouchers';
-import Transactions from './pages/member/Transactions';
-import TransactionDetails from './pages/member/TransactionDetails';
-import UpgradeAccount from './pages/member/UpgradeAccount';
-import Registration from './pages/member/Registration';
-import SupportContact from './pages/member/SupportContact';
+const Login = lazy(() => import('./pages/member/Login'));
+const Dashboard = lazy(() => import('./pages/member/Dashboard'));
+const DashboardMetricDetail = lazy(() => import('./pages/member/DashboardMetricDetail'));
+const EWallet = lazy(() => import('./pages/member/EWallet'));
+const AccountDetails = lazy(() => import('./pages/member/AccountDetails'));
+const ActivationCodes = lazy(() => import('./pages/member/ActivationCodes'));
+const DirectReferrals = lazy(() => import('./pages/member/DirectReferrals'));
+const GenealogyTree = lazy(() => import('./pages/member/GenealogyTree'));
+const PairingReports = lazy(() => import('./pages/member/PairingReports'));
+const PairingLegAccounts = lazy(() => import('./pages/member/PairingLegAccounts'));
+const HiFiveBonus = lazy(() => import('./pages/member/HiFiveBonus'));
+const RankingProgress = lazy(() => import('./pages/member/RankingProgress'));
+const Leaderboard = lazy(() => import('./pages/member/Leaderboard'));
+const Vouchers = lazy(() => import('./pages/member/Vouchers'));
+const Transactions = lazy(() => import('./pages/member/Transactions'));
+const TransactionDetails = lazy(() => import('./pages/member/TransactionDetails'));
+const UpgradeAccount = lazy(() => import('./pages/member/UpgradeAccount'));
+const Registration = lazy(() => import('./pages/member/Registration'));
+const SupportContact = lazy(() => import('./pages/member/SupportContact'));
+const ReferralInvite = lazy(() => import('./pages/member/ReferralInvite'));
 
-// Admin Pages
-import AdminLogin from './pages/admin/Login';
-import AdminDashboard from './pages/admin/Dashboard';
-import AccountMasterlist from './pages/admin/AccountMasterlist';
-import GenerateCodes from './pages/admin/GenerateCodes';
-import ManageCodes from './pages/admin/ManageCodes';
-import Encashment from './pages/admin/Encashment';
-import Redeem from './pages/admin/Redeem';
-import HiFivePackageClaims from './pages/admin/HiFivePackageClaims';
-import UpdateAccounts from './pages/admin/UpdateAccounts';
-import IncomeDetails from './pages/admin/IncomeDetails';
-import CDPaymentDetails from './pages/admin/CDPaymentDetails';
-import AdminGenealogy from './pages/admin/AdminGenealogy';
-import ChangePassword from './pages/admin/ChangePassword';
-import NewsManagement from './pages/admin/NewsManagement';
-import Messages from './pages/admin/Messages';
-import Rankings from './pages/admin/Rankings';
-import GlobalBonus from './pages/admin/GlobalBonus';
-import CDAccounts from './pages/admin/CDAccounts';
-import Finance from './pages/admin/Finance';
-import VoucherManagement from './pages/admin/VoucherManagement';
-import VoucherGrant from './pages/admin/VoucherGrant';
-import Applications from './pages/admin/Applications';
-import ReferralInvite from './pages/member/ReferralInvite';
+const AdminLogin = lazy(() => import('./pages/admin/Login'));
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AccountMasterlist = lazy(() => import('./pages/admin/AccountMasterlist'));
+const GenerateCodes = lazy(() => import('./pages/admin/GenerateCodes'));
+const ManageCodes = lazy(() => import('./pages/admin/ManageCodes'));
+const Encashment = lazy(() => import('./pages/admin/Encashment'));
+const Redeem = lazy(() => import('./pages/admin/Redeem'));
+const HiFivePackageClaims = lazy(() => import('./pages/admin/HiFivePackageClaims'));
+const UpdateAccounts = lazy(() => import('./pages/admin/UpdateAccounts'));
+const IncomeDetails = lazy(() => import('./pages/admin/IncomeDetails'));
+const CDPaymentDetails = lazy(() => import('./pages/admin/CDPaymentDetails'));
+const AdminGenealogy = lazy(() => import('./pages/admin/AdminGenealogy'));
+const ChangePassword = lazy(() => import('./pages/admin/ChangePassword'));
+const NewsManagement = lazy(() => import('./pages/admin/NewsManagement'));
+const Messages = lazy(() => import('./pages/admin/Messages'));
+const Rankings = lazy(() => import('./pages/admin/Rankings'));
+const GlobalBonus = lazy(() => import('./pages/admin/GlobalBonus'));
+const CDAccounts = lazy(() => import('./pages/admin/CDAccounts'));
+const Finance = lazy(() => import('./pages/admin/Finance'));
+const VoucherManagement = lazy(() => import('./pages/admin/VoucherManagement'));
+const VoucherGrant = lazy(() => import('./pages/admin/VoucherGrant'));
+const Applications = lazy(() => import('./pages/admin/Applications'));
+
+function RouteFallback() {
+  return (
+    <div className="flex items-center justify-center h-screen portal-bg">
+      <div className="size-12 rounded-full border-[3px] animate-spin" style={{ borderColor: 'rgba(212,175,55,0.12)', borderTopColor: '#D4AF37' }} />
+    </div>
+  );
+}
 
 function ProtectedMember({ children }) {
   const { user, loading } = useAuth();
@@ -104,129 +111,131 @@ export default function App() {
   return (
     <>
       <Toaster position="top-right" />
-      <Routes>
-        {/* Public */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          {/* Public */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* Member Portal */}
-        <Route path="/" element={<ProtectedMember><MemberLayout /></ProtectedMember>}>
-          <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="dashboard/details/:metric" element={<DashboardMetricDetail />} />
-          <Route path="ewallet" element={<EWallet />} />
-          <Route path="account" element={<AccountDetails />} />
-          <Route path="codes" element={<ActivationCodes />} />
-          <Route path="referrals" element={<DirectReferrals />} />
-          <Route path="genealogy" element={<GenealogyTree />} />
-          <Route path="pairing" element={<PairingReports />} />
-          <Route path="pairing/leg/:side" element={<PairingLegAccounts />} />
-          <Route path="hifive" element={<HiFiveBonus />} />
-          <Route path="ranking" element={<RankingProgress />} />
-          <Route path="leaderboard" element={<Leaderboard />} />
-          <Route path="vouchers" element={<Vouchers />} />
-          <Route path="transactions" element={<Transactions />} />
-          <Route path="transactions/:pid" element={<TransactionDetails />} />
-          <Route path="upgrade" element={<UpgradeAccount />} />
-          <Route path="register" element={<Registration />} />
-          <Route path="referral-invite" element={<ReferralInvite />} />
-          <Route path="support" element={<SupportContact />} />
-        </Route>
+          {/* Member Portal */}
+          <Route path="/" element={<ProtectedMember><MemberLayout /></ProtectedMember>}>
+            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="dashboard/details/:metric" element={<DashboardMetricDetail />} />
+            <Route path="ewallet" element={<EWallet />} />
+            <Route path="account" element={<AccountDetails />} />
+            <Route path="codes" element={<ActivationCodes />} />
+            <Route path="referrals" element={<DirectReferrals />} />
+            <Route path="genealogy" element={<GenealogyTree />} />
+            <Route path="pairing" element={<PairingReports />} />
+            <Route path="pairing/leg/:side" element={<PairingLegAccounts />} />
+            <Route path="hifive" element={<HiFiveBonus />} />
+            <Route path="ranking" element={<RankingProgress />} />
+            <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="vouchers" element={<Vouchers />} />
+            <Route path="transactions" element={<Transactions />} />
+            <Route path="transactions/:pid" element={<TransactionDetails />} />
+            <Route path="upgrade" element={<UpgradeAccount />} />
+            <Route path="register" element={<Registration />} />
+            <Route path="referral-invite" element={<ReferralInvite />} />
+            <Route path="support" element={<SupportContact />} />
+          </Route>
 
-        {/* Admin Panel */}
-        <Route path="/admin" element={<ProtectedAdmin><AdminLayout /></ProtectedAdmin>}>
-          <Route
-            index
-            element={<ProtectedAdminRoles allowed={[1, 3]}><AdminDashboard /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="dashboard"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><AdminDashboard /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="accounts"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><AccountMasterlist /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="accounts/:uid"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><UpdateAccounts /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="accounts/:uid/income"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><IncomeDetails /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="accounts/:uid/cd"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><CDPaymentDetails /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="generate-codes"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><GenerateCodes /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="manage-codes"
-            element={<ProtectedAdminRoles allowed={[1, 2, 3]}><ManageCodes /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="voucher-management"
-            element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherManagement /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="voucher-management/grant"
-            element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherGrant /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="encashment"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><Encashment /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="redeem"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><Redeem /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="hifive-package-claims"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><HiFivePackageClaims /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="rankings"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><Rankings /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="finance"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><Finance /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="global-bonus"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><GlobalBonus /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="cd-accounts"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><CDAccounts /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="genealogy"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><AdminGenealogy /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="news"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><NewsManagement /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="messages"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><Messages /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="applications"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><Applications /></ProtectedAdminRoles>}
-          />
-          <Route
-            path="change-password"
-            element={<ProtectedAdminRoles allowed={[1, 3]}><ChangePassword /></ProtectedAdminRoles>}
-          />
-        </Route>
+          {/* Admin Panel */}
+          <Route path="/admin" element={<ProtectedAdmin><AdminLayout /></ProtectedAdmin>}>
+            <Route
+              index
+              element={<ProtectedAdminRoles allowed={[1, 3]}><AdminDashboard /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="dashboard"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><AdminDashboard /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="accounts"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><AccountMasterlist /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="accounts/:uid"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><UpdateAccounts /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="accounts/:uid/income"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><IncomeDetails /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="accounts/:uid/cd"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><CDPaymentDetails /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="generate-codes"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><GenerateCodes /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="manage-codes"
+              element={<ProtectedAdminRoles allowed={[1, 2, 3]}><ManageCodes /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="voucher-management"
+              element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherManagement /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="voucher-management/grant"
+              element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherGrant /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="encashment"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><Encashment /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="redeem"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><Redeem /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="hifive-package-claims"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><HiFivePackageClaims /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="rankings"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><Rankings /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="finance"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><Finance /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="global-bonus"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><GlobalBonus /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="cd-accounts"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><CDAccounts /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="genealogy"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><AdminGenealogy /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="news"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><NewsManagement /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="messages"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><Messages /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="applications"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><Applications /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="change-password"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><ChangePassword /></ProtectedAdminRoles>}
+            />
+          </Route>
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Suspense>
     </>
   );
 }

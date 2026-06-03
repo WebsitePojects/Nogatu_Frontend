@@ -63,7 +63,7 @@ export default function Leaderboard() {
     }
   }
 
-  const pointsBasis = data?.pointsBasis || 'Product Repurchase Points';
+  const pointsBasis = data?.pointsBasis || 'Repurchase points';
   const userRank = Number(data?.userRank || 0);
   const userCurrentRankLabel = data?.userCurrentRankLabel || 'Unranked';
   const userPoints = Number((data?.userGrossRankablePoints ?? data?.userRepurchasePoints ?? data?.userPoints) || 0);
@@ -158,7 +158,7 @@ export default function Leaderboard() {
                     <p className="text-white font-semibold mt-1">{fmt(row.grossRankablePoints ?? row.repurchasePoints)}</p>
                   </div>
                   <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p className="text-[11px] text-white/45">Product Repurchase Points</p>
+                    <p className="text-[11px] text-white/45">Repurchase points</p>
                     <p className="text-white font-semibold mt-1">{fmt(row.remainingRankablePoints)}</p>
                   </div>
                 </div>
@@ -174,7 +174,7 @@ export default function Leaderboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Top', 'Member', 'Package', 'Current Rank', 'Gross Recorded Points', 'Product Repurchase Points'].map((heading) => (
+                  {['Top', 'Member', 'Package', 'Current Rank', 'Gross Recorded Points', 'Repurchase points'].map((heading) => (
                     <th key={heading} className="table-header p-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
