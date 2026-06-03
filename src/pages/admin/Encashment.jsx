@@ -62,7 +62,7 @@ export default function Encashment() {
     } catch { } finally { setLoading(false); }
   }
 
-  async function handleExport(format = 'xlsx') {
+  async function handleExport(format = 'csv') {
     setExporting(true);
     try {
       let url = `/admin/encashment/export?format=${format}`;
@@ -183,20 +183,12 @@ export default function Encashment() {
           </button>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => handleExport('xlsx')}
+              onClick={() => handleExport('csv')}
               disabled={exporting}
               className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
               style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
              type="button">
-              {exporting ? 'Exporting...' : 'Export XLSX'}
-            </button>
-            <button
-              onClick={() => handleExport('pdf')}
-              disabled={exporting}
-              className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
-              style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
-             type="button">
-              {exporting ? 'Preparing PDF...' : 'Export PDF'}
+              {exporting ? 'Exporting...' : 'Export CSV'}
             </button>
           </div>
         </div>
@@ -469,7 +461,7 @@ export default function Encashment() {
                     <p>Pairing: ₱{fmt(activeDetails?.income?.pairing)}</p>
                     <p>Leadership: ₱{fmt(activeDetails?.income?.leadership)}</p>
                     <p>Hi-Five: ₱{fmt(activeDetails?.income?.hifive)}</p>
-                    <p>LPC: ₱{fmt(activeDetails?.income?.lpc)}</p>
+                    <p>Ranking Bonus: ₱{fmt(activeDetails?.income?.rankingBonus)}</p>
                   </div>
 
                   <div className="mt-4 text-sm space-y-1 rounded-xl p-3" style={{ color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(148,163,184,0.2)' }}>

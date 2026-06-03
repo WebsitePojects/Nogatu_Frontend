@@ -1,5 +1,5 @@
 import React from 'react';
-import { BaseEdge, Handle, Position } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import { HiOutlinePlusCircle } from 'react-icons/hi';
 import {
   JUNCTION_SIZE,
@@ -259,8 +259,28 @@ export function TreeEdge({ id, sourceX, sourceY, targetX, targetY, style = {} })
 
   return (
     <>
-      <BaseEdge id={`${id}-glow`} path={path} style={{ stroke: 'rgba(212,175,55,0.18)', strokeWidth: edgeWidth + 4, strokeLinecap: 'round', strokeLinejoin: 'round' }} />
-      <BaseEdge id={id} path={path} style={{ ...style, stroke: edgeStroke, strokeWidth: edgeWidth, strokeLinecap: 'round', strokeLinejoin: 'round' }} />
+      <path
+        id={`${id}-glow`}
+        d={path}
+        className="react-flow__edge-path"
+        fill="none"
+        stroke="rgba(212,175,55,0.18)"
+        strokeWidth={Number(edgeWidth) + 4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ fill: 'none', stroke: 'rgba(212,175,55,0.18)', strokeWidth: Number(edgeWidth) + 4 }}
+      />
+      <path
+        id={id}
+        d={path}
+        className="react-flow__edge-path"
+        fill="none"
+        stroke={edgeStroke}
+        strokeWidth={edgeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ fill: 'none', stroke: edgeStroke, strokeWidth: edgeWidth, ...style }}
+      />
       <circle cx={sourceX} cy={midY} r="3" fill="#E7C45C" opacity="0.78" />
       {Math.abs(targetX - sourceX) > 1 ? <circle cx={targetX} cy={midY} r="3" fill="#E7C45C" opacity="0.78" /> : null}
     </>

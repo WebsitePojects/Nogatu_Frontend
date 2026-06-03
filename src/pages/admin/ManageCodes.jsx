@@ -57,7 +57,7 @@ export default function ManageCodes() {
     } catch { } finally { setLoading(false); }
   }
 
-  async function exportHistory(format = 'xlsx') {
+  async function exportHistory(format = 'csv') {
     try {
       const q = codeSearch.trim();
       const url = apiUrl(`/admin/codes/history/export?format=${format}${q ? `&q=${encodeURIComponent(q)}` : ''}`);
@@ -417,19 +417,11 @@ export default function ManageCodes() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => exportHistory('xlsx')}
+              onClick={() => exportHistory('csv')}
               className="rounded-xl px-4 py-2 text-xs font-semibold border"
               style={{ background: 'rgba(59,130,246,0.08)', color: blueText, border: '1px solid rgba(59,130,246,0.22)' }}
             >
-              Export XLSX
-            </button>
-            <button
-              type="button"
-              onClick={() => exportHistory('pdf')}
-              className="rounded-xl px-4 py-2 text-xs font-semibold border"
-              style={{ background: 'rgba(16,185,129,0.08)', color: greenText, border: '1px solid rgba(16,185,129,0.22)' }}
-            >
-              Export PDF
+              Export CSV
             </button>
             <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage <= 1}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{historyPage} / {historyTotalPages}</span>

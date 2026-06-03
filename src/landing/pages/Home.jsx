@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
 import { apiUrl } from '../../utils/apiBase';
+import { LANDING_PRODUCT_GROUPS } from '../data/productCatalog';
 
 const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
 
@@ -37,7 +38,7 @@ function ProductGroupSection({ group, groupIndex, onOpenLightbox }) {
           {group.title}
         </p>
       </div>
-      <div className={`ggrid grid-cols-1 min-[560px]:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7 ${group.centered ? 'product-grid-centered' : ''}`}>
+      <div className={`grid grid-cols-1 min-[560px]:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7 ${group.centered ? 'product-grid-centered' : ''}`}>
         {group.items.map((p) => (
           <article key={p.name} className="product-lineup-card group mx-auto flex size-full max-w-[24rem] flex-col rounded-[1.9rem] border border-brand-gold/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,248,225,0.98)_100%)] p-4 text-center shadow-[0_18px_42px_rgba(89,34,25,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_52px_rgba(184,134,11,0.16)] sm:p-5">
             <div
@@ -120,24 +121,24 @@ function Hero() {
             <p className="mb-4 sm:mb-6 text-white/90 text-sm sm:text-lg font-medium max-w-md drop-shadow-md">
               Wellness You Can Taste, Quality You Can Trust.
             </p>
-            <div className="landing-hero-actions flex w-full max-w-sm flex-col gap-2 sm:w-auto sm:max-w-none sm:flex-row sm:gap-3">
+            <div className="landing-hero-actions flex w-full max-w-sm flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:gap-4">
               <a
                 href="/portal/login"
-                className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center px-6 sm:px-8 py-3 text-center text-white text-sm sm:text-base font-bold rounded-full motion-safe:transition-all motion-safe:duration-300 border-2 border-brand-gold-dark shadow-[0_10px_40px_rgba(184,134,11,0.5)] leading-tight hover:scale-[1.02] hover:shadow-[0_15px_50px_rgba(184,134,11,0.7)]"
+                className="inline-flex min-h-[62px] w-full sm:w-auto items-center justify-center px-7 sm:px-9 py-3.5 text-center text-white text-sm sm:text-base font-extrabold rounded-full motion-safe:transition-all motion-safe:duration-300 border border-[#b37f08] shadow-[0_10px_34px_rgba(184,134,11,0.45)] leading-tight hover:-translate-y-0.5 hover:shadow-[0_16px_42px_rgba(184,134,11,0.6)]"
                 style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
               >
                 Be the One. Register Now!
               </a>
               <a
                 href="#stockist-apply"
-                className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center gap-2 rounded-full px-5 sm:px-6 py-3 text-center text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
+                className="inline-flex min-h-[62px] w-full sm:w-auto items-center justify-center gap-3 rounded-full px-6 sm:px-7 py-3.5 text-center text-sm sm:text-base font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
                 style={{
-                  border: '1px solid rgba(255,255,255,0.42)',
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(212,165,40,0.16))',
-                  boxShadow: '0 10px 28px rgba(89,34,25,0.18), inset 0 1px 0 rgba(255,255,255,0.32)',
+                  border: '1px solid rgba(255,255,255,0.5)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(212,165,40,0.14))',
+                  boxShadow: '0 10px 28px rgba(89,34,25,0.18), inset 0 1px 0 rgba(255,255,255,0.34)',
                 }}
               >
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/25 bg-white/15">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-white/15">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
                   </svg>
@@ -157,7 +158,7 @@ function Hero() {
             <div className="hero-carousel-shell relative w-full max-w-[600px] sm:max-w-[760px] lg:max-w-[1080px] xl:max-w-[1240px] mx-auto lg:mx-0">
               <div className="hero-carousel-card">
                 <div className="hero-carousel-stage">
-                  <span className={`hhero-carousel-eyebrow ${activeSlide === 1 ? 'is-lower' : 'is-upper'}`}>
+                  <span className={`hero-carousel-eyebrow ${activeSlide === 1 ? 'is-lower' : 'is-upper'}`}>
                     {heroSlides[activeSlide].eyebrow}
                   </span>
                   <div className="hero-carousel-glow" />
@@ -168,7 +169,7 @@ function Hero() {
                       key={slide.image}
                       src={slide.image}
                       alt={slide.alt}
-                      className={`hhero-carousel-image ${index === activeSlide ? 'is-active' : 'is-hidden'} ${index === 0 ? 'is-collection' : 'is-single-product'}`}
+                      className={`hero-carousel-image ${index === activeSlide ? 'is-active' : 'is-hidden'} ${index === 0 ? 'is-collection' : 'is-single-product'}`}
                     />
                   ))}
 
@@ -176,7 +177,7 @@ function Hero() {
                     {heroSlides.map((slide, index) => (
                       <span
                         key={slide.image}
-                        className={`hhero-carousel-dot ${index === activeSlide ? 'is-active' : ''}`}
+                        className={`hero-carousel-dot ${index === activeSlide ? 'is-active' : ''}`}
                       />
                     ))}
                   </div>
@@ -383,40 +384,6 @@ function WhyUs() {
 /* ────────────────────────── Products ─────────────────────── */
 function Products() {
   const lightbox = useLightbox();
-  const productGroups = [
-    {
-      title: 'New Products',
-      layout: 'featured',
-      items: [
-        { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png', badge: 'New Product' },
-        { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png', badge: 'New Product' },
-      ],
-    },
-    {
-      title: 'Capsules and Supplements',
-      items: [
-        { name: 'Vitamin C with Zinc & Mangosteen', desc: 'Vitamin support blend with mangosteen extract', price: '580.00', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png', badge: 'Wellness Pick' },
-        { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png', badge: 'Beauty Blend' },
-        { name: 'Vitamin C with Collagen & Glutathione', desc: 'Radiance and antioxidant support formula', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png', badge: 'Daily Support' },
-      ],
-    },
-    {
-      title: 'Coffee Products',
-      items: [
-        { name: 'Nogatu Coffee Mix', desc: 'Herbal coffee mix for immunity and energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png', imgLg: '/legacy-img/Coffee-Mix.png', badge: 'Coffee Blend' },
-        { name: 'Mangosteen Coffee Mix', desc: 'Coffee drink mix with mangosteen', price: '375.00', img: '/legacy-img/Mangoosteen_1.png', imgLg: '/legacy-img/Mangoosteen_1.png', badge: 'Coffee Blend' },
-        { name: 'Nogatu Black Coffee', desc: 'Premium black coffee drink mix', price: '250.00', img: '/legacy-img/blck-coffee.png', imgLg: '/legacy-img/blck-coffee.png', badge: 'Coffee Blend' },
-      ],
-    },
-    {
-      title: 'Barley Juice and Chocolate Drink Mix',
-      layout: 'featured',
-      items: [
-        { name: 'Nogatu Barley Juice', desc: 'Pure energy and naturally refreshing', price: '850.00', img: '/legacy-img/Barley-Mix.png', imgLg: '/legacy-img/Barley-Mix.png', badge: 'Wellness Pick' },
-        { name: 'Chocolate Drink Mix', desc: 'Healthy chocolate with herbal and vegetable mix', price: '710.00', img: '/legacy-img/Chox-Mix.png', imgLg: '/legacy-img/Chox-Mix.png', badge: 'Comfort Blend' },
-      ],
-    },
-  ];
 
   return (
     <section className="section-padding relative overflow-hidden" style={{ background: '#FFFDF5' }}>
@@ -431,7 +398,7 @@ function Products() {
           </p>
         </div>
         <div className="space-y-10 sm:space-y-12">
-          {productGroups.map((group, groupIndex) => {
+          {LANDING_PRODUCT_GROUPS.map((group, groupIndex) => {
             const sectionRef = useScrollReveal({ delay: groupIndex * 80 });
             return (
               <div key={group.title} ref={sectionRef} className="reveal">
@@ -719,7 +686,7 @@ function ApplicationForm() {
                   onChange={(e) => updateField(field.key, e.target.value)}
                   required
                   aria-invalid={fieldErrors[field.key] ? 'true' : 'false'}
-                  className={`ww-full rounded-xl border bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20 ${fieldErrors[field.key] ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-primary-200/70'}`}
+                  className={`w-full rounded-xl border bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20 ${fieldErrors[field.key] ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-primary-200/70'}`}
                 />
                 {fieldErrors[field.key] && (
                   <p className="mt-2 text-sm text-red-600">{fieldErrors[field.key]}</p>
@@ -727,7 +694,7 @@ function ApplicationForm() {
               </label>
             ))}
             {status.message && (
-              <div className={`rrounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+              <div className={`rounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                 {status.message}
               </div>
             )}
