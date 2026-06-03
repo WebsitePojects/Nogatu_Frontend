@@ -892,7 +892,6 @@ html:not(.dark) .label {
   .genealogy-flow .react-flow__edge-path {
     stroke-linejoin: round;
     stroke-linecap: round;
-    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.18));
   }
 
   .genealogy-flow .react-flow__controls {

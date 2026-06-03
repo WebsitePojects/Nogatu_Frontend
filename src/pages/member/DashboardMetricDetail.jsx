@@ -281,14 +281,14 @@ export default function DashboardMetricDetail() {
     return () => { cancelled = true; };
   }, [metric, page]);
 
-  async function handleExportXlsx() {
-    const res = await api.get(`/dashboard/breakdown/${metric}/export?format=xlsx`, {
+  async function handleExportCsv() {
+    const res = await api.get(`/dashboard/breakdown/${metric}/export?format=csv`, {
       responseType: 'blob',
     });
     const url = window.URL.createObjectURL(new Blob([res.data]));
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${metric}-breakdown.xlsx`;
+    link.download = `${metric}-breakdown.csv`;
     link.click();
     window.URL.revokeObjectURL(url);
   }
@@ -353,12 +353,12 @@ export default function DashboardMetricDetail() {
               <>
                 <button
                   type="button"
-                  onClick={handleExportXlsx}
+                  onClick={handleExportCsv}
                   className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
                   style={{ background: `${config.accent}16`, color: config.accent, border: `1px solid ${config.accent}33` }}
                 >
                   <HiOutlineDownload className="size-4" />
-                  Export XLSX
+                  Export CSV
                 </button>
                 <button
                   type="button"

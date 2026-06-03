@@ -1,5 +1,6 @@
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
+import { LANDING_PRODUCT_GROUPS } from '../data/productCatalog';
 
 function PageHero({ title, subtitle }) {
   return (
@@ -29,7 +30,7 @@ const WAYS_OF_WEALTH = [
   { num: '4', name: 'Leadership Bonus', desc: 'Bonus rewards for reaching leadership milestones and maintaining consistent network growth.' },
   { num: '5', name: 'Hi-Five Bonus', desc: 'Special rewards through the Hi-Five program for qualified and active members.' },
   { num: '6', name: 'Unilevel Bonus', desc: 'Multi-level income from your entire downline across multiple depths of your network.' },
-  { num: '7', name: 'Ranking Bonus', desc: 'Additional income based on your rank in the Leadership Point Count (LPC) system.' },
+  { num: '7', name: 'Ranking Bonus', desc: 'Additional income based on your approved rank achievements and released ranking incentives.' },
   { num: '8', name: 'Global Bonus', desc: 'Share in the company\'s global pool bonus reserved for top-performing leaders in the network.' },
 ];
 
@@ -40,19 +41,6 @@ const TIERS = [
   { name: 'Gold', price: '10,000', color: 'from-yellow-500 to-amber-500', badge: 'bg-yellow-50 text-yellow-700', popular: true, features: ['Gold package products', 'Maximum pairing bonus', 'Leadership bonus eligible', 'Hi-Five bonus eligible', 'Full income streams'] },
   { name: 'Silver', price: '5,000', color: 'from-gray-400 to-gray-500', badge: 'bg-gray-100 text-gray-600', features: ['Silver package products', 'Higher pairing bonus', 'Direct referral bonus', 'Unilevel income'] },
   { name: 'Bronze', price: '2,500', color: 'from-amber-700 to-amber-600', badge: 'bg-amber-100 text-amber-700', features: ['Entry package products', 'Binary genealogy placement', 'Direct referral bonus', 'Basic member portal'] },
-];
-
-const PRODUCTS = [
-  { name: 'Nogatu Barley Juice', desc: 'Pure Energy & Naturally Refreshing', price: '850.00', img: '/legacy-img/Barley-Mix.png' },
-  { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png' },
-  { name: 'Vitamin C with Collagen & Glutathione', desc: 'Radiance and antioxidant support formula', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png' },
-  { name: 'Chocolate Drink Mix', desc: 'Healthy Chocolate with Herbal & Vegetable Mix', price: '710.00', img: '/legacy-img/Chox-Mix.png' },
-  { name: 'Nogatu Coffee Mix', desc: 'Herbal Coffee Mix for Immunity & Energy', price: '495.00', img: '/legacy-img/Coffee-Mix.png' },
-  { name: 'Mangosteen Coffee Mix', desc: 'Coffee Drink Mix', price: '375.00', img: '/legacy-img/Mangoosteen_1.png' },
-  { name: 'Vitamin C with Zinc & Mangosteen', desc: 'Vitamin support blend with mangosteen extract', price: '580.00', img: '/legacy-img/Vitamin-C.png' },
-  { name: 'Nogatu Black Coffee', desc: 'Premium black coffee drink mix', price: '250.00', img: '/legacy-img/blck-coffee.png' },
-  { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png' },
-  { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png' },
 ];
 
 function ProductCard({ product, delay, onLightbox }) {
@@ -113,14 +101,14 @@ function TierCard({ tier, delay }) {
   return (
     <div
       ref={ref}
-      className={`rreveal relative rounded-2xl border overflow-hidden motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-1 ${tier.popular ? 'shadow-lg' : ''}`}
+      className={`reveal relative rounded-2xl border overflow-hidden motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-1 ${tier.popular ? 'shadow-lg' : ''}`}
       style={{ backgroundColor: '#FFFDF5', borderColor: tier.popular ? '#D4A528' : 'rgba(184,134,11,0.15)', ...(tier.popular ? { boxShadow: '0 0 0 1px rgba(212,165,40,0.3)' } : {}) }}
     >
       {tier.popular && (
         <div className="absolute top-0 right-0 px-4 py-1 text-white text-xs font-bold rounded-bl-xl" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>Popular</div>
       )}
-      <div className={`pp-6 bg-gradient-to-br ${tier.color} text-whitee`}>
-        <span className={`iinline-block px-3 py-1 rounded-full text-xs font-bold ${tier.badge} mb-33`}>{tier.name}</span>
+      <div className={`p-6 bg-gradient-to-br ${tier.color} text-white`}>
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${tier.badge} mb-3`}>{tier.name}</span>
         <div className="flex items-baseline gap-1">
           <span className="text-sm opacity-80">&#8369;</span>
           <span className="text-3xl font-extrabold">{tier.price}</span>
@@ -137,7 +125,7 @@ function TierCard({ tier, delay }) {
         </ul>
         <a
           href="/portal/login"
-          className={`mmt-6 block text-center py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-all motion-safe:duration-200 cursor-pointer ${tier.popular ? 'text-white shadow-md' : 'text-brand-brown hover:opacity-90'}`}
+          className={`mt-6 block text-center py-2.5 rounded-xl text-sm font-semibold motion-safe:transition-all motion-safe:duration-200 cursor-pointer ${tier.popular ? 'text-white shadow-md' : 'text-brand-brown hover:opacity-90'}`}
           style={tier.popular ? { background: 'linear-gradient(135deg, #B8860B, #D4A528)' } : { backgroundColor: '#FFF8E1', color: '#592219' }}
         >
           Get Started
@@ -179,9 +167,25 @@ export default function Opportunities() {
             <div className="w-16 h-1 rounded-full mx-auto mt-4" style={{ background: 'linear-gradient(90deg, #B8860B, #D4A528)' }} />
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-5 sm:gap-8">
-            {PRODUCTS.map((p, i) => (
-              <ProductCard key={p.name} product={p} delay={i * 80} onLightbox={lightbox.open} />
+          <div className="space-y-10 sm:space-y-12">
+            {LANDING_PRODUCT_GROUPS.map((group, groupIndex) => (
+              <div key={group.title} className="space-y-5 sm:space-y-6">
+                <div className="text-center">
+                  <p className="inline-flex items-center rounded-full border border-brand-gold/20 bg-white/70 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-brand-gold-dark shadow-sm">
+                    {group.title}
+                  </p>
+                </div>
+                <div className={`grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-8 ${group.items.length === 2 ? 'xl:grid-cols-2 xl:max-w-4xl xl:mx-auto' : 'lg:grid-cols-3'}`}>
+                  {group.items.map((product, itemIndex) => (
+                    <ProductCard
+                      key={product.name}
+                      product={product}
+                      delay={(groupIndex * 3 + itemIndex) * 70}
+                      onLightbox={lightbox.open}
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>

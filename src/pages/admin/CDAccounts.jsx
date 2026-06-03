@@ -87,7 +87,7 @@ export default function CDAccounts() {
     loadAccounts(1, search, status, packageType);
   }
 
-  async function handleExport(format = 'xlsx') {
+  async function handleExport(format = 'csv') {
     setExporting(true);
     try {
       const url = apiUrl(`/admin/cd-accounts/export?format=${encodeURIComponent(format)}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}&packageType=${encodeURIComponent(packageType)}`);
@@ -252,21 +252,12 @@ export default function CDAccounts() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => handleExport('xlsx')}
+              onClick={() => handleExport('csv')}
               disabled={exporting}
               className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50 h-[46px]"
               style={{ borderColor: 'rgba(59,130,246,0.22)', color: blueText, background: 'rgba(59,130,246,0.08)' }}
             >
-              {exporting ? 'Exporting...' : 'Export XLSX'}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleExport('pdf')}
-              disabled={exporting}
-              className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50 h-[46px]"
-              style={{ borderColor: 'rgba(16,185,129,0.22)', color: greenText, background: 'rgba(16,185,129,0.08)' }}
-            >
-              {exporting ? 'Preparing PDF...' : 'Export PDF'}
+              {exporting ? 'Exporting...' : 'Export CSV'}
             </button>
           </div>
         </form>

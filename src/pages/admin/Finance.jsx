@@ -421,21 +421,12 @@ export default function Finance() {
             </button>
             <button
               type="button"
-              onClick={() => handleExport('xlsx')}
-              disabled={exporting === 'xlsx'}
+              onClick={() => handleExport('csv')}
+              disabled={exporting === 'csv'}
               className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
               style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
             >
-              {exporting === 'xlsx' ? 'Exporting...' : 'Export XLSX'}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleExport('pdf')}
-              disabled={exporting === 'pdf'}
-              className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
-              style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
-            >
-              {exporting === 'pdf' ? 'Preparing PDF...' : 'Export PDF'}
+              {exporting === 'csv' ? 'Exporting...' : 'Export CSV'}
             </button>
           </div>
         </div>
@@ -711,21 +702,12 @@ export default function Finance() {
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => handleExport('xlsx')}
+                  onClick={() => handleExport('csv')}
                   disabled={Boolean(exporting)}
                   className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50"
                   style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
                 >
-                  {exporting === 'xlsx' ? 'Exporting XLSX...' : 'Export current year to XLSX'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleExport('pdf')}
-                  disabled={Boolean(exporting)}
-                  className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50"
-                  style={{ borderColor: 'rgba(16,185,129,0.22)', color: '#6ee7b7', background: 'rgba(16,185,129,0.08)' }}
-                >
-                  {exporting === 'pdf' ? 'Preparing PDF report...' : 'Export current year to PDF'}
+                  {exporting === 'csv' ? 'Exporting CSV...' : 'Export current year to CSV'}
                 </button>
               </div>
             </div>

@@ -39,6 +39,43 @@ export function legLabel(leg) {
   return 'Team';
 }
 
+function escapeCsvValue(value) {
+  if (value == null) return '';
+  const stringValue = typeof value === 'string' ? value : String(value);
+  if (/["\r\n,]/.test(stringValue)) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  return stringValue;
+}
+
+function buildCsvSection(title, rows = []) {
+  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const lines = [];
+
+  if (title) {
+    lines.push(escapeCsvValue(title));
+  }
+
+  if (headers.length > 0) {
+    lines.push(headers.map(escapeCsvValue).join(','));
+    rows.forEach((row) => {
+      lines.push(headers.map((header) => escapeCsvValue(row?.[header])).join(','));
+    });
+  }
+
+  lines.push('');
+  return lines.join('\r\n');
+}
+
+function triggerBlobDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
 export const PACKAGE_STYLES = {
   Bronze: {
     strong: '#B86225',
@@ -262,7 +299,7 @@ export function flattenTree(node, level = 0, maxRenderLevel = 5, bucket = { node
     position: { x: 0, y: 0 },
   });
 
-  const hasVisibleChildRoom = level < maxRenderLevel - 1;
+  const hasVisibleChildRoom = level < maxRenderLevel;
   const children = [];
 
   if (node.left) {
@@ -403,4 +440,423 @@ export function layoutGraph(nodes, edges) {
       position: { x: pos.x - width / 2, y: pos.y - height / 2 },
     };
   });
+}
+
+
+// ─── Export Utilities ────────────────────────────────────────────────────────
+
+/**
+ * Shared capture setup: saves the current viewport transform, calls fitView
+ * so the full tree fills the canvas, and waits for React Flow to commit
+ * the transform to the DOM. Returns the dimensions of the canvas element
+ * and a restore callback to return the viewport to its original state.
+ *
+ * @param {object}  reactFlowInstance
+ * @param {Element} canvasEl  – outer wrapper div around the ReactFlow component
+ * @returns {{ width, height, restore }}
+ */
+async function prepareViewportCapture(reactFlowInstance, canvasEl) {
+  // 1. Save original viewport transform and canvas dimensions so we can restore them later
+  const prevViewport = reactFlowInstance.getViewport();
+  const originalWidth = canvasEl.style.width;
+  const originalHeight = canvasEl.style.height;
+
+  const viewportEl = canvasEl.querySelector('.react-flow__viewport');
+  if (!viewportEl) throw new Error('[genealogyExport] .react-flow__viewport not found in canvasEl.');
+  const originalTransform = viewportEl.style.transform;
+  const originalTransformOrigin = viewportEl.style.transformOrigin;
+
+  // 2. Get all nodes to calculate bounds
+  const nodes = reactFlowInstance.getNodes();
+  if (nodes.length === 0) {
+    return {
+      width: canvasEl.clientWidth,
+      height: canvasEl.clientHeight,
+      restore: () => {}
+    };
+  }
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  nodes.forEach((node) => {
+    const x = node.position.x;
+    const y = node.position.y;
+    let w = 260; // NODE_WIDTH
+    let h = 160; // NODE_HEIGHT
+    if (node.type === 'junctionNode') {
+      w = 16;
+      h = 16;
+    }
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x + w);
+    maxY = Math.max(maxY, y + h);
+  });
+
+  const boundsWidth = maxX - minX;
+  const boundsHeight = maxY - minY;
+
+  // 3. Add padding
+  const padding = 80;
+  const exportWidth = boundsWidth + padding * 2;
+  const exportHeight = boundsHeight + padding * 2;
+
+  // 4. Temporarily resize the live canvas wrapper in the DOM to fit the full bounds
+  canvasEl.style.width = `${exportWidth}px`;
+  canvasEl.style.height = `${exportHeight}px`;
+
+  // 5. Align the viewport transform to exactly scale(1.0) and center on node bounds
+  const translateX = -minX + padding;
+  const translateY = -minY + padding;
+  viewportEl.style.transform = `translate(${translateX}px, ${translateY}px) scale(1)`;
+  viewportEl.style.transformOrigin = 'top left';
+
+  // 6. Wait for React Flow and browser layout engine to paint elements at these new bounds
+  await new Promise((resolve) => setTimeout(resolve, 400));
+
+  const restore = () => {
+    canvasEl.style.width = originalWidth;
+    canvasEl.style.height = originalHeight;
+    
+    // Delay restoring the viewport transform to allow React Flow's ResizeObserver
+    // to process the container resize back to its original size. This prevents
+    // React Flow from clamping or miscalculating the viewport, which makes the tree vanish.
+    setTimeout(() => {
+      viewportEl.style.transform = originalTransform;
+      viewportEl.style.transformOrigin = originalTransformOrigin;
+      reactFlowInstance.setViewport(prevViewport, { duration: 0 });
+    }, 150);
+  };
+
+  return { width: exportWidth, height: exportHeight, restore };
+}
+
+/**
+ * Capture the full genealogy tree as a high-resolution PNG and download it.
+ *
+ * Uses html-to-image (SVG-based serialiser) — html2canvas silently drops SVG
+ * <path> elements so all edges disappear. html-to-image includes them.
+ * Output pixel ratio: 3× (crisp on HiDPI / Retina screens).
+ *
+ * @param {object}  reactFlowInstance
+ * @param {Element} canvasEl
+ * @param {string}  filename  – base filename, without extension
+ * @param {boolean} isDarkMode
+ */
+export async function exportTreeAsPng(reactFlowInstance, canvasEl, filename = 'nogatu_genealogy_tree', isDarkMode = false) {
+  if (!reactFlowInstance || !canvasEl) return;
+  let restore = null;
+  try {
+    const { toPng } = await import('html-to-image');
+    const capture = await prepareViewportCapture(reactFlowInstance, canvasEl);
+    restore = capture.restore;
+
+    const dataUrl = await toPng(canvasEl, {
+      backgroundColor: isDarkMode ? '#0d0a07' : '#eff3f7',
+      width: capture.width,
+      height: capture.height,
+      style: {
+        width: `${capture.width}px`,
+        height: `${capture.height}px`,
+      },
+      filter: (node) => {
+        const cl = node.classList;
+        if (
+          cl?.contains('react-flow__controls') ||
+          cl?.contains('react-flow__background') ||
+          cl?.contains('react-flow__attribution') ||
+          cl?.contains('pointer-events-none') ||
+          node.getAttribute?.('aria-label') === 'Activate genealogy canvas'
+        ) {
+          return false;
+        }
+        return true;
+      },
+      pixelRatio: 3,
+      skipFonts: true,
+    });
+    const a = document.createElement('a');
+    a.download = `${filename}_${new Date().toISOString().slice(0, 10)}.png`;
+    a.href = dataUrl;
+    a.click();
+  } catch (err) {
+    console.error('[exportTreeAsPng]', err);
+    throw err;
+  } finally {
+    if (restore) restore();
+  }
+}
+
+/**
+ * Capture the full genealogy tree as a JPEG and download it.
+ * Smaller file than PNG with 92% quality — visually indistinguishable.
+ * Output pixel ratio: 2.5×.
+ *
+ * @param {object}  reactFlowInstance
+ * @param {Element} canvasEl
+ * @param {string}  filename
+ * @param {boolean} isDarkMode
+ */
+export async function exportTreeAsJpeg(reactFlowInstance, canvasEl, filename = 'nogatu_genealogy_tree', isDarkMode = false) {
+  if (!reactFlowInstance || !canvasEl) return;
+  let restore = null;
+  try {
+    const { toJpeg } = await import('html-to-image');
+    const capture = await prepareViewportCapture(reactFlowInstance, canvasEl);
+    restore = capture.restore;
+
+    const dataUrl = await toJpeg(canvasEl, {
+      backgroundColor: isDarkMode ? '#0d0a07' : '#eff3f7',
+      width: capture.width,
+      height: capture.height,
+      style: {
+        width: `${capture.width}px`,
+        height: `${capture.height}px`,
+      },
+      filter: (node) => {
+        const cl = node.classList;
+        if (
+          cl?.contains('react-flow__controls') ||
+          cl?.contains('react-flow__background') ||
+          cl?.contains('react-flow__attribution') ||
+          cl?.contains('pointer-events-none') ||
+          node.getAttribute?.('aria-label') === 'Activate genealogy canvas'
+        ) {
+          return false;
+        }
+        return true;
+      },
+      pixelRatio: 2.5,
+      quality: 0.92,
+      skipFonts: true,
+    });
+    const a = document.createElement('a');
+    a.download = `${filename}_${new Date().toISOString().slice(0, 10)}.jpg`;
+    a.href = dataUrl;
+    a.click();
+  } catch (err) {
+    console.error('[exportTreeAsJpeg]', err);
+    throw err;
+  } finally {
+    if (restore) restore();
+  }
+}
+
+/**
+ * Capture the full genealogy tree as a scalable SVG and download it.
+ * Infinitely scalable; best choice for large-format printing.
+ *
+ * @param {object}  reactFlowInstance
+ * @param {Element} canvasEl
+ * @param {string}  filename
+ * @param {boolean} isDarkMode
+ */
+export async function exportTreeAsSvg(reactFlowInstance, canvasEl, filename = 'nogatu_genealogy_tree', isDarkMode = false) {
+  if (!reactFlowInstance || !canvasEl) return;
+  let restore = null;
+  try {
+    const { toSvg } = await import('html-to-image');
+    const capture = await prepareViewportCapture(reactFlowInstance, canvasEl);
+    restore = capture.restore;
+
+    const dataUrl = await toSvg(canvasEl, {
+      backgroundColor: isDarkMode ? '#0d0a07' : '#eff3f7',
+      width: capture.width,
+      height: capture.height,
+      style: {
+        width: `${capture.width}px`,
+        height: `${capture.height}px`,
+      },
+      filter: (node) => {
+        const cl = node.classList;
+        if (
+          cl?.contains('react-flow__controls') ||
+          cl?.contains('react-flow__background') ||
+          cl?.contains('react-flow__attribution') ||
+          cl?.contains('pointer-events-none') ||
+          node.getAttribute?.('aria-label') === 'Activate genealogy canvas'
+        ) {
+          return false;
+        }
+        return true;
+      },
+      skipFonts: true,
+    });
+    const a = document.createElement('a');
+    a.download = `${filename}_${new Date().toISOString().slice(0, 10)}.svg`;
+    a.href = dataUrl;
+    a.click();
+  } catch (err) {
+    console.error('[exportTreeAsSvg]', err);
+    throw err;
+  } finally {
+    if (restore) restore();
+  }
+}
+
+/**
+ * Export the visible network members as a CSV file.
+ *
+ * @param {Array} network - flat list of member objects from /genealogy/network
+ * @param {string} rootUsername
+ * @param {number} depth
+ */
+export async function exportNetworkAsCsv(network, rootUsername = '', depth = 5) {
+  const rows = (network || []).map((m) => ({
+    Level: Number(m.depth || 0),
+    Username: m.username || '',
+    'Full Name': m.fullname || '',
+    Package: m.accttypeName || '',
+    Leg: legLabel(m.leg),
+    Status: m.accountStateLabel || 'PD',
+    'Binary Points': Number(m.binaryPoints || 0) / 250,
+  }));
+
+  const pdCount = rows.filter((r) => r.Status === 'PD').length;
+  const cdCount = rows.filter((r) => r.Status === 'CD').length;
+  const cdPaidCount = rows.filter((r) => r.Status === 'CD - Paid').length;
+  const fsCount = rows.filter((r) => r.Status === 'FS').length;
+  const totalBp = rows.reduce((sum, r) => sum + r['Binary Points'], 0);
+
+  const summaryRows = [
+    { Field: 'Root Account', Value: rootUsername || '—' },
+    { Field: 'Depth Loaded', Value: `Level ${depth}` },
+    { Field: 'Total Members', Value: rows.length },
+    { Field: 'PD (Paid)', Value: pdCount },
+    { Field: 'CD (Unpaid)', Value: cdCount },
+    { Field: 'CD - Paid', Value: cdPaidCount },
+    { Field: 'FS (Free Slot)', Value: fsCount },
+    { Field: 'Total Binary Points', Value: totalBp },
+    { Field: 'Export Date', Value: new Date().toLocaleDateString('en-PH') },
+  ];
+
+  const csv = `\uFEFF${[
+    buildCsvSection('Genealogy Network', rows),
+    buildCsvSection('Summary', summaryRows),
+  ].join('\r\n')}`.trimEnd();
+
+  triggerBlobDownload(
+    new Blob([csv], { type: 'text/csv;charset=utf-8;' }),
+    `nogatu_genealogy_${rootUsername || 'tree'}_L${depth}_${new Date().toISOString().slice(0, 10)}.csv`
+  );
+}
+
+/**
+ * Export a formatted .docx text report of the genealogy tree.
+ *
+ * @param {Array} network
+ * @param {string} rootUsername
+ * @param {number} depth
+ * @param {boolean} isAdmin
+ */
+export async function exportNetworkAsDocx(network, rootUsername = '', depth = 5, isAdmin = false) {
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, TableRow, TableCell, Table, WidthType } = await import('docx');
+
+  const today = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+  const rows = network || [];
+
+  const pdCount = rows.filter((r) => (r.accountStateLabel || 'PD') === 'PD').length;
+  const cdCount = rows.filter((r) => (r.accountStateLabel || '') === 'CD').length;
+  const cdPaidCount = rows.filter((r) => (r.accountStateLabel || '') === 'CD - Paid').length;
+  const fsCount = rows.filter((r) => (r.accountStateLabel || '') === 'FS').length;
+  const totalBp = rows.reduce((sum, r) => sum + Number(r.binaryPoints || 0), 0);
+
+  // Group members by level
+  const byLevel = {};
+  rows.forEach((m) => {
+    const lvl = Number(m.depth || 0);
+    if (!byLevel[lvl]) byLevel[lvl] = [];
+    byLevel[lvl].push(m);
+  });
+
+  const levelKeys = Object.keys(byLevel)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  const children = [
+    new Paragraph({
+      text: `${isAdmin ? 'Admin ' : ''}Genealogy Tree Report`,
+      heading: HeadingLevel.HEADING_1,
+      alignment: AlignmentType.CENTER,
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({ text: 'Generated: ', bold: true }),
+        new TextRun(today),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 320 },
+    }),
+    new Paragraph({
+      text: 'Summary Statistics',
+      heading: HeadingLevel.HEADING_2,
+      spacing: { before: 240, after: 120 },
+    }),
+    new Paragraph({ children: [new TextRun({ text: `Root Account: `, bold: true }), new TextRun(rootUsername || '—')] }),
+    new Paragraph({ children: [new TextRun({ text: `Depth Loaded: `, bold: true }), new TextRun(`Level ${depth}`)] }),
+    new Paragraph({ children: [new TextRun({ text: `Total Members in Tree: `, bold: true }), new TextRun(String(rows.length))] }),
+    new Paragraph({ spacing: { after: 80 } }),
+    new Paragraph({
+      text: 'Account State Breakdown',
+      heading: HeadingLevel.HEADING_3,
+      spacing: { before: 200, after: 100 },
+    }),
+    new Paragraph({ children: [new TextRun({ text: '✅ PD (Paid): ', bold: true }), new TextRun(String(pdCount))] }),
+    new Paragraph({ children: [new TextRun({ text: '🔴 CD (Commission Deduction – Unpaid): ', bold: true }), new TextRun(String(cdCount))] }),
+    new Paragraph({ children: [new TextRun({ text: '🟡 CD - Paid (CD Fully Recovered): ', bold: true }), new TextRun(String(cdPaidCount))] }),
+    new Paragraph({ children: [new TextRun({ text: '🔵 FS (Free Slot): ', bold: true }), new TextRun(String(fsCount))] }),
+    new Paragraph({ spacing: { after: 80 } }),
+    new Paragraph({
+      text: 'Binary Points',
+      heading: HeadingLevel.HEADING_3,
+      spacing: { before: 200, after: 100 },
+    }),
+    new Paragraph({ children: [new TextRun({ text: `Total Binary Points (in BP units): `, bold: true }), new TextRun(fmtInt(totalBp / 250))] }),
+    new Paragraph({ children: [new TextRun({ text: `Equivalent PHP Value (1 BP = 250 PHP): `, bold: true }), new TextRun(`PHP ${fmtInt(totalBp)}`)] }),
+    new Paragraph({ spacing: { after: 200 } }),
+    new Paragraph({
+      text: 'Member List by Level',
+      heading: HeadingLevel.HEADING_2,
+      spacing: { before: 320, after: 200 },
+    }),
+    ...levelKeys.flatMap((lvl) => [
+      new Paragraph({
+        text: `Level ${lvl} — ${byLevel[lvl].length} member${byLevel[lvl].length !== 1 ? 's' : ''}`,
+        heading: HeadingLevel.HEADING_3,
+        spacing: { before: 240, after: 100 },
+      }),
+      ...byLevel[lvl].map((m) =>
+        new Paragraph({
+          children: [
+            new TextRun({ text: `${m.username || '—'}`, bold: true }),
+            new TextRun({ text: `  |  ` }),
+            new TextRun({ text: m.fullname || '', italics: true }),
+            new TextRun({ text: `  |  Package: ${m.accttypeName || '—'}` }),
+            new TextRun({ text: `  |  Status: ${m.accountStateLabel || 'PD'}` }),
+            new TextRun({ text: `  |  Leg: ${legLabel(m.leg)}` }),
+            new TextRun({ text: `  |  BP: ${fmtInt(Number(m.binaryPoints || 0) / 250)}` }),
+          ],
+          spacing: { after: 60 },
+        })
+      ),
+    ]),
+  ];
+
+  const doc = new Document({
+    creator: 'Nogatu Alliance System',
+    title: `Genealogy Report – ${rootUsername || 'Tree'}`,
+    description: `Binary genealogy tree report generated on ${today}`,
+    sections: [{ children }],
+  });
+
+  const buffer = await Packer.toBlob(doc);
+  const url = URL.createObjectURL(buffer);
+  const link = document.createElement('a');
+  link.download = `nogatu_genealogy_${rootUsername || 'tree'}_L${depth}_${new Date().toISOString().slice(0, 10)}.docx`;
+  link.href = url;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
