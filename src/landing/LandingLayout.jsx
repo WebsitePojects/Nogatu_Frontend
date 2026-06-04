@@ -215,7 +215,7 @@ function Footer() {
       <div className="border-t border-white/10 relative z-10">
         <div className="section-container py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/40">&copy; {new Date().getFullYear()} NOGATU Alliance. All rights reserved.</p>
-          <p className="text-xs text-white/30">Mon-Sat: 11AM - 11PM | Sunday: Closed</p>
+          <p className="text-xs text-white/30">Mon-Sat: 11AM - 8PM | Sunday: Closed</p>
         </div>
       </div>
     </footer>
