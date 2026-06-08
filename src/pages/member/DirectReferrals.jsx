@@ -63,17 +63,27 @@ export default function DirectReferrals() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className={`portal-page-title font-display text-2xl font-bold ${headingTone}`}>Direct Referrals</h1>
-        <div className="mt-2 h-0.5 w-10 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
-      </div>
+      <div className="glass-card rounded-3xl p-6 sm:p-8 overflow-hidden relative">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at top right, rgba(212,175,55,0.12), transparent 55%)' }} />
+        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-3xl">
+            <div className="size-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.24)' }}>
+              <HiOutlineUsers className="size-6" style={{ color: '#D4AF37' }} />
+            </div>
+            <h1 className={`portal-page-title font-display text-2xl sm:text-3xl font-bold ${headingTone}`}>Direct Referrals</h1>
+            <p className="mt-3 text-sm leading-relaxed portal-card-text">
+              Review the members personally referred to this account, their package type, entry status, and registration date.
+            </p>
+          </div>
 
-      <div
-        className="inline-flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-sm"
-        style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)' }}
-      >
-        <HiOutlineUsers className="h-4 w-4" style={{ color: '#D4AF37' }} />
-        <span style={{ color: summaryText }}>{referrals.length} total referrals</span>
+          <div
+            className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold self-start"
+            style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)' }}
+          >
+            <HiOutlineUsers className="h-4 w-4" style={{ color: '#D4AF37' }} />
+            <span style={{ color: summaryText }}>{referrals.length} total referrals</span>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3 md:hidden">
@@ -133,7 +143,7 @@ export default function DirectReferrals() {
         )}
       </div>
 
-      <div className="glass-card hidden overflow-hidden rounded-2xl md:block">
+      <div className="glass-card hidden overflow-hidden rounded-3xl md:block">
         <div className="overflow-x-auto">
           <table className="min-w-[600px] w-full text-sm">
             <thead>

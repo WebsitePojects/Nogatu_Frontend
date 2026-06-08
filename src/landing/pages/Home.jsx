@@ -121,21 +121,21 @@ function Hero() {
             <p className="mb-4 sm:mb-6 text-white/90 text-sm sm:text-lg font-medium max-w-md drop-shadow-md">
               Wellness You Can Taste, Quality You Can Trust.
             </p>
-            <div className="landing-hero-actions flex w-full max-w-sm flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:gap-4">
+            <div className="landing-hero-actions flex w-full max-w-sm flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3">
               <a
                 href="/portal/login"
-                className="inline-flex min-h-[62px] w-full sm:w-auto items-center justify-center px-7 sm:px-9 py-3.5 text-center text-white text-sm sm:text-base font-extrabold rounded-full motion-safe:transition-all motion-safe:duration-300 border border-[#b37f08] shadow-[0_10px_34px_rgba(184,134,11,0.45)] leading-tight hover:-translate-y-0.5 hover:shadow-[0_16px_42px_rgba(184,134,11,0.6)]"
+                className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center px-6 sm:px-7 py-3 text-center text-white text-sm sm:text-[15px] font-extrabold rounded-full motion-safe:transition-all motion-safe:duration-300 border border-[#b37f08] shadow-[0_10px_28px_rgba(184,134,11,0.4)] leading-none hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(184,134,11,0.52)]"
                 style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
               >
-                Be the One. Register Now!
+                Register Now
               </a>
               <a
                 href="#stockist-apply"
-                className="inline-flex min-h-[62px] w-full sm:w-auto items-center justify-center gap-3 rounded-full px-6 sm:px-7 py-3.5 text-center text-sm sm:text-base font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
+                className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center gap-3 rounded-full px-5 sm:px-6 py-3 text-center text-sm sm:text-[15px] font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
                 style={{
                   border: '1px solid rgba(255,255,255,0.5)',
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(212,165,40,0.14))',
-                  boxShadow: '0 10px 28px rgba(89,34,25,0.18), inset 0 1px 0 rgba(255,255,255,0.34)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.16), rgba(212,165,40,0.16))',
+                  boxShadow: '0 10px 24px rgba(89,34,25,0.16), inset 0 1px 0 rgba(255,255,255,0.34)',
                 }}
               >
                 <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-white/15">
@@ -576,7 +576,7 @@ function BusinessPreview() {
 function DownloadableMaterials() {
   const ref = useScrollReveal();
   const materials = [
-    { title: 'PgotDF Product Presentation', desc: 'Presentation deck placeholder for product education and distributor orientation.' },
+    { title: 'PDF Product Presentation', desc: 'Presentation deck placeholder for product education and distributor orientation.' },
     { title: 'PDF Brochures', desc: 'Brochure upload space for product details, benefits, and customer-facing information.' },
     { title: 'Marketing Collateral', desc: 'Flyers, social posts, and campaign materials for field marketing support.' },
   ];

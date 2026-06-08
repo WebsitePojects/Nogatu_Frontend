@@ -23,6 +23,7 @@ export default function Organizations() {
   return (
     <div className="pt-24 sm:pt-32 pb-12 sm:pb-20 min-h-screen bg-[#FFFDF5] relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none bg-geo-pattern" />
+      <div className="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(212,165,40,0.14),transparent_70%)] pointer-events-none" />
 
       <div className="section-container relative z-10">
         <div className="text-center mb-8 sm:mb-14 max-w-3xl mx-auto">
@@ -37,11 +38,11 @@ export default function Organizations() {
           </p>
         </div>
 
-        <div className="organization-page-grid mx-auto max-w-5xl">
+        <div className="organization-page-grid mx-auto max-w-6xl rounded-[2rem] border border-white/70 bg-white/70 p-4 shadow-[0_28px_60px_rgba(89,34,25,0.08)] backdrop-blur-sm sm:p-6 lg:p-7">
           {LEADERS.map((leader) => (
             <article
               key={leader.name}
-              className="leader-portrait-card leader-portrait-card-page group overflow-hidden rounded-[1.5rem] border border-brand-gold/25 bg-white/90 shadow-[0_24px_60px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
+              className="leader-portrait-card leader-portrait-card-page organization-leader-card group overflow-hidden rounded-[1.75rem] border border-brand-gold/25 shadow-[0_22px_48px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
             >
               <div className="leader-portrait-media leader-portrait-media-page">
                 <img
@@ -55,8 +56,8 @@ export default function Organizations() {
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-gold-dark">{leader.role}</p>
                 <h2 className="mt-2 text-2xl sm:text-[1.9rem] font-black leading-tight tracking-tight text-brand-brown">{leader.name}</h2>
                 <div className="my-4 h-px w-16 bg-gradient-to-r from-brand-gold/60 to-transparent" />
-                <p className="text-base font-extrabold uppercase leading-6 text-[#3A1000] sm:text-lg">{leader.motto}</p>
-                <p className="mt-3 text-sm sm:text-base text-[#5B4A3A] leading-7">{leader.message}</p>
+                <p className="organization-leader-motto text-base font-extrabold uppercase leading-6 sm:text-lg">{leader.motto}</p>
+                <p className="organization-leader-message mt-3 text-sm sm:text-base leading-7">{leader.message}</p>
               </div>
             </article>
           ))}

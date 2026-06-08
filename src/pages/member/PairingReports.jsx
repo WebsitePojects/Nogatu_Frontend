@@ -14,11 +14,17 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigit
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
 const BP_PESO_VALUE = 250;
 const toBp = (pesoValue) => Number(Number(pesoValue || 0) / BP_PESO_VALUE);
+const PORTAL_TITLE = 'var(--portal-card-title)';
+const PORTAL_TEXT = 'var(--portal-card-text)';
+const PORTAL_MUTED = 'var(--portal-card-muted)';
+const PORTAL_SURFACE = 'var(--portal-soft-bg)';
+const PORTAL_BORDER = 'var(--portal-soft-border)';
+const PORTAL_ROW = 'var(--portal-row-border)';
 
 function SourceMetaLine({ source }) {
   if (!source) return null;
   return (
-    <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+    <p className="text-[11px] mt-1" style={{ color: PORTAL_MUTED }}>
       {source.packageLabel || 'Unknown'} - {source.accountStateLabel || 'Unknown'}
     </p>
   );
@@ -26,7 +32,7 @@ function SourceMetaLine({ source }) {
 
 function Pager({ page = 1, totalPages = 1, onPrev, onNext, className = '' }) {
   return (
-    <div className={`fflex items-center justify-between sm:justify-end gap-2 flex-nowrap whitespace-nowrap overflow-x-auto ${className}`}>
+    <div className={`flex items-center justify-between sm:justify-end gap-2 flex-nowrap whitespace-nowrap overflow-x-auto ${className}`}>
       <button
         onClick={onPrev}
         disabled={page <= 1}
@@ -35,7 +41,7 @@ function Pager({ page = 1, totalPages = 1, onPrev, onNext, className = '' }) {
        type="button">
         Prev
       </button>
-      <span className="text-xs shrink-0" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
+      <span className="text-xs shrink-0" style={{ color: PORTAL_MUTED }}>{page} / {totalPages}</span>
       <button
         onClick={onNext}
         disabled={page >= totalPages}
@@ -92,7 +98,7 @@ function SummaryCard({ label, value, icon: Icon, color = '#D4AF37', onClick, hel
     <button
       type="button"
       onClick={interactive ? onClick : undefined}
-      className={`gglass-card rounded-2xl p-5 flex-shrink-0 w-full text-left ${interactive ? 'hover:bg-white/[0.03] transition-colors cursor-pointer' : 'cursor-default'}`}
+      className={`glass-card rounded-2xl p-5 flex-shrink-0 w-full text-left transition-colors ${interactive ? 'cursor-pointer' : 'cursor-default'}`}
     >
       <div
         className="size-9 rounded-xl flex items-center justify-center mb-3"
@@ -100,10 +106,10 @@ function SummaryCard({ label, value, icon: Icon, color = '#D4AF37', onClick, hel
       >
         <Icon className="size-4" style={{ color }} />
       </div>
-      <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
-      <p className="text-xl font-bold text-white">{value}</p>
+      <p className="text-xs mb-1" style={{ color: PORTAL_MUTED }}>{label}</p>
+      <p className="text-xl font-bold" style={{ color: PORTAL_TITLE }}>{value}</p>
       {helper ? (
-        <p className="text-[11px] mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>{helper}</p>
+        <p className="text-[11px] mt-2" style={{ color: PORTAL_MUTED }}>{helper}</p>
       ) : null}
     </button>
   );
@@ -116,8 +122,8 @@ function TraceEventCard({ row, expanded, onToggle }) {
       <button type="button" className="w-full text-left" onClick={onToggle}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-xs font-semibold text-white/80">{formatDateTimeManila(row.pairedAt)}</div>
-            <div className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <div className="text-xs font-semibold" style={{ color: PORTAL_TITLE }}>{formatDateTimeManila(row.pairedAt)}</div>
+            <div className="text-[11px] mt-1" style={{ color: PORTAL_MUTED }}>
               {(row.left?.username || '-')} x {(row.right?.username || '-')}
             </div>
           </div>
@@ -130,7 +136,7 @@ function TraceEventCard({ row, expanded, onToggle }) {
         </div>
       </button>
 
-      <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+      <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: PORTAL_TEXT }}>
         <div>Matched: {fmtInt(toBp(row.pairPoints))} BP</div>
         <div>Credited: PHP {fmt(row.creditedIncome)}</div>
         <div>Gross: PHP {fmt(row.grossIncome)}</div>
@@ -138,26 +144,26 @@ function TraceEventCard({ row, expanded, onToggle }) {
       </div>
 
       {expanded ? (
-        <div className="rounded-2xl p-4 space-y-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="rounded-2xl p-4 space-y-4" style={{ background: PORTAL_SURFACE, border: `1px solid ${PORTAL_BORDER}` }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl p-3" style={{ background: 'rgba(0,0,0,0.16)' }}>
+            <div className="rounded-xl p-3" style={{ background: 'color-mix(in srgb, var(--portal-soft-bg) 74%, rgba(15,23,42,0.06))' }}>
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#D4AF37' }}>Left Source</p>
-              <p className="text-white font-semibold mt-2">{row.left?.fullName || '-'}</p>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>@{row.left?.username || '-'}</p>
+              <p className="font-semibold mt-2" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</p>
+              <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>@{row.left?.username || '-'}</p>
               <SourceMetaLine source={row.left} />
-              <div className="grid grid-cols-2 gap-2 mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.68)' }}>
+              <div className="grid grid-cols-2 gap-2 mt-3 text-xs" style={{ color: PORTAL_TEXT }}>
                 <div>Binary Points before: {fmtInt(toBp(row.left?.pointsBefore))} BP</div>
                 <div>Remaining Binary Points: {fmtInt(toBp(row.left?.remainingAfter))} BP</div>
                 <div>Type: {row.left?.eventType || '-'}</div>
                 <div>{row.left?.fullyConsumed ? 'Fully consumed' : 'Still pairable'}</div>
               </div>
             </div>
-            <div className="rounded-xl p-3" style={{ background: 'rgba(0,0,0,0.16)' }}>
+            <div className="rounded-xl p-3" style={{ background: 'color-mix(in srgb, var(--portal-soft-bg) 74%, rgba(15,23,42,0.06))' }}>
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#D4AF37' }}>Right Source</p>
-              <p className="text-white font-semibold mt-2">{row.right?.fullName || '-'}</p>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>@{row.right?.username || '-'}</p>
+              <p className="font-semibold mt-2" style={{ color: PORTAL_TITLE }}>{row.right?.fullName || '-'}</p>
+              <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>@{row.right?.username || '-'}</p>
               <SourceMetaLine source={row.right} />
-              <div className="grid grid-cols-2 gap-2 mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.68)' }}>
+              <div className="grid grid-cols-2 gap-2 mt-3 text-xs" style={{ color: PORTAL_TEXT }}>
                 <div>Binary Points before: {fmtInt(toBp(row.right?.pointsBefore))} BP</div>
                 <div>Remaining Binary Points: {fmtInt(toBp(row.right?.remainingAfter))} BP</div>
                 <div>Type: {row.right?.eventType || '-'}</div>
@@ -234,7 +240,7 @@ export default function PairingReports() {
   ]), [data, navigate]);
 
   if (loading) return <Spinner />;
-  if (!data) return <p style={{ color: 'rgba(255,255,255,0.4)' }}>Failed to load pairing data.</p>;
+  if (!data) return <p style={{ color: PORTAL_MUTED }}>Failed to load pairing data.</p>;
 
   const traceSummary = data.trace?.summary || {};
   const packagePolicy = data.packagePolicy || null;
@@ -244,7 +250,7 @@ export default function PairingReports() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">Pairing Reports</h1>
+        <h1 className="font-display text-2xl font-bold" style={{ color: PORTAL_TITLE }}>Pairing Reports</h1>
         <div className="w-10 h-0.5 mt-2 rounded-full" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
@@ -262,18 +268,18 @@ export default function PairingReports() {
       </div>
 
       {!eligibility.canEarnPairing && (
-        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid rgba(248,113,113,0.18)', background: 'rgba(248,113,113,0.06)' }}>
-          <p className="text-sm font-semibold text-white">Binary pairing is still locked for this account</p>
-          <p className="text-xs mt-2 leading-6" style={{ color: 'rgba(255,255,255,0.68)' }}>
+        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid var(--portal-danger-border)', background: 'var(--portal-danger-bg)' }}>
+          <p className="text-sm font-semibold" style={{ color: PORTAL_TITLE }}>Binary pairing is still locked for this account</p>
+          <p className="text-xs mt-2 leading-6" style={{ color: PORTAL_TEXT }}>
             {eligibility.reason || 'You need one personally sponsored qualified direct on the left leg and one on the right leg before binary pairing is released. Spillover placements from your upline do not count for this unlock.'}
           </p>
         </div>
       )}
 
       {!eligibility.sourceEligible && (
-        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid rgba(212,175,55,0.18)', background: 'rgba(212,175,55,0.06)' }}>
-          <p className="text-sm font-semibold text-white">This account cannot pass its own BP upward yet</p>
-          <p className="text-xs mt-2 leading-6" style={{ color: 'rgba(255,255,255,0.68)' }}>
+        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid var(--portal-warning-border)', background: 'var(--portal-warning-bg)' }}>
+          <p className="text-sm font-semibold" style={{ color: PORTAL_TITLE }}>This account cannot pass its own BP upward yet</p>
+          <p className="text-xs mt-2 leading-6" style={{ color: PORTAL_TEXT }}>
             {eligibility.sourceReason || 'This account cannot contribute its own BP upstream yet, but eligible downlines can still generate pairing for this account when the left and right subtree both contain qualified BP.'}
           </p>
         </div>
@@ -283,8 +289,8 @@ export default function PairingReports() {
         <div className="glass-card rounded-2xl p-5 space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
             <div>
-              <h3 className="font-display text-base font-semibold text-white">{packagePolicy.packageLabel} Package Rules</h3>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.48)' }}>
+              <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>{packagePolicy.packageLabel} Package Rules</h3>
+              <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
                 This account follows the current package safety net, pairing ceiling, and upgrade ladder from the PPT-backed package policy.
               </p>
             </div>
@@ -294,26 +300,26 @@ export default function PairingReports() {
           </div>
 
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.42)' }}>Direct Referral</p>
-              <p className="text-lg font-bold text-white">PHP {fmt(packagePolicy.directReferralBonus)}</p>
+            <div className="rounded-2xl p-4" style={{ background: PORTAL_SURFACE, border: `1px solid ${PORTAL_BORDER}` }}>
+              <p className="text-xs mb-1" style={{ color: PORTAL_MUTED }}>Direct Referral</p>
+              <p className="text-lg font-bold" style={{ color: PORTAL_TITLE }}>PHP {fmt(packagePolicy.directReferralBonus)}</p>
             </div>
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.42)' }}>Binary Value</p>
-              <p className="text-lg font-bold text-white">{fmtInt(packagePolicy.binaryPoints)} BP</p>
-              <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>PHP {fmt(packagePolicy.binaryValue)} per matched side</p>
+            <div className="rounded-2xl p-4" style={{ background: PORTAL_SURFACE, border: `1px solid ${PORTAL_BORDER}` }}>
+              <p className="text-xs mb-1" style={{ color: PORTAL_MUTED }}>Binary Value</p>
+              <p className="text-lg font-bold" style={{ color: PORTAL_TITLE }}>{fmtInt(packagePolicy.binaryPoints)} BP</p>
+              <p className="text-[11px] mt-1" style={{ color: PORTAL_MUTED }}>PHP {fmt(packagePolicy.binaryValue)} per matched side</p>
             </div>
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.42)' }}>
+            <div className="rounded-2xl p-4" style={{ background: PORTAL_SURFACE, border: `1px solid ${PORTAL_BORDER}` }}>
+              <p className="text-xs mb-1" style={{ color: PORTAL_MUTED }}>
                 {Number(packagePolicy.lifetimeIncomeCeiling || 0) > 0 ? 'Lifetime Income Ceiling' : 'Monthly Pairing Cap'}
               </p>
-              <p className="text-lg font-bold text-white">
+              <p className="text-lg font-bold" style={{ color: PORTAL_TITLE }}>
                 PHP {fmt(Number(packagePolicy.lifetimeIncomeCeiling || 0) > 0 ? packagePolicy.lifetimeIncomeCeiling : packagePolicy.pairingMonthlyCap)}
               </p>
             </div>
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.42)' }}>Unilevel Reach</p>
-              <p className="text-lg font-bold text-white">Level {fmtInt(packagePolicy.unilevelReach)}</p>
+            <div className="rounded-2xl p-4" style={{ background: PORTAL_SURFACE, border: `1px solid ${PORTAL_BORDER}` }}>
+              <p className="text-xs mb-1" style={{ color: PORTAL_MUTED }}>Unilevel Reach</p>
+              <p className="text-lg font-bold" style={{ color: PORTAL_TITLE }}>Level {fmtInt(packagePolicy.unilevelReach)}</p>
             </div>
           </div>
         </div>
@@ -322,8 +328,8 @@ export default function PairingReports() {
       <div className="glass-card rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
           <div>
-            <h3 className="font-display text-base font-semibold text-white">Pairing History</h3>
-            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing History</h3>
+            <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
               Each row is one successful matched-points event that actually credited pairing income.
             </p>
           </div>
@@ -352,23 +358,23 @@ export default function PairingReports() {
                 <tr
                   key={row.historyUid || i}
                   style={{
-                    background: i % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'transparent',
-                    borderBottom: '1px solid rgba(212,175,55,0.05)',
+                    background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent',
+                    borderBottom: `1px solid ${PORTAL_ROW}`,
                   }}
-                  className="hover:bg-white/[0.03] transition-colors"
+                  className="portal-table-row-hover transition-colors"
                 >
-                  <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{formatDateTimeManila(row.pairedAt)}</td>
+                  <td className="py-3 px-4 text-xs" style={{ color: PORTAL_MUTED }}>{formatDateTimeManila(row.pairedAt)}</td>
                   <td className="py-3 px-4">
-                    <div className="text-white/80 text-xs">{row.left?.fullName || '-'}</div>
-                    <div className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>{row.left?.username || ''}</div>
-                    <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'}</div>
+                    <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</div>
+                    <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.left?.username || ''}</div>
+                    <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'}</div>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-white/80 text-xs">{row.right?.fullName || '-'}</div>
-                    <div className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>{row.right?.username || ''}</div>
-                    <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
+                    <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.right?.fullName || '-'}</div>
+                    <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.right?.username || ''}</div>
+                    <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
                   </td>
-                  <td className="py-3 px-4 font-medium text-white/85">{fmtInt(toBp(row.matchedPoints))} BP</td>
+                  <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(toBp(row.matchedPoints))} BP</td>
                   <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.leftRemainingAfter))} BP</td>
                   <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.rightRemainingAfter))} BP</td>
                   <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
@@ -378,7 +384,7 @@ export default function PairingReports() {
                 <tr>
                   <td colSpan="7" className="py-14 text-center">
                     <HiOutlineChartBar className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
-                    <p style={{ color: 'rgba(255,255,255,0.3)' }}>No successful pairing records found yet.</p>
+                    <p style={{ color: PORTAL_MUTED }}>No successful pairing records found yet.</p>
                   </td>
                 </tr>
               )}
@@ -389,10 +395,10 @@ export default function PairingReports() {
           {historyRows.map((row, i) => (
             <div key={row.historyUid || i} className="glass-card rounded-2xl p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-white/80">{formatDateTimeManila(row.pairedAt)}</span>
+                <span className="text-xs font-semibold" style={{ color: PORTAL_TITLE }}>{formatDateTimeManila(row.pairedAt)}</span>
                 <span className="text-xs font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</span>
               </div>
-              <div className="grid grid-cols-1 gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              <div className="grid grid-cols-1 gap-2 text-xs" style={{ color: PORTAL_TEXT }}>
                 <div>Left: {row.left?.username || '-'} ({row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'})</div>
                 <div>Right: {row.right?.username || '-'} ({row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'})</div>
                 <div>Matched: {fmtInt(toBp(row.matchedPoints))} BP</div>
@@ -415,8 +421,8 @@ export default function PairingReports() {
       <div className="glass-card rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 gap-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
           <div>
-            <h3 className="font-display text-base font-semibold text-white">Pairing Event Trace</h3>
-            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing Event Trace</h3>
+            <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
               Shows the actual left-right matches, the matched BP, the payout result, and the remaining binary points on each source account after that event.
             </p>
           </div>
@@ -451,26 +457,26 @@ export default function PairingReports() {
                   <tr
                     key={row.ledgerUid || index}
                     style={{
-                      background: index % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'transparent',
-                      borderBottom: '1px solid rgba(212,175,55,0.05)',
+                      background: index % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent',
+                      borderBottom: `1px solid ${PORTAL_ROW}`,
                     }}
-                    className="hover:bg-white/[0.03] transition-colors"
+                    className="portal-table-row-hover transition-colors"
                   >
-                    <td className="py-3 px-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{formatDateTimeManila(row.pairedAt)}</td>
+                    <td className="py-3 px-4 text-xs" style={{ color: PORTAL_MUTED }}>{formatDateTimeManila(row.pairedAt)}</td>
                     <td className="py-3 px-4">
-                      <div className="text-white/80 text-xs">{row.left?.fullName || '-'}</div>
-                      <div className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>{row.left?.username || ''}</div>
-                      <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'}</div>
+                      <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</div>
+                      <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.left?.username || ''}</div>
+                      <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'}</div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="text-white/80 text-xs">{row.right?.fullName || '-'}</div>
-                      <div className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>{row.right?.username || ''}</div>
-                      <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
+                      <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.right?.fullName || '-'}</div>
+                      <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.right?.username || ''}</div>
+                      <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
                     </td>
-                    <td className="py-3 px-4 text-white/85 font-medium">{fmtInt(toBp(row.pairPoints))} BP</td>
-                    <td className="py-3 px-4 text-white/70">PHP {fmt(row.grossIncome)}</td>
+                    <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(toBp(row.pairPoints))} BP</td>
+                    <td className="py-3 px-4" style={{ color: PORTAL_TEXT }}>PHP {fmt(row.grossIncome)}</td>
                     <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
-                    <td className="py-3 px-4" style={{ color: row.blockedIncome > 0 ? '#f87171' : 'rgba(255,255,255,0.35)' }}>PHP {fmt(row.blockedIncome)}</td>
+                    <td className="py-3 px-4" style={{ color: row.blockedIncome > 0 ? '#f87171' : PORTAL_MUTED }}>PHP {fmt(row.blockedIncome)}</td>
                     <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.left?.remainingAfter))} BP</td>
                     <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.right?.remainingAfter))} BP</td>
                     <td className="py-3 px-4">
@@ -483,7 +489,7 @@ export default function PairingReports() {
                 <tr>
                   <td colSpan="10" className="py-14 text-center">
                     <HiOutlineChartBar className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
-                    <p style={{ color: 'rgba(255,255,255,0.3)' }}>No pairing event trace yet.</p>
+                    <p style={{ color: PORTAL_MUTED }}>No pairing event trace yet.</p>
                   </td>
                 </tr>
               )}
@@ -501,7 +507,7 @@ export default function PairingReports() {
             />
           ))}
           {traceRows.length === 0 && (
-            <div className="rounded-2xl border p-4 text-center" style={{ borderColor: 'rgba(212,175,55,0.12)', color: 'rgba(255,255,255,0.35)' }}>
+            <div className="rounded-2xl border p-4 text-center" style={{ borderColor: PORTAL_BORDER, color: PORTAL_MUTED, background: PORTAL_SURFACE }}>
               No pairing event trace yet.
             </div>
           )}

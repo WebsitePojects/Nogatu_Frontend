@@ -30,6 +30,7 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const routeLocation = useLocation();
+  const isHomePage = routeLocation.pathname === '/';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -47,9 +48,11 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className={`relative rounded-3xl overflow-hidden flex items-center justify-between h-[72px] px-4 sm:px-6 transition-all duration-500 border ${
-            scrolled
-              ? 'bg-white/70 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border-white/50'
-              : 'bg-white/40 backdrop-blur-lg border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:bg-white/60'
+            isHomePage
+              ? scrolled
+                ? 'bg-white/80 backdrop-blur-2xl shadow-[0_10px_34px_rgba(0,0,0,0.08)] border-white/60'
+                : 'bg-white/58 backdrop-blur-xl border-white/40 shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:bg-white/72'
+              : 'bg-white/94 backdrop-blur-xl border-[#eadfbe] shadow-[0_12px_36px_rgba(89,34,25,0.08)]'
           }`}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-primary-400/10 opacity-50 pointer-events-none mix-blend-overlay" />
