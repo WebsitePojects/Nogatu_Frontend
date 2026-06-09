@@ -365,18 +365,26 @@ export default function PairingReports() {
                 >
                   <td className="py-3 px-4 text-xs" style={{ color: PORTAL_MUTED }}>{formatDateTimeManila(row.pairedAt)}</td>
                   <td className="py-3 px-4">
-                    <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</div>
-                    <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.left?.username || ''}</div>
-                    <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'}</div>
+                    {row.isLegacy ? <span className="text-[11px]" style={{ color: PORTAL_MUTED }}>Legacy record</span> : (
+                      <>
+                        <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</div>
+                        <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.left?.username || ''}</div>
+                        <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'}</div>
+                      </>
+                    )}
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.right?.fullName || '-'}</div>
-                    <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.right?.username || ''}</div>
-                    <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
+                    {row.isLegacy ? <span className="text-[11px]" style={{ color: PORTAL_MUTED }}>Legacy record</span> : (
+                      <>
+                        <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.right?.fullName || '-'}</div>
+                        <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.right?.username || ''}</div>
+                        <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
+                      </>
+                    )}
                   </td>
-                  <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(toBp(row.matchedPoints))} BP</td>
-                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.leftRemainingAfter))} BP</td>
-                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.rightRemainingAfter))} BP</td>
+                  <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{row.matchedPoints != null ? `${fmtInt(toBp(row.matchedPoints))} BP` : '-'}</td>
+                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{row.leftRemainingAfter != null ? `${fmtInt(toBp(row.leftRemainingAfter))} BP` : '-'}</td>
+                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{row.rightRemainingAfter != null ? `${fmtInt(toBp(row.rightRemainingAfter))} BP` : '-'}</td>
                   <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
                 </tr>
               ))}
@@ -399,11 +407,17 @@ export default function PairingReports() {
                 <span className="text-xs font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</span>
               </div>
               <div className="grid grid-cols-1 gap-2 text-xs" style={{ color: PORTAL_TEXT }}>
-                <div>Left: {row.left?.username || '-'} ({row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'})</div>
-                <div>Right: {row.right?.username || '-'} ({row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'})</div>
-                <div>Matched: {fmtInt(toBp(row.matchedPoints))} BP</div>
-                <div>Left remaining after: {fmtInt(toBp(row.leftRemainingAfter))} BP</div>
-                <div>Right remaining after: {fmtInt(toBp(row.rightRemainingAfter))} BP</div>
+                {row.isLegacy ? (
+                  <div style={{ color: PORTAL_MUTED }}>Legacy record — source detail not available</div>
+                ) : (
+                  <>
+                    <div>Left: {row.left?.username || '-'} ({row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'})</div>
+                    <div>Right: {row.right?.username || '-'} ({row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'})</div>
+                    <div>Matched: {row.matchedPoints != null ? `${fmtInt(toBp(row.matchedPoints))} BP` : '-'}</div>
+                    <div>Left remaining after: {row.leftRemainingAfter != null ? `${fmtInt(toBp(row.leftRemainingAfter))} BP` : '-'}</div>
+                    <div>Right remaining after: {row.rightRemainingAfter != null ? `${fmtInt(toBp(row.rightRemainingAfter))} BP` : '-'}</div>
+                  </>
+                )}
               </div>
             </div>
           ))}
