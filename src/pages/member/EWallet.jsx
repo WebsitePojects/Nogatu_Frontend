@@ -392,6 +392,23 @@ export default function EWallet() {
               </div>
             ))}
           </div>
+
+          {/* Unilevel maintenance notice */}
+          {data.unilevelMaintenance && !data.unilevelMaintenance.maintenanceMet && data.unilevelMaintenance.projectedUnilevel > 0 && (
+            <div
+              className="mt-4 rounded-xl p-3.5 text-sm leading-6"
+              style={{ background: 'rgba(234,179,8,0.07)', border: '1px solid rgba(234,179,8,0.22)', color: 'rgba(255,255,255,0.75)' }}
+            >
+              <p className="font-semibold mb-1" style={{ color: '#fbbf24' }}>Uni-Level Income On Hold</p>
+              <p>
+                You would have earned{' '}
+                <span className="font-semibold" style={{ color: '#D4AF37' }}>
+                  ₱{fmt(data.unilevelMaintenance.projectedUnilevel)}
+                </span>{' '}
+                this month, but last month&apos;s maintenance points were below 200. Purchase a product maintenance code to qualify next month.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Encashment */}

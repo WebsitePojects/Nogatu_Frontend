@@ -1,4 +1,4 @@
-const MAX_TIN_DIGITS = 15;
+const MAX_TIN_DIGITS = 12;
 
 export function extractTinDigits(value) {
   return String(value || '').replace(/\D/g, '').slice(0, MAX_TIN_DIGITS);

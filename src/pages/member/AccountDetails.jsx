@@ -57,7 +57,7 @@ export default function AccountDetails() {
     try {
       const normalizedTin = formatTin(data.tin || data.tinno || '');
       if (normalizedTin && !isValidTin(normalizedTin)) {
-        toast.error('TIN must contain 9-15 digits');
+        toast.error('TIN must be 9–12 digits (e.g. 123-456-789-000). Use 000-000-000-000 if you do not have a TIN.');
         setSaving(false);
         return;
       }

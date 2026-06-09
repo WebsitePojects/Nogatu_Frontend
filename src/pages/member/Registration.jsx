@@ -326,7 +326,7 @@ export default function Registration() {
       setConfirmModal({
         tone: 'red',
         title: 'Invalid TIN',
-        message: 'TIN must contain 9-15 digits.',
+        message: 'TIN must be 9–12 digits (e.g. 123-456-789-000). Use 000-000-000-000 if you do not have a TIN.',
         confirmLabel: 'Close',
         onConfirm: () => setConfirmModal(null),
       });
