@@ -1,7 +1,7 @@
 const LEADERS = [
   {
     name: 'Harold M. Tugano',
-    image: '/landing/img/chairman%20Harold%20M.%20Tugano.png',
+    image: '/landing/img/chairman.jpg',
     role: 'Chairman',
     motto: 'I lead with vision, stand with integrity and build with courage.',
     message:

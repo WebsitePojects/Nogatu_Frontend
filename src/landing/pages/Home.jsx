@@ -453,7 +453,7 @@ function OrganizationsPreview() {
   const leaders = [
     {
       name: 'Harold M. Tugano',
-      image: '/landing/img/chairman%20Harold%20M.%20Tugano.png',
+      image: '/landing/img/chairman.jpg',
       role: 'Chairman',
       motto: 'I lead with vision, stand with integrity and build with courage.',
       message: 'So every member, leader, every family and every dream can rise with NOGATU Alliance Worldwide, Inc. (NAWI).',
