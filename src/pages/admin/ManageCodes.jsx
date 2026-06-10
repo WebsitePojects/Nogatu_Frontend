@@ -359,7 +359,7 @@ export default function ManageCodes() {
                       style={{ accentColor: '#D4AF37' }}
                     />
                   </th>
-                  {['Code', 'Product', 'Status', 'Generated'].map(h => (
+                  {['ID', 'Code', 'Product', 'Current Owner', 'Transfer Trail', 'Status', 'Generated'].map(h => (
                     <th key={h} className="table-header py-3 px-4 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
@@ -382,8 +382,33 @@ export default function ManageCodes() {
                         style={{ accentColor: '#D4AF37' }}
                       />
                     </td>
+                    <td className="py-3 px-4 text-xs font-mono" style={{ color: textMuted }}>{c.id}</td>
                     <td className="py-3 px-4 font-mono text-xs" style={{ color: goldText }}>{c.code}</td>
                     <td className="py-3 px-4" style={{ color: textSubtle }}>{c.producttypeName}</td>
+                    <td className="py-3 px-4">
+                      {c.ownerUsername ? (
+                        <div>
+                          <span className="font-semibold text-xs" style={{ color: blueText }}>{c.ownerUsername}</span>
+                          {c.ownerFullname && (
+                            <div className="text-xs mt-0.5" style={{ color: textMuted }}>{c.ownerFullname}</div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs" style={{ color: textMuted }}>—</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 max-w-xs">
+                      {c.transferHistory ? (
+                        <div>
+                          <div className="text-xs font-mono break-all leading-relaxed" style={{ color: textSubtle }}>{c.transferHistory}</div>
+                          {c.lastTransferDate && (
+                            <div className="text-xs mt-0.5" style={{ color: dateColor }}>{c.lastTransferDate}</div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs" style={{ color: textMuted }}>—</span>
+                      )}
+                    </td>
                     <td className="py-3 px-4">
                       <span
                         className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
@@ -397,7 +422,7 @@ export default function ManageCodes() {
                 ))}
                 {codes.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="py-12 text-center" style={{ color: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(71,85,105,0.7)' }}>
+                    <td colSpan="8" className="py-12 text-center" style={{ color: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(71,85,105,0.7)' }}>
                       No codes found.
                     </td>
                   </tr>
