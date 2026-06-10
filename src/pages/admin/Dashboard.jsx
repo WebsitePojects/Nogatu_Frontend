@@ -1,106 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
-import { HiOutlineUsers, HiOutlineCash, HiOutlineShoppingCart, HiOutlineSparkles, HiOutlineClock, HiOutlineBadgeCheck, HiOutlineReceiptTax, HiOutlineCalendar, HiOutlineSearch, HiOutlineUserCircle } from 'react-icons/hi';
+import { HiOutlineUsers, HiOutlineCash, HiOutlineShoppingCart, HiOutlineSparkles, HiOutlineClock, HiOutlineBadgeCheck, HiOutlineReceiptTax, HiOutlineCalendar } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-function MemberLookup() {
-  const navigate = useNavigate();
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [searching, setSearching] = useState(false);
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef(null);
-  const timerRef = useRef(null);
-
-  useEffect(() => {
-    const q = query.trim();
-    if (!q) { setResults([]); setOpen(false); return; }
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      setSearching(true);
-      api.get(`/admin/view-as/search?q=${encodeURIComponent(q)}`)
-        .then(res => { setResults(res.data.members || []); setOpen(true); })
-        .catch(() => { setResults([]); setOpen(true); })
-        .finally(() => setSearching(false));
-    }, 300);
-    return () => clearTimeout(timerRef.current);
-  }, [query]);
-
-  useEffect(() => {
-    function onClickOutside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
-    }
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, []);
-
-  function selectMember(uid) {
-    setOpen(false);
-    setQuery('');
-    navigate(`/admin/view-as/${uid}`);
-  }
-
-  const ACCT_LABELS = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum', 50: 'Garnet', 60: 'Diamond' };
-
-  return (
-    <div className="glass-card rounded-2xl p-6 mt-6" ref={containerRef}>
-      <div className="flex items-center gap-2 mb-4">
-        <div
-          className="size-10 rounded-xl flex items-center justify-center text-white"
-          style={{ background: 'linear-gradient(135deg, #b45309, #f59e0b)', boxShadow: '0 8px 20px rgba(217,119,6,0.28)' }}
-        >
-          <HiOutlineSearch className="size-5" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Member Lookup</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">View any member's account (read-only)</p>
-        </div>
-      </div>
-
-      <div className="relative">
-        <div className="relative flex items-center">
-          <HiOutlineSearch className="absolute left-3 size-4 text-slate-400 pointer-events-none" />
-          <input
-            type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onFocus={() => results.length > 0 && setOpen(true)}
-            placeholder="Search by username…"
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400/50 placeholder-slate-400"
-          />
-          {searching && (
-            <div className="absolute right-3 size-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-          )}
-        </div>
-
-        {open && (
-          <div className="absolute z-50 mt-1.5 w-full rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden max-h-64 overflow-y-auto">
-            {results.length === 0 ? (
-              <p className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">No members found.</p>
-            ) : results.map(m => (
-              <button
-                key={m.uid}
-                onClick={() => selectMember(m.uid)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
-              >
-                <HiOutlineUserCircle className="size-8 shrink-0 text-slate-400" />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{m.username}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                    {m.fullname || '—'} &middot; {m.acctTypeName || ACCT_LABELS[m.accttype] || `Acct ${m.accttype}`}
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 export default function AdminDashboard() {
   const { admin } = useAuth();
@@ -246,8 +150,6 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Member Lookup — visible to readonly accounts only */}
-      {admin?.role === 'readonly' && <MemberLookup />}
     </div>
   );
 }
