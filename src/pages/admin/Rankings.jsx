@@ -95,7 +95,7 @@ export default function Rankings() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Top', 'Member', 'Username', 'Package', 'Gate', 'Current Rank', 'Gross', 'Consumed', 'Remaining', 'Qualified Date', 'Claim Status', 'Action'].map((heading) => (
+                  {['Top', 'Member', 'Username', 'Package', 'Gate', 'Current Rank', 'Gross', 'Verified', 'Contributors', 'Last Repurchase', 'Consumed', 'Remaining', 'Qualified Date', 'Claim Status', 'Action'].map((heading) => (
                     <th key={heading} className="table-header p-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
@@ -161,6 +161,41 @@ export default function Rankings() {
                       <td className="p-3">
                         <div className="text-white/85 font-medium">{fmtInt(row.grossRankablePoints ?? row.basisPoints)}</div>
                       </td>
+                      <td className="p-3">
+                        {/* Verified = actual sum from repurchase records — should match Gross */}
+                        {row.verifiedRepurchasePoints != null ? (
+                          <div className="flex flex-col gap-0.5">
+                            <span
+                              className="font-medium text-sm"
+                              style={{ color: row.verifiedRepurchasePoints === (row.grossRankablePoints ?? row.basisPoints) ? '#34d399' : '#fbbf24' }}
+                            >
+                              {fmtInt(row.verifiedRepurchasePoints)}
+                            </span>
+                            {row.verifiedRepurchasePoints !== (row.grossRankablePoints ?? row.basisPoints) && (
+                              <span className="text-[10px]" style={{ color: 'rgba(251,191,36,0.7)' }}>
+                                snapshot drift
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        {row.repurchaseContributorCount != null ? (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-white/80 font-medium">{fmtInt(row.repurchaseContributorCount)}</span>
+                            <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                              {fmtInt(row.repurchaseEvents)} events
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-white/60">
+                        {row.lastRepurchaseDate ? formatQualifiedDate(row.lastRepurchaseDate) : <span style={{ color: 'rgba(255,255,255,0.25)' }}>No activity</span>}
+                      </td>
                       <td className="p-3 text-white/60">{fmtInt(row.consumedPoints)}</td>
                       <td className="p-3 text-white/60">{fmtInt(row.remainingRankablePoints)}</td>
                       <td className="p-3 text-white/55">{formatQualifiedDate(row.qualifiedDate || row.rank_date)}</td>
@@ -200,7 +235,7 @@ export default function Rankings() {
 
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan="12" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    <td colSpan="15" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
                       No ranked members found.
                     </td>
                   </tr>

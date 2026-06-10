@@ -98,7 +98,7 @@ export default function AdminLayout() {
     <div className="flex h-screen overflow-hidden portal-bg">
       {/* Sidebar */}
       <aside
-        className={`ffixed inset-y-0 left-0 z-50 w-[272px] glass-sidebar transform motion-safe:transition-transform motion-safe:duration-300 ease-out lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-50 w-[272px] glass-sidebar transform motion-safe:transition-transform motion-safe:duration-300 ease-out lg:translate-x-0 lg:static lg:flex-shrink-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Logo area */}
         <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
