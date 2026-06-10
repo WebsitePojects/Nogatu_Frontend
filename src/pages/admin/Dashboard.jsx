@@ -246,8 +246,8 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Member Lookup */}
-      <MemberLookup />
+      {/* Member Lookup — visible to readonly accounts only */}
+      {admin?.role === 'readonly' && <MemberLookup />}
     </div>
   );
 }
