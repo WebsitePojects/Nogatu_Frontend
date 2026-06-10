@@ -267,11 +267,11 @@ export default function PairingReports() {
         <SummaryCard label="Weekly Cap" value={`PHP ${fmt(data.trace?.weeklyCap)}`} icon={HiOutlineChartBar} color="#F2D06B" />
       </div>
 
-      {!eligibility.canEarnPairing && (
-        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid var(--portal-danger-border)', background: 'var(--portal-danger-bg)' }}>
-          <p className="text-sm font-semibold" style={{ color: PORTAL_TITLE }}>Binary pairing is still locked for this account</p>
+      {!eligibility.canEarnPairing && (eligibility.qualifiedDirects?.left || 0) === 0 && (eligibility.qualifiedDirects?.right || 0) === 0 && (
+        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid var(--portal-soft-border)', background: 'var(--portal-soft-bg)' }}>
+          <p className="text-sm font-semibold" style={{ color: PORTAL_TITLE }}>No personally-sponsored qualified directs yet</p>
           <p className="text-xs mt-2 leading-6" style={{ color: PORTAL_TEXT }}>
-            {eligibility.reason || 'You need one personally sponsored qualified direct on the left leg and one on the right leg before binary pairing is released. Spillover placements from your upline do not count for this unlock.'}
+            You have no personally-sponsored PD or fully-paid CD members in your binary network yet. Pairing income is still earned whenever qualified BP exists on both your left and right legs from any downline source.
           </p>
         </div>
       )}
