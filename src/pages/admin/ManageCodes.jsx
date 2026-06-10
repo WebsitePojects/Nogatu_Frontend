@@ -191,7 +191,7 @@ export default function ManageCodes() {
       )}
 
       {/* Actions Bar */}
-      <div className="glass-card rounded-2xl p-6 mb-6">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="text-sm font-medium" style={{ color: textMuted }}>
             {selected.length > 0 ? <span style={{ color: goldText }}>{selected.length} codes selected</span> : 'Select codes below'}
@@ -208,8 +208,8 @@ export default function ManageCodes() {
             {selectMode ? 'Exit Selection Mode' : 'Select Multiple'}
           </button>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 items-end mb-4">
-          <div className="flex-1">
+        <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-end">
+          <div className="flex-1 w-full">
             <label className="label">Search Code</label>
             <input
               type="text"
@@ -219,28 +219,30 @@ export default function ManageCodes() {
               placeholder="Enter code"
             />
           </div>
-          <button
-            onClick={() => { setPage(1); setHistoryPage(1); loadCodes(); loadHistory(); }}
-            className="gold-btn rounded-xl py-2.5 px-5 text-sm"
-           type="button">
-            Search
-          </button>
-          <button
-            onClick={() => {
-              setCodeSearch('');
-              setPage(1);
-              setHistoryPage(1);
-              setTimeout(() => { loadCodes(); loadHistory(); }, 0);
-            }}
-            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
-           type="button">
-            Clear
-          </button>
+          <div className="flex flex-row gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => { setPage(1); setHistoryPage(1); loadCodes(); loadHistory(); }}
+              className="gold-btn rounded-xl py-2.5 px-5 text-sm flex-1 sm:flex-initial text-center justify-center items-center"
+             type="button">
+              Search
+            </button>
+            <button
+              onClick={() => {
+                setCodeSearch('');
+                setPage(1);
+                setHistoryPage(1);
+                setTimeout(() => { loadCodes(); loadHistory(); }, 0);
+              }}
+              className="rounded-xl py-2.5 px-5 text-sm font-medium border flex-1 sm:flex-initial text-center justify-center items-center"
+              style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
+             type="button">
+              Clear
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 items-end">
-          <div className="flex-1">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+          <div className="flex-1 w-full">
             <label className="label">Transfer to Account</label>
             <input
               type="text"
@@ -250,40 +252,46 @@ export default function ManageCodes() {
               placeholder="Username"
             />
           </div>
-          <button
-            onClick={handleTagAccount}
-            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: 'rgba(59,130,246,0.35)', color: blueText, background: 'rgba(59,130,246,0.1)' }}
-           type="button">
-            Search Account
-          </button>
-          <button
-            onClick={clearTag}
-            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
-           type="button">
-            Clear Tag
-          </button>
+          <div className="flex flex-row gap-2 w-full sm:w-auto">
+            <button
+              onClick={handleTagAccount}
+              className="rounded-xl py-2.5 px-4 text-sm font-medium border flex-1 sm:flex-initial text-center justify-center items-center"
+              style={{ borderColor: 'rgba(59,130,246,0.35)', color: blueText, background: 'rgba(59,130,246,0.1)' }}
+             type="button">
+              Search Account
+            </button>
+            <button
+              onClick={clearTag}
+              className="rounded-xl py-2.5 px-4 text-sm font-medium border flex-1 sm:flex-initial text-center justify-center items-center"
+              style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}
+             type="button">
+              Clear Tag
+            </button>
+          </div>
+        </div>
+
+        {/* Action buttons grid/flex */}
+        <div className="flex flex-wrap gap-2.5 mt-4 pt-3 border-t" style={{ borderColor: subtleBorder }}>
           {canRelease && (
             <button
               onClick={handleReleaseAndTransfer}
               disabled={selected.length === 0}
-              className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-xl py-2.5 px-4 text-xs font-medium border flex-1 sm:flex-initial text-center justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ borderColor: 'rgba(34,197,94,0.3)', color: greenText, background: 'rgba(34,197,94,0.08)' }}
              type="button">
-              Release and Transfer ({selected.length})
+              Release &amp; Transfer ({selected.length})
             </button>
           )}
           <button
             onClick={handleTransfer}
             disabled={selected.length === 0}
-            className="gold-btn rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="gold-btn rounded-xl py-2.5 px-4 text-xs flex-1 sm:flex-initial text-center justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
            type="button">
             Transfer ({selected.length})
           </button>
           <button
             onClick={toggleSelectAllCurrentPage}
-            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
+            className="rounded-xl py-2.5 px-4 text-xs font-medium border flex-1 sm:flex-initial text-center justify-center items-center"
             style={{ borderColor: 'rgba(212,175,55,0.18)', color: goldText }}
            type="button">
             Select All Page
@@ -292,7 +300,7 @@ export default function ManageCodes() {
             <button
               onClick={handleRelease}
               disabled={selected.length === 0}
-              className="btn-success rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-success rounded-xl py-2.5 px-4 text-xs flex-1 sm:flex-initial text-center justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
              type="button">
               Release ({selected.length})
             </button>
@@ -310,21 +318,21 @@ export default function ManageCodes() {
       </div>
 
       {/* Codes Table */}
-      <div className="glass-card rounded-2xl p-6 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <p className="text-sm font-medium" style={{ color: textMuted }}>
             {selected.length > 0
               ? <span style={{ color: goldText }}>{selected.length} selected</span>
               : 'Select codes below'}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => {
                 setCodesExpanded((current) => !current);
                 setPage(1);
               }}
-              className="text-sm py-1.5 px-3 rounded-lg font-medium"
+              className="text-xs sm:text-sm py-1.5 px-3 rounded-lg font-medium flex-1 sm:flex-initial text-center"
               style={{
                 background: isDarkMode ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.12)',
                 color: blueText,
@@ -333,9 +341,11 @@ export default function ManageCodes() {
             >
               {codesExpanded ? 'Retract to 40 Rows' : 'Expand to 100 Rows'}
             </button>
-            <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
-            <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{page} / {totalPages}</span>
-            <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
+            <div className="flex items-center gap-2 justify-end flex-shrink-0">
+              <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)', padding: '4px 10px', fontSize: '12px' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
+              <span className="text-xs sm:text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{page} / {totalPages}</span>
+              <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)', padding: '4px 10px', fontSize: '12px' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
+            </div>
           </div>
         </div>
 
@@ -433,24 +443,26 @@ export default function ManageCodes() {
         )}
       </div>
 
-      <div className="glass-card rounded-2xl p-6 overflow-hidden mt-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden mt-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4">
           <div>
             <p className="text-sm font-semibold" style={{ color: headingColor }}>Activation Code History</p>
             <p className="text-xs mt-1" style={{ color: textMuted }}>Generated, released, transferred, upgraded, and repurchase usage events.</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
             <button
               type="button"
               onClick={() => exportHistory('csv')}
-              className="rounded-xl px-4 py-2 text-xs font-semibold border"
+              className="rounded-xl px-3 py-1.5 text-xs font-semibold border flex-1 md:flex-initial text-center"
               style={{ background: 'rgba(59,130,246,0.08)', color: blueText, border: '1px solid rgba(59,130,246,0.22)' }}
             >
               Export CSV
             </button>
-            <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage <= 1}>Prev</PaginationButton>
-            <span className="text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{historyPage} / {historyTotalPages}</span>
-            <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)' }} onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))} disabled={historyPage >= historyTotalPages}>Next</PaginationButton>
+            <div className="flex items-center gap-2">
+              <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)', padding: '4px 10px', fontSize: '12px' }} onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage <= 1}>Prev</PaginationButton>
+              <span className="text-xs sm:text-sm" style={{ color: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(71,85,105,0.8)' }}>{historyPage} / {historyTotalPages}</span>
+              <PaginationButton style={{ background: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.14)', color: isDarkMode ? 'rgba(212,175,55,0.8)' : '#7a5c08', border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(212,175,55,0.3)', padding: '4px 10px', fontSize: '12px' }} onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))} disabled={historyPage >= historyTotalPages}>Next</PaginationButton>
+            </div>
           </div>
         </div>
 

@@ -121,25 +121,25 @@ function Hero() {
             <p className="mb-4 sm:mb-6 text-white/90 text-sm sm:text-lg font-medium max-w-md drop-shadow-md">
               Wellness You Can Taste, Quality You Can Trust.
             </p>
-            <div className="landing-hero-actions flex w-full max-w-sm flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3">
+            <div className="landing-hero-actions flex w-full max-w-sm flex-row gap-2.5 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3">
               <a
                 href="/portal/login"
-                className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center px-6 sm:px-7 py-3 text-center text-white text-sm sm:text-[15px] font-extrabold rounded-full motion-safe:transition-all motion-safe:duration-300 border border-[#b37f08] shadow-[0_10px_28px_rgba(184,134,11,0.4)] leading-none hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(184,134,11,0.52)]"
+                className="inline-flex min-h-[44px] sm:min-h-[54px] flex-1 sm:flex-none items-center justify-center px-3 sm:px-7 py-2 sm:py-3 text-center text-white text-xs sm:text-[15px] font-extrabold rounded-full motion-safe:transition-all motion-safe:duration-300 border border-[#b37f08] shadow-[0_10px_28px_rgba(184,134,11,0.4)] leading-none hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(184,134,11,0.52)]"
                 style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%)' }}
               >
                 Register Now
               </a>
               <a
                 href="#stockist-apply"
-                className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center gap-3 rounded-full px-5 sm:px-6 py-3 text-center text-sm sm:text-[15px] font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
+                className="inline-flex min-h-[44px] sm:min-h-[54px] flex-1 sm:flex-none items-center justify-center gap-1.5 sm:gap-3 rounded-full px-3 sm:px-6 py-2 sm:py-3 text-center text-xs sm:text-[15px] font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5"
                 style={{
                   border: '1px solid rgba(255,255,255,0.5)',
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.16), rgba(212,165,40,0.16))',
                   boxShadow: '0 10px 24px rgba(89,34,25,0.16), inset 0 1px 0 rgba(255,255,255,0.34)',
                 }}
               >
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-white/15">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="hidden min-[400px]:inline-flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-full border border-white/25 bg-white/15">
+                  <svg className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
                   </svg>
                 </span>
@@ -556,12 +556,12 @@ function BusinessPreview() {
             <p className="text-[#6d3028] text-base md:text-xl max-w-2xl mx-auto mb-7 sm:mb-10 leading-relaxed font-medium">
               Join thousands of members building healthier lives and sustainable income with NOGATU Alliance.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
-              <a href="/portal/login" className="w-full sm:w-auto inline-flex min-h-12 items-center justify-center gap-2 px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-white font-bold text-base sm:text-lg hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_20px_rgba(184,134,11,0.4)] hover:shadow-[0_12px_25px_rgba(184,134,11,0.6)]" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
+            <div className="flex flex-row w-full max-w-md mx-auto items-center justify-center gap-2.5 sm:gap-5">
+              <a href="/portal/login" className="flex-1 sm:flex-initial inline-flex min-h-[44px] sm:min-h-12 items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-10 py-2 sm:py-4 rounded-xl text-white font-bold text-xs sm:text-lg hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_20px_rgba(184,134,11,0.4)] hover:shadow-[0_12px_25px_rgba(184,134,11,0.6)]" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
                 Join Now
-                <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                <svg className="size-4 sm:size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
               </a>
-              <NavLink to="/products#packages" className="w-full sm:w-auto inline-flex min-h-12 items-center justify-center px-7 sm:px-8 py-3 sm:py-4 rounded-xl text-[#B8860B] font-bold text-base sm:text-lg border-2 border-[#D4A528]/30 hover:border-[#D4A528] hover:bg-[#FFF8E1] transition-all duration-300">
+              <NavLink to="/products#packages" className="flex-1 sm:flex-initial inline-flex min-h-[44px] sm:min-h-12 items-center justify-center px-4 sm:px-8 py-2 sm:py-4 rounded-xl text-[#B8860B] font-bold text-xs sm:text-lg border-2 border-[#D4A528]/30 hover:border-[#D4A528] hover:bg-[#FFF8E1] transition-all duration-300">
                 View Business Plans &rarr;
               </NavLink>
             </div>

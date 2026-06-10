@@ -204,57 +204,68 @@ export default function CDAccounts() {
         </div>
       )}
 
-      <div className="glass-card rounded-2xl p-4 mb-6">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.3fr)_220px_220px_auto_auto_auto] gap-3 items-center">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="glass-input rounded-xl px-4 py-2.5 text-sm h-[46px]"
-            placeholder="Type account name or username..."
-          />
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="glass-input rounded-xl px-4 py-2.5 text-sm h-[46px]"
-          >
-            <option value="all">All CD Status</option>
-            <option value="paid">Fully Paid</option>
-            <option value="unpaid">Still Paying</option>
-          </select>
-          <select
-            value={packageType}
-            onChange={(e) => setPackageType(e.target.value)}
-            className="glass-input rounded-xl px-4 py-2.5 text-sm h-[46px]"
-          >
-            <option value="all">All Packages</option>
-            {Object.entries(PACKAGE_NAMES).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-          <button type="submit" className="gold-btn rounded-xl py-2.5 px-5 text-sm h-[46px]">
-            Search
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setSearch('');
-              setStatus('all');
-              setPackageType('all');
-              setPage(1);
-              loadAccounts(1, '', 'all', 'all');
-            }}
-            className="rounded-xl py-2.5 px-5 text-sm font-medium border h-[46px]"
-            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
-          >
-            Clear
-          </button>
-          <div className="flex flex-wrap gap-2">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6">
+        <form onSubmit={handleSearch}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label className="label">Search Account</label>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5 h-[46px]"
+                placeholder="Type account name or username..."
+              />
+            </div>
+            <div>
+              <label className="label">CD Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5 h-[46px]"
+              >
+                <option value="all">All CD Status</option>
+                <option value="paid">Fully Paid</option>
+                <option value="unpaid">Still Paying</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Package Type</label>
+              <select
+                value={packageType}
+                onChange={(e) => setPackageType(e.target.value)}
+                className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5 h-[46px]"
+              >
+                <option value="all">All Packages</option>
+                {Object.entries(PACKAGE_NAMES).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2.5 mt-4 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.12)' }}>
+            <button type="submit" className="gold-btn rounded-xl py-2.5 px-5 text-sm flex-1 sm:flex-initial text-center justify-center items-center h-[46px]">
+              Search
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch('');
+                setStatus('all');
+                setPackageType('all');
+                setPage(1);
+                loadAccounts(1, '', 'all', 'all');
+              }}
+              className="rounded-xl py-2.5 px-5 text-sm font-medium border flex-1 sm:flex-initial text-center justify-center items-center h-[46px]"
+              style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.05)' }}
+            >
+              Clear
+            </button>
             <button
               type="button"
               onClick={() => handleExport('csv')}
               disabled={exporting}
-              className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50 h-[46px]"
+              className="rounded-xl py-2.5 px-4 text-sm font-medium border disabled:opacity-50 flex-1 sm:flex-initial text-center justify-center items-center h-[46px]"
               style={{ borderColor: 'rgba(59,130,246,0.22)', color: blueText, background: 'rgba(59,130,246,0.08)' }}
             >
               {exporting ? 'Exporting...' : 'Export CSV'}
@@ -264,7 +275,7 @@ export default function CDAccounts() {
       </div>
 
       {packageBreakdown.length > 0 && (
-        <div className="glass-card rounded-2xl p-6 mb-6 overflow-hidden">
+        <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <p
               className="text-sm font-medium"
@@ -306,15 +317,15 @@ export default function CDAccounts() {
         </div>
       )}
 
-      <div className="glass-card rounded-2xl p-6 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <p
             className="text-sm font-medium"
             style={{ color: mutedText }}
           >
             CD Accounts
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
             <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}

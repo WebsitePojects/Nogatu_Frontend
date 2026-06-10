@@ -98,7 +98,6 @@ export default function Leaderboard() {
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Current race title: {userCurrentRankLabel}
             </p>
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Gross recorded points: {fmt(userPoints)}</p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>
               {pointsBasis}: {fmt(userRemaining)} | Consumed: {fmt(userConsumed)}
             </p>
@@ -152,11 +151,7 @@ export default function Leaderboard() {
                     <p className="text-xs mt-1 text-white/70">{row.currentRankLabel}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <p className="text-[11px] text-white/45">Gross Recorded Points</p>
-                    <p className="text-white font-semibold mt-1">{fmt(row.grossRankablePoints ?? row.repurchasePoints)}</p>
-                  </div>
+                <div className="grid grid-cols-1 gap-3 text-sm">
                   <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <p className="text-[11px] text-white/45">Repurchase points</p>
                     <p className="text-white font-semibold mt-1">{fmt(row.remainingRankablePoints)}</p>
@@ -174,7 +169,7 @@ export default function Leaderboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Top', 'Member', 'Package', 'Current Rank', 'Gross Recorded Points', 'Repurchase points'].map((heading) => (
+                  {['Top', 'Member', 'Package', 'Current Rank', 'Repurchase points'].map((heading) => (
                     <th key={heading} className="table-header p-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
@@ -211,13 +206,12 @@ export default function Leaderboard() {
                       <HiOutlineStar className="inline size-4 mr-1" />
                       {row.currentRankLabel}
                     </td>
-                    <td className="p-3 font-semibold text-white">{fmt(row.grossRankablePoints ?? row.repurchasePoints)}</td>
                     <td className="p-3 text-white/70">{fmt(row.remainingRankablePoints)}</td>
                   </tr>
                 ))}
                 {(!data?.leaderboard || data.leaderboard.length === 0) && (
                   <tr>
-                    <td colSpan="6" className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    <td colSpan="5" className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
                       No leaderboard records found.
                     </td>
                   </tr>

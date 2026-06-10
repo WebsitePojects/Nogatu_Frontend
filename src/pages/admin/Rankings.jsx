@@ -59,10 +59,10 @@ export default function Rankings() {
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
-      <div className="glass-card rounded-2xl p-6 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Ranking race members</p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}

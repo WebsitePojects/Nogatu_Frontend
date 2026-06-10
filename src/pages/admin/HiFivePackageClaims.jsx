@@ -121,14 +121,14 @@ export default function HiFivePackageClaims() {
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
-      <div className="glass-card rounded-2xl p-6 mb-6">
-        <div className="flex flex-col xl:flex-row gap-3 items-end">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
             <label className="label">Status</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -141,7 +141,7 @@ export default function HiFivePackageClaims() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             />
           </div>
           <div>
@@ -150,7 +150,7 @@ export default function HiFivePackageClaims() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             />
           </div>
           <div>
@@ -158,7 +158,7 @@ export default function HiFivePackageClaims() {
             <select
               value={packageFilter}
               onChange={(e) => setPackageFilter(e.target.value)}
-              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             >
               <option value="">All Packages</option>
               <option value="bronze">Bronze</option>
@@ -169,19 +169,21 @@ export default function HiFivePackageClaims() {
               <option value="diamond">Diamond</option>
             </select>
           </div>
+        </div>
+        <div className="flex flex-wrap gap-2.5 mt-4 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.12)' }}>
           <button
             onClick={() => { setPage(1); loadData(); }}
-            className="gold-btn rounded-xl py-2.5 px-5 text-sm"
+            className="gold-btn rounded-xl py-2.5 px-5 text-sm flex-1 sm:flex-initial text-center justify-center items-center"
            type="button">
             Filter
           </button>
         </div>
       </div>
 
-      <div className="glass-card rounded-2xl p-6 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Package Claim Queue</p>
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
             <PaginationButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
             <PaginationButton onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Next</PaginationButton>

@@ -28,10 +28,10 @@
 
   /* ─── Gold primary button ─── */
   .btn-landing-primary {
-    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-white font-semibold text-sm
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-7 sm:py-3.5 rounded-full text-white font-semibold text-xs sm:text-sm
            transition-all duration-300 cursor-pointer;
     background: linear-gradient(135deg, #B8860B 0%, #D4A528 50%, #E7C679 100%);
-    box-shadow: 0 4px 20px rgba(184, 134, 11, 0.35);
+    box-shadow: 0 4px 12px rgba(184, 134, 11, 0.25);
   }
   .btn-landing-primary:hover {
     transform: translateY(-2px) scale(1.02);
@@ -40,7 +40,7 @@
 
   /* ─── Brown secondary button ─── */
   .btn-landing-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-semibold text-sm
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-7 sm:py-3.5 rounded-full font-semibold text-xs sm:text-sm
            transition-all duration-300 cursor-pointer;
     color: #592219;
     border: 2px solid #592219;
@@ -53,10 +53,10 @@
 
   /* ─── Brown gradient button ─── */
   .btn-landing-brown {
-    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-white font-semibold text-sm
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-7 sm:py-3.5 rounded-full text-white font-semibold text-xs sm:text-sm
            transition-all duration-300 cursor-pointer;
     background: linear-gradient(135deg, #592219 0%, #6d3028 100%);
-    box-shadow: 0 4px 20px rgba(89, 34, 25, 0.3);
+    box-shadow: 0 4px 12px rgba(89, 34, 25, 0.2);
   }
   .btn-landing-brown:hover {
     transform: translateY(-2px);

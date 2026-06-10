@@ -128,7 +128,7 @@ export default function AccountMasterlist() {
       </div>
 
       {/* Search */}
-      <div className="glass-card rounded-2xl p-6 mb-6">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6">
         <form onSubmit={handleSearch} className="flex gap-3">
           <input
             type="text"
@@ -147,10 +147,10 @@ export default function AccountMasterlist() {
       </div>
 
       {/* Table Card */}
-      <div className="glass-card rounded-2xl p-6 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Accounts</p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
             <PaginationButton onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
             <PaginationButton onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Next</PaginationButton>
@@ -378,7 +378,7 @@ export default function AccountMasterlist() {
           </form>
         </div>
       ) : null}
-      <div className="glass-card rounded-2xl p-6 mt-6 overflow-hidden">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 mt-6 overflow-hidden">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between mb-5">
           <div>
             <h2 className="font-display text-xl font-bold text-white">Registration Monitoring</h2>
@@ -415,11 +415,11 @@ export default function AccountMasterlist() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>
             Filtered registrations
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
             <PaginationButton onClick={() => setMonitorPage((p) => Math.max(1, p - 1))} disabled={monitorPage <= 1} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{monitorPage} / {monitorTotalPages}</span>
             <PaginationButton onClick={() => setMonitorPage((p) => Math.min(monitorTotalPages, p + 1))} disabled={monitorPage >= monitorTotalPages} style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }}>Next</PaginationButton>

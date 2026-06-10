@@ -129,16 +129,16 @@ export default function Encashment() {
       </div>
 
       {/* Filter */}
-      <div className="glass-card rounded-2xl p-6 mb-6 relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row gap-3 items-end">
-          <div className="sm:min-w-[240px]">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6 relative overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
             <label className="label">Account Search</label>
             <input
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="Username or account name"
-              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             />
           </div>
           <div>
@@ -147,7 +147,7 @@ export default function Encashment() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             />
           </div>
           <div>
@@ -156,15 +156,17 @@ export default function Encashment() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             />
           </div>
+        </div>
+        <div className="flex flex-wrap gap-2.5 mt-4 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.12)' }}>
           <button
             onClick={() => {
               setPage(1);
               loadData(1);
             }}
-            className="gold-btn rounded-xl py-2.5 px-5 text-sm"
+            className="gold-btn rounded-xl py-2.5 px-5 text-sm flex-1 sm:flex-initial text-center justify-center items-center"
            type="button">
             Filter
           </button>
@@ -176,21 +178,19 @@ export default function Encashment() {
               setPage(1);
               setTimeout(() => loadData(1, { keyword: '', startDate: '', endDate: '' }), 0);
             }}
-            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border flex-1 sm:flex-initial text-center justify-center items-center"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.05)' }}
            type="button">
             Clear
           </button>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => handleExport('csv')}
-              disabled={exporting}
-              className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50"
-              style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
-             type="button">
-              {exporting ? 'Exporting...' : 'Export CSV'}
-            </button>
-          </div>
+          <button
+            onClick={() => handleExport('csv')}
+            disabled={exporting}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border disabled:opacity-50 flex-1 sm:flex-initial text-center justify-center items-center"
+            style={{ borderColor: 'rgba(59,130,246,0.22)', color: '#93c5fd', background: 'rgba(59,130,246,0.08)' }}
+           type="button">
+            {exporting ? 'Exporting...' : 'Export CSV'}
+          </button>
         </div>
       </div>
 
@@ -215,17 +215,17 @@ export default function Encashment() {
       )}
 
       {summary?.daily?.length > 0 && (
-        <div className="glass-card rounded-2xl p-6 mb-6 overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
+        <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6 overflow-hidden">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
             <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Daily Encashment Totals</p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => {
                   setDailyExpanded((current) => !current);
                   setDailyPage(1);
                 }}
-                className="rounded-xl px-4 py-2 text-xs font-semibold border"
+                className="rounded-xl px-4 py-2 text-xs font-semibold border flex-1 sm:flex-initial text-center"
                 style={{ background: 'rgba(212,175,55,0.1)', color: goldText, border: '1px solid rgba(212,175,55,0.2)' }}
               >
                 {dailyExpanded ? 'Retract to 30 Rows' : 'Expand to 100 Rows'}
@@ -233,11 +233,11 @@ export default function Encashment() {
               <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{summary.daily.length} day rows</span>
             </div>
           </div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
             <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
               Showing {visibleDailyRows.length} rows per page ({dailyPerPage} max)
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
               <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setDailyPage((p) => Math.max(1, p - 1))} disabled={dailyPage <= 1}>Prev</PaginationButton>
               <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{dailyPage} / {dailyTotalPages}</span>
               <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setDailyPage((p) => Math.min(dailyTotalPages, p + 1))} disabled={dailyPage >= dailyTotalPages}>Next</PaginationButton>
@@ -280,10 +280,10 @@ export default function Encashment() {
       )}
 
       {/* Table */}
-      <div className="glass-card rounded-2xl p-6 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Encashment Records</p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
             <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
             <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
             <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
@@ -299,11 +299,6 @@ export default function Encashment() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <div className="flex items-center justify-end mb-4 gap-2">
-              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
-              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
-              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
-            </div>
             <table className="w-full text-sm">
               <thead>
                 <tr>

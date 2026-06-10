@@ -192,40 +192,42 @@ export default function GlobalBonus() {
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
       </div>
 
-      <div className="glass-card rounded-2xl p-6 mb-6">
-        <div className="flex flex-col xl:flex-row xl:items-end gap-3">
-          <div className="xl:min-w-[280px]">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6">
+        <div className="flex flex-col gap-4">
+          <div className="w-full sm:max-w-xs">
             <label className="label">Completed Year</label>
             <input
               type="number"
               min="2000"
               value={year}
               onChange={(event) => setYear(Number(event.target.value || lastClosedYear()))}
-              className="glass-input rounded-xl px-4 py-2.5 text-sm mt-1.5 w-[160px]"
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
             />
-            <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Annual pool uses the prior fully completed year and supports manual member controls before distribution.
-            </p>
           </div>
-          <button onClick={() => { setPage(1); loadReport(year, 1); }} className="gold-btn rounded-xl py-2.5 px-5 text-sm" type="button">
-            Load Annual Report
-          </button>
-          <button
-            onClick={loadLatest}
-            className="rounded-xl py-2.5 px-5 text-sm font-medium border"
-            style={{ borderColor: 'rgba(59,130,246,0.35)', color: '#93c5fd', background: 'rgba(59,130,246,0.1)' }}
-            type="button"
-          >
-            Latest Distributed
-          </button>
-          <button
-            onClick={distribute}
-            disabled={processing || !canDistribute}
-            className="btn-success rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            type="button"
-          >
-            {processing ? 'Distributing...' : 'Distribute Annual Pool'}
-          </button>
+          <p className="text-xs -mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            Annual pool uses the prior fully completed year and supports manual member controls before distribution.
+          </p>
+          <div className="flex flex-wrap gap-2.5 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.12)' }}>
+            <button onClick={() => { setPage(1); loadReport(year, 1); }} className="gold-btn rounded-xl py-2.5 px-5 text-sm flex-1 sm:flex-initial text-center justify-center items-center" type="button">
+              Load Annual Report
+            </button>
+            <button
+              onClick={loadLatest}
+              className="rounded-xl py-2.5 px-5 text-sm font-medium border flex-1 sm:flex-initial text-center justify-center items-center"
+              style={{ borderColor: 'rgba(59,130,246,0.35)', color: '#93c5fd', background: 'rgba(59,130,246,0.1)' }}
+              type="button"
+            >
+              Latest Distributed
+            </button>
+            <button
+              onClick={distribute}
+              disabled={processing || !canDistribute}
+              className="btn-success rounded-xl py-2.5 px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-initial text-center justify-center items-center"
+              type="button"
+            >
+              {processing ? 'Distributing...' : 'Distribute Annual Pool'}
+            </button>
+          </div>
         </div>
 
         {blockedReason && (
@@ -255,7 +257,7 @@ export default function GlobalBonus() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.05fr_1.45fr] gap-6 mb-6">
-        <div className="glass-card rounded-2xl p-6">
+        <div className="glass-card rounded-2xl p-4 sm:p-6">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-semibold text-white">Recipient Controls</h2>
@@ -385,7 +387,7 @@ export default function GlobalBonus() {
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 overflow-hidden">
+        <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-semibold text-white">Managed Roster</h2>
@@ -480,12 +482,12 @@ export default function GlobalBonus() {
         </div>
       </div>
 
-      <div className="glass-card rounded-2xl p-6 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
             Distributed recipients for Year {year}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
             <button
               onClick={() => setPage((value) => Math.max(1, value - 1))}
               disabled={page <= 1}

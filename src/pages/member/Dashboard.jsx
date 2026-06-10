@@ -211,10 +211,10 @@ export default function Dashboard() {
               onClick={() => navigate('/dashboard/details/uni-level')}
             />
             <ActionPanel
-              title="Receivable Unilevel"
-              subtitle={data.unilevelMaintenance?.eligible ? 'Eligible this month' : 'Blocked until maintenance is complete'}
+              title="Downline Accruing"
+              subtitle={data.unilevelMaintenance?.eligible ? 'Eligible — will be released' : 'Maintenance needed to unlock payout'}
               metric="uni-level"
-              value={`PHP ${fmt(data.unilevelMaintenance?.receivableAmount || 0)}`}
+              value={`PHP ${fmt((data.unilevelMaintenance?.receivableAmount || 0) + (data.unilevelMaintenance?.blockedAmount || 0))}`}
               onClick={() => navigate('/dashboard/details/uni-level')}
             />
           </div>

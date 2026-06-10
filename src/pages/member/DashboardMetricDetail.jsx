@@ -83,11 +83,12 @@ function LoadingState() {
   );
 }
 
-function SummaryCard({ label, value, accent }) {
+function SummaryCard({ label, value, accent, helper }) {
   return (
     <div className="rounded-2xl p-4" style={{ background: PORTAL_SURFACE, border: `1px solid ${PORTAL_BORDER}`, boxShadow: 'var(--portal-box-shadow)' }}>
       <p className="text-xs" style={{ color: PORTAL_MUTED }}>{label}</p>
       <p className="text-lg font-bold mt-1" style={{ color: accent || PORTAL_TITLE }}>{value}</p>
+      {helper && <p className="text-[10px] mt-1 leading-4" style={{ color: PORTAL_MUTED }}>{helper}</p>}
     </div>
   );
 }
@@ -516,10 +517,18 @@ export default function DashboardMetricDetail() {
         <SummaryCard label="Total" value={typeof data.total === 'number' ? fmtMoney(data.total) : data.total} accent={config.accent} />
         <SummaryCard label="Entries Shown" value={fmtInt(rows.length)} />
         <SummaryCard label="As Of" value={data.asOf ? formatDateTimeManila(data.asOf) : 'Now'} />
-        <SummaryCard
-          label="Traceability"
-          value={metric === 'leadership-bonus' ? `${fmtInt(data.summary?.directReferralCount || 0)} direct referrals` : 'Readable breakdown'}
-        />
+        {metric === 'uni-level' ? (
+          <SummaryCard
+            label="This Month Accruing"
+            value={fmtMoney(data.eligibility?.projectedDownlineAmount || 0)}
+            accent={config.accent}
+            helper="Projected from current-month downline product points — released at month-end when maintenance is met"
+          />
+        ) : metric === 'leadership-bonus' ? (
+          <SummaryCard label="Direct Referrals" value={`${fmtInt(data.summary?.directReferralCount || 0)} referrals`} />
+        ) : (
+          <SummaryCard label="Traceability" value="Readable breakdown" />
+        )}
       </div>
 
         {metric === 'uni-level' && data.eligibility && (

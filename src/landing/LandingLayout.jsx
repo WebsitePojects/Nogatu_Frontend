@@ -134,7 +134,7 @@ function Navbar() {
           ))}
           <a
             href="/portal/login"
-            className="block px-4 py-3 rounded-full text-sm font-semibold text-white text-center mt-1 cursor-pointer border border-brand-gold-dark"
+            className="block px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white text-center mt-1 cursor-pointer border border-brand-gold-dark"
             style={{ background: 'linear-gradient(135deg, #B8860B 0%, #D4A528 100%)' }}
           >
             Members Login

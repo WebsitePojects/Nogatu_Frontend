@@ -263,9 +263,19 @@ export default function PairingReports() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard label="Pair Events" value={traceSummary.totalEvents || 0} icon={HiOutlineChartBar} color="#D4AF37" />
         <SummaryCard label="Matched BP" value={`${fmtInt(toBp(traceSummary.totalPairPoints))} BP`} icon={HiOutlineChartBar} color="#F2D06B" />
-        <SummaryCard label="Credited Pairing" value={`PHP ${fmt(traceSummary.totalCreditedIncome || 0)}`} icon={HiOutlineChartBar} color="#D4AF37" />
-        <SummaryCard label="Weekly Cap" value={`PHP ${fmt(data.trace?.weeklyCap)}`} icon={HiOutlineChartBar} color="#F2D06B" />
+        <SummaryCard label="Audit Trail Total" value={`PHP ${fmt(traceSummary.totalCreditedIncome || 0)}`} icon={HiOutlineChartBar} color="#D4AF37" />
+        <SummaryCard label="Wallet Pairing Total" value={`PHP ${fmt(data.walletPairingTotal || 0)}`} icon={HiOutlineChartBar} color="#F2D06B" />
       </div>
+
+      {data.walletPairingTotal > 0 && (
+        <div className="glass-card rounded-2xl p-4" style={{ border: '1px solid rgba(212,175,55,0.18)', background: 'rgba(212,175,55,0.04)' }}>
+          <p className="text-sm font-semibold" style={{ color: PORTAL_TITLE }}>Wallet Balance vs Audit Trail</p>
+          <p className="text-xs mt-2 leading-5" style={{ color: PORTAL_TEXT }}>
+            Your wallet shows <strong style={{ color: '#D4AF37' }}>PHP {fmt(data.walletPairingTotal)}</strong> in total pairing income (all-time, including history from the previous system).
+            The <strong style={{ color: '#D4AF37' }}>Audit Trail Total</strong> ({`PHP ${fmt(traceSummary.totalCreditedIncome || 0)}`}) reflects only the entries tracked by the new audit system — it will catch up as more pairing events are processed.
+          </p>
+        </div>
+      )}
 
       {!eligibility.canEarnPairing && (eligibility.qualifiedDirects?.left || 0) === 0 && (eligibility.qualifiedDirects?.right || 0) === 0 && (
         <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid var(--portal-soft-border)', background: 'var(--portal-soft-bg)' }}>
