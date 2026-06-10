@@ -40,7 +40,7 @@ function MemberLookup() {
   function selectMember(uid) {
     setOpen(false);
     setQuery('');
-    navigate(`/admin/accounts/${uid}/income`);
+    navigate(`/admin/view-as/${uid}`);
   }
 
   const ACCT_LABELS = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum', 50: 'Garnet', 60: 'Diamond' };
