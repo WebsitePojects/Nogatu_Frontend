@@ -4,6 +4,7 @@ import api from '../../api';
 import toast from 'react-hot-toast';
 import { PaginationButton } from '../../components/PaginationButton';
 import { useTheme } from '../../contexts/ThemeContext';
+import { formatDateTimeManila } from '../../utils/dateTime';
 
 function statusStyle(status) {
   if (status === 'suspended') {
@@ -212,7 +213,7 @@ export default function AccountMasterlist() {
                       </div>
                     </td>
                     <td className="py-3 px-4 text-xs text-white/40">{a.entryType}</td>
-                    <td className="py-3 px-4 text-xs text-white/40">{a.datereg}</td>
+                    <td className="py-3 px-4 text-xs text-white/40">{formatDateTimeManila(a.datereg)}</td>
                     <td className="py-3 px-4">
                       <div className="flex gap-1.5 flex-wrap">
                         <button
@@ -447,7 +448,7 @@ export default function AccountMasterlist() {
                       {account.accountStatus === 'active' ? 'Active' : 'Suspended'}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-xs text-white/45">{account.datereg}</td>
+                  <td className="py-3 px-4 text-xs text-white/45">{formatDateTimeManila(account.datereg)}</td>
                   <td className="py-3 px-4">
                     <div className="flex gap-1.5 flex-wrap">
                       <button

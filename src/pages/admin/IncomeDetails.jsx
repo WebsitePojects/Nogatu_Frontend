@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
+import { formatDateTimeManila } from '../../utils/dateTime';
 
 const PKG_COLORS = {
   Bronze:   '#CD7F32',
@@ -92,7 +93,7 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
           <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--brand-gold)' }}>Income Credit</p>
           <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Transaction #{tx.pid}</p>
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-            {new Date(tx.transdate).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {formatDateTimeManila(tx.transdate)}
           </p>
           <div className="w-12 h-0.5 mt-3" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
         </div>
@@ -187,7 +188,7 @@ function IncomeModal({ tx, directReferrals, binaryChildren, leadershipDownline, 
                           {row.left?.username || '—'} × {row.right?.username || '—'}
                         </p>
                         <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                          {row.pairedAt} · {fmt(row.pairPoints)} BP
+                          {formatDateTimeManila(row.pairedAt)} · {Math.round(Number(row.pairPoints || 0) / 250)} PV
                         </p>
                       </div>
                       <div className="text-right">

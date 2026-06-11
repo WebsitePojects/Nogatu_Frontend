@@ -7,7 +7,9 @@ function toDate(value) {
   if (!raw) return null;
   const normalized = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(raw)
     ? `${raw.replace(' ', 'T')}Z`
-    : raw;
+    : /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(raw)
+      ? `${raw.replace(' ', 'T')}:00Z`
+      : raw;
   const parsed = new Date(normalized);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }

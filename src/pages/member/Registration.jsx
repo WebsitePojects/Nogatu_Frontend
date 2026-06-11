@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
-import { formatTin, isValidTin } from '../../utils/tin';
+import { formatTin, isValidTin, isZeroTin } from '../../utils/tin';
 
 function Spinner() {
   return <svg className="animate-spin size-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>;
@@ -101,7 +101,12 @@ export default function Registration() {
     ['password', 'Password'],
   ];
 
-  const handleChange = (field, value) => {
+  const NAME_FIELDS = new Set(['firstname', 'lastname', 'middlename']);
+
+  const handleChange = (field, rawValue) => {
+    const value = NAME_FIELDS.has(field)
+      ? rawValue.replace(/[0-9]/g, '')
+      : rawValue;
     setForm((prev) => ({ ...prev, [field]: value }));
     setFieldErrors((prev) => ({ ...prev, [field]: '' }));
     if (field === 'activationCode') {
@@ -231,6 +236,7 @@ export default function Registration() {
           title: 'Username already exists',
           message: 'Please choose another username before continuing with registration.',
           confirmLabel: 'Close',
+          showCancel: false,
           onConfirm: () => setConfirmModal(null),
         });
       }
@@ -289,6 +295,43 @@ export default function Registration() {
     }
 
     setFieldErrors({});
+
+    // Phone: accept 10–11 digits (Philippine mobile 09XXXXXXXXX or 10-digit)
+    const phoneDigits = String(form.contactno || '').replace(/\D/g, '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      setConfirmModal({
+        tone: 'red',
+        title: 'Invalid contact number',
+        message: 'Contact number must be 10–11 digits (e.g. 09XXXXXXXXX).',
+        confirmLabel: 'Close',
+        onConfirm: () => setConfirmModal(null),
+      });
+      return;
+    }
+
+    // DOB: must be in the past and at least 18 years ago
+    if (form.dob) {
+      const dob = new Date(form.dob);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const minAge = new Date(today);
+      minAge.setFullYear(minAge.getFullYear() - 18);
+      const maxAge = new Date(today);
+      maxAge.setFullYear(maxAge.getFullYear() - 120);
+      if (dob >= today) {
+        setConfirmModal({ tone: 'red', title: 'Invalid date of birth', message: 'Date of birth must be in the past.', confirmLabel: 'Close', onConfirm: () => setConfirmModal(null) });
+        return;
+      }
+      if (dob > minAge) {
+        setConfirmModal({ tone: 'red', title: 'Age requirement', message: 'Member must be at least 18 years old.', confirmLabel: 'Close', onConfirm: () => setConfirmModal(null) });
+        return;
+      }
+      if (dob < maxAge) {
+        setConfirmModal({ tone: 'red', title: 'Invalid date of birth', message: 'Please enter a valid date of birth.', confirmLabel: 'Close', onConfirm: () => setConfirmModal(null) });
+        return;
+      }
+    }
+
     let preview = codePreview;
     if (!preview || String(preview.code || '').toLowerCase() !== String(form.activationCode || '').trim().toLowerCase()) {
       preview = await validateCode(false);
@@ -322,7 +365,7 @@ export default function Registration() {
     }
 
     const normalizedTin = formatTin(form.tin);
-    if (normalizedTin && !isValidTin(normalizedTin)) {
+    if (normalizedTin && !isZeroTin(normalizedTin) && !isValidTin(normalizedTin)) {
       setConfirmModal({
         tone: 'red',
         title: 'Invalid TIN',
@@ -382,6 +425,7 @@ export default function Registration() {
         message={confirmModal?.message}
         details={confirmModal?.details || []}
         confirmLabel={confirmModal?.confirmLabel || 'Confirm'}
+        showCancel={confirmModal?.showCancel !== false}
         onConfirm={confirmModal?.onConfirm}
         onClose={() => setConfirmModal(null)}
         busy={submitting}

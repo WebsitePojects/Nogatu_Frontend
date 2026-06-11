@@ -366,29 +366,6 @@ export default function HiFivePackageClaims() {
                     </div>
                   ) : null}
 
-                  {detail.claim?.status === 'pending_review' ? (
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={() => openActionModal('approve', detail.claim)}
-                        disabled={busyId === detail.claim?.qualificationUid}
-                        className="rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
-                        style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
-                      >
-                        Approve Claim
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openActionModal('reject', detail.claim)}
-                        disabled={busyId === detail.claim?.qualificationUid}
-                        className="rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
-                        style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
-                      >
-                        Reject Claim
-                      </button>
-                    </div>
-                  ) : null}
-
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm min-w-[1100px]">
                       <thead>

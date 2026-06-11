@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
-import { formatTin, isValidTin } from '../../utils/tin';
+import { formatTin, isValidTin, isZeroTin } from '../../utils/tin';
 import { apiUrl } from '../../utils/apiBase';
 
 export default function Join() {
@@ -47,7 +47,11 @@ export default function Join() {
     loadInvite();
   }, [token]);
 
-  const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+  const NAME_FIELDS = new Set(['firstname', 'lastname', 'middlename']);
+  const updateField = (field, value) => {
+    const sanitized = NAME_FIELDS.has(field) ? value.replace(/[0-9]/g, '') : value;
+    setForm((current) => ({ ...current, [field]: sanitized }));
+  };
 
   async function validateCode(showFeedback = true) {
     if (!form.activationCode) return null;
@@ -111,7 +115,39 @@ export default function Join() {
       return;
     }
 
-    if (form.tin && !isValidTin(form.tin)) {
+    // Phone: 10–11 digits
+    const phoneDigits = String(form.contactno || '').replace(/\D/g, '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      setFeedbackModal({ tone: 'red', title: 'Invalid contact number', message: 'Contact number must be 10–11 digits (e.g. 09XXXXXXXXX).' });
+      return;
+    }
+
+    // DOB: past date, min 18 years
+    if (form.dob) {
+      const dob = new Date(form.dob);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const minAge = new Date(today);
+      minAge.setFullYear(minAge.getFullYear() - 18);
+      const maxAge = new Date(today);
+      maxAge.setFullYear(maxAge.getFullYear() - 120);
+      if (dob >= today) {
+        setFeedbackModal({ tone: 'red', title: 'Invalid date of birth', message: 'Date of birth must be in the past.' });
+        return;
+      }
+      if (dob > minAge) {
+        setFeedbackModal({ tone: 'red', title: 'Age requirement', message: 'Member must be at least 18 years old.' });
+        return;
+      }
+      if (dob < maxAge) {
+        setFeedbackModal({ tone: 'red', title: 'Invalid date of birth', message: 'Please enter a valid date of birth.' });
+        return;
+      }
+    }
+
+    // TIN: 000-000-000-000 bypasses duplicate check; otherwise validate format
+    const tinVal = formatTin(form.tin);
+    if (tinVal && !isZeroTin(tinVal) && !isValidTin(tinVal)) {
       setFeedbackModal({
         tone: 'red',
         title: 'Invalid TIN',

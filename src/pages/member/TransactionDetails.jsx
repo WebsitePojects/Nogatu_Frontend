@@ -112,6 +112,9 @@ export default function TransactionDetails() {
   const account = normalizeAccount(data);
   const supporting = normalizeSupporting(data);
   const notes = supporting.notes || {};
+  // CD Details section is only relevant for CD accounts (cdStatus 1 or 2)
+  const isCdAccount = Number(account.cdStatus) === 1 || Number(account.cdStatus) === 2
+    || String(account.entryState || '').toUpperCase().includes('CD');
   const breadcrumbText = isDarkMode ? 'rgba(255,255,255,0.52)' : '#64748b';
   const detailButtonStyle = isDarkMode
     ? { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }
@@ -161,26 +164,52 @@ export default function TransactionDetails() {
       <div className="glass-card rounded-2xl p-6">
         <h2 className="portal-page-title font-display text-lg font-semibold">Breakdown</h2>
         <div className="grid grid-cols-1 gap-3 mt-4 text-sm md:grid-cols-2">
-          <div className="portal-detail-card flex justify-between rounded-xl px-4 py-3"><span className="portal-card-text">Direct Referral</span><span className="portal-detail-value">PHP {fmt(tx.directReferral)}</span></div>
-          <div className="portal-detail-card flex justify-between rounded-xl px-4 py-3"><span className="portal-card-text">Pairing</span><span className="portal-detail-value">PHP {fmt(tx.pairing)}</span></div>
-          <div className="portal-detail-card flex justify-between rounded-xl px-4 py-3"><span className="portal-card-text">Leadership</span><span className="portal-detail-value">PHP {fmt(tx.leadership)}</span></div>
-          <div className="portal-detail-card flex justify-between rounded-xl px-4 py-3"><span className="portal-card-text">Unilevel</span><span className="portal-detail-value">PHP {fmt(tx.unilevel)}</span></div>
-          <div className="portal-detail-card flex justify-between rounded-xl px-4 py-3"><span className="portal-card-text">Hi-Five</span><span className="portal-detail-value">PHP {fmt(tx.hifive)}</span></div>
-          <div className="portal-detail-card flex justify-between rounded-xl px-4 py-3"><span className="portal-card-text">Ranking Bonus</span><span className="portal-detail-value">PHP {fmt(tx.rankingBonus)}</span></div>
-          <div className="portal-detail-card flex justify-between rounded-xl px-4 py-3"><span className="portal-card-text">Encashment</span><span className="portal-detail-value">PHP {fmt(tx.encashment)}</span></div>
-          <div className="portal-detail-card flex justify-between rounded-xl px-4 py-3"><span className="portal-card-text">Deductions</span><span className="portal-detail-value">PHP {fmt(tx.deductions)}</span></div>
+          {[
+            { label: 'Direct Referral', value: tx.directReferral },
+            { label: 'Pairing', value: tx.pairing },
+            { label: 'Leadership', value: tx.leadership },
+            { label: 'Unilevel', value: tx.unilevel },
+            { label: 'Hi-Five', value: tx.hifive },
+            { label: 'Ranking Bonus', value: tx.rankingBonus },
+            { label: 'Encashment', value: tx.encashment },
+            { label: 'Deductions', value: tx.deductions },
+          ].map(({ label, value }) => {
+            const active = Number(value) > 0;
+            return (
+              <div
+                key={label}
+                className="portal-detail-card flex justify-between rounded-xl px-4 py-3"
+                style={active ? { borderLeft: '3px solid rgba(212,175,55,0.6)', background: 'rgba(212,175,55,0.06)' } : {}}
+              >
+                <span className="portal-card-text flex items-center gap-2">
+                  {label}
+                  {active && (
+                    <span
+                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                      style={{ background: 'rgba(212,175,55,0.18)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }}
+                    >
+                      Credited
+                    </span>
+                  )}
+                </span>
+                <span className="portal-detail-value">PHP {fmt(value)}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="glass-card rounded-2xl p-6">
-        <h2 className="portal-page-title font-display text-lg font-semibold">CD Details</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">Account State</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{account.entryState}</p></div>
-          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Amount</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(account.cdAmount)}</p></div>
-          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Recovered</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(account.cdTotal)}</p></div>
-          <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Status</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{Number(account.cdStatus) === 2 ? 'Fully Paid' : Number(account.cdStatus) === 1 ? 'Unpaid' : 'Not CD'}</p></div>
+      {isCdAccount && (
+        <div className="glass-card rounded-2xl p-6">
+          <h2 className="portal-page-title font-display text-lg font-semibold">CD Details</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+            <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">Account State</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{account.entryState}</p></div>
+            <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Amount</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(account.cdAmount)}</p></div>
+            <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Recovered</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(account.cdTotal)}</p></div>
+            <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">CD Status</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{Number(account.cdStatus) === 2 ? 'Fully Paid' : 'Unpaid'}</p></div>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="glass-card rounded-2xl p-6">
         <h2 className="portal-page-title font-display text-lg font-semibold">Supporting Connections</h2>

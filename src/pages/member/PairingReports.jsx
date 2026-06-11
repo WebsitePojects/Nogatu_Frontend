@@ -137,7 +137,7 @@ function TraceEventCard({ row, expanded, onToggle }) {
       </button>
 
       <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: PORTAL_TEXT }}>
-        <div>Matched: {fmtInt(toBp(row.pairPoints))} BP</div>
+        <div>Matched: {fmtInt(toBp(row.pairPoints))} PV</div>
         <div>Credited: PHP {fmt(row.creditedIncome)}</div>
         <div>Gross: PHP {fmt(row.grossIncome)}</div>
         <div>Blocked: PHP {fmt(row.blockedIncome)}</div>
@@ -152,8 +152,8 @@ function TraceEventCard({ row, expanded, onToggle }) {
               <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>@{row.left?.username || '-'}</p>
               <SourceMetaLine source={row.left} />
               <div className="grid grid-cols-2 gap-2 mt-3 text-xs" style={{ color: PORTAL_TEXT }}>
-                <div>Binary Points before: {fmtInt(toBp(row.left?.pointsBefore))} BP</div>
-                <div>Remaining Binary Points: {fmtInt(toBp(row.left?.remainingAfter))} BP</div>
+                <div>PV before: {fmtInt(toBp(row.left?.pointsBefore))} PV</div>
+                <div>Remaining PV: {fmtInt(toBp(row.left?.remainingAfter))} PV</div>
                 <div>Type: {row.left?.eventType || '-'}</div>
                 <div>{row.left?.fullyConsumed ? 'Fully consumed' : 'Still pairable'}</div>
               </div>
@@ -164,8 +164,8 @@ function TraceEventCard({ row, expanded, onToggle }) {
               <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>@{row.right?.username || '-'}</p>
               <SourceMetaLine source={row.right} />
               <div className="grid grid-cols-2 gap-2 mt-3 text-xs" style={{ color: PORTAL_TEXT }}>
-                <div>Binary Points before: {fmtInt(toBp(row.right?.pointsBefore))} BP</div>
-                <div>Remaining Binary Points: {fmtInt(toBp(row.right?.remainingAfter))} BP</div>
+                <div>PV before: {fmtInt(toBp(row.right?.pointsBefore))} PV</div>
+                <div>Remaining PV: {fmtInt(toBp(row.right?.remainingAfter))} PV</div>
                 <div>Type: {row.right?.eventType || '-'}</div>
                 <div>{row.right?.fullyConsumed ? 'Fully consumed' : 'Still pairable'}</div>
               </div>
@@ -353,7 +353,7 @@ export default function PairingReports() {
                 <th className="table-header py-3 px-4">Date</th>
                 <th className="table-header py-3 px-4">Left Source</th>
                 <th className="table-header py-3 px-4">Right Source</th>
-                <th className="table-header py-3 px-4">Matched BP</th>
+                <th className="table-header py-3 px-4">Matched PV</th>
                 <th className="table-header py-3 px-4">Left Remaining After</th>
                 <th className="table-header py-3 px-4">Right Remaining After</th>
                 <th className="table-header py-3 px-4">Credited Payout</th>
@@ -388,9 +388,9 @@ export default function PairingReports() {
                       </>
                     )}
                   </td>
-                  <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{row.matchedPoints != null ? `${fmtInt(toBp(row.matchedPoints))} BP` : '-'}</td>
-                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{row.leftRemainingAfter != null ? `${fmtInt(toBp(row.leftRemainingAfter))} BP` : '-'}</td>
-                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{row.rightRemainingAfter != null ? `${fmtInt(toBp(row.rightRemainingAfter))} BP` : '-'}</td>
+                  <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{row.matchedPoints != null ? `${fmtInt(toBp(row.matchedPoints))} PV` : '-'}</td>
+                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{row.leftRemainingAfter != null ? `${fmtInt(toBp(row.leftRemainingAfter))} PV` : '-'}</td>
+                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{row.rightRemainingAfter != null ? `${fmtInt(toBp(row.rightRemainingAfter))} PV` : '-'}</td>
                   <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
                 </tr>
               ))}
@@ -419,9 +419,9 @@ export default function PairingReports() {
                   <>
                     <div>Left: {row.left?.username || '-'} ({row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'})</div>
                     <div>Right: {row.right?.username || '-'} ({row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'})</div>
-                    <div>Matched: {row.matchedPoints != null ? `${fmtInt(toBp(row.matchedPoints))} BP` : '-'}</div>
-                    <div>Left remaining after: {row.leftRemainingAfter != null ? `${fmtInt(toBp(row.leftRemainingAfter))} BP` : '-'}</div>
-                    <div>Right remaining after: {row.rightRemainingAfter != null ? `${fmtInt(toBp(row.rightRemainingAfter))} BP` : '-'}</div>
+                    <div>Matched: {row.matchedPoints != null ? `${fmtInt(toBp(row.matchedPoints))} PV` : '-'}</div>
+                    <div>Left remaining after: {row.leftRemainingAfter != null ? `${fmtInt(toBp(row.leftRemainingAfter))} PV` : '-'}</div>
+                    <div>Right remaining after: {row.rightRemainingAfter != null ? `${fmtInt(toBp(row.rightRemainingAfter))} PV` : '-'}</div>
                   </>
                 )}
               </div>
@@ -461,7 +461,7 @@ export default function PairingReports() {
                 <th className="table-header py-3 px-4">Date</th>
                 <th className="table-header py-3 px-4">Left Source</th>
                 <th className="table-header py-3 px-4">Right Source</th>
-                <th className="table-header py-3 px-4">Matched BP</th>
+                <th className="table-header py-3 px-4">Matched PV</th>
                 <th className="table-header py-3 px-4">Gross Pairing</th>
                 <th className="table-header py-3 px-4">Credited</th>
                 <th className="table-header py-3 px-4">Blocked</th>
@@ -493,12 +493,12 @@ export default function PairingReports() {
                       <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.right?.username || ''}</div>
                       <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
                     </td>
-                    <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(toBp(row.pairPoints))} BP</td>
+                    <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(toBp(row.pairPoints))} PV</td>
                     <td className="py-3 px-4" style={{ color: PORTAL_TEXT }}>PHP {fmt(row.grossIncome)}</td>
                     <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
                     <td className="py-3 px-4" style={{ color: row.blockedIncome > 0 ? '#f87171' : PORTAL_MUTED }}>PHP {fmt(row.blockedIncome)}</td>
-                    <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.left?.remainingAfter))} BP</td>
-                    <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.right?.remainingAfter))} BP</td>
+                    <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.left?.remainingAfter))} PV</td>
+                    <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.right?.remainingAfter))} PV</td>
                     <td className="py-3 px-4">
                       <span className="text-[11px] px-2 py-1 rounded-full font-semibold" style={styles}>{traceStatus(row)}</span>
                     </td>
