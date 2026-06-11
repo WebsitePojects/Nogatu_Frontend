@@ -210,34 +210,42 @@ export default function PairingReports() {
     }
   }, [expandedTraceUid, traceRows]);
 
-  const summaryCards = useMemo(() => ([
-    {
-      label: 'Left Accounts',
-      value: data?.counts?.totalLeft || 0,
-      icon: HiOutlineArrowLeft,
-      helper: 'Open left-leg account list',
-      onClick: () => navigate('/pairing/leg/left'),
-    },
-    {
-      label: 'Left Remaining',
-      value: `${fmtInt(toBp(data?.counts?.totalPointsLeft))} PV`,
-      icon: HiOutlineChartBar,
-      color: '#F2D06B',
-    },
-    {
-      label: 'Right Accounts',
-      value: data?.counts?.totalRight || 0,
-      icon: HiOutlineArrowRight,
-      helper: 'Open right-leg account list',
-      onClick: () => navigate('/pairing/leg/right'),
-    },
-    {
-      label: 'Right Remaining',
-      value: `${fmtInt(toBp(data?.counts?.totalPointsRight))} PV`,
-      icon: HiOutlineChartBar,
-      color: '#F2D06B',
-    },
-  ]), [data, navigate]);
+  const summaryCards = useMemo(() => {
+    const leftPV = Math.round((data?.counts?.totalPointsLeft || 0) / 250);
+    const rightPV = Math.round((data?.counts?.totalPointsRight || 0) / 250);
+    const leftRemaining = leftPV > rightPV ? leftPV - rightPV : 0;
+    const rightRemaining = rightPV > leftPV ? rightPV - leftPV : 0;
+    return [
+      {
+        label: 'Left Accounts',
+        value: data?.counts?.totalLeft || 0,
+        icon: HiOutlineArrowLeft,
+        helper: 'Open left-leg account list',
+        onClick: () => navigate('/pairing/leg/left'),
+      },
+      {
+        label: 'Left Remaining',
+        value: `${fmtInt(leftRemaining)} PV`,
+        icon: HiOutlineChartBar,
+        color: '#F2D06B',
+        helper: leftPV > rightPV ? 'Strong leg — unmatched surplus' : 'Weak leg — fully consumed',
+      },
+      {
+        label: 'Right Accounts',
+        value: data?.counts?.totalRight || 0,
+        icon: HiOutlineArrowRight,
+        helper: 'Open right-leg account list',
+        onClick: () => navigate('/pairing/leg/right'),
+      },
+      {
+        label: 'Right Remaining',
+        value: `${fmtInt(rightRemaining)} PV`,
+        icon: HiOutlineChartBar,
+        color: '#F2D06B',
+        helper: rightPV > leftPV ? 'Strong leg — unmatched surplus' : 'Weak leg — fully consumed',
+      },
+    ];
+  }, [data, navigate]);
 
   if (loading) return <Spinner />;
   if (!data) return <p style={{ color: PORTAL_MUTED }}>Failed to load pairing data.</p>;

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
-import { HiOutlineSearch, HiOutlineTicket, HiOutlineUsers, HiOutlineCheckCircle, HiOutlineX } from 'react-icons/hi';
+import { useAuth } from '../../contexts/AuthContext';
+import { HiOutlineSearch, HiOutlineTicket, HiOutlineUsers, HiOutlineCheckCircle, HiOutlineX, HiOutlineEye } from 'react-icons/hi';
 
 const PACKAGE_LABELS = {
   10: 'Bronze',
@@ -13,13 +14,20 @@ const PACKAGE_LABELS = {
   60: 'Diamond',
 };
 
-const fmt = (n) => Number(n || 0).toLocaleString('en-US', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const VOUCHER_STATUS_MAP = { 1: 'Active', 2: 'Expired', 3: 'Fully Used', 4: 'Suspended' };
+const VOUCHER_STATUS_STYLES = {
+  1: { color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' },
+  2: { color: '#fbbf24', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' },
+  3: { color: '#93c5fd', background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)' },
+  4: { color: '#f87171', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' },
+};
 
 export default function VoucherGrant() {
   const navigate = useNavigate();
+  const { admin } = useAuth();
+  const isCashier = Number(admin?.rights) === 2;
 
   const [loading, setLoading] = useState(true);
   const [granting, setGranting] = useState(false);
@@ -38,12 +46,12 @@ export default function VoucherGrant() {
   }, [page, search]);
 
   const selectedOnPage = useMemo(
-    () => rows.filter((r) => selected.includes(r.uid)).length,
+    () => rows.filter((r) => !r.hasVoucher && selected.includes(r.uid)).length,
     [rows, selected]
   );
 
   const selectedRows = useMemo(
-    () => rows.filter((r) => selected.includes(r.uid)),
+    () => rows.filter((r) => !r.hasVoucher && selected.includes(r.uid)),
     [rows, selected]
   );
 
@@ -57,13 +65,14 @@ export default function VoucherGrant() {
     try {
       const params = new URLSearchParams({ page: String(page) });
       if (search.trim()) params.set('search', search.trim());
+      if (isCashier) params.set('includeAll', '1');
 
       const res = await api.get(`/admin/voucher-management/grant-candidates?${params.toString()}`);
       setRows(res.data.users || []);
       setTotalPages(Number(res.data.totalPages || 1));
       setTotal(Number(res.data.total || 0));
 
-      setSelected((prev) => prev.filter((uid) => (res.data.users || []).some((r) => r.uid === uid)));
+      setSelected((prev) => prev.filter((uid) => (res.data.users || []).some((r) => r.uid === uid && !r.hasVoucher)));
     } catch {
       setRows([]);
       setTotalPages(1);
@@ -80,7 +89,10 @@ export default function VoucherGrant() {
     setSearch(searchInput.trim());
   }
 
-  function handleRowClick(uid) {
+  function handleRowClick(row) {
+    if (row.hasVoucher) return;
+    const uid = row.uid;
+
     setSelected((prev) => {
       if (multiSelect) {
         return prev.includes(uid)
@@ -96,7 +108,7 @@ export default function VoucherGrant() {
   }
 
   function toggleSelectAllPage() {
-    const pageUids = rows.map((row) => row.uid);
+    const pageUids = rows.filter((row) => !row.hasVoucher).map((row) => row.uid);
     const allSelected = pageUids.length > 0 && pageUids.every((uid) => selected.includes(uid));
 
     setSelected((prev) => {
@@ -108,7 +120,7 @@ export default function VoucherGrant() {
   }
 
   async function handleGrantSelected() {
-    if (selected.length === 0) {
+    if (selectedRows.length === 0) {
       toast.error('Select at least one user account');
       return;
     }
@@ -116,7 +128,7 @@ export default function VoucherGrant() {
     setConfirmOpen(false);
     setGranting(true);
     try {
-      const res = await api.post('/admin/voucher-management/grant', { uids: selected });
+      const res = await api.post('/admin/voucher-management/grant', { uids: selectedRows.map((row) => row.uid) });
       const granted = Number(res.data.granted || 0);
       const skipped = Number(res.data.skippedCount || 0);
 
@@ -137,11 +149,16 @@ export default function VoucherGrant() {
   }
 
   function openGrantConfirm() {
-    if (selected.length === 0) {
+    if (selectedRows.length === 0) {
       toast.error('Select at least one user account');
       return;
     }
     setConfirmOpen(true);
+  }
+
+  function goToVoucherAvailment(row) {
+    if (!row.voucherId) return;
+    navigate(`/admin/voucher-management?voucherId=${row.voucherId}&mode=add`);
   }
 
   return (
@@ -175,11 +192,19 @@ export default function VoucherGrant() {
         </button>
       </div>
 
+      {isCashier && (
+        <div className="glass-card rounded-2xl p-4 text-sm" style={{ border: '1px solid rgba(212,175,55,0.2)', color: 'rgba(255,255,255,0.75)', background: 'rgba(212,175,55,0.06)' }}>
+          <span style={{ color: '#D4AF37', fontWeight: 600 }}>Cashier view:</span> Select members without vouchers to grant one, or click Transact for existing voucher balances to record ER-traced availments.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="glass-card rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <HiOutlineUsers className="size-5" style={{ color: '#93c5fd' }} />
-            <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>Eligible Accounts</p>
+            <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              {isCashier ? 'All Members' : 'Eligible Accounts'}
+            </p>
           </div>
           <p className="text-2xl font-bold text-white">{Number(total || 0).toLocaleString()}</p>
         </div>
@@ -188,7 +213,7 @@ export default function VoucherGrant() {
             <HiOutlineCheckCircle className="size-5" style={{ color: '#34d399' }} />
             <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>Selected</p>
           </div>
-          <p className="text-2xl font-bold text-white">{selected.length}</p>
+          <p className="text-2xl font-bold text-white">{selectedRows.length}</p>
         </div>
         <div className="glass-card rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -221,46 +246,46 @@ export default function VoucherGrant() {
           </button>
         </form>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => {
-              setMultiSelect((prev) => {
-                const next = !prev;
-                if (!next && selected.length > 1) {
-                  setSelected([selected[0]]);
-                }
-                return next;
-              });
-            }}
-            className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-            style={
-              multiSelect
-                ? { background: 'rgba(212,175,55,0.16)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }
-                : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }
-            }
-           type="button">
-            {multiSelect ? 'Exit Multi Select' : 'Multi Select'}
-          </button>
-
-          {multiSelect && (
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={toggleSelectAllPage}
+              onClick={() => {
+                setMultiSelect((prev) => {
+                  const next = !prev;
+                  if (!next && selected.length > 1) {
+                    setSelected([selected[0]]);
+                  }
+                  return next;
+                });
+              }}
               className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-              style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
+              style={
+                multiSelect
+                  ? { background: 'rgba(212,175,55,0.16)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }
+                  : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }
+              }
              type="button">
-              {selectedOnPage === rows.length && rows.length > 0 ? 'Unselect Page' : 'Select Page'}
+              {multiSelect ? 'Exit Multi Select' : 'Multi Select'}
             </button>
-          )}
 
-          <button
-            onClick={openGrantConfirm}
-            disabled={selected.length === 0 || granting}
-            className="text-xs px-3 py-1.5 rounded-lg font-semibold disabled:opacity-50"
-            style={{ background: 'rgba(16,185,129,0.16)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}
-           type="button">
-            {granting ? 'Granting...' : `Review & Grant${selected.length > 0 ? ` (${selected.length})` : ''}`}
-          </button>
-        </div>
+            {multiSelect && (
+              <button
+                onClick={toggleSelectAllPage}
+                className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
+               type="button">
+                {selectedOnPage === rows.filter((row) => !row.hasVoucher).length && selectedOnPage > 0 ? 'Unselect Page' : 'Select Eligible Page'}
+              </button>
+            )}
+
+            <button
+              onClick={openGrantConfirm}
+              disabled={selectedRows.length === 0 || granting}
+              className="text-xs px-3 py-1.5 rounded-lg font-semibold disabled:opacity-50"
+              style={{ background: 'rgba(16,185,129,0.16)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}
+             type="button">
+              {granting ? 'Granting...' : `Review & Grant${selectedRows.length > 0 ? ` (${selectedRows.length})` : ''}`}
+            </button>
+          </div>
       </div>
 
       <div className="glass-card rounded-2xl p-6 overflow-hidden">
@@ -273,32 +298,42 @@ export default function VoucherGrant() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['', 'UID', 'Username', 'Full Name', 'Package', 'Voucher Amount', 'Date Registered'].map((h) => (
-                    <th key={h} className="table-header p-3 text-left text-xs uppercase tracking-wide">{h}</th>
+                  {[
+                    '',
+                    'UID', 'Username', 'Full Name', 'Package',
+                    isCashier ? 'Voucher Status' : 'Voucher Amount',
+                    isCashier ? 'Remaining' : 'Date Registered',
+                    isCashier ? '' : null,
+                  ].filter(h => h !== null).map((h, i) => (
+                    <th key={i} className="table-header p-3 text-left text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row, index) => {
                   const active = selected.includes(row.uid);
+                  const vsStyle = row.hasVoucher ? (VOUCHER_STATUS_STYLES[row.voucherStatus] || VOUCHER_STATUS_STYLES[1]) : null;
+                  const selectable = !row.hasVoucher;
                   return (
                     <tr
                       key={row.uid}
-                      onClick={() => handleRowClick(row.uid)}
-                      className="cursor-pointer transition-colors"
+                      onClick={() => handleRowClick(row)}
+                      className={`transition-colors ${selectable ? 'cursor-pointer' : ''}`}
                       style={{
                         background: active
                           ? 'rgba(212,175,55,0.16)'
                           : index % 2 === 0
                             ? 'rgba(255,255,255,0.02)'
                             : 'transparent',
+                        opacity: selectable ? 1 : 0.88,
                       }}
                     >
                       <td className="p-3">
                         <input
                           type="checkbox"
                           checked={active}
-                          onChange={() => handleRowClick(row.uid)}
+                          disabled={!selectable}
+                          onChange={() => handleRowClick(row)}
                           onClick={(e) => e.stopPropagation()}
                           style={{ accentColor: '#D4AF37' }}
                         />
@@ -307,15 +342,51 @@ export default function VoucherGrant() {
                       <td className="p-3 text-white/85 font-semibold">{row.username}</td>
                       <td className="p-3 text-white/70">{row.fullname || 'N/A'}</td>
                       <td className="p-3 text-white/70">{PACKAGE_LABELS[row.accttype] || row.accttype}</td>
-                      <td className="p-3 font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(row.voucherAmount)}</td>
-                      <td className="p-3 text-white/50 text-xs">{row.datereg || '—'}</td>
+                      {isCashier ? (
+                        <>
+                          <td className="p-3">
+                            {row.hasVoucher ? (
+                              <span className="inline-block text-xs px-2.5 py-0.5 rounded-full" style={vsStyle}>
+                                {VOUCHER_STATUS_MAP[row.voucherStatus] || 'Active'}
+                              </span>
+                            ) : (
+                              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>No Voucher</span>
+                            )}
+                          </td>
+                          <td className="p-3 font-mono" style={{ color: row.hasVoucher ? '#D4AF37' : 'rgba(255,255,255,0.35)' }}>
+                            {row.hasVoucher ? `₱${fmt(row.voucherRemaining)}` : '—'}
+                          </td>
+                          <td className="p-3">
+                            {row.hasVoucher && (
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  goToVoucherAvailment(row);
+                                }}
+                                className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg"
+                                style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}
+                                title="Add ER-traced voucher availment"
+                              >
+                                <HiOutlineEye className="size-3.5" />
+                                Transact
+                              </button>
+                            )}
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="p-3 font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(row.voucherAmount)}</td>
+                          <td className="p-3 text-white/50 text-xs">{row.datereg || '—'}</td>
+                        </>
+                      )}
                     </tr>
                   );
                 })}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                      No eligible accounts found.
+                    <td colSpan={isCashier ? 7 : 7} className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      {isCashier ? 'No members found.' : 'No eligible accounts found.'}
                     </td>
                   </tr>
                 )}

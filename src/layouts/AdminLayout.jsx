@@ -27,7 +27,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin/accounts',         label: 'Account Masterlist',     icon: HiOutlineUsers,         roles: [1, 3] },
       { to: '/admin/genealogy',        label: 'Account Genealogy',      icon: FaSitemap,              roles: [1, 3] },
-      { to: '/admin/generate-codes',   label: 'Generate Codes',         icon: HiOutlineKey,           roles: [1, 3] },
+      { to: '/admin/generate-codes',   label: 'Generate Codes',         icon: HiOutlineKey,           roles: [1, 2, 3] },
       { to: '/admin/manage-codes',     label: 'Manage Codes',           icon: HiOutlineCog },
     ],
   },

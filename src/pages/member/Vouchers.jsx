@@ -3,7 +3,11 @@ import toast from 'react-hot-toast';
 import { HiOutlineGift, HiOutlineSparkles, HiOutlineCash, HiOutlineRefresh, HiOutlineShoppingCart, HiOutlineDocumentText, HiOutlineExclamation, HiOutlineX } from 'react-icons/hi';
 import api from '../../api';
 import { useTheme } from '../../contexts/ThemeContext';
-import { MAINTENANCE_PRODUCTS, MAINTENANCE_PRODUCT_IMAGES } from '../../constants/maintenanceProducts';
+import {
+  MAINTENANCE_PRODUCTS,
+  MAINTENANCE_PRODUCT_IMAGES,
+  getVoucherMemberPricing,
+} from '../../constants/maintenanceProducts';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -140,29 +144,29 @@ export default function Vouchers() {
         return Number(a.id || 0) - Number(b.id || 0);
       });
 
-    const fullMatch = activeVouchers.find((v) => Number(v.remaining_balance || 0) >= requiredAmount);
-    return fullMatch || activeVouchers[0] || null;
+    return activeVouchers.find((v) => Number(v.remaining_balance || 0) >= requiredAmount) || null;
   }
 
   function handleProductCheckout(product) {
-    const price = Number(product?.price || 0);
-    if (!Number.isFinite(price) || price <= 0) {
+    const pricing = getVoucherMemberPricing(product?.price || 0);
+    const memberPrice = Number(pricing.memberPrice || 0);
+    if (!Number.isFinite(memberPrice) || memberPrice <= 0) {
       toast.error('Invalid product amount');
       return;
     }
 
-    if (price > Number(walletBalance || 0)) {
+    if (memberPrice > Number(walletBalance || 0)) {
       toast.error('Insufficient wallet balance');
       return;
     }
 
-    const voucher = pickVoucherForCheckout(price);
+    const voucher = pickVoucherForCheckout(memberPrice);
     if (!voucher) {
       toast.error('No active voucher available for checkout');
       return;
     }
 
-    const voucherMatch = Math.min(price, Number(voucher.remaining_balance || 0));
+    const voucherMatch = Math.min(memberPrice, Number(voucher.remaining_balance || 0));
     if (voucherMatch <= 0) {
       toast.error('No usable voucher balance for this checkout');
       return;
@@ -170,10 +174,11 @@ export default function Vouchers() {
 
     setCheckoutModal({
       product,
+      pricing,
       voucher,
-      price,
+      price: memberPrice,
       voucherMatch,
-      totalValue: price + voucherMatch,
+      totalValue: memberPrice + voucherMatch,
     });
   }
 
@@ -199,7 +204,7 @@ export default function Vouchers() {
       });
 
       toast.success(
-        `${product.name} checkout successful. You will receive 2x ${product.name}. Wallet -P${fmt(data?.cashPaid)} | Voucher -P${fmt(data?.voucherDeducted)}`
+        `${product.name} request submitted. Claim 2x ${product.name} during your branch visit. Wallet -P${fmt(data?.cashPaid)} | Voucher -P${fmt(data?.voucherDeducted)}`
       );
 
       setCheckoutModal(null);
@@ -269,7 +274,7 @@ export default function Vouchers() {
           <div>
             <p className="portal-card-title font-semibold text-base">PRODUCT + PRODUCT VOUCHER = DOBLE SULIT</p>
             <p className="portal-card-text text-sm mt-1 leading-6">
-              Buy 1 Take 1 style: every successful checkout gives you <span className="portal-card-title font-semibold">2x of the selected product</span>. Your cash payment is matched by your voucher balance, based on wallet spend.
+              Buy 1 Take 1 style stays active, and every request now uses the <span className="portal-card-title font-semibold">30% member-discounted product amount</span> as the wallet and voucher match basis. The cashier will mark the request claimed during your visit.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <div className="portal-soft-panel min-w-[150px] px-4 py-3 rounded-xl">
@@ -377,13 +382,14 @@ export default function Vouchers() {
           <h2 className="font-display text-lg text-white">Available Products</h2>
         </div>
         <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Products are based on your wallet cash balance. Voucher usage can match the cash amount you spend, up to your remaining voucher balance.
+          Products show the original price, the 30% member discount, and the discounted request amount that your wallet and voucher must both match.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {MAINTENANCE_PRODUCTS.map((p) => {
-            const canAfford = Number(walletBalance || 0) >= Number(p.price || 0);
-            const voucher = pickVoucherForCheckout(p.price);
-            const voucherMatch = Math.min(Number(p.price || 0), Number(voucher?.remaining_balance || 0));
+            const pricing = getVoucherMemberPricing(p.price);
+            const canAfford = Number(walletBalance || 0) >= Number(pricing.memberPrice || 0);
+            const voucher = pickVoucherForCheckout(pricing.memberPrice);
+            const voucherMatch = Math.min(Number(pricing.memberPrice || 0), Number(voucher?.remaining_balance || 0));
             const canUseVoucher = voucherMatch > 0;
             const canCheckout = canAfford && canUseVoucher;
             const checkoutLocked = Boolean(processingProduct);
@@ -415,13 +421,15 @@ export default function Vouchers() {
                   </div>
                 )}
                 <p className="text-sm font-medium text-white/80">{p.name}</p>
-                <p className="text-xs mt-1" style={{ color: '#D4AF37' }}>P{fmt(p.price)}</p>
+                <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>Original P{fmt(pricing.originalPrice)}</p>
+                <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>Member Discount 30%: -P{fmt(pricing.discountValue)}</p>
+                <p className="text-xs mt-1 font-semibold" style={{ color: '#D4AF37' }}>Total P{fmt(pricing.memberPrice)}</p>
                 <p className="text-[10px] mt-1 font-semibold" style={{ color: canCheckout ? '#34d399' : 'rgba(255,255,255,0.45)' }}>
-                  You will receive 2x this product
+                  Submit request for 2x this product
                 </p>
 
                 <div className="mt-2 space-y-1">
-                  <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>Wallet: P{fmt(p.price)}</p>
+                  <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>Wallet Match: P{fmt(pricing.memberPrice)}</p>
                   <p className="text-[11px]" style={{ color: canUseVoucher ? '#34d399' : 'rgba(255,255,255,0.5)' }}>
                     Voucher Match: P{fmt(voucherMatch)}
                   </p>
@@ -443,7 +451,7 @@ export default function Vouchers() {
                       opacity: checkoutLocked ? 0.7 : 1,
                     }}
                   >
-                    {isProcessing ? 'Processing...' : 'Use Voucher'}
+                    {isProcessing ? 'Submitting...' : 'Submit Request'}
                   </button>
                 ) : (
                   <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full" style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)' }}>
@@ -564,10 +572,10 @@ export default function Vouchers() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold" style={{ color: modalStyles.title }}>
-                  Confirm Product Purchase
+                  Submit Product Request
                 </h3>
                 <p className="text-sm mt-1" style={{ color: modalStyles.muted }}>
-                  Confirm this buy 1 take 1 checkout to receive 2x of your selected product.
+                  Submit this buy 1 take 1 request. The branch cashier will mark it claimed when you receive the products.
                 </p>
               </div>
               <button
@@ -588,8 +596,22 @@ export default function Vouchers() {
                 <span className="font-semibold" style={{ color: modalStyles.title }}>{checkoutModal.product.name}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
+                <span style={{ color: modalStyles.body }}>Original Price</span>
+                <span className="font-semibold" style={{ color: modalStyles.title }}>P{fmt(checkoutModal.pricing.originalPrice)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span style={{ color: modalStyles.body }}>Member Discount</span>
+                <span className="font-semibold" style={{ color: modalStyles.deduct }}>
+                  -P{fmt(checkoutModal.pricing.discountValue)} ({checkoutModal.pricing.discountPercent}%)
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span style={{ color: modalStyles.body }}>Discounted Request Amount</span>
+                <span className="font-semibold" style={{ color: modalStyles.total }}>P{fmt(checkoutModal.price)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
                 <span style={{ color: modalStyles.body }}>You Will Receive</span>
-                <span className="font-bold" style={{ color: '#22c55e' }}>2 x {checkoutModal.product.name}</span>
+                <span className="font-bold" style={{ color: '#22c55e' }}>2 x {checkoutModal.product.name} on claim</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span style={{ color: modalStyles.body }}>Wallet Deduction</span>

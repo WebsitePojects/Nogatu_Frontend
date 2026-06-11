@@ -54,6 +54,9 @@ export default function GenerateCodes() {
       <div className="mb-7">
         <h1 className="font-display text-2xl font-bold text-white">Generate Codes</h1>
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+        <p className="mt-3 text-sm max-w-2xl" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          Cashier and admin roles can still generate codes here while voucher tracing is handled in the dedicated voucher ledger.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -101,7 +101,7 @@ function ProtectedAdminRoles({ allowed, children }) {
 
   const rights = Number(admin.rights || 0);
   if (!allowed.includes(rights)) {
-    const fallback = rights === 2 ? '/admin/manage-codes' : '/admin/dashboard';
+    const fallback = rights === 2 ? '/admin/voucher-management' : '/admin/dashboard';
     return <Navigate to={fallback} replace />;
   }
 
@@ -171,7 +171,7 @@ export default function App() {
             />
             <Route
               path="generate-codes"
-              element={<ProtectedAdminRoles allowed={[1, 3]}><GenerateCodes /></ProtectedAdminRoles>}
+              element={<ProtectedAdminRoles allowed={[1, 2, 3]}><GenerateCodes /></ProtectedAdminRoles>}
             />
             <Route
               path="manage-codes"
@@ -179,6 +179,10 @@ export default function App() {
             />
             <Route
               path="voucher-management"
+              element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherManagement /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="voucher-management/:voucherId"
               element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherManagement /></ProtectedAdminRoles>}
             />
             <Route
