@@ -32,14 +32,15 @@ const PKG_COLORS = {
   Diamond: '#4FC3F7',
 };
 
-function StatCard({ card, idx, onClick }) {
+function StatCard({ card, idx, onClick, disabled }) {
   const theme = CARD_ICONS[idx % CARD_ICONS.length];
 
   return (
     <button
       type="button"
-      onClick={onClick}
-      className="glass-card rounded-2xl p-3 sm:p-5 group cursor-pointer w-full min-w-0 text-left focus:outline-none focus:ring-2 focus:ring-yellow-500/40"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={`glass-card rounded-2xl p-3 sm:p-5 group w-full min-w-0 text-left focus:outline-none focus:ring-2 focus:ring-yellow-500/40 ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div
@@ -138,6 +139,15 @@ export default function Dashboard() {
     { label: 'Leadership Bonus', metric: 'leadership-bonus', value: `PHP ${fmt(data.leadershipBonus)}`, icon: HiOutlineStar, actionLabel: 'See leadership bonus entries' },
     { label: 'Hi-Five Bonus', metric: 'hi-five-bonus', path: '/hifive', value: `PHP ${fmt(data.hiFiveBonus)}`, icon: HiOutlineGift, actionLabel: 'Open Hi-Five bonus page' },
     { label: 'Ranking Bonus', metric: 'ranking-bonus', value: `PHP ${fmt(data.rankingBonus)}`, icon: HiOutlineShieldCheck, actionLabel: 'See ranking bonus entries' },
+    {
+      label: 'Global Bonus',
+      metric: 'global-bonus',
+      path: data.globalBonusEligible ? '/global-bonus' : undefined,
+      value: data.globalBonusEligible ? `PHP ${fmt(data.globalBonus)}` : 'Not Eligible',
+      icon: HiOutlineShieldCheck,
+      actionLabel: data.globalBonusEligible ? 'See global bonus entries' : 'Eligibility: Director rank or above',
+      disabled: !data.globalBonusEligible,
+    },
     { label: 'Left Accounts', metric: 'left-accounts', path: '/pairing', value: `${fmtInt(data.leftAccounts)} accts | ${fmtInt(data.leftPoints)} PV`, icon: HiOutlineArrowLeft, actionLabel: 'Open pairing reports' },
     { label: 'Right Accounts', metric: 'right-accounts', path: '/pairing', value: `${fmtInt(data.rightAccounts)} accts | ${fmtInt(data.rightPoints)} PV`, icon: HiOutlineArrowRight, actionLabel: 'Open pairing reports' },
   ];
@@ -175,7 +185,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
         {cards.map((card, index) => (
-          <StatCard key={card.metric} card={card} idx={index} onClick={() => goToCard(card)} />
+          <StatCard key={card.metric} card={card} idx={index} onClick={() => goToCard(card)} disabled={card.disabled} />
         ))}
       </div>
 

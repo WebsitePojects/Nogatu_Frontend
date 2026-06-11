@@ -27,6 +27,7 @@ const UpgradeAccount = lazy(() => import('./pages/member/UpgradeAccount'));
 const Registration = lazy(() => import('./pages/member/Registration'));
 const SupportContact = lazy(() => import('./pages/member/SupportContact'));
 const ReferralInvite = lazy(() => import('./pages/member/ReferralInvite'));
+const MemberGlobalBonus = lazy(() => import('./pages/member/MemberGlobalBonus'));
 
 const AdminLogin = lazy(() => import('./pages/admin/Login'));
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -139,6 +140,7 @@ export default function App() {
             <Route path="register" element={<Registration />} />
             <Route path="referral-invite" element={<ReferralInvite />} />
             <Route path="support" element={<SupportContact />} />
+            <Route path="global-bonus" element={<MemberGlobalBonus />} />
           </Route>
 
           {/* Admin Panel */}

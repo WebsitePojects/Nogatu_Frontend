@@ -213,11 +213,28 @@ export default function TransactionDetails() {
             rows={(supporting.pairingTrace || []).slice(0, 12)}
             note={notes.pairingTrace}
             emptyMessage="No pairing contributors are tied to this record."
-            renderRow={(row, index) => (
-              <div key={`${row.ledgerUid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
-                {index + 1}. {row.left?.username || '-'} x {row.right?.username || '-'} - PHP {fmt(row.creditedIncome)} <span className={supportMutedTone}>({fmt(row.pairPoints || 0)} matched)</span>
-              </div>
-            )}
+            renderRow={(row, index) => {
+              const leftName = row.left?.username || row.left?.fullname;
+              const rightName = row.right?.username || row.right?.fullname;
+              const hasAccounts = leftName || rightName;
+              const matchedPV = row.matchedPoints != null ? Math.round(row.matchedPoints / 250) : null;
+              return (
+                <div key={`${row.ledgerUid || row.historyUid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
+                  {hasAccounts ? (
+                    <>
+                      {index + 1}. {leftName || '—'} × {rightName || '—'} -{' '}
+                      <span className="portal-gold-text">PHP {fmt(row.creditedIncome)}</span>
+                      {matchedPV != null && <span className={supportMutedTone}> ({matchedPV} PV matched)</span>}
+                    </>
+                  ) : (
+                    <>
+                      {index + 1}. <span className="portal-gold-text">PHP {fmt(row.creditedIncome)}</span>
+                      <span className={supportMutedTone}> — legacy record</span>
+                    </>
+                  )}
+                </div>
+              );
+            }}
           />
           <SupportCard
             title="Hi-Five Sources"

@@ -3,16 +3,18 @@ import { Link } from 'react-router-dom';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
-import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineSparkles } from 'react-icons/hi';
+import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineSparkles, HiOutlineShieldCheck } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const INCOME_ITEMS = [
-  { key: 'directReferral', label: 'Direct Referral',  icon: HiOutlineUsers,       color: '#D4AF37' },
-  { key: 'pairing',        label: 'Binary Pairing',   icon: HiOutlineChartBar,    color: '#F2D06B' },
-  { key: 'leadership',     label: 'Leadership Bonus', icon: HiOutlineStar,        color: '#B8960C' },
-  { key: 'unilevel',       label: 'Uni-Level',        icon: HiOutlineTrendingUp,  color: '#D4AF37' },
-  { key: 'hifive',         label: 'Hi-Five Bonus',    icon: HiOutlineGift,        color: '#F2D06B' },
+  { key: 'directReferral', label: 'Direct Referral',  icon: HiOutlineUsers,        color: '#D4AF37' },
+  { key: 'pairing',        label: 'Binary Pairing',   icon: HiOutlineChartBar,     color: '#F2D06B' },
+  { key: 'leadership',     label: 'Leadership Bonus', icon: HiOutlineStar,         color: '#B8960C' },
+  { key: 'unilevel',       label: 'Uni-Level',        icon: HiOutlineTrendingUp,   color: '#D4AF37' },
+  { key: 'hifive',         label: 'Hi-Five Bonus',    icon: HiOutlineGift,         color: '#F2D06B' },
+  { key: 'rankingBonus',   label: 'Ranking Bonus',    icon: HiOutlineShieldCheck,  color: '#D4AF37' },
+  { key: 'globalBonus',   label: 'Global Bonus',     icon: HiOutlineSparkles,     color: '#B8960C' },
 ];
 
 function SpinnerIcon() {

@@ -77,9 +77,18 @@ export default function Encashment() {
     }
   }
 
-  async function handleProcess(pid, uid) {
+  async function handleProcess(record) {
+    const fullname = record?.fullname || `UID ${record?.uid || 'unknown'}`;
+    const amount = fmt(record?.encashment);
+    const confirmed = window.confirm(
+      `Mark PHP ${amount} as paid for ${fullname}? This cannot be undone.`
+    );
+    if (!confirmed) {
+      return false;
+    }
+
     try {
-      await api.put(`/admin/encashment/${pid}/process`, { uid });
+      await api.put(`/admin/encashment/${record.pid}/process`, { uid: record.uid });
       toast.success('Encashment marked as processed');
       loadData();
       return true;
@@ -364,7 +373,7 @@ export default function Encashment() {
                     <td className="p-3">
                       {Number(r.cashStatus) !== 1 && (
                         <button
-                          onClick={() => handleProcess(r.pid, r.uid)}
+                          onClick={() => handleProcess(r)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer motion-safe:transition-colors"
                           style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
                          type="button">
@@ -491,7 +500,12 @@ export default function Encashment() {
                   {Number(activeDetails?.status) !== 1 && (
                     <button
                       onClick={async () => {
-                        const ok = await handleProcess(activeDetails.pid, activeDetails.uid);
+                        const ok = await handleProcess({
+                          pid: activeDetails.pid,
+                          uid: activeDetails.uid,
+                          fullname: activeDetails.fullname,
+                          encashment: activeDetails.netReceivable,
+                        });
                         if (ok) {
                           setActiveDetails({ ...activeDetails, status: 1, statusLabel: 'Paid' });
                         }
