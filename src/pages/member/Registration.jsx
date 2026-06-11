@@ -309,21 +309,15 @@ export default function Registration() {
       return;
     }
 
-    // DOB: must be in the past and at least 18 years ago
+    // DOB: must be in the past (no future dates)
     if (form.dob) {
       const dob = new Date(form.dob);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const minAge = new Date(today);
-      minAge.setFullYear(minAge.getFullYear() - 18);
       const maxAge = new Date(today);
       maxAge.setFullYear(maxAge.getFullYear() - 120);
       if (dob >= today) {
         setConfirmModal({ tone: 'red', title: 'Invalid date of birth', message: 'Date of birth must be in the past.', confirmLabel: 'Close', onConfirm: () => setConfirmModal(null) });
-        return;
-      }
-      if (dob > minAge) {
-        setConfirmModal({ tone: 'red', title: 'Age requirement', message: 'Member must be at least 18 years old.', confirmLabel: 'Close', onConfirm: () => setConfirmModal(null) });
         return;
       }
       if (dob < maxAge) {

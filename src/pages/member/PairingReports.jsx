@@ -269,8 +269,8 @@ export default function PairingReports() {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <SummaryCard label="Matched PV" value={`${fmtInt(Math.round((data.walletPairingTotal || 0) / 250))} PV`} icon={HiOutlineChartBar} color="#F2D06B" />
-        <SummaryCard label="Total SMB Earned" value={`PHP ${fmt(data.walletPairingTotal || 0)}`} icon={HiOutlineChartBar} color="#D4AF37" />
+        <SummaryCard label="Matched PV" value={`${fmtInt(Math.round((traceSummary.totalPairPoints || data.walletPairingTotal || 0) / 250))} PV`} icon={HiOutlineChartBar} color="#F2D06B" />
+        <SummaryCard label="Total SMB Earned" value={`PHP ${fmt(traceSummary.totalCreditedIncome || data.walletPairingTotal || 0)}`} icon={HiOutlineChartBar} color="#D4AF37" />
       </div>
 
       {!eligibility.canEarnPairing && (eligibility.qualifiedDirects?.left || 0) === 0 && (eligibility.qualifiedDirects?.right || 0) === 0 && (
@@ -354,8 +354,8 @@ export default function PairingReports() {
                 <th className="table-header py-3 px-4">Left Source</th>
                 <th className="table-header py-3 px-4">Right Source</th>
                 <th className="table-header py-3 px-4">Matched PV</th>
-                <th className="table-header py-3 px-4">Left Remaining After</th>
-                <th className="table-header py-3 px-4">Right Remaining After</th>
+                <th className="table-header py-3 px-4">Left Source Remaining</th>
+                <th className="table-header py-3 px-4">Right Source Remaining</th>
                 <th className="table-header py-3 px-4">Credited Payout</th>
               </tr>
             </thead>
@@ -465,8 +465,8 @@ export default function PairingReports() {
                 <th className="table-header py-3 px-4">Gross Pairing</th>
                 <th className="table-header py-3 px-4">Credited</th>
                 <th className="table-header py-3 px-4">Blocked</th>
-                <th className="table-header py-3 px-4">Left Remaining After</th>
-                <th className="table-header py-3 px-4">Right Remaining After</th>
+                <th className="table-header py-3 px-4">Left Source Remaining</th>
+                <th className="table-header py-3 px-4">Right Source Remaining</th>
                 <th className="table-header py-3 px-4">Status</th>
               </tr>
             </thead>

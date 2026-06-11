@@ -122,21 +122,15 @@ export default function Join() {
       return;
     }
 
-    // DOB: past date, min 18 years
+    // DOB: must be in the past (no future dates)
     if (form.dob) {
       const dob = new Date(form.dob);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const minAge = new Date(today);
-      minAge.setFullYear(minAge.getFullYear() - 18);
       const maxAge = new Date(today);
       maxAge.setFullYear(maxAge.getFullYear() - 120);
       if (dob >= today) {
         setFeedbackModal({ tone: 'red', title: 'Invalid date of birth', message: 'Date of birth must be in the past.' });
-        return;
-      }
-      if (dob > minAge) {
-        setFeedbackModal({ tone: 'red', title: 'Age requirement', message: 'Member must be at least 18 years old.' });
         return;
       }
       if (dob < maxAge) {

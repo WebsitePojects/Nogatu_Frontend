@@ -9,9 +9,9 @@ export const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFra
 
 export function formatBinaryPackagePoints(binaryPoints) {
   const raw = Number(binaryPoints || 0);
-  if (!raw) return '0 BP';
+  if (!raw) return '0 PV';
   const bp = raw / BP_UNIT_VALUE;
-  if (Number.isInteger(bp)) return `${fmtInt(bp)} BP`;
+  if (Number.isInteger(bp)) return `${fmtInt(bp)} PV`;
   return `${fmtInt(raw)} pts`;
 }
 
@@ -810,12 +810,12 @@ export async function exportNetworkAsDocx(network, rootUsername = '', depth = 5,
     new Paragraph({ children: [new TextRun({ text: '🔵 FS (Free Slot): ', bold: true }), new TextRun(String(fsCount))] }),
     new Paragraph({ spacing: { after: 80 } }),
     new Paragraph({
-      text: 'Binary Points',
+      text: 'Binary PV',
       heading: HeadingLevel.HEADING_3,
       spacing: { before: 200, after: 100 },
     }),
-    new Paragraph({ children: [new TextRun({ text: `Total Binary Points (in BP units): `, bold: true }), new TextRun(fmtInt(totalBp / 250))] }),
-    new Paragraph({ children: [new TextRun({ text: `Equivalent PHP Value (1 BP = 250 PHP): `, bold: true }), new TextRun(`PHP ${fmtInt(totalBp)}`)] }),
+    new Paragraph({ children: [new TextRun({ text: `Total Binary PV (1 PV = PHP 250): `, bold: true }), new TextRun(fmtInt(totalBp / 250))] }),
+    new Paragraph({ children: [new TextRun({ text: `Equivalent PHP Value: `, bold: true }), new TextRun(`PHP ${fmtInt(totalBp)}`)] }),
     new Paragraph({ spacing: { after: 200 } }),
     new Paragraph({
       text: 'Member List by Level',
@@ -837,7 +837,7 @@ export async function exportNetworkAsDocx(network, rootUsername = '', depth = 5,
             new TextRun({ text: `  |  Package: ${m.accttypeName || '—'}` }),
             new TextRun({ text: `  |  Status: ${m.accountStateLabel || 'PD'}` }),
             new TextRun({ text: `  |  Leg: ${legLabel(m.leg)}` }),
-            new TextRun({ text: `  |  BP: ${fmtInt(Number(m.binaryPoints || 0) / 250)}` }),
+            new TextRun({ text: `  |  PV: ${fmtInt(Number(m.binaryPoints || 0) / 250)}` }),
           ],
           spacing: { after: 60 },
         })

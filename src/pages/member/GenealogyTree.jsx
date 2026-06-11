@@ -427,13 +427,13 @@ export default function GenealogyTree() {
       tooltip: 'Free Slot',
     },
     {
-      label: 'Total BP',
+      label: 'Total PV',
       count: fmtInt(treeStats.totalBp / 250),
       bg: isDarkMode ? 'rgba(212,175,55,0.10)' : 'rgba(212,175,55,0.10)',
       color: isDarkMode ? '#F4D675' : '#7A5C08',
       border: isDarkMode ? '1px solid rgba(212,175,55,0.24)' : '1px solid rgba(212,175,55,0.24)',
       dot: '#D4AF37',
-      tooltip: 'Total Binary Points (in BP units) in this view',
+      tooltip: 'Total Binary PV (1 PV = PHP 250) in this view',
     },
   ];
 
