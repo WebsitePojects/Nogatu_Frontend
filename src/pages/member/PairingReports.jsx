@@ -255,6 +255,21 @@ export default function PairingReports() {
   const eligibility = data.eligibility || { canEarnPairing: true, sourceEligible: true, reason: null };
   const historyRows = data.history?.rows || [];
 
+  // ── Money-integrity: authoritative lifetime SMB vs event-traceable subset ──
+  // walletPairingTotal (payouttotaltab.ttlincome2) is the authoritative, already-paid
+  // lifetime pairing total. It is monotonic — the new engine uses Math.max so it can
+  // never be lowered below what the legacy PHP system already credited.
+  // traceSummary.totalCreditedIncome is only the portion the new ledger reconstructed
+  // with full event-by-event detail. The difference is real legacy income that was
+  // imported as a verified aggregate but has no per-event records in this portal.
+  // We display the TRUE lifetime figure and are transparent about the untraceable part
+  // — we never understate real earnings and never fabricate per-event figures.
+  const lifetimeSmb = Number(data.walletPairingTotal || 0);
+  const traceableSmb = Number(traceSummary.totalCreditedIncome || 0);
+  const historicalSmb = Math.max(0, lifetimeSmb - traceableSmb);
+  const lifetimeMatchedPv = Math.round(lifetimeSmb / 250);
+  const traceableMatchedPv = Math.round(Number(traceSummary.totalPairPoints || traceableSmb || 0) / 250);
+
   return (
     <div className="space-y-6">
       <div>
@@ -269,9 +284,48 @@ export default function PairingReports() {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <SummaryCard label="Matched PV" value={`${fmtInt(Math.round((traceSummary.totalPairPoints || data.walletPairingTotal || 0) / 250))} PV`} icon={HiOutlineChartBar} color="#F2D06B" />
-        <SummaryCard label="Total SMB Earned" value={`PHP ${fmt(traceSummary.totalCreditedIncome || data.walletPairingTotal || 0)}`} icon={HiOutlineChartBar} color="#D4AF37" />
+        <SummaryCard
+          label="Matched PV"
+          value={`${fmtInt(lifetimeMatchedPv)} PV`}
+          icon={HiOutlineChartBar}
+          color="#F2D06B"
+          helper={historicalSmb > 0 ? `${fmtInt(traceableMatchedPv)} PV with event detail · rest is legacy import` : 'Fully event-traceable'}
+        />
+        <SummaryCard
+          label="Total SMB Earned"
+          value={`PHP ${fmt(lifetimeSmb)}`}
+          icon={HiOutlineChartBar}
+          color="#D4AF37"
+          helper={historicalSmb > 0 ? `PHP ${fmt(traceableSmb)} traceable + PHP ${fmt(historicalSmb)} historical` : 'Fully event-traceable'}
+        />
       </div>
+
+      {historicalSmb > 0 && (
+        <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid var(--portal-soft-border)', background: 'var(--portal-soft-bg)' }}>
+          <p className="text-sm font-semibold" style={{ color: PORTAL_TITLE }}>How your Total SMB is composed</p>
+          <p className="text-xs mt-2 leading-6" style={{ color: PORTAL_TEXT }}>
+            Your <strong>Total SMB Earned (PHP {fmt(lifetimeSmb)})</strong> is your full lifetime pairing income.
+            Of this, <strong>PHP {fmt(traceableSmb)}</strong> is reconstructed with complete event-by-event detail
+            in the history and trace below. The remaining <strong>PHP {fmt(historicalSmb)}</strong> was credited and
+            paid by the previous system and imported as a verified historical total — it is real, already-credited
+            income, but the individual matched-pair records behind it are not available in this portal.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+            <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--portal-soft-bg)', border: '1px solid var(--portal-soft-border)' }}>
+              <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: PORTAL_MUTED }}>Event-traceable</p>
+              <p className="mt-1 text-sm font-semibold" style={{ color: PORTAL_TITLE }}>PHP {fmt(traceableSmb)}</p>
+            </div>
+            <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--portal-soft-bg)', border: '1px solid var(--portal-soft-border)' }}>
+              <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: PORTAL_MUTED }}>Historical import</p>
+              <p className="mt-1 text-sm font-semibold" style={{ color: PORTAL_TITLE }}>PHP {fmt(historicalSmb)}</p>
+            </div>
+            <div className="rounded-xl px-3 py-2.5" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.24)' }}>
+              <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: PORTAL_MUTED }}>Lifetime total</p>
+              <p className="mt-1 text-sm font-semibold" style={{ color: '#F4D675' }}>PHP {fmt(lifetimeSmb)}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!eligibility.canEarnPairing && (eligibility.qualifiedDirects?.left || 0) === 0 && (eligibility.qualifiedDirects?.right || 0) === 0 && (
         <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid var(--portal-soft-border)', background: 'var(--portal-soft-bg)' }}>
