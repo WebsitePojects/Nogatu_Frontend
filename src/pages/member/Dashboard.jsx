@@ -131,8 +131,8 @@ export default function Dashboard() {
   }
 
   const cards = [
-    { label: 'Total Cash Incentives', metric: 'total-cash-incentives', path: '/ewallet', value: `PHP ${fmt(data.totalCashIncome)}`, icon: HiOutlineCash, actionLabel: 'Open e-wallet breakdown' },
-    { label: 'Current Cash Balance', metric: 'current-cash-balance', path: '/ewallet', value: `PHP ${fmt(data.cashBalance)}`, icon: HiOutlineCash, actionLabel: 'View wallet balance details' },
+    { label: 'Total Amount Earned', metric: 'total-cash-incentives', path: '/ewallet', value: `PHP ${fmt(data.totalCashIncome)}`, icon: HiOutlineCash, actionLabel: 'All credited income streams; balance shown separately' },
+    { label: 'Current Cash Balance', metric: 'current-cash-balance', path: '/ewallet', value: `PHP ${fmt(data.cashBalance)}`, icon: HiOutlineCash, actionLabel: 'Available e-wallet amount after deductions and encashments' },
     { label: 'Direct Referral', metric: 'direct-referral', value: `PHP ${fmt(data.directReferral)}`, icon: HiOutlineUsers, actionLabel: 'See who triggered this income' },
     { label: 'Sales Matched Bonus', metric: 'sales-volume', path: '/pairing', value: `PHP ${fmt(data.salesVolume)}`, icon: HiOutlineChartBar, actionLabel: 'Open pairing reports' },
     { label: 'Uni-Level', metric: 'uni-level', value: `PHP ${fmt(data.uniLevel)}`, icon: HiOutlineTrendingUp, actionLabel: 'View eligibility and payout history' },
