@@ -6,7 +6,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 import {
   MAINTENANCE_PRODUCTS,
   MAINTENANCE_PRODUCT_IMAGES,
-  getVoucherMemberPricing,
 } from '../../constants/maintenanceProducts';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -105,22 +104,23 @@ export default function Vouchers() {
 
   const modalStyles = useMemo(() => {
     return {
-      overlay: isDarkMode ? 'rgba(2,6,23,0.72)' : 'rgba(15,23,42,0.34)',
-      panelBg: isDarkMode ? '#0f172a' : '#ffffff',
-      panelBorder: isDarkMode ? '1px solid rgba(148,163,184,0.2)' : '1px solid rgba(148,163,184,0.35)',
+      // Dark-mode values follow the portal's black/gold glass theme (not slate navy).
+      overlay: isDarkMode ? 'rgba(0,0,0,0.72)' : 'rgba(15,23,42,0.34)',
+      panelBg: isDarkMode ? 'rgba(18,16,12,0.98)' : '#ffffff',
+      panelBorder: isDarkMode ? '1px solid rgba(212,175,55,0.20)' : '1px solid rgba(148,163,184,0.35)',
       panelShadow: isDarkMode
-        ? '0 18px 38px rgba(2,6,23,0.55)'
+        ? '0 18px 38px rgba(0,0,0,0.6)'
         : '0 18px 40px rgba(15,23,42,0.22)',
       title: isDarkMode ? '#f8fafc' : '#0f172a',
       body: isDarkMode ? 'rgba(226,232,240,0.82)' : 'rgba(51,65,85,0.92)',
-      muted: isDarkMode ? 'rgba(148,163,184,0.82)' : 'rgba(100,116,139,0.9)',
-      cardBg: isDarkMode ? 'rgba(148,163,184,0.09)' : 'rgba(241,245,249,0.9)',
-      cardBorder: isDarkMode ? '1px solid rgba(148,163,184,0.2)' : '1px solid rgba(203,213,225,0.9)',
-      closeBg: isDarkMode ? 'rgba(148,163,184,0.12)' : 'rgba(148,163,184,0.18)',
-      closeColor: isDarkMode ? '#cbd5e1' : '#334155',
-      cancelBg: isDarkMode ? 'rgba(148,163,184,0.14)' : 'rgba(226,232,240,0.9)',
+      muted: isDarkMode ? 'rgba(212,175,55,0.7)' : 'rgba(100,116,139,0.9)',
+      cardBg: isDarkMode ? 'rgba(212,175,55,0.06)' : 'rgba(241,245,249,0.9)',
+      cardBorder: isDarkMode ? '1px solid rgba(212,175,55,0.14)' : '1px solid rgba(203,213,225,0.9)',
+      closeBg: isDarkMode ? 'rgba(212,175,55,0.10)' : 'rgba(148,163,184,0.18)',
+      closeColor: isDarkMode ? '#e8d9a8' : '#334155',
+      cancelBg: isDarkMode ? 'rgba(212,175,55,0.10)' : 'rgba(226,232,240,0.9)',
       cancelColor: isDarkMode ? '#e2e8f0' : '#0f172a',
-      cancelBorder: isDarkMode ? '1px solid rgba(148,163,184,0.24)' : '1px solid rgba(148,163,184,0.45)',
+      cancelBorder: isDarkMode ? '1px solid rgba(212,175,55,0.22)' : '1px solid rgba(148,163,184,0.45)',
       confirmBg: isDarkMode ? 'linear-gradient(135deg,#16a34a,#22c55e)' : 'linear-gradient(135deg,#15803d,#16a34a)',
       confirmColor: '#ffffff',
       confirmBorder: '1px solid rgba(22,163,74,0.5)',
@@ -148,25 +148,24 @@ export default function Vouchers() {
   }
 
   function handleProductCheckout(product) {
-    const pricing = getVoucherMemberPricing(product?.price || 0);
-    const memberPrice = Number(pricing.memberPrice || 0);
-    if (!Number.isFinite(memberPrice) || memberPrice <= 0) {
+    const price = Number(product?.price || 0);
+    if (!Number.isFinite(price) || price <= 0) {
       toast.error('Invalid product amount');
       return;
     }
 
-    if (memberPrice > Number(walletBalance || 0)) {
+    if (price > Number(walletBalance || 0)) {
       toast.error('Insufficient wallet balance');
       return;
     }
 
-    const voucher = pickVoucherForCheckout(memberPrice);
+    const voucher = pickVoucherForCheckout(price);
     if (!voucher) {
       toast.error('No active voucher available for checkout');
       return;
     }
 
-    const voucherMatch = Math.min(memberPrice, Number(voucher.remaining_balance || 0));
+    const voucherMatch = Math.min(price, Number(voucher.remaining_balance || 0));
     if (voucherMatch <= 0) {
       toast.error('No usable voucher balance for this checkout');
       return;
@@ -174,11 +173,10 @@ export default function Vouchers() {
 
     setCheckoutModal({
       product,
-      pricing,
       voucher,
-      price: memberPrice,
+      price,
       voucherMatch,
-      totalValue: memberPrice + voucherMatch,
+      totalValue: price + voucherMatch,
     });
   }
 
@@ -274,7 +272,7 @@ export default function Vouchers() {
           <div>
             <p className="portal-card-title font-semibold text-base">PRODUCT + PRODUCT VOUCHER = DOBLE SULIT</p>
             <p className="portal-card-text text-sm mt-1 leading-6">
-              Buy 1 Take 1 style stays active, and every request now uses the <span className="portal-card-title font-semibold">30% member-discounted product amount</span> as the wallet and voucher match basis. The cashier will mark the request claimed during your visit.
+              Buy 1 Take 1 style stays active. Every request uses the <span className="portal-card-title font-semibold">product price</span> as the wallet and voucher match basis. The cashier will mark the request claimed during your visit.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <div className="portal-soft-panel min-w-[150px] px-4 py-3 rounded-xl">
@@ -382,14 +380,14 @@ export default function Vouchers() {
           <h2 className="font-display text-lg text-white">Available Products</h2>
         </div>
         <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Products show the original price, the 30% member discount, and the discounted request amount that your wallet and voucher must both match.
+          Each request uses the product price, which your wallet and voucher must both match.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {MAINTENANCE_PRODUCTS.map((p) => {
-            const pricing = getVoucherMemberPricing(p.price);
-            const canAfford = Number(walletBalance || 0) >= Number(pricing.memberPrice || 0);
-            const voucher = pickVoucherForCheckout(pricing.memberPrice);
-            const voucherMatch = Math.min(Number(pricing.memberPrice || 0), Number(voucher?.remaining_balance || 0));
+            const price = Number(p.price || 0);
+            const canAfford = Number(walletBalance || 0) >= price;
+            const voucher = pickVoucherForCheckout(price);
+            const voucherMatch = Math.min(price, Number(voucher?.remaining_balance || 0));
             const canUseVoucher = voucherMatch > 0;
             const canCheckout = canAfford && canUseVoucher;
             const checkoutLocked = Boolean(processingProduct);
@@ -421,15 +419,13 @@ export default function Vouchers() {
                   </div>
                 )}
                 <p className="text-sm font-medium text-white/80">{p.name}</p>
-                <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>Original P{fmt(pricing.originalPrice)}</p>
-                <p className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>Member Discount 30%: -P{fmt(pricing.discountValue)}</p>
-                <p className="text-xs mt-1 font-semibold" style={{ color: '#D4AF37' }}>Total P{fmt(pricing.memberPrice)}</p>
+                <p className="text-xs mt-1 font-semibold" style={{ color: '#D4AF37' }}>P{fmt(price)}</p>
                 <p className="text-[10px] mt-1 font-semibold" style={{ color: canCheckout ? '#34d399' : 'rgba(255,255,255,0.45)' }}>
                   Submit request for 2x this product
                 </p>
 
                 <div className="mt-2 space-y-1">
-                  <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>Wallet Match: P{fmt(pricing.memberPrice)}</p>
+                  <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>Wallet Match: P{fmt(price)}</p>
                   <p className="text-[11px]" style={{ color: canUseVoucher ? '#34d399' : 'rgba(255,255,255,0.5)' }}>
                     Voucher Match: P{fmt(voucherMatch)}
                   </p>
@@ -596,17 +592,7 @@ export default function Vouchers() {
                 <span className="font-semibold" style={{ color: modalStyles.title }}>{checkoutModal.product.name}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span style={{ color: modalStyles.body }}>Original Price</span>
-                <span className="font-semibold" style={{ color: modalStyles.title }}>P{fmt(checkoutModal.pricing.originalPrice)}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span style={{ color: modalStyles.body }}>Member Discount</span>
-                <span className="font-semibold" style={{ color: modalStyles.deduct }}>
-                  -P{fmt(checkoutModal.pricing.discountValue)} ({checkoutModal.pricing.discountPercent}%)
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span style={{ color: modalStyles.body }}>Discounted Request Amount</span>
+                <span style={{ color: modalStyles.body }}>Request Amount</span>
                 <span className="font-semibold" style={{ color: modalStyles.total }}>P{fmt(checkoutModal.price)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">

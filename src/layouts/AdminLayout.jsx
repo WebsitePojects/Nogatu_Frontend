@@ -1,14 +1,16 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import api from '../api';
+import useSupportStream from '../hooks/useSupportStream';
 import {
   HiOutlineHome, HiOutlineUsers, HiOutlineKey, HiOutlineCog,
   HiOutlineCash, HiOutlineGift, HiOutlineLogout, HiOutlineMenu,
   HiOutlineLockClosed, HiOutlineNewspaper, HiOutlineBell,
   HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck,
   HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket,
-  HiOutlineClipboardList, HiOutlineX, HiOutlineViewBoards,
+  HiOutlineChat, HiOutlineClipboardList, HiOutlineX, HiOutlineViewBoards,
   HiOutlineDotsHorizontal,
 } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
@@ -53,6 +55,7 @@ const NAV_GROUPS = [
     label: 'Content',
     items: [
       { to: '/admin/messages',     label: 'Contact Messages', icon: HiOutlineBell,          roles: [1, 3] },
+      { to: '/admin/support',      label: 'Support Tickets',  icon: HiOutlineChat,          roles: [1, 3] },
       { to: '/admin/applications', label: 'Applications',     icon: HiOutlineClipboardList, roles: [1, 3] },
       { to: '/admin/news',         label: 'News & Posts',     icon: HiOutlineNewspaper,     roles: [1, 3] },
     ],
@@ -87,6 +90,32 @@ export default function AdminLayout() {
 
   const rights = Number(admin?.rights || 0);
   const roleLabel = rights === 1 ? 'Administrator' : rights === 2 ? 'Cashier' : 'BOD';
+
+  /* Customer-support unread badge. Suppressed while the admin is on the support
+     page (they're already triaging tickets there). Refreshes live via SSE. */
+  const onSupportPage = location.pathname.startsWith('/admin/support');
+  const canSeeSupport = rights === 1 || rights === 3;
+  const [supportUnread, setSupportUnread] = useState(0);
+
+  const refreshUnread = useCallback(async () => {
+    if (!canSeeSupport) return;
+    try {
+      const res = await api.get('/admin/support/meta/unread-count');
+      setSupportUnread(Number(res.data?.unread || 0));
+    } catch { /* ignore */ }
+  }, [canSeeSupport]);
+
+  useEffect(() => { refreshUnread(); }, [refreshUnread, location.pathname]);
+
+  useSupportStream(useCallback((event) => {
+    // Any inbound support activity may change the unread count; re-fetch the
+    // authoritative number rather than guessing from the event.
+    if (event === 'support.reply' || event === 'support.read' || event === 'support.status') {
+      refreshUnread();
+    }
+  }, [refreshUnread]), { admin: true, enabled: canSeeSupport });
+
+  const showSupportBadge = canSeeSupport && !onSupportPage && supportUnread > 0;
 
   /* Role-filter sidebar */
   const filteredGroups = useMemo(() => NAV_GROUPS
@@ -123,7 +152,7 @@ export default function AdminLayout() {
   /* Active bottom tabs */
   const MANAGE_PATHS  = ['/admin/accounts', '/admin/genealogy', '/admin/generate-codes', '/admin/manage-codes'];
   const FINANCE_PATHS = ['/admin/encashment', '/admin/finance', '/admin/redeem', '/admin/hifive-package-claims', '/admin/rankings', '/admin/global-bonus', '/admin/cd-accounts'];
-  const MORE_PATHS    = ['/admin/messages', '/admin/applications', '/admin/news', '/admin/change-password'];
+  const MORE_PATHS    = ['/admin/messages', '/admin/support', '/admin/applications', '/admin/news', '/admin/change-password'];
 
   const getBottomTabActive = (item) => {
     if (item.id === 'home')    return location.pathname === '/admin/dashboard';
@@ -264,6 +293,22 @@ export default function AdminLayout() {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {canSeeSupport && (
+              <button onClick={() => navigate('/admin/support')}
+                className="portal-card-muted p-2 rounded-xl transition-colors hover:text-[var(--portal-gold-text)] relative"
+                title="Customer Support" aria-label="Customer Support" type="button">
+                <HiOutlineChat className="size-5" />
+                {showSupportBadge && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[9px] font-bold text-always-white"
+                    style={{ background: '#dc2626', border: '1.5px solid var(--glass-topbar-bg, #1a1a1a)' }}
+                    aria-label={`${supportUnread} unread support tickets`}
+                  >
+                    {supportUnread > 9 ? '9+' : supportUnread}
+                  </span>
+                )}
+              </button>
+            )}
             <button onClick={toggleTheme}
               className="portal-card-muted p-2 rounded-xl transition-colors hover:text-[var(--portal-gold-text)]"
               title="Toggle Theme" type="button">

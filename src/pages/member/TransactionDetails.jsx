@@ -34,6 +34,24 @@ function normalizeTransaction(data) {
     rankingBonus: candidate.rankingBonus ?? candidate.income6 ?? 0,
     encashment: candidate.encashment ?? candidate.encashment1 ?? 0,
     deductions: candidate.deductions ?? 0,
+    cashPaid: candidate.cashPaid ?? candidate.cash_paid ?? 0,
+    voucherUsed: candidate.voucherUsed ?? candidate.voucher_used ?? 0,
+    totalProductValue: candidate.totalProductValue ?? candidate.total_value ?? 0,
+  };
+}
+
+function normalizeVoucherDetail(data) {
+  const v = data?.voucherDetail || data?.details?.voucherDetail || null;
+  if (!v) return null;
+  return {
+    source: v.source || (v.requestSource === 'cashier' ? 'Cashier (manual transaction)' : 'Member-side request'),
+    requestSource: v.requestSource || null,
+    erNumber: v.erNumber || null,
+    claimStatus: v.claimStatus || null,
+    availmentDate: v.availmentDate || null,
+    processedByAdmin: v.processedByAdmin || null,
+    items: Array.isArray(v.items) ? v.items.filter(Boolean) : [],
+    itemsTotal: Number(v.itemsTotal || 0),
   };
 }
 
@@ -65,7 +83,7 @@ function EmptySupportMessage({ message }) {
   return <div className="portal-card-muted text-sm">{message}</div>;
 }
 
-function SupportCard({ title, rows = [], emptyMessage, renderRow, note = null }) {
+function SupportCard({ title, rows = [], emptyMessage, renderRow, note = null, footer = null }) {
   return (
     <div className="portal-support-card rounded-xl p-4">
       <p className="portal-card-title text-sm font-semibold">{title}</p>
@@ -76,6 +94,7 @@ function SupportCard({ title, rows = [], emptyMessage, renderRow, note = null })
         {rows.map(renderRow)}
         {rows.length === 0 && <EmptySupportMessage message={emptyMessage} />}
       </div>
+      {footer}
     </div>
   );
 }
@@ -111,6 +130,8 @@ export default function TransactionDetails() {
   const tx = normalizeTransaction(data);
   const account = normalizeAccount(data);
   const supporting = normalizeSupporting(data);
+  const voucherDetail = normalizeVoucherDetail(data);
+  const isVoucher = tx?.transactionTypeName === 'Voucher';
   const notes = supporting.notes || {};
   // CD Details section is only relevant for CD accounts (cdStatus 1 or 2)
   const isCdAccount = Number(account.cdStatus) === 1 || Number(account.cdStatus) === 2
@@ -157,10 +178,71 @@ export default function TransactionDetails() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Type</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{tx.transactionTypeName}</p></div>
         <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Date</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{formatDateTimeManila(tx.transdate)}</p></div>
-        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Beginning</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.beginningBalance)}</p></div>
-        <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Ending</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.endingBalance)}</p></div>
+        {isVoucher ? (
+          <>
+            <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Voucher Used</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.voucherUsed)}</p></div>
+            <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Cash Paid</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.cashPaid)}</p></div>
+          </>
+        ) : (
+          <>
+            <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Beginning</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.beginningBalance)}</p></div>
+            <div className="portal-detail-card rounded-2xl p-4"><p className="portal-detail-label">Ending</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.endingBalance)}</p></div>
+          </>
+        )}
       </div>
 
+      {isVoucher && (
+        <div className="glass-card rounded-2xl p-6">
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <h2 className="portal-page-title font-display text-lg font-semibold">Voucher Details</h2>
+              <p className="portal-card-muted text-sm mt-1">
+                {voucherDetail?.source || 'Voucher availment'}
+                {voucherDetail?.availmentDate ? ` · ${formatDateTimeManila(voucherDetail.availmentDate)}` : ''}
+              </p>
+            </div>
+            {voucherDetail?.erNumber && (
+              <span className="text-xs font-semibold px-2 py-1 rounded-lg" style={{ background: 'rgba(212,175,55,0.14)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.28)' }}>
+                ER {voucherDetail.erNumber}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-sm">
+            <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">Source</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{voucherDetail?.source || '-'}</p></div>
+            <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">Processed By</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>{voucherDetail?.processedByAdmin || (voucherDetail?.requestSource === 'cashier' ? 'Cashier' : 'Member')}</p></div>
+            <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">Voucher Used</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.voucherUsed)}</p></div>
+            <div className="portal-detail-card rounded-xl px-4 py-3"><p className="portal-detail-label">Cash Paid</p><p className={`mmt-1 font-semibold ${detailValueTone}`}>PHP {fmt(tx.cashPaid)}</p></div>
+          </div>
+
+          <div className="mt-5">
+            <p className="portal-detail-label mb-2">Products Purchased</p>
+            {voucherDetail && voucherDetail.items.length > 0 ? (
+              <div className="portal-detail-card rounded-xl overflow-hidden">
+                {voucherDetail.items.map((item, idx) => (
+                  <div key={`${item.lineNo}-${idx}`} className="flex items-center justify-between px-4 py-3" style={{ borderTop: idx === 0 ? 'none' : '1px solid rgba(148,163,184,0.18)' }}>
+                    <span className={`text-sm ${supportTextTone}`}>
+                      {idx + 1}. {item.label}
+                      {item.productCode != null && <span className={supportMutedTone}> (#{item.productCode})</span>}
+                    </span>
+                    <span className="portal-gold-text text-sm font-semibold">PHP {fmt(item.amount)}</span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: '1px solid rgba(212,175,55,0.35)', background: 'rgba(212,175,55,0.06)' }}>
+                  <span className={`text-sm font-semibold ${detailValueTone}`}>Total</span>
+                  <span className="portal-gold-text text-sm font-bold">PHP {fmt(voucherDetail.itemsTotal || tx.totalProductValue)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="portal-card-muted text-sm">
+                Itemized products were not recorded for this voucher transaction. Total value: PHP {fmt(tx.totalProductValue)}.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!isVoucher && (
       <div className="glass-card rounded-2xl p-6">
         <h2 className="portal-page-title font-display text-lg font-semibold">Breakdown</h2>
         <div className="grid grid-cols-1 gap-3 mt-4 text-sm md:grid-cols-2">
@@ -198,6 +280,7 @@ export default function TransactionDetails() {
           })}
         </div>
       </div>
+      )}
 
       {isCdAccount && (
         <div className="glass-card rounded-2xl p-6">
@@ -221,7 +304,16 @@ export default function TransactionDetails() {
             emptyMessage="No direct referral contributors are tied to this record."
             renderRow={(row, index) => (
               <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
-                {index + 1}. {row.fullname || row.username} <span className={supportMutedTone}>({row.entryType}{row.username ? ` / @${row.username}` : ''})</span>{' '}
+                {index + 1}. {row.fullname || row.username}
+                {row.username && <span className={supportMutedTone}> @{row.username}</span>}
+                {row.entryType && (
+                  <span
+                    className="ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full align-middle"
+                    style={{ background: 'rgba(212,175,55,0.14)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.28)' }}
+                  >
+                    {row.entryType}
+                  </span>
+                )}{' '}
                 <span className="portal-gold-text">PHP {fmt(row.amount || 0)}</span>
               </div>
             )}
@@ -242,6 +334,16 @@ export default function TransactionDetails() {
             rows={(supporting.pairingTrace || []).slice(0, 12)}
             note={notes.pairingTrace}
             emptyMessage="No pairing contributors are tied to this record."
+            footer={(supporting.pairingTrace || []).length > 0 ? (
+              <button
+                type="button"
+                onClick={() => navigate('/pairing')}
+                className="mt-3 w-full text-xs font-semibold py-2 rounded-lg transition-colors"
+                style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.28)' }}
+              >
+                View all pairing events in Pairing Reports →
+              </button>
+            ) : null}
             renderRow={(row, index) => {
               const leftName = row.left?.username || row.left?.fullname;
               const rightName = row.right?.username || row.right?.fullname;

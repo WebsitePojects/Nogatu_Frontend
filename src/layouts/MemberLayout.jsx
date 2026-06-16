@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import api from '../api';
+import useSupportStream from '../hooks/useSupportStream';
 import {
   HiOutlineHome, HiOutlineCreditCard, HiOutlineUser, HiOutlineKey,
   HiOutlineUsers, HiOutlineChartBar, HiOutlineGift, HiOutlineDocumentText,
@@ -28,6 +30,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/referrals',                        label: 'Direct Referrals',       icon: HiOutlineUsers },
       { to: '/genealogy',                        label: 'Genealogy Tree',         icon: FaSitemap },
+      { to: '/unilevel',                         label: 'Unilevel Tree',          icon: FaSitemap },
       { to: '/pairing',                          label: 'Pairing Reports',        icon: HiOutlineChartBar },
       { to: '/dashboard/details/uni-level',      label: 'Uni-Level',             icon: HiOutlineTrendingUp },
       { to: '/dashboard/details/leadership-bonus', label: 'Leadership',          icon: HiOutlineStar },
@@ -53,7 +56,7 @@ const NAV_GROUPS = [
 ];
 
 const NETWORK_PREFIXES = [
-  '/referrals', '/genealogy', '/pairing', '/hifive', '/ranking', '/leaderboard',
+  '/referrals', '/genealogy', '/unilevel', '/pairing', '/hifive', '/ranking', '/leaderboard',
   '/dashboard/details',
 ];
 const ACCOUNT_PATHS = [
@@ -89,6 +92,21 @@ export default function MemberLayout() {
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Support unread badge — suppressed while inside the support area (list/thread).
+  const onSupportPage = location.pathname.startsWith('/support');
+  const [supportUnread, setSupportUnread] = useState(0);
+  const refreshSupportUnread = useCallback(async () => {
+    try {
+      const res = await api.get('/support/meta/unread-count');
+      setSupportUnread(Number(res.data?.unread || 0));
+    } catch { /* ignore */ }
+  }, []);
+  useEffect(() => { refreshSupportUnread(); }, [refreshSupportUnread, location.pathname]);
+  useSupportStream(useCallback((event) => {
+    if (event === 'support.reply' || event === 'support.status') refreshSupportUnread();
+  }, [refreshSupportUnread]));
+  const showSupportBadge = !onSupportPage && supportUnread > 0;
 
   const [sidebarOpen,      setSidebarOpen]      = useState(false);
   const [scrolled,         setScrolled]         = useState(false);
@@ -288,6 +306,20 @@ export default function MemberLayout() {
 
             {/* Right */}
             <div className="flex items-center gap-1">
+              <button onClick={() => navigate('/support')}
+                className="p-2 rounded-xl portal-card-muted hover:text-[var(--portal-gold-text)] transition-colors relative"
+                title="Customer Support" aria-label="Customer Support" type="button">
+                <HiOutlineSupport className="size-[18px]" />
+                {showSupportBadge && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[9px] font-bold text-always-white"
+                    style={{ background: '#dc2626', border: '1.5px solid var(--glass-topbar-bg, #1a1a1a)' }}
+                    aria-label={`${supportUnread} unread support replies`}
+                  >
+                    {supportUnread > 9 ? '9+' : supportUnread}
+                  </span>
+                )}
+              </button>
               <button onClick={toggleTheme}
                 className="p-2 rounded-xl portal-card-muted hover:text-[var(--portal-gold-text)] transition-colors"
                 title="Toggle Theme" type="button">

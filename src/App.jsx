@@ -15,6 +15,7 @@ const AccountDetails = lazy(() => import('./pages/member/AccountDetails'));
 const ActivationCodes = lazy(() => import('./pages/member/ActivationCodes'));
 const DirectReferrals = lazy(() => import('./pages/member/DirectReferrals'));
 const GenealogyTree = lazy(() => import('./pages/member/GenealogyTree'));
+const UnilevelTree = lazy(() => import('./pages/member/UnilevelTree'));
 const PairingReports = lazy(() => import('./pages/member/PairingReports'));
 const PairingLegAccounts = lazy(() => import('./pages/member/PairingLegAccounts'));
 const HiFiveBonus = lazy(() => import('./pages/member/HiFiveBonus'));
@@ -26,6 +27,7 @@ const TransactionDetails = lazy(() => import('./pages/member/TransactionDetails'
 const UpgradeAccount = lazy(() => import('./pages/member/UpgradeAccount'));
 const Registration = lazy(() => import('./pages/member/Registration'));
 const SupportContact = lazy(() => import('./pages/member/SupportContact'));
+const SupportThread = lazy(() => import('./pages/member/SupportThread'));
 const ReferralInvite = lazy(() => import('./pages/member/ReferralInvite'));
 const MemberGlobalBonus = lazy(() => import('./pages/member/MemberGlobalBonus'));
 
@@ -44,6 +46,8 @@ const AdminGenealogy = lazy(() => import('./pages/admin/AdminGenealogy'));
 const ChangePassword = lazy(() => import('./pages/admin/ChangePassword'));
 const NewsManagement = lazy(() => import('./pages/admin/NewsManagement'));
 const Messages = lazy(() => import('./pages/admin/Messages'));
+const AdminSupport = lazy(() => import('./pages/admin/Support'));
+const AdminSupportThread = lazy(() => import('./pages/admin/SupportThread'));
 const Rankings = lazy(() => import('./pages/admin/Rankings'));
 const GlobalBonus = lazy(() => import('./pages/admin/GlobalBonus'));
 const CDAccounts = lazy(() => import('./pages/admin/CDAccounts'));
@@ -128,6 +132,7 @@ export default function App() {
             <Route path="codes" element={<ActivationCodes />} />
             <Route path="referrals" element={<DirectReferrals />} />
             <Route path="genealogy" element={<GenealogyTree />} />
+            <Route path="unilevel" element={<UnilevelTree />} />
             <Route path="pairing" element={<PairingReports />} />
             <Route path="pairing/leg/:side" element={<PairingLegAccounts />} />
             <Route path="hifive" element={<HiFiveBonus />} />
@@ -140,6 +145,7 @@ export default function App() {
             <Route path="register" element={<Registration />} />
             <Route path="referral-invite" element={<ReferralInvite />} />
             <Route path="support" element={<SupportContact />} />
+            <Route path="support/:ticketUid" element={<SupportThread />} />
             <Route path="global-bonus" element={<MemberGlobalBonus />} />
           </Route>
 
@@ -228,6 +234,14 @@ export default function App() {
             <Route
               path="messages"
               element={<ProtectedAdminRoles allowed={[1, 3]}><Messages /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="support"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><AdminSupport /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="support/:ticketUid"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><AdminSupportThread /></ProtectedAdminRoles>}
             />
             <Route
               path="applications"

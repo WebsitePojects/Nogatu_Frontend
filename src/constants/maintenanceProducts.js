@@ -11,27 +11,6 @@ export const MAINTENANCE_PRODUCTS = [
   { key: 'bnad', hifiveKey: 'bnad', code: 109, name: 'Berry NAD+', price: 7998, image: '/legacy-img/Berry-Nad.png' },
 ];
 
-export const VOUCHER_MEMBER_DISCOUNT_RATE = 0.3;
-export const VOUCHER_MEMBER_DISCOUNT_PERCENT = Math.round(VOUCHER_MEMBER_DISCOUNT_RATE * 100);
-
-function roundCurrency(value) {
-  return Math.round(Number(value || 0) * 100) / 100;
-}
-
-export function getVoucherMemberPricing(price) {
-  const originalPrice = roundCurrency(price);
-  const discountValue = roundCurrency(originalPrice * VOUCHER_MEMBER_DISCOUNT_RATE);
-  const memberPrice = roundCurrency(originalPrice - discountValue);
-
-  return {
-    originalPrice,
-    discountRate: VOUCHER_MEMBER_DISCOUNT_RATE,
-    discountPercent: VOUCHER_MEMBER_DISCOUNT_PERCENT,
-    discountValue,
-    memberPrice,
-  };
-}
-
 export const MAINTENANCE_PRODUCT_IMAGES = Object.fromEntries(
   MAINTENANCE_PRODUCTS.map((product) => [product.key, product.image])
 );

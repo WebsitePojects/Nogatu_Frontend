@@ -14,6 +14,34 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigit
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
 const BP_PESO_VALUE = 250;
 const toBp = (pesoValue) => Number(Number(pesoValue || 0) / BP_PESO_VALUE);
+
+// Map a matched-PV value to its package tier (1=Bronze, 2=Silver, 4=Gold,
+// 10=Platinum, 20=Garnet, 60=Diamond). Used to group the long event-trace list
+// (e.g. a Diamond matched against hundreds of 1-PV Bronze accounts) by tier.
+const PV_TIERS = [
+  { pv: 60, label: 'Diamond' }, { pv: 20, label: 'Garnet' }, { pv: 10, label: 'Platinum' },
+  { pv: 4, label: 'Gold' }, { pv: 2, label: 'Silver' }, { pv: 1, label: 'Bronze' },
+];
+function pvTierLabel(pv) {
+  const exact = PV_TIERS.find((t) => t.pv === pv);
+  if (exact) return exact.label;
+  return pv > 0 ? `${pv} PV` : 'Other';
+}
+
+// Group trace rows by matched-PV tier. Returns sorted summary buckets.
+function groupTraceByTier(rows) {
+  const map = new Map();
+  for (const r of rows) {
+    const pv = Math.round(Number(r.pairPoints || 0) / BP_PESO_VALUE);
+    const key = pv;
+    if (!map.has(key)) map.set(key, { pv, label: pvTierLabel(pv), count: 0, totalPv: 0, credited: 0 });
+    const b = map.get(key);
+    b.count += 1;
+    b.totalPv += pv;
+    b.credited += Number(r.creditedIncome || 0);
+  }
+  return Array.from(map.values()).sort((a, b) => b.pv - a.pv);
+}
 const PORTAL_TITLE = 'var(--portal-card-title)';
 const PORTAL_TEXT = 'var(--portal-card-text)';
 const PORTAL_MUTED = 'var(--portal-card-muted)';
@@ -183,14 +211,31 @@ export default function PairingReports() {
   const [historyPage, setHistoryPage] = useState(1);
   const [tracePage, setTracePage] = useState(1);
   const [expandedTraceUid, setExpandedTraceUid] = useState(null);
+  const [groupTrace, setGroupTrace] = useState(false);
+  const [historySearch, setHistorySearch] = useState('');
+  const [debouncedHistorySearch, setDebouncedHistorySearch] = useState('');
+  const [historySort, setHistorySort] = useState('date');
+  const [historyDir, setHistoryDir] = useState('desc');
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedHistorySearch(historySearch.trim()), 350);
+    return () => clearTimeout(id);
+  }, [historySearch]);
+  useEffect(() => { setHistoryPage(1); }, [debouncedHistorySearch, historySort, historyDir]);
 
   useEffect(() => {
     let cancelled = false;
     async function loadData() {
       setLoading(true);
       try {
-        const res = await api.get(`/pairing?historyPage=${historyPage}&historyPerPage=50&tracePage=${tracePage}&tracePerPage=50`);
+        const hp = new URLSearchParams({
+          historyPage: String(historyPage), historyPerPage: '50',
+          tracePage: String(tracePage), tracePerPage: '50',
+          historySort, historyDir,
+        });
+        if (debouncedHistorySearch) hp.set('historySearch', debouncedHistorySearch);
+        const res = await api.get(`/pairing?${hp.toString()}`);
         if (cancelled) return;
         setData(res.data);
       } catch {
@@ -200,8 +245,9 @@ export default function PairingReports() {
       }
     }
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => { cancelled = true; };
-  }, [historyPage, tracePage]);
+  }, [historyPage, tracePage, debouncedHistorySearch, historySort, historyDir]);
 
   const traceRows = data?.trace?.rows || [];
   useEffect(() => {
@@ -386,19 +432,34 @@ export default function PairingReports() {
       )}
 
       <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 px-5 py-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
           <div>
             <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing History</h3>
             <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
               Each row is one successful matched-points event that actually credited pairing income.
             </p>
           </div>
-          <Pager
-            page={data.history?.page || 1}
-            totalPages={data.history?.totalPages || 1}
-            onPrev={() => setHistoryPage((p) => Math.max(1, p - 1))}
-            onNext={() => setHistoryPage((p) => Math.min(Number(data.history?.totalPages || 1), p + 1))}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              value={historySearch}
+              onChange={(e) => setHistorySearch(e.target.value)}
+              placeholder="Search date or @username"
+              className="glass-input text-xs rounded-lg py-1.5 px-2.5 w-44"
+            />
+            <select value={`${historySort}:${historyDir}`} onChange={(e) => { const [s, d] = e.target.value.split(':'); setHistorySort(s); setHistoryDir(d); }}
+              className="glass-input text-xs rounded-lg py-1.5 px-2">
+              <option value="date:desc">Newest first</option>
+              <option value="date:asc">Oldest first</option>
+              <option value="amount:desc">Amount: high → low</option>
+              <option value="amount:asc">Amount: low → high</option>
+            </select>
+            <Pager
+              page={data.history?.page || 1}
+              totalPages={data.history?.totalPages || 1}
+              onPrev={() => setHistoryPage((p) => Math.max(1, p - 1))}
+              onNext={() => setHistoryPage((p) => Math.min(Number(data.history?.totalPages || 1), p + 1))}
+            />
+          </div>
         </div>
         <div className="overflow-x-auto hidden lg:block">
           <table className="w-full text-sm min-w-[960px]">
@@ -500,15 +561,62 @@ export default function PairingReports() {
               Shows the actual left-right matches, the matched BP, the payout result, and the remaining binary points on each source account after that event.
             </p>
           </div>
-          <Pager
-            page={data.trace?.pagination?.page || 1}
-            totalPages={data.trace?.pagination?.totalPages || 1}
-            onPrev={() => setTracePage((p) => Math.max(1, p - 1))}
-            onNext={() => setTracePage((p) => Math.min(Number(data.trace?.pagination?.totalPages || 1), p + 1))}
-          />
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setGroupTrace((v) => !v)}
+              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors"
+              style={groupTrace
+                ? { background: 'rgba(212,175,55,0.18)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.4)' }
+                : { background: 'rgba(212,175,55,0.06)', color: PORTAL_MUTED, border: '1px solid rgba(212,175,55,0.18)' }}
+            >
+              {groupTrace ? 'Grouped by tier' : 'Group by tier'}
+            </button>
+            <Pager
+              page={data.trace?.pagination?.page || 1}
+              totalPages={data.trace?.pagination?.totalPages || 1}
+              onPrev={() => setTracePage((p) => Math.max(1, p - 1))}
+              onNext={() => setTracePage((p) => Math.min(Number(data.trace?.pagination?.totalPages || 1), p + 1))}
+            />
+          </div>
         </div>
 
-        <div className="overflow-x-auto hidden xl:block">
+        {groupTrace && (
+          <div className="p-4">
+            <p className="text-xs mb-3" style={{ color: PORTAL_MUTED }}>
+              This page&apos;s {traceRows.length} matched event{traceRows.length === 1 ? '' : 's'} grouped by the opposite-leg package tier (by matched PV per event).
+            </p>
+            <div className="overflow-x-auto rounded-xl" style={{ border: `1px solid ${PORTAL_BORDER}` }}>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="table-header py-2.5 px-4 text-left">Tier</th>
+                    <th className="table-header py-2.5 px-4 text-left">PV / Event</th>
+                    <th className="table-header py-2.5 px-4 text-left">Events</th>
+                    <th className="table-header py-2.5 px-4 text-left">Total Matched PV</th>
+                    <th className="table-header py-2.5 px-4 text-left">Total Credited</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groupTraceByTier(traceRows).map((b, i) => (
+                    <tr key={b.pv} style={{ background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent', borderTop: `1px solid ${PORTAL_ROW}` }}>
+                      <td className="py-2.5 px-4 font-semibold" style={{ color: PORTAL_TITLE }}>{b.label}</td>
+                      <td className="py-2.5 px-4" style={{ color: PORTAL_TEXT }}>{fmtInt(b.pv)} PV</td>
+                      <td className="py-2.5 px-4" style={{ color: PORTAL_TEXT }}>{fmtInt(b.count)}</td>
+                      <td className="py-2.5 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(b.totalPv)} PV</td>
+                      <td className="py-2.5 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(b.credited)}</td>
+                    </tr>
+                  ))}
+                  {traceRows.length === 0 && (
+                    <tr><td colSpan="5" className="py-8 text-center text-xs" style={{ color: PORTAL_MUTED }}>No events on this page.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <div className={`overflow-x-auto hidden ${groupTrace ? '' : 'xl:block'}`} style={groupTrace ? { display: 'none' } : undefined}>
           <table className="w-full text-sm min-w-[1240px]">
             <thead>
               <tr>
@@ -571,7 +679,7 @@ export default function PairingReports() {
           </table>
         </div>
 
-        <div className="xl:hidden p-4 space-y-3">
+        <div className={`${groupTrace ? 'hidden' : 'xl:hidden'} p-4 space-y-3`}>
           {traceRows.map((row, index) => (
             <TraceEventCard
               key={row.ledgerUid || index}

@@ -119,8 +119,12 @@ export function MemberNode({ data }) {
 
       <div className="mt-4">
         <div className="rounded-xl px-3 py-2.5" style={{ background: tone.sectionBg, border: `1px solid ${tone.sectionBorder}` }}>
-          <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: tone.muted }}>Binary PV</p>
-          <p className="mt-1 text-sm font-semibold" style={{ color: tone.text }}>{formatBinaryPackagePoints(data.binaryPoints)}</p>
+          <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: tone.muted }}>{data.metricLabel || 'Binary PV'}</p>
+          <p className="mt-1 text-sm font-semibold" style={{ color: tone.text }}>
+            {data.metricLabel
+              ? `${Number(data.metricValue || 0).toLocaleString('en-US')} pts`
+              : formatBinaryPackagePoints(data.binaryPoints)}
+          </p>
         </div>
       </div>
     </button>

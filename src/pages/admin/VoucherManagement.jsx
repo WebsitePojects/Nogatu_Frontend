@@ -19,8 +19,6 @@ import {
 } from 'react-icons/hi';
 import {
   MAINTENANCE_PRODUCTS,
-  VOUCHER_MEMBER_DISCOUNT_PERCENT,
-  getVoucherMemberPricing,
 } from '../../constants/maintenanceProducts';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -50,11 +48,6 @@ const CLAIM_STATUS_STYLES = {
 };
 
 const emptyAvailmentItem = () => ({ productCode: '', productKey: '', description: '', amount: '' });
-
-function getVoucherItemPricing(item) {
-  const product = PRODUCT_BY_CODE[Number(item?.productCode || 0)];
-  return product ? getVoucherMemberPricing(product.price) : null;
-}
 
 function toLocalDateTimeInput(value) {
   if (!value) return '';
@@ -330,7 +323,6 @@ export default function VoucherManagement() {
   function updateAvailmentItem(index, field, value) {
     if (field === 'productCode') {
       const product = PRODUCT_BY_CODE[Number(value)];
-      const pricing = product ? getVoucherMemberPricing(product.price) : null;
       setAvailmentForm((current) => ({
         ...current,
         items: current.items.map((item, itemIndex) => (
@@ -340,7 +332,7 @@ export default function VoucherManagement() {
                 productCode: value,
                 productKey: product?.key || '',
                 description: product?.name || '',
-                amount: pricing ? String(pricing.memberPrice) : '',
+                amount: product ? String(product.price) : '',
               }
             : item
         )),
@@ -966,7 +958,7 @@ export default function VoucherManagement() {
               <div>
                 <p className="text-[11px] uppercase tracking-[0.18em]" style={{ color: 'rgba(212,175,55,0.75)' }}>Voucher Request Cross-Check</p>
                 <h2 className="portal-modal-title font-display text-xl mt-1">{viewingAvailment.reference || viewingAvailment.erNumber}</h2>
-                <p className="portal-modal-muted text-sm mt-1">Verify ER, selected products, discounted amount used, and claim status before releasing products.</p>
+                <p className="portal-modal-muted text-sm mt-1">Verify ER, selected products, amount used, and claim status before releasing products.</p>
               </div>
               <button onClick={() => setViewingAvailment(null)} className="portal-modal-muted hover:opacity-80 p-1" aria-label="Close view modal" type="button">
                 <HiOutlineX className="size-5" />
@@ -1004,23 +996,15 @@ export default function VoucherManagement() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(viewingAvailment.items || []).map((item, index) => {
-                      const pricing = getVoucherItemPricing(item);
-                      return (
-                        <tr key={`${item.productCode || index}-${item.lineNo || index}`} className="hover:bg-white/[0.04]">
-                          <td className="portal-modal-muted py-2.5 px-3 font-mono">{item.productCode || '-'}</td>
-                          <td className="portal-modal-title py-2.5 px-3">
-                            <div>{item.description || '-'}</div>
-                            {pricing && (
-                              <div className="mt-1 text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                                Original P{fmt(pricing.originalPrice)} | Member {pricing.discountPercent}% off (-P{fmt(pricing.discountValue)})
-                              </div>
-                            )}
-                          </td>
-                          <td className="portal-modal-title py-2.5 px-3 font-mono">PHP {fmt(item.amount)}</td>
-                        </tr>
-                      );
-                    })}
+                    {(viewingAvailment.items || []).map((item, index) => (
+                      <tr key={`${item.productCode || index}-${item.lineNo || index}`} className="hover:bg-white/[0.04]">
+                        <td className="portal-modal-muted py-2.5 px-3 font-mono">{item.productCode || '-'}</td>
+                        <td className="portal-modal-title py-2.5 px-3">
+                          <div>{item.description || '-'}</div>
+                        </td>
+                        <td className="portal-modal-title py-2.5 px-3 font-mono">PHP {fmt(item.amount)}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -1055,7 +1039,7 @@ export default function VoucherManagement() {
             <div className="flex items-center justify-between p-6 pb-4 shrink-0">
               <div>
                 <h2 className="portal-modal-title font-display text-xl">{editorMode === 'edit' ? 'Edit Voucher Transaction' : 'Transact Voucher'}</h2>
-                <p className="portal-modal-muted text-sm mt-1">Capture the ER number, availment date, discounted member pricing, and every item that consumed the voucher.</p>
+                <p className="portal-modal-muted text-sm mt-1">Capture the ER number, availment date, product pricing, and every item that consumed the voucher.</p>
               </div>
               <button onClick={closeAvailmentEditor} className="portal-modal-muted hover:opacity-80 p-1" aria-label="Close modal" type="button">
                 <HiOutlineX className="size-5" />
@@ -1091,7 +1075,7 @@ export default function VoucherManagement() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h3 className="portal-modal-title text-sm font-semibold">Transacted Items</h3>
-                    <p className="portal-modal-muted text-xs mt-1">Pick a product to prefill the 30% member-discounted amount, then adjust the amount if operations need a different deduction.</p>
+                    <p className="portal-modal-muted text-xs mt-1">Pick a product to prefill its price, then adjust the amount if operations need a different deduction.</p>
                   </div>
                   <button
                     onClick={addAvailmentItem}
@@ -1105,7 +1089,6 @@ export default function VoucherManagement() {
 
                 <div className="mt-4 space-y-3">
                   {availmentForm.items.map((item, index) => {
-                    const pricing = getVoucherItemPricing(item);
                     return (
                       <div key={`${index}-${editorMode}`} className="space-y-2 rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_0.7fr_auto] gap-3 items-end">
@@ -1145,26 +1128,6 @@ export default function VoucherManagement() {
                             Remove
                           </button>
                         </div>
-                        {pricing && (
-                          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-[11px]">
-                            <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                              <p style={{ color: 'rgba(255,255,255,0.45)' }}>Original Price</p>
-                              <p className="mt-1 font-mono text-white">P{fmt(pricing.originalPrice)}</p>
-                            </div>
-                            <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                              <p style={{ color: 'rgba(255,255,255,0.45)' }}>Member Discount</p>
-                              <p className="mt-1 text-white">{VOUCHER_MEMBER_DISCOUNT_PERCENT}%</p>
-                            </div>
-                            <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                              <p style={{ color: 'rgba(255,255,255,0.45)' }}>Discount Value</p>
-                              <p className="mt-1 font-mono" style={{ color: '#fca5a5' }}>-P{fmt(pricing.discountValue)}</p>
-                            </div>
-                            <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.14)' }}>
-                              <p style={{ color: 'rgba(255,255,255,0.45)' }}>Suggested Total</p>
-                              <p className="mt-1 font-mono text-white">P{fmt(pricing.memberPrice)}</p>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     );
                   })}

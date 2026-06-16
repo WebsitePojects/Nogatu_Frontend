@@ -104,10 +104,10 @@ export default function ActivationCodes() {
     });
   }
 
-  async function performMaintenance(code) {
+  async function performMaintenance(code, transType) {
     try {
-      await api.post('/codes/maintenance', { code });
-      toast.success('Code activated successfully');
+      await api.post('/codes/maintenance', { code, transType });
+      toast.success(transType === 2 ? 'Set as Hi-Five purchase' : 'Set as maintenance');
       setConfirmModal(null);
       loadCodes();
       loadHistory();
@@ -116,18 +116,21 @@ export default function ActivationCodes() {
     }
   }
 
-  function handleMaintenance(code) {
+  function handleMaintenance(code, transType) {
     const codeRow = findCodeRecord(code);
+    const isHiFive = transType === 2;
     setConfirmModal({
       tone: 'gold',
-      title: 'Use this code for repurchase?',
-      message: 'This code will be consumed immediately after confirmation and will move into your activation history.',
-      confirmLabel: 'Use Repurchase Code',
-      onConfirm: () => performMaintenance(code),
+      title: isHiFive ? 'Use this code as a Hi-Five purchase?' : 'Use this code for maintenance?',
+      message: isHiFive
+        ? 'This code will be consumed and counted toward your Hi-Five Product Bonus qualification. This cannot be changed after confirmation.'
+        : 'This code will be consumed and counted toward your monthly maintenance product points. This cannot be changed after confirmation.',
+      confirmLabel: isHiFive ? 'Set as Hi-Five' : 'Set as Maintenance',
+      onConfirm: () => performMaintenance(code, transType),
       details: [
         { label: 'Code', value: code },
         { label: 'Product', value: codeRow?.producttypeName || 'Maintenance code' },
-        { label: 'Use', value: 'Repurchase / maintenance points' },
+        { label: 'Applied to', value: isHiFive ? 'Hi-Five purchase qualification' : 'Monthly maintenance points' },
       ],
     });
   }
@@ -283,13 +286,22 @@ export default function ActivationCodes() {
 
                   <div className="flex flex-wrap gap-2">
                     {c.codestatus === 1 && c.producttype >= 100 && (
-                      <button
-                        onClick={() => handleMaintenance(c.code)}
-                        className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
-                        style={{ background: 'rgba(34,197,94,0.1)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }}
-                       type="button">
-                        Repurchase
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleMaintenance(c.code, 1)}
+                          className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                          style={{ background: 'rgba(34,197,94,0.1)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }}
+                         type="button">
+                          Set as Maintenance
+                        </button>
+                        <button
+                          onClick={() => handleMaintenance(c.code, 2)}
+                          className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                          style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)' }}
+                         type="button">
+                          Set as Hi-Five
+                        </button>
+                      </>
                     )}
                     {c.codestatus === 1 && c.producttype < 100 && Number(c.producttype) > currentAccttype && (
                       <button
@@ -362,13 +374,22 @@ export default function ActivationCodes() {
                         {c.codestatus === 1 && c.producttype >= 100 && (
                           <div className="flex gap-1.5">
                             <button
-                              onClick={() => handleMaintenance(c.code)}
+                              onClick={() => handleMaintenance(c.code, 1)}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
                               style={{ background: 'rgba(34,197,94,0.1)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }}
                               onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}
                               onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.1)'}
                              type="button">
-                              Repurchase
+                              Set as Maintenance
+                            </button>
+                            <button
+                              onClick={() => handleMaintenance(c.code, 2)}
+                              className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
+                              style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)' }}
+                              onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.18)'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
+                             type="button">
+                              Set as Hi-Five
                             </button>
                           </div>
                         )}

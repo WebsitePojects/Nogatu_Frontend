@@ -20,10 +20,11 @@ export default function ManageCodes() {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [codesExpanded, setCodesExpanded] = useState(false);
   const [selected, setSelected] = useState([]);
-  const [selectMode, setSelectMode] = useState(false);
   const [codeSearch, setCodeSearch] = useState('');
   const [targetUsername, setTargetUsername] = useState('');
   const [taggedAccount, setTaggedAccount] = useState(null);
+  const [confirm, setConfirm] = useState(null); // { kind, target, count }
+  const [confirmBusy, setConfirmBusy] = useState(false);
   const canRelease = [1, 2, 3].includes(Number(admin?.rights));
 
   const headingColor = isDarkMode ? '#ffffff' : '#111827';
@@ -96,6 +97,36 @@ export default function ManageCodes() {
     const pageCodes = codes.map(c => c.code);
     const allSelected = pageCodes.every(code => selected.includes(code));
     setSelected(allSelected ? selected.filter(code => !pageCodes.includes(code)) : Array.from(new Set([...selected, ...pageCodes])));
+  }
+
+  // Open a confirmation before any release / transfer to prevent accidental actions.
+  function requestRelease() {
+    if (!canRelease) return toast.error('Release is restricted to Administrator and BOD');
+    if (selected.length === 0) return toast.error('Select codes to release');
+    setConfirm({ kind: 'release', target: null, count: selected.length });
+  }
+  function requestTransfer() {
+    const transferTo = taggedAccount?.username || targetUsername.trim();
+    if (!transferTo || selected.length === 0) return toast.error('Tag an account and select codes');
+    setConfirm({ kind: 'transfer', target: transferTo, count: selected.length });
+  }
+  function requestReleaseAndTransfer() {
+    const transferTo = taggedAccount?.username || targetUsername.trim();
+    if (!transferTo || selected.length === 0) return toast.error('Tag an account and select codes');
+    setConfirm({ kind: 'release-transfer', target: transferTo, count: selected.length });
+  }
+
+  async function runConfirmed() {
+    if (!confirm || confirmBusy) return;
+    setConfirmBusy(true);
+    try {
+      if (confirm.kind === 'release') await handleRelease();
+      else if (confirm.kind === 'transfer') await handleTransfer();
+      else if (confirm.kind === 'release-transfer') await handleReleaseAndTransfer();
+    } finally {
+      setConfirmBusy(false);
+      setConfirm(null);
+    }
   }
 
   async function handleRelease() {
@@ -186,18 +217,19 @@ export default function ManageCodes() {
       <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="text-sm font-medium" style={{ color: textMuted }}>
-            {selected.length > 0 ? <span style={{ color: goldText }}>{selected.length} codes selected</span> : 'Select codes below'}
+            {selected.length > 0 ? <span style={{ color: goldText }}>{selected.length} codes selected</span> : 'Tap any row to select'}
           </div>
           <button
-            onClick={() => setSelectMode(v => !v)}
-            className="text-sm py-1.5 px-3 rounded-lg font-medium"
+            onClick={() => setSelected([])}
+            disabled={selected.length === 0}
+            className="text-sm py-1.5 px-3 rounded-lg font-medium disabled:opacity-40"
             style={{
-              background: selectMode ? 'rgba(212,175,55,0.14)' : subtleButtonBg,
-              color: selectMode ? goldText : textSubtle,
+              background: subtleButtonBg,
+              color: textSubtle,
               border: isDarkMode ? '1px solid rgba(212,175,55,0.15)' : '1px solid rgba(148,163,184,0.35)',
             }}
            type="button">
-            {selectMode ? 'Exit Selection Mode' : 'Select Multiple'}
+            Clear Selection
           </button>
         </div>
         <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-end">
@@ -266,7 +298,7 @@ export default function ManageCodes() {
         <div className="flex flex-wrap gap-2.5 mt-4 pt-3 border-t" style={{ borderColor: subtleBorder }}>
           {canRelease && (
             <button
-              onClick={handleReleaseAndTransfer}
+              onClick={requestReleaseAndTransfer}
               disabled={selected.length === 0}
               className="rounded-xl py-2.5 px-4 text-xs font-medium border flex-1 sm:flex-initial text-center justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ borderColor: 'rgba(34,197,94,0.3)', color: greenText, background: 'rgba(34,197,94,0.08)' }}
@@ -275,7 +307,7 @@ export default function ManageCodes() {
             </button>
           )}
           <button
-            onClick={handleTransfer}
+            onClick={requestTransfer}
             disabled={selected.length === 0}
             className="gold-btn rounded-xl py-2.5 px-4 text-xs flex-1 sm:flex-initial text-center justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
            type="button">
@@ -290,7 +322,7 @@ export default function ManageCodes() {
           </button>
           {canRelease && (
             <button
-              onClick={handleRelease}
+              onClick={requestRelease}
               disabled={selected.length === 0}
               className="btn-success rounded-xl py-2.5 px-4 text-xs flex-1 sm:flex-initial text-center justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
              type="button">
@@ -371,8 +403,8 @@ export default function ManageCodes() {
                   <tr
                     key={c.code}
                     className="motion-safe:transition-colors"
-                    style={{ background: selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent', cursor: selectMode ? 'pointer' : 'default' }}
-                    onClick={() => { if (selectMode) toggleSelect(c.code); }}
+                    style={{ background: selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent', cursor: 'pointer' }}
+                    onClick={() => toggleSelect(c.code)}
                     onMouseEnter={e => { if (!selected.includes(c.code)) e.currentTarget.style.background = rowHover; }}
                     onMouseLeave={e => { e.currentTarget.style.background = selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent'; }}
                   >
@@ -381,6 +413,7 @@ export default function ManageCodes() {
                         type="checkbox"
                         checked={selected.includes(c.code)}
                         onChange={() => toggleSelect(c.code)}
+                        onClick={(e) => e.stopPropagation()}
                         style={{ accentColor: '#D4AF37' }}
                       />
                     </td>
@@ -536,6 +569,49 @@ export default function ManageCodes() {
           </div>
         )}
       </div>
+
+      {/* Confirmation gate for release / transfer — prevents accidental actions */}
+      {confirm && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}
+          onMouseDown={() => !confirmBusy && setConfirm(null)}>
+          <div onMouseDown={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl p-6"
+            style={{ background: isDarkMode ? '#15161a' : '#ffffff', border: `1px solid ${subtleBorder}` }}>
+            <div className="flex items-start gap-3">
+              <div className="size-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(234,179,8,0.14)', border: '1px solid rgba(234,179,8,0.3)', color: '#eab308' }}>
+                <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-display text-lg font-bold" style={{ color: headingColor }}>
+                  {confirm.kind === 'release' ? 'Confirm Release'
+                    : confirm.kind === 'transfer' ? 'Confirm Transfer'
+                      : 'Confirm Release & Transfer'}
+                </h3>
+                <p className="text-sm mt-1.5" style={{ color: textSubtle }}>
+                  You are about to <strong style={{ color: headingColor }}>
+                    {confirm.kind === 'release' ? 'release' : confirm.kind === 'transfer' ? 'transfer' : 'release and transfer'}
+                  </strong>{' '}
+                  <strong style={{ color: goldText }}>{confirm.count}</strong> code{confirm.count === 1 ? '' : 's'}
+                  {confirm.target && (<> to <strong style={{ color: goldText }}>@{confirm.target}</strong></>)}.
+                  {' '}This action cannot be undone. Please confirm.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-5">
+              <button type="button" onClick={() => setConfirm(null)} disabled={confirmBusy}
+                className="rounded-xl py-2 px-4 text-sm font-medium border disabled:opacity-50"
+                style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}>
+                Cancel
+              </button>
+              <button type="button" onClick={runConfirmed} disabled={confirmBusy}
+                className="rounded-xl py-2 px-4 text-sm font-semibold text-always-white disabled:opacity-50"
+                style={{ background: confirm.kind === 'transfer' ? 'linear-gradient(135deg,#D4AF37,#b8860b)' : 'linear-gradient(135deg,#16a34a,#15803d)' }}>
+                {confirmBusy ? 'Processing…' : 'Yes, proceed'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

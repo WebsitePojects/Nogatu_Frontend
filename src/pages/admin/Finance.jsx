@@ -78,15 +78,10 @@ export default function Finance() {
   const [exporting, setExporting] = useState('');
   const [snapshot, setSnapshot] = useState(null);
   const [drafts, setDrafts] = useState({});
-  const [customColumns, setCustomColumns] = useState([]);
-  const [newColumnLabel, setNewColumnLabel] = useState('');
-  const [savingCustomColumnId, setSavingCustomColumnId] = useState(null);
   const [selectedPanel, setSelectedPanel] = useState('expenseReserve');
-  const [selectedPackageType, setSelectedPackageType] = useState(null);
   const headingText = isDarkMode ? '#ffffff' : '#111827';
   const strongText = isDarkMode ? 'rgba(255,255,255,0.85)' : '#334155';
   const softText = isDarkMode ? 'rgba(255,255,255,0.7)' : '#475569';
-  const packageActiveText = isDarkMode ? '#F9E08A' : '#7a5c08';
   const packageIdleText = isDarkMode ? '#ffffff' : '#334155';
   const directReferralText = isDarkMode ? '#fcd34d' : '#9a6700';
   const reserveTotalText = isDarkMode ? '#fecdd3' : '#be185d';
@@ -102,7 +97,6 @@ export default function Finance() {
     try {
       const res = await api.get(`/admin/finance?year=${targetYear}`);
       setSnapshot(res.data);
-      setCustomColumns(res.data.customColumns || []);
       const nextDrafts = {};
       for (const config of res.data.packageConfigs || []) {
         nextDrafts[config.packageType] = {
@@ -113,9 +107,6 @@ export default function Finance() {
         };
       }
       setDrafts(nextDrafts);
-      if (!selectedPackageType && (res.data.packageRows || []).length > 0) {
-        setSelectedPackageType(res.data.packageRows[0].packageType);
-      }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to load finance data');
     } finally {
@@ -133,28 +124,6 @@ export default function Finance() {
     }));
   }
 
-  function updateCustomColumnDraft(columnId, field, value) {
-    setCustomColumns((current) => current.map((column) => (
-      Number(column.id) === Number(columnId)
-        ? { ...column, [field]: value }
-        : column
-    )));
-  }
-
-  function updateCustomColumnValueDraft(columnId, packageType, value) {
-    setCustomColumns((current) => current.map((column) => (
-      Number(column.id) === Number(columnId)
-        ? {
-            ...column,
-            valuesByPackage: {
-              ...column.valuesByPackage,
-              [packageType]: value,
-            },
-          }
-        : column
-    )));
-  }
-
   async function saveDraft(packageType) {
     setSavingPackage(packageType);
     try {
@@ -166,54 +135,6 @@ export default function Finance() {
       toast.error(error.response?.data?.error || 'Failed to save package settings');
     } finally {
       setSavingPackage(null);
-    }
-  }
-
-  async function createBudgetColumn() {
-    if (!newColumnLabel.trim()) {
-      toast.error('Column label is required');
-      return;
-    }
-
-    setSavingCustomColumnId('new');
-    try {
-      await api.post('/admin/finance/custom-columns', { label: newColumnLabel.trim() });
-      toast.success('Budget column added');
-      setNewColumnLabel('');
-      await loadFinance(year);
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to add budget column');
-    } finally {
-      setSavingCustomColumnId(null);
-    }
-  }
-
-  async function saveBudgetColumnLabel(column) {
-    setSavingCustomColumnId(`label-${column.id}`);
-    try {
-      await api.put(`/admin/finance/custom-columns/${column.id}`, {
-        label: column.label,
-        sortOrder: column.sortOrder,
-      });
-      toast.success('Column label updated');
-      await loadFinance(year);
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to update budget column');
-    } finally {
-      setSavingCustomColumnId(null);
-    }
-  }
-
-  async function saveBudgetColumnValue(columnId, packageType, amount) {
-    setSavingCustomColumnId(`value-${columnId}-${packageType}`);
-    try {
-      await api.put(`/admin/finance/custom-columns/${columnId}/values/${packageType}`, { amount });
-      toast.success('Budget amount updated');
-      await loadFinance(year);
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to update budget amount');
-    } finally {
-      setSavingCustomColumnId(null);
     }
   }
 
@@ -313,32 +234,24 @@ export default function Finance() {
     [selectedPanel, summaryCards]
   );
 
-  const selectedPackage = useMemo(
-    () => (snapshot?.packageRows || []).find((row) => Number(row.packageType) === Number(selectedPackageType)) || null,
-    [selectedPackageType, snapshot]
-  );
-
-  const selectedPackagePanel = selectedPackage
-    ? {
-      title: `${selectedPackage.packageLabel} package breakdown`,
-      subtitle: 'This package row shows the reserve math per code and in aggregate for the selected year.',
+  const packageBreakdowns = useMemo(
+    () => (snapshot?.packageRows || []).map((row) => ({
+      packageType: row.packageType,
+      title: `${row.packageLabel} package breakdown`,
       details: [
-        { label: 'Codes Used', value: fmtInt(selectedPackage.soldCount) },
-        { label: 'Gross Sales', value: `PHP ${fmtMoney(selectedPackage.grossSales)}` },
-        { label: 'Product Cost / Code', value: `PHP ${fmtMoney(selectedPackage.productCost)}` },
-        { label: 'Sales Match Reserve / Code', value: `PHP ${fmtMoney(selectedPackage.salesMatchCeiling)}` },
-        { label: 'Direct Referral / Code', value: `PHP ${fmtMoney(selectedPackage.directReferralFixed)}` },
-        { label: 'Admin / Ops Reserve / Code', value: `PHP ${fmtMoney(selectedPackage.adminExtraCost)}` },
-        ...customColumns.map((column) => ({
-          label: `${column.label} / Code`,
-          value: `PHP ${fmtMoney(column.valuesByPackage?.[selectedPackage.packageType] ?? 0)}`,
-        })),
-        { label: 'Reserve / Code', value: `PHP ${fmtMoney(selectedPackage.reservePerCode)}` },
-        { label: 'Reserve Total', value: `PHP ${fmtMoney(selectedPackage.reserveTotal)}` },
-        { label: 'Projected Margin', value: `PHP ${fmtMoney(selectedPackage.projectedOperatingMargin)}` },
+        { label: 'Codes Used', value: fmtInt(row.soldCount) },
+        { label: 'Gross Sales', value: `PHP ${fmtMoney(row.grossSales)}` },
+        { label: 'Product Cost / Code', value: `PHP ${fmtMoney(row.productCost)}` },
+        { label: 'Sales Match Reserve / Code', value: `PHP ${fmtMoney(row.salesMatchCeiling)}` },
+        { label: 'Direct Referral / Code', value: `PHP ${fmtMoney(row.directReferralFixed)}` },
+        { label: 'Admin / Ops Reserve / Code', value: `PHP ${fmtMoney(row.adminExtraCost)}` },
+        { label: 'Reserve / Code', value: `PHP ${fmtMoney(row.reservePerCode)}` },
+        { label: 'Reserve Total', value: `PHP ${fmtMoney(row.reserveTotal)}` },
+        { label: 'Projected Margin', value: `PHP ${fmtMoney(row.projectedOperatingMargin)}` },
       ],
-    }
-    : null;
+    })),
+    [snapshot]
+  );
 
   const selectedSummaryPanel = selectedCard
     ? {
@@ -435,15 +348,12 @@ export default function Finance() {
       {summaryCards.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6 gap-3">
           {summaryCards.map((card) => {
-            const active = !selectedPackage && selectedPanel === card.key;
+            const active = selectedPanel === card.key;
             return (
               <button
                 key={card.key}
                 type="button"
-                onClick={() => {
-                  setSelectedPackageType(null);
-                  setSelectedPanel(card.key);
-                }}
+                onClick={() => setSelectedPanel(card.key)}
                 className="glass-card rounded-2xl p-4 text-left motion-safe:transition-all"
                 style={{
                   border: active ? '1px solid rgba(212,175,55,0.3)' : '1px solid rgba(255,255,255,0.08)',
@@ -476,73 +386,6 @@ export default function Finance() {
 
       <div className="space-y-6">
         <div className="glass-card rounded-2xl p-6 overflow-hidden">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 mb-5">
-            <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold text-white">Custom reserve columns</p>
-                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  Add package budgets like reserve wallet, logistics, promo budget, or other finance columns and make them affect package margin math immediately. Column editors are kept here too so labels and order are easy to update.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 xl:min-w-[360px]">
-                <input
-                  type="text"
-                  value={newColumnLabel}
-                  onChange={(event) => setNewColumnLabel(event.target.value)}
-                  className="glass-input rounded-xl px-4 py-2.5 text-sm min-w-[220px]"
-                  placeholder="New column label"
-                />
-                <button
-                  type="button"
-                  onClick={createBudgetColumn}
-                  disabled={savingCustomColumnId === 'new'}
-                  className="gold-btn rounded-xl py-2.5 px-5 text-sm disabled:opacity-50"
-                >
-                  {savingCustomColumnId === 'new' ? 'Adding...' : 'Add Column'}
-                </button>
-              </div>
-            </div>
-            {customColumns.length > 0 && (
-              <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-3">
-                {customColumns.map((column) => (
-                  <div
-                    key={`editor-${column.id}`}
-                    className="rounded-2xl border border-white/10 bg-white/[0.025] p-3.5"
-                  >
-                    <p className="text-[11px] uppercase tracking-wide mb-2" style={{ color: 'rgba(147,197,253,0.85)' }}>
-                      Edit column
-                    </p>
-                    <div className="space-y-2.5">
-                      <input
-                        type="text"
-                        value={column.label}
-                        onChange={(event) => updateCustomColumnDraft(column.id, 'label', event.target.value)}
-                        className="glass-input rounded-xl px-3 py-2 text-xs w-full"
-                        placeholder="Column label"
-                      />
-                      <input
-                        type="number"
-                        value={column.sortOrder ?? 0}
-                        onChange={(event) => updateCustomColumnDraft(column.id, 'sortOrder', Number(event.target.value || 0))}
-                        className="glass-input rounded-xl px-3 py-2 text-xs w-full"
-                        placeholder="Display order"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => saveBudgetColumnLabel(column)}
-                        disabled={savingCustomColumnId === `label-${column.id}`}
-                        className="rounded-xl px-3 py-2 text-xs font-medium border disabled:opacity-50 w-full"
-                        style={{ borderColor: 'rgba(212,175,55,0.22)', color: saveText, background: 'rgba(212,175,55,0.08)' }}
-                      >
-                        {savingCustomColumnId === `label-${column.id}` ? 'Saving...' : 'Update Column'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
           <div className="flex items-center justify-between mb-4 gap-4">
             <div>
               <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
@@ -553,7 +396,7 @@ export default function Finance() {
               </p>
             </div>
             <span className="text-xs text-right" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              Click a package name to inspect its full breakdown.
+              Every package&apos;s full breakdown is shown below.
             </span>
           </div>
 
@@ -574,7 +417,6 @@ export default function Finance() {
                       'Sales Match Reserve',
                       'Direct Referral',
                       'Admin / Ops Reserve',
-                      ...customColumns.map((column) => column.label),
                       'Reserve / Code',
                       'Reserve Total',
                       'Projected Margin',
@@ -590,27 +432,19 @@ export default function Finance() {
                 <tbody>
                   {(snapshot?.packageRows || []).map((row, index) => {
                     const draft = drafts[row.packageType] || {};
-                    const active = Number(selectedPackageType) === Number(row.packageType);
                     return (
                       <tr
                         key={row.packageType}
                         style={{
-                          background: active
-                            ? 'rgba(212,175,55,0.06)'
-                            : index % 2 === 0
-                              ? 'rgba(255,255,255,0.02)'
-                              : 'transparent',
+                          background: index % 2 === 0
+                            ? 'rgba(255,255,255,0.02)'
+                            : 'transparent',
                         }}
                       >
                         <td className="p-3">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedPackageType(row.packageType)}
-                            className="font-semibold text-left"
-                            style={{ color: active ? packageActiveText : packageIdleText }}
-                          >
+                          <span className="font-semibold" style={{ color: packageIdleText }}>
                             {row.packageLabel}
-                          </button>
+                          </span>
                         </td>
                         <td className="p-3" style={{ color: softText }}>{fmtInt(row.soldCount)}</td>
                         <td className="p-3" style={{ color: strongText }}>PHP {fmtMoney(row.grossSales)}</td>
@@ -639,17 +473,6 @@ export default function Finance() {
                             className="glass-input rounded-xl px-3 py-2 text-xs w-full"
                           />
                         </td>
-                        {customColumns.map((column) => (
-                          <td key={`${row.packageType}-${column.id}`} className="p-3 min-w-[170px]">
-                            <input
-                              type="number"
-                              value={column.valuesByPackage?.[row.packageType] ?? 0}
-                              onChange={(event) => updateCustomColumnValueDraft(column.id, row.packageType, event.target.value)}
-                              onBlur={(event) => saveBudgetColumnValue(column.id, row.packageType, event.target.value)}
-                              className="glass-input rounded-xl px-3 py-2 text-xs w-full"
-                            />
-                          </td>
-                        ))}
                         <td className="p-3" style={{ color: strongText }}>PHP {fmtMoney(row.reservePerCode)}</td>
                         <td className="p-3 font-medium" style={{ color: reserveTotalText }}>PHP {fmtMoney(row.reserveTotal)}</td>
                         <td className="p-3 font-medium" style={{ color: marginText }}>PHP {fmtMoney(row.projectedOperatingMargin)}</td>
@@ -716,14 +539,29 @@ export default function Finance() {
           <div className="glass-card rounded-2xl p-5">
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
-                <p className="text-sm font-semibold text-white">{selectedPackagePanel?.title || 'Package breakdown'}</p>
+                <p className="text-sm font-semibold text-white">Package breakdowns</p>
                 <p className="text-xs mt-1 leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  {selectedPackagePanel?.subtitle || 'Click a package row above to inspect the full reserve math for that package beside the calculation summary.'}
+                  Full reserve math for every package in the selected year.
                 </p>
               </div>
             </div>
 
-            <DetailList items={selectedPackagePanel?.details || []} />
+            <div className="space-y-5">
+              {packageBreakdowns.length === 0 ? (
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  No package data for this year.
+                </p>
+              ) : (
+                packageBreakdowns.map((pkg) => (
+                  <div key={pkg.packageType}>
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'rgba(212,175,55,0.8)' }}>
+                      {pkg.title}
+                    </p>
+                    <DetailList items={pkg.details} />
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>

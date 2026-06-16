@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { useTheme } from '../../contexts/ThemeContext';
-import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineDocumentText } from 'react-icons/hi';
+import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineDocumentText, HiOutlineSearch } from 'react-icons/hi';
 import { formatDateTimeManila } from '../../utils/dateTime';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', {
@@ -27,25 +27,56 @@ export default function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  // Table standard: search + type filter + sort + responsive page size (50 mobile / 100 desktop).
+  const [search, setSearch] = useState('');
+  const [type, setType] = useState('all');
+  const [sort, setSort] = useState('date');
+  const [dir, setDir] = useState('desc');
+  const [perPage, setPerPage] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768 ? 50 : 100));
+
+  useEffect(() => {
+    const onResize = () => setPerPage(window.innerWidth < 768 ? 50 : 100);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Debounce the search box so typing doesn't fire a request per keystroke.
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search.trim()), 350);
+    return () => clearTimeout(id);
+  }, [search]);
+
+  // Any filter/sort change resets to page 1.
+  useEffect(() => { setPage(1); }, [debouncedSearch, type, sort, dir, perPage]);
 
   useEffect(() => {
     loadData();
-  }, [page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, debouncedSearch, type, sort, dir, perPage]);
 
   async function loadData() {
     setLoading(true);
     try {
-      const res = await api.get(`/transactions?page=${page}`);
+      const params = new URLSearchParams({
+        page: String(page), perPage: String(perPage), type, sort, dir,
+      });
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      const res = await api.get(`/transactions?${params.toString()}`);
       setTransactions(Array.isArray(res.data.transactions) ? res.data.transactions : []);
       setTotalPages(Number(res.data.totalPages || 1));
+      setTotal(Number(res.data.total || 0));
     } catch {
       setTransactions([]);
       setTotalPages(1);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
   }
+
 
   const txAmount = (t) => {
     if (t.transactionType === 10) return Number(t.encashment || 0);
@@ -101,11 +132,36 @@ export default function Transactions() {
 
       <div className="glass-card rounded-2xl overflow-hidden">
         <div
-          className="flex flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 px-5 py-3.5 lg:flex-row lg:items-center lg:justify-between"
           style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}
         >
-          <p className="portal-card-muted text-sm">Transaction records</p>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+            <div className="relative flex-1 max-w-xs">
+              <HiOutlineSearch className="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 portal-card-muted" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by date (e.g. 2026-06-16)"
+                className="glass-input w-full pl-8 pr-3 py-1.5 text-sm rounded-lg"
+              />
+            </div>
+            <select value={type} onChange={(e) => setType(e.target.value)}
+              className="glass-input text-sm rounded-lg py-1.5 px-2">
+              <option value="all">All types</option>
+              <option value="income">Income</option>
+              <option value="voucher">Voucher</option>
+              <option value="encashment">Encashment</option>
+            </select>
+            <select value={`${sort}:${dir}`} onChange={(e) => { const [s, d] = e.target.value.split(':'); setSort(s); setDir(d); }}
+              className="glass-input text-sm rounded-lg py-1.5 px-2">
+              <option value="date:desc">Newest first</option>
+              <option value="date:asc">Oldest first</option>
+              <option value="amount:desc">Amount: high → low</option>
+              <option value="amount:asc">Amount: low → high</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <span className="portal-card-muted text-xs mr-1">{total} total</span>
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}

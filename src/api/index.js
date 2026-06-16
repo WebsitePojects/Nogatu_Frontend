@@ -11,6 +11,14 @@ api.interceptors.request.use((config) => {
   const requestId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   config.headers = config.headers || {};
   config.headers['X-Request-ID'] = requestId;
+  // For multipart uploads (FormData), the default 'application/json' content-type
+  // must be removed so the browser sets 'multipart/form-data' WITH the boundary.
+  // Without this, multer on the server parses nothing -> empty body/file -> 400.
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (config.headers['Content-Type']) delete config.headers['Content-Type'];
+    if (config.headers.common) delete config.headers.common['Content-Type'];
+    if (config.headers.post) delete config.headers.post['Content-Type'];
+  }
   return config;
 });
 

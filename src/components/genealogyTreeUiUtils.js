@@ -412,6 +412,73 @@ export function flattenTree(node, level = 0, maxRenderLevel = 5, bucket = { node
   return bucket;
 }
 
+/**
+ * Flatten an n-ary unilevel / sponsor tree (node.children[]) into React Flow
+ * nodes + edges. Mirrors flattenTree but for unlimited children per node and
+ * level-based labels. A junction node is inserted when a parent has more than
+ * one child so the branch bus renders cleanly.
+ */
+export function flattenUnilevelTree(node, level = 0, maxRenderLevel = 5, bucket = { nodes: [], edges: [] }) {
+  if (!node) return bucket;
+
+  const nodeId = String(node.publicUid || node.uid);
+
+  bucket.nodes.push({
+    id: nodeId,
+    type: 'memberNode',
+    data: {
+      ...node,
+      packageType: normalizePackageType(node.packageType || node.accttypeName),
+      level,
+      positionLabel: level === 0 ? 'You (Level 0)' : `Level ${level}`,
+      // Unilevel cards show this month's product maintenance points (not binary PV).
+      metricLabel: 'Maint. Points',
+      metricValue: Number(node.maintenancePoints || 0),
+    },
+    position: { x: 0, y: 0 },
+  });
+
+  const children = Array.isArray(node.children) ? node.children : [];
+  if (level >= maxRenderLevel || children.length === 0) {
+    return bucket;
+  }
+
+  // Always route children through a junction — even for a single child — so every
+  // level step costs the same number of layout ranks. Mixing direct edges (1 rank)
+  // with junction edges (2 ranks) staggers members of the same level onto different
+  // rows; a uniform junction keeps each unilevel level aligned on one row.
+  const junctionId = `${nodeId}::junction`;
+  bucket.nodes.push({
+    id: junctionId,
+    type: 'junctionNode',
+    data: { level: level + 0.5, isJunction: true },
+    position: { x: 0, y: 0 },
+  });
+  bucket.edges.push({
+    id: `${nodeId}-${junctionId}`,
+    source: nodeId,
+    target: junctionId,
+    type: 'treeEdge',
+    animated: false,
+    style: { stroke: 'rgba(212,175,55,0.95)', strokeWidth: 2.9 },
+  });
+
+  children.forEach((child) => {
+    const childId = String(child.publicUid || child.uid);
+    flattenUnilevelTree(child, level + 1, maxRenderLevel, bucket);
+    bucket.edges.push({
+      id: `${junctionId}-${childId}`,
+      source: junctionId,
+      target: childId,
+      type: 'treeEdge',
+      animated: false,
+      style: { stroke: 'rgba(212,175,55,0.9)', strokeWidth: 2.7 },
+    });
+  });
+
+  return bucket;
+}
+
 export function layoutGraph(nodes, edges) {
   const graph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
   graph.setGraph({ rankdir: 'TB', ranksep: 118, nodesep: 54, marginx: 42, marginy: 34 });

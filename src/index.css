@@ -82,6 +82,18 @@
   }
 }
 
+/* Support chat: each new message slides up + fades in (200ms, transform/opacity only). */
+@keyframes chat-bubble-in {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.chat-bubble-in {
+  animation: chat-bubble-in 0.2s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-bubble-in { animation: none; }
+}
+
 html.dark {
   --app-bg: #0d0b07;
   --text-primary: #ffffff;
