@@ -676,7 +676,7 @@ export default function PairingReports() {
           </div>
         )}
 
-        <div className={`overflow-x-auto hidden ${groupTrace ? '' : 'xl:block'}`} style={groupTrace ? { display: 'none' } : undefined}>
+        <div className={`overflow-x-auto hidden ${groupTrace ? '' : 'lg:block'}`} style={groupTrace ? { display: 'none' } : undefined}>
           <table className="w-full text-sm min-w-[1240px]">
             <thead>
               <tr>
@@ -743,7 +743,7 @@ export default function PairingReports() {
           </table>
         </div>
 
-        <div className={`${groupTrace ? 'hidden' : 'xl:hidden'} p-4 space-y-3`}>
+        <div className={`${groupTrace ? 'hidden' : 'lg:hidden'} p-4 space-y-3`}>
           {orderedTraceRows.map((row, index) => (
             <TraceEventCard
               key={row.ledgerUid || index}
