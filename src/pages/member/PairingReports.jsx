@@ -15,32 +15,30 @@ const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDi
 const BP_PESO_VALUE = 250;
 const toBp = (pesoValue) => Number(Number(pesoValue || 0) / BP_PESO_VALUE);
 
-// Map a matched-PV value to its package tier (1=Bronze, 2=Silver, 4=Gold,
-// 10=Platinum, 20=Garnet, 60=Diamond). Used to group the long event-trace list
-// (e.g. a Diamond matched against hundreds of 1-PV Bronze accounts) by tier.
-const PV_TIERS = [
-  { pv: 60, label: 'Diamond' }, { pv: 20, label: 'Garnet' }, { pv: 10, label: 'Platinum' },
-  { pv: 4, label: 'Gold' }, { pv: 2, label: 'Silver' }, { pv: 1, label: 'Bronze' },
-];
-function pvTierLabel(pv) {
-  const exact = PV_TIERS.find((t) => t.pv === pv);
-  if (exact) return exact.label;
-  return pv > 0 ? `${pv} PV` : 'Other';
+// Group the event trace by the matched source's ACTUAL package tier (not by the
+// matched-PV-per-event, which produced confusing buckets like "3 PV"). A pairing
+// match is limited by the smaller-package source, so that source's package is the
+// event's tier.
+const PACKAGE_RANK = { Bronze: 1, Silver: 2, Gold: 3, Platinum: 4, Garnet: 5, Diamond: 6 };
+function eventPackageTier(r) {
+  const l = r.left?.packageLabel;
+  const rt = r.right?.packageLabel;
+  const lr = PACKAGE_RANK[l] || 0;
+  const rr = PACKAGE_RANK[rt] || 0;
+  if (lr && rr) return lr <= rr ? l : rt;   // limiting (smaller) package defines the tier
+  return l || rt || 'Unknown';
 }
-
-// Group trace rows by matched-PV tier. Returns sorted summary buckets.
 function groupTraceByTier(rows) {
   const map = new Map();
   for (const r of rows) {
-    const pv = Math.round(Number(r.pairPoints || 0) / BP_PESO_VALUE);
-    const key = pv;
-    if (!map.has(key)) map.set(key, { pv, label: pvTierLabel(pv), count: 0, totalPv: 0, credited: 0 });
-    const b = map.get(key);
+    const label = eventPackageTier(r);
+    if (!map.has(label)) map.set(label, { label, rank: PACKAGE_RANK[label] || 0, count: 0, totalPv: 0, credited: 0 });
+    const b = map.get(label);
     b.count += 1;
-    b.totalPv += pv;
+    b.totalPv += Math.round(Number(r.pairPoints || 0) / BP_PESO_VALUE);
     b.credited += Number(r.creditedIncome || 0);
   }
-  return Array.from(map.values()).sort((a, b) => b.pv - a.pv);
+  return Array.from(map.values()).sort((a, b) => b.rank - a.rank || b.totalPv - a.totalPv);
 }
 const PORTAL_TITLE = 'var(--portal-card-title)';
 const PORTAL_TEXT = 'var(--portal-card-text)';
@@ -250,6 +248,19 @@ export default function PairingReports() {
   }, [historyPage, tracePage, debouncedHistorySearch, historySort, historyDir]);
 
   const traceRows = data?.trace?.rows || [];
+  // ③ Chronological running ledger: oldest → newest so the remaining balance reads
+  // forward (60 → 59 → 57…), with a per-event running cumulative matched PV.
+  const orderedTraceRows = useMemo(() => {
+    let cumulative = 0;
+    return [...traceRows]
+      .sort((a, b) => new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
+      .map((row) => {
+        const matchedPv = Math.round(Number(row.pairPoints || 0) / BP_PESO_VALUE);
+        cumulative += matchedPv;
+        return { ...row, matchedPv, cumulativeMatchedPv: cumulative };
+      });
+  }, [traceRows]);
+
   useEffect(() => {
     if (!traceRows.some((row) => row.ledgerUid === expandedTraceUid)) {
       setExpandedTraceUid(null);
@@ -558,7 +569,7 @@ export default function PairingReports() {
           <div>
             <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing Event Trace</h3>
             <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
-              Shows the actual left-right matches, the matched BP, the payout result, and the remaining binary points on each source account after that event.
+              In chronological order (oldest first): each left–right match, the PV matched that event, the running total matched, the payout, and each source&apos;s remaining points — so it reads as a running ledger.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -584,31 +595,29 @@ export default function PairingReports() {
         {groupTrace && (
           <div className="p-4">
             <p className="text-xs mb-3" style={{ color: PORTAL_MUTED }}>
-              This page&apos;s {traceRows.length} matched event{traceRows.length === 1 ? '' : 's'} grouped by the opposite-leg package tier (by matched PV per event).
+              This page&apos;s {traceRows.length} matched event{traceRows.length === 1 ? '' : 's'} grouped by the matched source&apos;s package tier.
             </p>
             <div className="overflow-x-auto rounded-xl" style={{ border: `1px solid ${PORTAL_BORDER}` }}>
               <table className="w-full text-sm">
                 <thead>
                   <tr>
-                    <th className="table-header py-2.5 px-4 text-left">Tier</th>
-                    <th className="table-header py-2.5 px-4 text-left">PV / Event</th>
-                    <th className="table-header py-2.5 px-4 text-left">Events</th>
+                    <th className="table-header py-2.5 px-4 text-left">Package Tier</th>
+                    <th className="table-header py-2.5 px-4 text-left">Matches</th>
                     <th className="table-header py-2.5 px-4 text-left">Total Matched PV</th>
                     <th className="table-header py-2.5 px-4 text-left">Total Credited</th>
                   </tr>
                 </thead>
                 <tbody>
                   {groupTraceByTier(traceRows).map((b, i) => (
-                    <tr key={b.pv} style={{ background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent', borderTop: `1px solid ${PORTAL_ROW}` }}>
+                    <tr key={b.label} style={{ background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent', borderTop: `1px solid ${PORTAL_ROW}` }}>
                       <td className="py-2.5 px-4 font-semibold" style={{ color: PORTAL_TITLE }}>{b.label}</td>
-                      <td className="py-2.5 px-4" style={{ color: PORTAL_TEXT }}>{fmtInt(b.pv)} PV</td>
                       <td className="py-2.5 px-4" style={{ color: PORTAL_TEXT }}>{fmtInt(b.count)}</td>
                       <td className="py-2.5 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(b.totalPv)} PV</td>
                       <td className="py-2.5 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(b.credited)}</td>
                     </tr>
                   ))}
                   {traceRows.length === 0 && (
-                    <tr><td colSpan="5" className="py-8 text-center text-xs" style={{ color: PORTAL_MUTED }}>No events on this page.</td></tr>
+                    <tr><td colSpan="4" className="py-8 text-center text-xs" style={{ color: PORTAL_MUTED }}>No events on this page.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -620,10 +629,12 @@ export default function PairingReports() {
           <table className="w-full text-sm min-w-[1240px]">
             <thead>
               <tr>
+                <th className="table-header py-3 px-4">#</th>
                 <th className="table-header py-3 px-4">Date</th>
                 <th className="table-header py-3 px-4">Left Source</th>
                 <th className="table-header py-3 px-4">Right Source</th>
                 <th className="table-header py-3 px-4">Matched PV</th>
+                <th className="table-header py-3 px-4">Running Matched</th>
                 <th className="table-header py-3 px-4">Gross Pairing</th>
                 <th className="table-header py-3 px-4">Credited</th>
                 <th className="table-header py-3 px-4">Blocked</th>
@@ -633,7 +644,7 @@ export default function PairingReports() {
               </tr>
             </thead>
             <tbody>
-              {traceRows.map((row, index) => {
+              {orderedTraceRows.map((row, index) => {
                 const styles = statusStyles(row);
                 return (
                   <tr
@@ -644,6 +655,7 @@ export default function PairingReports() {
                     }}
                     className="portal-table-row-hover transition-colors"
                   >
+                    <td className="py-3 px-4 text-xs font-mono" style={{ color: PORTAL_MUTED }}>{index + 1}</td>
                     <td className="py-3 px-4 text-xs" style={{ color: PORTAL_MUTED }}>{formatDateTimeManila(row.pairedAt)}</td>
                     <td className="py-3 px-4">
                       <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</div>
@@ -655,7 +667,8 @@ export default function PairingReports() {
                       <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.right?.username || ''}</div>
                       <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
                     </td>
-                    <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(toBp(row.pairPoints))} PV</td>
+                    <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(row.matchedPv)} PV</td>
+                    <td className="py-3 px-4 font-semibold" style={{ color: 'rgba(212,175,55,0.92)' }}>{fmtInt(row.cumulativeMatchedPv)} PV</td>
                     <td className="py-3 px-4" style={{ color: PORTAL_TEXT }}>PHP {fmt(row.grossIncome)}</td>
                     <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
                     <td className="py-3 px-4" style={{ color: row.blockedIncome > 0 ? '#f87171' : PORTAL_MUTED }}>PHP {fmt(row.blockedIncome)}</td>
@@ -669,7 +682,7 @@ export default function PairingReports() {
               })}
               {traceRows.length === 0 && (
                 <tr>
-                  <td colSpan="10" className="py-14 text-center">
+                  <td colSpan="12" className="py-14 text-center">
                     <HiOutlineChartBar className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
                     <p style={{ color: PORTAL_MUTED }}>No pairing event trace yet.</p>
                   </td>
@@ -680,7 +693,7 @@ export default function PairingReports() {
         </div>
 
         <div className={`${groupTrace ? 'hidden' : 'xl:hidden'} p-4 space-y-3`}>
-          {traceRows.map((row, index) => (
+          {orderedTraceRows.map((row, index) => (
             <TraceEventCard
               key={row.ledgerUid || index}
               row={row}
