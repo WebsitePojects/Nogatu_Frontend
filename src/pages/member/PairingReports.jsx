@@ -6,9 +6,11 @@ import {
   HiOutlineChartBar,
   HiOutlineChevronDown,
   HiOutlineChevronUp,
+  HiOutlineDownload,
 } from 'react-icons/hi';
 import api from '../../api';
 import { formatDateTimeManila } from '../../utils/dateTime';
+import { exportPairingXlsx } from '../../lib/pairingXlsx';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -215,6 +217,45 @@ export default function PairingReports() {
   const [historySort, setHistorySort] = useState('date');
   const [historyDir, setHistoryDir] = useState('desc');
   const [loading, setLoading] = useState(true);
+  const [exportingXlsx, setExportingXlsx] = useState(false);
+
+  async function handleExportXlsx() {
+    if (exportingXlsx || !data) return;
+    setExportingXlsx(true);
+    try {
+      const allTrace = [];
+      const allHistory = [];
+      for (let i = 1, tp = 1; i <= tp && i <= 100; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await api.get(`/pairing?tracePage=${i}&tracePerPage=200&historyPerPage=1`);
+        allTrace.push(...(res.data.trace?.rows || []));
+        tp = Number(res.data.trace?.pagination?.totalPages || 1);
+      }
+      for (let i = 1, hp = 1; i <= hp && i <= 100; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await api.get(`/pairing?historyPage=${i}&historyPerPage=200&tracePerPage=1`);
+        allHistory.push(...(res.data.history?.rows || []));
+        hp = Number(res.data.history?.pagination?.totalPages || 1);
+      }
+      // Chronological + running cumulative across the WHOLE trace (not per page).
+      let cum = 0;
+      const orderedAll = [...allTrace]
+        .sort((a, b) => new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
+        .map((row) => { cum += Math.round(Number(row.pairPoints || 0) / BP_PESO_VALUE); return { ...row, cumulativeMatchedPv: cum }; });
+
+      const lifetime = Number(data.walletPairingTotal || 0);
+      const traceable = Number(data.trace?.summary?.totalCreditedIncome || 0);
+      await exportPairingXlsx({
+        username: data.username || data.account?.username,
+        summary: { lifetimeSmb: lifetime, traceableSmb: traceable, legacySmb: Math.max(0, lifetime - traceable), lifetimePv: Math.round(lifetime / BP_PESO_VALUE) },
+        tierGroups: groupTraceByTier(orderedAll),
+        history: allHistory,
+        trace: orderedAll,
+      });
+    } catch { /* surfaced by axios interceptor */ } finally {
+      setExportingXlsx(false);
+    }
+  }
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedHistorySearch(historySearch.trim()), 350);
@@ -573,6 +614,16 @@ export default function PairingReports() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={handleExportXlsx}
+              disabled={exportingXlsx}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              style={{ background: 'rgba(34,197,94,0.12)', color: '#34d399', border: '1px solid rgba(34,197,94,0.3)' }}
+              title="Export full pairing history + event trace (with chart) to Excel"
+            >
+              <HiOutlineDownload className="size-4" /> {exportingXlsx ? 'Exporting…' : 'Export XLSX'}
+            </button>
             <button
               type="button"
               onClick={() => setGroupTrace((v) => !v)}
