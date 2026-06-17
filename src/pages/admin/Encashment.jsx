@@ -307,7 +307,8 @@ export default function Encashment() {
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="overflow-x-auto hidden lg:block">
             <table className="w-full text-sm">
               <thead>
                 <tr>
@@ -392,12 +393,53 @@ export default function Encashment() {
                 )}
               </tbody>
             </table>
-            <div className="flex items-center justify-end mt-4 gap-2">
-              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
-              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
-              <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
-            </div>
           </div>
+
+          {/* Mobile / tablet card view */}
+          <div className="lg:hidden space-y-3">
+            {records.map((r) => (
+              <div key={r.pid} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.1)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-white/90 truncate">{r.fullname}</p>
+                    <p className="text-xs text-white/55 truncate">@{r.username}</p>
+                    <p className="text-[11px] text-white/40 mt-0.5">{r.cashtransdate || '-'}</p>
+                  </div>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold shrink-0"
+                    style={Number(r.cashStatus) === 1
+                      ? { background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.22)' }
+                      : { background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.22)' }}>
+                    {r.cashStatusLabel}
+                  </span>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                  <div><p className="text-white/40">Amount</p><p className="text-white/80 font-semibold tabular-nums">&#8369;{fmt(r.encashment)}</p></div>
+                  <div><p className="text-white/40">Deductions</p><p className="text-white/70 tabular-nums">&#8369;{fmt(r.deductions)}</p></div>
+                  <div className="col-span-2"><p className="text-white/40">Payout</p><p className="text-white/70 break-words">{r.payoutDetails || 'N/A'}</p></div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <button onClick={() => navigate(`/admin/accounts/${r.uid}/income`)} className="text-[11px] px-3 py-2 rounded-lg font-medium" style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }} type="button">View Details</button>
+                  <button onClick={() => openDetails(r)} className="text-[11px] px-3 py-2 rounded-lg font-medium" style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }} type="button">Encashment Slip</button>
+                  {r.canViewCdDetails && (
+                    <button onClick={() => navigate(`/admin/accounts/${r.uid}/cd`)} className="text-[11px] px-3 py-2 rounded-lg font-medium" style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)' }} type="button">CD Details</button>
+                  )}
+                  {Number(r.cashStatus) !== 1 && (
+                    <button onClick={() => handleProcess(r)} className="text-[11px] px-3 py-2 rounded-lg font-medium" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }} type="button">Set As Paid</button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {records.length === 0 && (
+              <div className="py-10 text-center text-sm" style={{ color: 'rgba(255,255,255,0.25)' }}>No records found.</div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-end mt-4 gap-2">
+            <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>Prev</PaginationButton>
+            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{page} / {totalPages}</span>
+            <PaginationButton style={{ background: 'rgba(212,175,55,0.08)', color: 'rgba(212,175,55,0.8)', border: '1px solid rgba(212,175,55,0.15)' }} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</PaginationButton>
+          </div>
+          </>
         )}
       </div>
 
