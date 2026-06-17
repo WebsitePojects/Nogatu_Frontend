@@ -569,7 +569,7 @@ export default function PairingReports() {
           <div>
             <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing Event Trace</h3>
             <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
-              In chronological order (oldest first): each left–right match, the PV matched that event, the running total matched, the payout, and each source&apos;s remaining points — so it reads as a running ledger.
+              This page&apos;s matches in chronological order (oldest first): each left–right match, the PV matched, the running total <em>within this page</em>, the payout, and each source&apos;s remaining points — so it reads as a running ledger.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -634,7 +634,7 @@ export default function PairingReports() {
                 <th className="table-header py-3 px-4">Left Source</th>
                 <th className="table-header py-3 px-4">Right Source</th>
                 <th className="table-header py-3 px-4">Matched PV</th>
-                <th className="table-header py-3 px-4">Running Matched</th>
+                <th className="table-header py-3 px-4">Running (this page)</th>
                 <th className="table-header py-3 px-4">Gross Pairing</th>
                 <th className="table-header py-3 px-4">Credited</th>
                 <th className="table-header py-3 px-4">Blocked</th>
