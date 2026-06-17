@@ -8,6 +8,7 @@ import {
   HiOutlineMinusSm,
   HiOutlineOfficeBuilding,
   HiOutlineRefresh,
+  HiOutlineSearch,
   HiOutlineUserGroup,
   HiOutlineUsers,
 } from 'react-icons/hi';
@@ -17,8 +18,8 @@ import {
   JunctionNode,
   TreeEdge,
 } from '../../components/genealogyTreeUi';
-import { getGenealogyTheme } from '../../components/genealogyTreeUiUtils';
-import { buildFlatTreeGraph } from '../../lib/buildFlatTreeGraph';
+import { getGenealogyTheme, NODE_WIDTH, NODE_HEIGHT } from '../../components/genealogyTreeUiUtils';
+import { buildFlatTreeGraph, expandPathTo } from '../../lib/buildFlatTreeGraph';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -40,6 +41,8 @@ export default function AdminUnilevelTree() {
   const [canvasActive, setCanvasActive] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchUsername, setSearchUsername] = useState(searchParams.get('username') || '');
+  const [expanded, setExpanded] = useState(() => new Set()); // explicitly opened deep branches
+  const [treeSearch, setTreeSearch] = useState(''); // in-tree name/username filter
 
   const rootId = searchParams.get('id') || '';
   const rootUsername = searchParams.get('username') || '';
@@ -100,28 +103,69 @@ export default function AdminUnilevelTree() {
   }
   function activateCanvas() { setCanvasActive(true); }
 
+  // Toggle a deep branch open/closed (progressive loading along the trail).
+  function toggleExpand(uid) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(uid)) next.delete(uid); else next.add(uid);
+      return next;
+    });
+  }
+
+  // Search "jump to": expand the path to a member and center the canvas on them.
+  function jumpTo(node) {
+    const path = expandPathTo(flatNodes, node.uid);
+    setExpanded((prev) => { const next = new Set(prev); path.forEach((u) => next.add(u)); return next; });
+    setCanvasActive(true);
+    const id = String(node.publicUid || node.uid);
+    setTimeout(() => {
+      const rf = reactFlowRef.current;
+      const target = rf?.getNode?.(id);
+      if (target) rf.setCenter(target.position.x + NODE_WIDTH / 2, target.position.y + NODE_HEIGHT / 2, { zoom: 0.85, duration: 500 });
+    }, 160);
+  }
+
+  // Reset expansion + in-tree search whenever a different account tree is loaded.
+  useEffect(() => { setExpanded(new Set()); setTreeSearch(''); }, [cacheKey]);
+
   // Render the WHOLE tree (root → deepest). The budget is only an extreme safety net
   // so a pathological 6-figure tree can't freeze the tab; normal company trees
   // (thousands) render in full. ReactFlow onlyRenderVisibleElements keeps it smooth.
-  const built = useMemo(() => buildFlatTreeGraph(flatNodes, { renderBudget: 30000 }), [flatNodes]);
+  // Progressive render: only the open trail is laid out (first 2 levels + expanded
+  // branches). Clicking a collapsed node loads the next level — fast even at 100k.
+  const built = useMemo(
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, expanded, initialDepth: 2 }),
+    [flatNodes, expanded],
+  );
   const nodes = useMemo(() => built.nodes.map((n) => (
     n.type === 'memberNode'
-      ? { ...n, data: { ...n.data, isDarkMode, canvasActive, onOpen: () => setRoot(n.id), onActivateCanvas: activateCanvas } }
+      ? { ...n, data: { ...n.data, isDarkMode, canvasActive, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } }
       : n
     // eslint-disable-next-line react-hooks/exhaustive-deps
   )), [built, isDarkMode, canvasActive]);
   const edges = built.edges;
 
   useEffect(() => {
-    if (!nodes.length) return undefined;
+    if (!built.nodes.length) return undefined;
     const timer = setTimeout(() => {
       reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.12 });
     }, 80);
     return () => clearTimeout(timer);
-  }, [built]);
+    // only refit when the tree (root) changes, not on every expand
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count]);
 
   const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode }), []);
   const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
+
+  // Side list / search: never render thousands of DOM cards — filter + cap.
+  const listResults = useMemo(() => {
+    const q = treeSearch.trim().toLowerCase();
+    const base = q
+      ? flatNodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q))
+      : flatNodes;
+    return base.slice(0, 120);
+  }, [flatNodes, treeSearch]);
 
   const flaggedCount = useMemo(() => flatNodes.filter(isLikelyCompany).length, [flatNodes]);
   const rootNode = flatNodes.find((n) => n.parentUid == null) || null;
@@ -305,11 +349,25 @@ export default function AdminUnilevelTree() {
               <span className="rounded-full px-2.5 py-1 text-xs font-semibold" style={amberButtonStyle}>{fmtInt(flatNodes.length)}</span>
             </div>
             <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>
-              Every account in the tree (full list, even beyond the canvas budget). Shows the points each passes up to
-              its upline; likely company/system accounts are flagged — verify before excluding from rank.
+              Search by name or username to jump to anyone in this tree (expands the path + centers).
+              Shows the points each passes up to its upline; likely company/system accounts are flagged.
             </p>
 
-            <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-auto pr-1">
+            {/* In-tree search */}
+            <div className="relative mt-3">
+              <HiOutlineSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2" style={{ color: chrome.tertiary }} />
+              <input type="text" value={treeSearch} onChange={(e) => setTreeSearch(e.target.value)}
+                placeholder="Find a name or username in this tree…"
+                className="w-full rounded-xl py-2.5 pl-9 pr-3 text-sm outline-none"
+                style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
+            </div>
+            <p className="mt-2 text-[11px]" style={{ color: chrome.tertiary }}>
+              {treeSearch.trim()
+                ? `${fmtInt(listResults.length)} match${listResults.length === 1 ? '' : 'es'}${listResults.length >= 120 ? '+ (refine)' : ''}`
+                : `Showing first ${fmtInt(listResults.length)} of ${fmtInt(flatNodes.length)} — type to search`}
+            </p>
+
+            <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-auto pr-1">
               {loading && (
                 <div className="rounded-2xl p-6 text-center" style={insetCardStyle}>
                   <Spinner /><p className="mt-2 text-xs" style={{ color: chrome.tertiary }}>Loading full tree…</p>
@@ -321,11 +379,14 @@ export default function AdminUnilevelTree() {
                   <p className="text-sm" style={{ color: chrome.tertiary }}>No accounts loaded yet.</p>
                 </div>
               )}
-              {flatNodes.map((node) => {
+              {!loading && treeSearch.trim() && listResults.length === 0 && (
+                <p className="px-1 py-4 text-center text-xs" style={{ color: chrome.tertiary }}>No match in this tree.</p>
+              )}
+              {listResults.map((node) => {
                 const flagged = isLikelyCompany(node);
                 return (
                   <button key={`${node.uid}-${node.depth}`} type="button"
-                    onClick={() => setRoot(node.publicUid || node.uid)}
+                    onClick={() => jumpTo(node)}
                     className="w-full rounded-xl p-3 text-left transition-all duration-200 hover:-translate-y-0.5"
                     style={{ ...insetCardStyle, ...(flagged ? { border: '1px solid rgba(248,113,113,0.4)' } : {}) }}>
                     <div className="flex items-start justify-between gap-2">

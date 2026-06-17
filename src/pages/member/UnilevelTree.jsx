@@ -6,12 +6,13 @@ import {
   HiOutlineHome,
   HiOutlineMinusSm,
   HiOutlineRefresh,
+  HiOutlineSearch,
   HiOutlineUsers,
 } from 'react-icons/hi';
 import api from '../../api';
 import { Spinner, MemberNode, JunctionNode, TreeEdge } from '../../components/genealogyTreeUi';
-import { getGenealogyTheme } from '../../components/genealogyTreeUiUtils';
-import { buildFlatTreeGraph } from '../../lib/buildFlatTreeGraph';
+import { getGenealogyTheme, NODE_WIDTH, NODE_HEIGHT } from '../../components/genealogyTreeUiUtils';
+import { buildFlatTreeGraph, expandPathTo } from '../../lib/buildFlatTreeGraph';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -19,30 +20,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 const UNILEVEL_RATES = [5, 3, 3, 2, 2, 1, 1, 1, 1, 1];
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US');
 const fmtMoney = (n) => `₱${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-// Re-root the already-loaded full tree at a node, fully client-side (no API call).
-// The member's whole sponsor tree is in memory, so "recenter" is just a subtree filter.
-function subtreeFrom(flatNodes, viewRootUid) {
-  if (!viewRootUid) return flatNodes;
-  const start = flatNodes.find((n) => String(n.uid) === String(viewRootUid) || String(n.publicUid) === String(viewRootUid));
-  if (!start || start.parentUid == null) return flatNodes;
-  const childrenOf = new Map();
-  for (const n of flatNodes) {
-    if (n.parentUid == null) continue;
-    const a = childrenOf.get(n.parentUid) || []; a.push(n); childrenOf.set(n.parentUid, a);
-  }
-  const out = [];
-  const seen = new Set();
-  const queue = [start];
-  while (queue.length) {
-    const n = queue.shift();
-    if (seen.has(n.uid)) continue;
-    seen.add(n.uid);
-    out.push(n === start ? { ...n, parentUid: null } : n);
-    for (const c of (childrenOf.get(n.uid) || [])) queue.push(c);
-  }
-  return out;
-}
 
 export default function UnilevelTree() {
   const { user } = useAuth();
@@ -52,7 +29,9 @@ export default function UnilevelTree() {
 
   const [canvasActive, setCanvasActive] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [viewRootUid, setViewRootUid] = useState(null); // null = my own root (full tree)
+  const [expanded, setExpanded] = useState(() => new Set()); // explicitly opened deep branches
+  const [treeSearch, setTreeSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [uniSummary, setUniSummary] = useState(null);
 
   const selfUid = user?.uid;
@@ -99,27 +78,58 @@ export default function UnilevelTree() {
   }
   function activateCanvas() { setCanvasActive(true); }
 
-  const viewNodes = useMemo(() => subtreeFrom(flatNodes, viewRootUid), [flatNodes, viewRootUid]);
-  const built = useMemo(() => buildFlatTreeGraph(viewNodes, { renderBudget: 60000 }), [viewNodes]);
+  function toggleExpand(uid) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(uid)) next.delete(uid); else next.add(uid);
+      return next;
+    });
+  }
+  function jumpTo(node) {
+    const path = expandPathTo(flatNodes, node.uid);
+    setExpanded((prev) => { const next = new Set(prev); path.forEach((u) => next.add(u)); return next; });
+    setCanvasActive(true);
+    setTreeSearch(''); setSearchOpen(false);
+    const id = String(node.publicUid || node.uid);
+    setTimeout(() => {
+      const rf = reactFlowRef.current;
+      const target = rf?.getNode?.(id);
+      if (target) rf.setCenter(target.position.x + NODE_WIDTH / 2, target.position.y + NODE_HEIGHT / 2, { zoom: 0.9, duration: 500 });
+    }, 160);
+  }
+
+  // Progressive render: first 2 levels + explicitly expanded branches only (fast).
+  const built = useMemo(
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, expanded, initialDepth: 2 }),
+    [flatNodes, expanded],
+  );
   const nodes = useMemo(() => built.nodes.map((n) => (
     n.type === 'memberNode'
-      ? { ...n, data: { ...n.data, isDarkMode, canvasActive, onOpen: () => setViewRootUid(n.data.uid), onActivateCanvas: activateCanvas } }
+      ? { ...n, data: { ...n.data, isDarkMode, canvasActive, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } }
       : n
     // eslint-disable-next-line react-hooks/exhaustive-deps
   )), [built, isDarkMode, canvasActive]);
   const edges = built.edges;
 
   useEffect(() => {
-    if (!nodes.length) return undefined;
+    if (!built.nodes.length) return undefined;
     const timer = setTimeout(() => {
       reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 });
     }, 80);
     return () => clearTimeout(timer);
-  }, [built]);
+    // refit only when the tree (size) changes, not on every expand
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count]);
+
+  const matchResults = useMemo(() => {
+    const q = treeSearch.trim().toLowerCase();
+    if (!q) return [];
+    return flatNodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q)).slice(0, 8);
+  }, [flatNodes, treeSearch]);
 
   const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode }), []);
   const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
-  const isSelfRoot = viewRootUid == null;
+  const isCollapsed = expanded.size === 0;
 
   return (
     <div className="space-y-5">
@@ -130,23 +140,47 @@ export default function UnilevelTree() {
             Unilevel Tree
           </h1>
           <p className="text-sm portal-card-muted mt-1">
-            Your full sponsor (direct-referral) network — Level 0 is you, down to the deepest generation. Each card
-            shows the points that member passes up to its upline. Click any member to recenter the tree on them.
+            Your full sponsor (direct-referral) network — Level 0 is you, down to the deepest generation. The first
+            levels load instantly; click any “+N below” card to open the next level. Search a name to jump anywhere.
           </p>
         </div>
       </div>
 
       {/* Toolbar */}
       <div className="relative flex flex-wrap items-center gap-2 rounded-2xl p-3" style={{ ...panelStyle, zIndex: 40 }}>
-        <button type="button" onClick={() => setViewRootUid(null)} disabled={isSelfRoot}
+        <button type="button" onClick={() => setExpanded(new Set())} disabled={isCollapsed}
           className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold disabled:opacity-40" style={neutralButtonStyle}>
-          <HiOutlineHome className="size-4" /> My Root
+          <HiOutlineHome className="size-4" /> Collapse all
         </button>
         <button type="button"
           onClick={() => reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 })}
           className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold" style={neutralButtonStyle}>
           <HiOutlineRefresh className="size-4" /> Fit View
         </button>
+
+        {/* In-tree search */}
+        <div className="relative">
+          <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
+          <input type="text" value={treeSearch}
+            onChange={(e) => { setTreeSearch(e.target.value); setSearchOpen(true); }}
+            onFocus={() => setSearchOpen(true)}
+            placeholder="Search a name in your tree…"
+            className="w-56 rounded-xl py-2 pl-8 pr-3 text-xs outline-none"
+            style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
+          {searchOpen && matchResults.length > 0 && (
+            <div className="absolute left-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-xl"
+              style={{ background: chrome.popoverBg, border: `1px solid ${chrome.surfaceBorder}`, boxShadow: chrome.popoverShadow }}>
+              {matchResults.map((m) => (
+                <button key={m.uid} type="button" onClick={() => jumpTo(m)}
+                  className="w-full px-3 py-2 text-left text-xs" style={{ color: chrome.searchText }}>
+                  <span className="font-semibold">{m.fullname || m.username}</span>
+                  <span className="ml-1 portal-card-muted">@{m.username} · L{m.depth}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         {refreshing && (
           <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
             style={{ background: 'rgba(212,175,55,0.14)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.3)' }}>
@@ -174,10 +208,10 @@ export default function UnilevelTree() {
             {isFullscreen ? <HiOutlineMinusSm className="size-4" /> : <HiOutlineArrowsExpand className="size-4" />}
             {isFullscreen ? 'Exit' : 'Full screen'}
           </button>
-          {isFullscreen && !isSelfRoot && (
-            <button type="button" onClick={() => setViewRootUid(null)}
+          {isFullscreen && !isCollapsed && (
+            <button type="button" onClick={() => setExpanded(new Set())}
               className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur" style={neutralButtonStyle}>
-              <HiOutlineHome className="size-4" /> My Root
+              <HiOutlineHome className="size-4" /> Collapse all
             </button>
           )}
         </div>
