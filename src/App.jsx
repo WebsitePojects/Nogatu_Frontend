@@ -43,6 +43,7 @@ const UpdateAccounts = lazy(() => import('./pages/admin/UpdateAccounts'));
 const IncomeDetails = lazy(() => import('./pages/admin/IncomeDetails'));
 const CDPaymentDetails = lazy(() => import('./pages/admin/CDPaymentDetails'));
 const AdminGenealogy = lazy(() => import('./pages/admin/AdminGenealogy'));
+const AdminUnilevelTree = lazy(() => import('./pages/admin/AdminUnilevelTree'));
 const ChangePassword = lazy(() => import('./pages/admin/ChangePassword'));
 const NewsManagement = lazy(() => import('./pages/admin/NewsManagement'));
 const Messages = lazy(() => import('./pages/admin/Messages'));
@@ -226,6 +227,10 @@ export default function App() {
             <Route
               path="genealogy"
               element={<ProtectedAdminRoles allowed={[1, 3]}><AdminGenealogy /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="unilevel-tree"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><AdminUnilevelTree /></ProtectedAdminRoles>}
             />
             <Route
               path="news"

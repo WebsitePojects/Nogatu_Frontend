@@ -13,7 +13,7 @@ import {
   HiOutlineChat, HiOutlineClipboardList, HiOutlineX, HiOutlineViewBoards,
   HiOutlineDotsHorizontal,
 } from 'react-icons/hi';
-import { FaSitemap } from 'react-icons/fa';
+import { FaSitemap, FaProjectDiagram } from 'react-icons/fa';
 
 /* ─── Nav data ──────────────────────────────────────────────── */
 
@@ -29,6 +29,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin/accounts',         label: 'Account Masterlist',     icon: HiOutlineUsers,         roles: [1, 3] },
       { to: '/admin/genealogy',        label: 'Account Genealogy',      icon: FaSitemap,              roles: [1, 3] },
+      { to: '/admin/unilevel-tree',    label: 'Unilevel Tree',          icon: FaProjectDiagram,       roles: [1, 3] },
       { to: '/admin/generate-codes',   label: 'Generate Codes',         icon: HiOutlineKey,           roles: [1, 2, 3] },
       { to: '/admin/manage-codes',     label: 'Manage Codes',           icon: HiOutlineCog },
     ],
@@ -150,7 +151,7 @@ export default function AdminLayout() {
   const isItemActive = (path) => location.pathname.startsWith(path);
 
   /* Active bottom tabs */
-  const MANAGE_PATHS  = ['/admin/accounts', '/admin/genealogy', '/admin/generate-codes', '/admin/manage-codes'];
+  const MANAGE_PATHS  = ['/admin/accounts', '/admin/genealogy', '/admin/unilevel-tree', '/admin/generate-codes', '/admin/manage-codes'];
   const FINANCE_PATHS = ['/admin/encashment', '/admin/finance', '/admin/redeem', '/admin/hifive-package-claims', '/admin/rankings', '/admin/global-bonus', '/admin/cd-accounts'];
   const MORE_PATHS    = ['/admin/messages', '/admin/support', '/admin/applications', '/admin/news', '/admin/change-password'];
 
