@@ -166,7 +166,8 @@ export default function AccountMasterlist() {
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="overflow-x-auto hidden lg:block">
             <table className="w-full text-sm">
               <thead>
                 <tr>
@@ -279,6 +280,42 @@ export default function AccountMasterlist() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile / tablet card view */}
+          <div className="lg:hidden space-y-3">
+            {accounts.map((a) => (
+              <div key={a.uid} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.1)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-white/90 truncate">{a.fullname}</p>
+                    <p className="text-xs text-white/55 truncate">@{a.username}</p>
+                    <p className="font-mono text-[11px] text-white/45 mt-0.5">{a.activationcode}</p>
+                  </div>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium shrink-0" style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}>{a.accttypeName}</span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium" style={statusStyle(a.accountStatus)}>{a.accountStatus === 'active' ? 'Active' : 'Suspended'}</span>
+                  <span className="text-white/40">{a.entryType}</span>
+                  <span className="text-white/40">{formatDateTimeManila(a.datereg)}</span>
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-1.5">
+                  <button onClick={() => navigate(`/admin/accounts/${a.uid}`)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(212,175,55,0.12)', color: goldText, border: '1px solid rgba(212,175,55,0.2)' }} type="button">Edit</button>
+                  <button onClick={() => navigate(`/admin/genealogy?id=${a.uid}`)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(16,185,129,0.1)', color: greenText, border: '1px solid rgba(16,185,129,0.2)' }} type="button">Tree</button>
+                  <button onClick={() => navigate(`/admin/accounts/${a.uid}/income`)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(59,130,246,0.1)', color: blueText, border: '1px solid rgba(59,130,246,0.25)' }} type="button">Income</button>
+                  <button onClick={() => navigate(`/admin/accounts/${a.uid}/cd`)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(239,68,68,0.1)', color: redText, border: '1px solid rgba(239,68,68,0.25)' }} type="button">CD</button>
+                  {a.accountStatus === 'active' ? (
+                    <button onClick={() => openStatusModal(a, 'suspended')} disabled={statusLoadingUid === a.uid} className="text-xs py-2.5 rounded-lg font-medium disabled:opacity-50 col-span-2" style={{ background: 'rgba(239,68,68,0.1)', color: redText, border: '1px solid rgba(239,68,68,0.25)' }} type="button">Suspend</button>
+                  ) : (
+                    <button onClick={() => openStatusModal(a, 'active')} disabled={statusLoadingUid === a.uid} className="text-xs py-2.5 rounded-lg font-medium disabled:opacity-50 col-span-2" style={{ background: 'rgba(74,222,128,0.1)', color: greenText, border: '1px solid rgba(74,222,128,0.22)' }} type="button">Reactivate</button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {accounts.length === 0 && (
+              <div className="py-10 text-center text-sm" style={{ color: 'rgba(255,255,255,0.25)' }}>No accounts found.</div>
+            )}
+          </div>
+          </>
         )}
       </div>
       {statusModal ? (
