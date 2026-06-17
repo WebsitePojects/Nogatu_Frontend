@@ -71,6 +71,7 @@ export default function Leaderboard() {
   const userConsumed = Number(data?.userConsumedPoints || 0);
   const nextRankPoints = Number(data?.nextRankPoints || 0);
   const needed = Math.max(0, nextRankPoints - userRemaining);
+  const rankPct = nextRankPoints > 0 ? Math.max(0, Math.min(100, (userRemaining / nextRankPoints) * 100)) : 100;
   const currentUserRow = (data?.leaderboard || []).find((row) => row.isCurrentUser) || null;
   const currentUserName = currentUserRow?.fullname || user?.fullname || user?.shortname || user?.username || 'Current member';
   const currentUserUsername = currentUserRow?.username || user?.username || '';
@@ -102,12 +103,17 @@ export default function Leaderboard() {
               {pointsBasis}: {fmt(userRemaining)} | Consumed: {fmt(userConsumed)}
             </p>
           </div>
-          <div
-            className="px-3 py-2 rounded-xl text-xs font-semibold"
-            style={{ background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.25)', color: '#D4AF37' }}
-          >
-            <HiOutlineSparkles className="inline size-4 mr-1" />
-            {needed > 0 ? `${fmt(needed)} more fresh race points to the next rank` : 'Next rank point target reached'}
+          <div className="w-full sm:w-72">
+            <div className="flex items-center justify-between text-[11px] mb-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              <span className="inline-flex items-center gap-1"><HiOutlineSparkles className="size-3.5" style={{ color: '#D4AF37' }} /> Progress to next rank</span>
+              <span style={{ color: '#D4AF37' }}>{fmt(userRemaining)} / {nextRankPoints > 0 ? fmt(nextRankPoints) : '—'}</span>
+            </div>
+            <div className="h-2.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.10)' }}>
+              <div className="h-full rounded-full transition-all" style={{ width: `${rankPct}%`, background: 'linear-gradient(90deg,#D4AF37,#F9E08A)' }} />
+            </div>
+            <p className="mt-1.5 text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              {needed > 0 ? `${fmt(needed)} more points to the next rank` : 'Next rank target reached'}
+            </p>
           </div>
         </div>
       </div>
