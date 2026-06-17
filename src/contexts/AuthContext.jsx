@@ -5,6 +5,7 @@ import {
   clearAllMemberWarmCache,
   setMemberCache,
 } from '../utils/memberWarmCache';
+import { preloadMemberTrees, clearAllTrees } from '../lib/treePreload';
 
 const AuthContext = createContext(null);
 
@@ -23,6 +24,10 @@ export function AuthProvider({ children }) {
     const epoch = bumpAuthEpoch();
     const controller = new AbortController();
     let cancelled = false;
+
+    // Phase C: background-preload this member's unilevel + binary trees so opening
+    // either tree paints instantly from cache (deduped; non-blocking).
+    preloadMemberTrees(user.uid);
 
     async function warmMemberData() {
       try {
@@ -58,6 +63,7 @@ export function AuthProvider({ children }) {
 
       if ((nextUser?.uid || null) !== (user?.uid || null)) {
         clearAllMemberWarmCache();
+        clearAllTrees(); // privacy: don't leave a previous member's tree cached
       }
       setUser(nextUser);
       setAdmin(nextAdmin);
@@ -94,6 +100,7 @@ export function AuthProvider({ children }) {
   async function logoutMember() {
     await api.post('/auth/logout');
     clearAllMemberWarmCache();
+    clearAllTrees();
     setUser(null);
     setAdmin(null);
   }
@@ -109,6 +116,7 @@ export function AuthProvider({ children }) {
   async function logoutAdmin() {
     await api.post('/admin/auth/logout');
     clearAllMemberWarmCache();
+    clearAllTrees();
     setAdmin(null);
     setUser(null);
   }
