@@ -18,6 +18,12 @@ const H_GAP = 44;
 const V_GAP = 96;
 const cap = (s) => String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1);
 
+// Binary child ordering: left slot before right, unknown last; tiebreak by uid.
+export const ORDER_BINARY = (a, b) => {
+  const rank = (p) => (p === 'left' ? 0 : p === 'right' ? 1 : 2);
+  return rank(a.position) - rank(b.position) || a.uid - b.uid;
+};
+
 /** parent→children index (skips orphans), root, and per-node descendant counts (O(n)). */
 function indexTree(flatNodes) {
   const byUid = new Map(flatNodes.map((n) => [n.uid, n]));
