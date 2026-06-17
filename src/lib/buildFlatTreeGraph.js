@@ -47,12 +47,15 @@ export function buildFlatTreeGraph(flatNodes, opts = {}) {
   const bucket = { nodes: [], edges: [] };
   let rendered = 0;
   let truncated = false;
+  const seen = new Set(); // cycle/duplicate guard — a bad refid/drefid edit can't loop us
 
   // BFS so the bounded render is breadth-first (keeps upper levels complete).
   const queue = [{ node: root, level: 0 }];
   while (queue.length) {
     const { node, level } = queue.shift();
     if (rendered >= budget) { truncated = true; break; }
+    if (seen.has(node.uid)) continue;
+    seen.add(node.uid);
 
     const nodeId = String(node.publicUid || node.uid);
     const kids = childrenOf.get(node.uid) || [];
