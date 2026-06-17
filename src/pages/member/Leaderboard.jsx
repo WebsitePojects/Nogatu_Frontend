@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api';
-import { HiOutlineStar, HiOutlineSparkles } from 'react-icons/hi';
+import { HiOutlineStar, HiOutlineSparkles, HiOutlineDownload, HiOutlineUsers, HiOutlineChevronDown } from 'react-icons/hi';
 import { useAuth } from '../../contexts/AuthContext';
 import { getMemberCache, setMemberCache } from '../../utils/memberWarmCache';
 
@@ -8,6 +8,15 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-US', {
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
 });
+
+function downloadCsv(filename, rows) {
+  const csv = rows.map((r) => r.map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
 
 function Pager({ page = 1, totalPages = 1, onPrev, onNext, className = '' }) {
   return (
@@ -264,6 +273,137 @@ export default function Leaderboard() {
           );
         })}
       </div>
+
+      <BloodlineBreakdown />
+    </div>
+  );
+}
+
+/* ── Bloodline breakdown: who in your downline produced your repurchase points ── */
+function BloodlineBreakdown() {
+  const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    let cancelled = false;
+    setLoading(true);
+    api.get(`/leaderboard/bloodline?page=${page}&perPage=50`)
+      .then((res) => { if (!cancelled) setData(res.data); })
+      .catch(() => { if (!cancelled) setData(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [open, page]);
+
+  async function exportCsv() {
+    setExporting(true);
+    try {
+      const all = [];
+      let p = 1; let totalPages = 1;
+      do {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await api.get(`/leaderboard/bloodline?page=${p}&perPage=200`);
+        all.push(...(res.data.contributors || []));
+        totalPages = Number(res.data.totalPages || 1);
+        p += 1;
+      } while (p <= totalPages && p <= 100);
+      const header = ['UID', 'Username', 'Full Name', 'Level', 'Repurchase Events', 'Gross Points', 'Consumed', 'Net Points'];
+      const rows = [header, ...all.map((c) => [c.uid, c.username, c.fullname, c.level, c.events, c.gross, c.consumed, c.net])];
+      downloadCsv(`bloodline_breakdown_${Date.now()}.csv`, rows);
+    } catch { /* ignore */ } finally {
+      setExporting(false);
+    }
+  }
+
+  const t = data?.totals || { contributors: 0, gross: 0, consumed: 0, net: 0 };
+  const contributors = data?.contributors || [];
+  const totalPages = Number(data?.totalPages || 1);
+
+  return (
+    <div className="glass-card rounded-2xl overflow-hidden">
+      <button type="button" onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left"
+        style={{ borderBottom: open ? '1px solid rgba(212,175,55,0.08)' : 'none' }}>
+        <div className="flex items-center gap-2">
+          <HiOutlineUsers className="size-5" style={{ color: '#D4AF37' }} />
+          <div>
+            <p className="font-display text-base font-semibold text-white">Bloodline Breakdown</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Which downline members produced your repurchase points</p>
+          </div>
+        </div>
+        <HiOutlineChevronDown className="size-5 transition-transform" style={{ color: 'rgba(212,175,55,0.7)', transform: open ? 'rotate(180deg)' : 'none' }} />
+      </button>
+
+      {open && (
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: 'Contributors', value: fmt(t.contributors), color: '#fff' },
+              { label: 'Gross points', value: fmt(t.gross), color: '#D4AF37' },
+              { label: 'Consumed (uplines)', value: fmt(t.consumed), color: '#fca5a5' },
+              { label: 'Net available', value: fmt(t.net), color: '#34d399' },
+            ].map((c) => (
+              <div key={c.label} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.1)' }}>
+                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{c.label}</p>
+                <p className="mt-1 text-lg font-bold" style={{ color: c.color }}>{c.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Gross total here should match your leaderboard repurchase points — from your downline only (you are excluded).
+            </p>
+            <button type="button" onClick={exportCsv} disabled={exporting}
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold disabled:opacity-50 shrink-0"
+              style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }}>
+              <HiOutlineDownload className="size-4" /> {exporting ? 'Exporting…' : 'Export CSV'}
+            </button>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid rgba(212,175,55,0.12)' }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  {['Member', 'Level', 'Events', 'Gross', 'Consumed', 'Net'].map((h) => (
+                    <th key={h} className="text-left py-2.5 px-3 text-xs font-semibold" style={{ color: 'rgba(212,175,55,0.7)', borderBottom: '1px solid rgba(212,175,55,0.12)' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading && (
+                  <tr><td colSpan="6" className="py-8 text-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading…</td></tr>
+                )}
+                {!loading && contributors.map((c, i) => (
+                  <tr key={c.uid} style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                    <td className="py-2.5 px-3">
+                      <div className="text-white text-xs font-medium">{c.fullname}</div>
+                      <div className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.45)' }}>@{c.username}</div>
+                    </td>
+                    <td className="py-2.5 px-3 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>L{c.level}</td>
+                    <td className="py-2.5 px-3 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{fmt(c.events)}</td>
+                    <td className="py-2.5 px-3 text-xs font-semibold" style={{ color: '#D4AF37' }}>{fmt(c.gross)}</td>
+                    <td className="py-2.5 px-3 text-xs" style={{ color: c.consumed > 0 ? '#fca5a5' : 'rgba(255,255,255,0.4)' }}>{fmt(c.consumed)}</td>
+                    <td className="py-2.5 px-3 text-xs font-semibold" style={{ color: '#34d399' }}>{fmt(c.net)}</td>
+                  </tr>
+                ))}
+                {!loading && contributors.length === 0 && (
+                  <tr><td colSpan="6" className="py-8 text-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>No downline repurchase contributors yet.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPages > 1 && (
+            <Pager page={page} totalPages={totalPages}
+              onPrev={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(totalPages, p + 1))} />
+          )}
+        </div>
+      )}
     </div>
   );
 }
