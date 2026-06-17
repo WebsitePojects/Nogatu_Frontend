@@ -1,34 +1,26 @@
 /**
  * Build ReactFlow { nodes, edges } from a FLAT adjacency payload (the /flat API).
  *
- * The whole subtree arrives flat (root → deepest, nothing summarized). We rebuild
- * the parent→child structure in O(n), then emit the same junction-routed graph the
- * existing nested flatten produces, so MemberNode/JunctionNode render identically.
+ * The whole subtree arrives flat (root → deepest, nothing summarized). We:
+ *   1. BFS from the root to the reachable set — this drops orphans (parentUid not in
+ *      the payload) and is inherently cycle-safe (visited guard), so a bad
+ *      refid/drefid edit can never loop us.
+ *   2. Lay it out with d3-hierarchy's tree layout. d3 is O(n) and aligns every level
+ *      by depth automatically (no junction nodes needed), so even a 100k-node company
+ *      tree lays out in milliseconds on the main thread — full depth, no lag. Render
+ *      perf on top is handled by ReactFlow `onlyRenderVisibleElements`.
  *
- * A high safety budget bounds how many nodes we hand to the dagre layout (laying
- * out a pathological 100k-node company tree at once would freeze the tab). All data
- * is still present for the side breakdown — the canvas just renders a bounded slice
- * and flags where deeper branches continue (click a node to recenter there).
- * Render performance on top of that is handled by ReactFlow `onlyRenderVisibleElements`.
+ * A high render budget is kept purely as an extreme memory safety net; normal trees
+ * (thousands) render in full.
  */
-import { layoutGraph } from '../components/genealogyTreeUiUtils';
+import { stratify, tree as d3tree } from 'd3-hierarchy';
+import { NODE_WIDTH, NODE_HEIGHT } from '../components/genealogyTreeUiUtils';
 
-const DEFAULT_RENDER_BUDGET = 2500;
-const GOLD_STRONG = 'rgba(212,175,55,0.95)';
+const DEFAULT_RENDER_BUDGET = 60000;
+const H_GAP = 44; // horizontal gap between sibling subtrees
+const V_GAP = 96; // vertical gap between levels
 
-function indexByParent(flatNodes) {
-  const childrenOf = new Map();
-  let root = null;
-  for (const n of flatNodes) {
-    if (n.parentUid == null) { root = n; continue; }
-    const arr = childrenOf.get(n.parentUid) || [];
-    arr.push(n);
-    childrenOf.set(n.parentUid, arr);
-  }
-  // Stable order: by uid so the tree doesn't reshuffle between refreshes.
-  for (const arr of childrenOf.values()) arr.sort((a, b) => a.uid - b.uid);
-  return { childrenOf, root: root || flatNodes[0] || null };
-}
+function cap(s) { return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }
 
 /**
  * @param {Array} flatNodes  rows from /flat ({ uid, parentUid, depth, ... })
@@ -36,83 +28,85 @@ function indexByParent(flatNodes) {
  * @returns {{ nodes, edges, total, rendered, truncated }}
  */
 export function buildFlatTreeGraph(flatNodes, opts = {}) {
+  const empty = { nodes: [], edges: [], total: 0, rendered: 0, truncated: false };
+  if (!Array.isArray(flatNodes) || flatNodes.length === 0) return empty;
+
   const budget = Math.max(50, Number(opts.renderBudget) || DEFAULT_RENDER_BUDGET);
-  if (!Array.isArray(flatNodes) || flatNodes.length === 0) {
-    return { nodes: [], edges: [], total: 0, rendered: 0, truncated: false };
+  const byUid = new Map(flatNodes.map((n) => [n.uid, n]));
+  const root = flatNodes.find((n) => n.parentUid == null) || flatNodes[0];
+  if (!root) return { ...empty, total: flatNodes.length };
+
+  // parent → children (skip orphans whose parent isn't in the payload)
+  const childrenOf = new Map();
+  for (const n of flatNodes) {
+    if (n === root || n.parentUid == null || !byUid.has(n.parentUid)) continue;
+    const arr = childrenOf.get(n.parentUid) || [];
+    arr.push(n);
+    childrenOf.set(n.parentUid, arr);
   }
+  for (const arr of childrenOf.values()) arr.sort((a, b) => a.uid - b.uid);
 
-  const { childrenOf, root } = indexByParent(flatNodes);
-  if (!root) return { nodes: [], edges: [], total: flatNodes.length, rendered: 0, truncated: false };
-
-  const bucket = { nodes: [], edges: [] };
-  let rendered = 0;
+  // BFS reachable set (cycle-safe, budget-bounded). A parent is always enqueued
+  // before its children, so every kept child's parent is also kept.
+  const reachable = [];
+  const seen = new Set();
+  const queue = [root];
   let truncated = false;
-  const seen = new Set(); // cycle/duplicate guard — a bad refid/drefid edit can't loop us
-
-  // BFS so the bounded render is breadth-first (keeps upper levels complete).
-  const queue = [{ node: root, level: 0 }];
   while (queue.length) {
-    const { node, level } = queue.shift();
-    if (rendered >= budget) { truncated = true; break; }
+    const node = queue.shift();
     if (seen.has(node.uid)) continue;
+    if (reachable.length >= budget) { truncated = true; break; }
     seen.add(node.uid);
-
-    const nodeId = String(node.publicUid || node.uid);
-    const kids = childrenOf.get(node.uid) || [];
-    rendered += 1;
-
-    bucket.nodes.push({
-      id: nodeId,
-      type: 'memberNode',
-      data: {
-        ...node,
-        packageType: node.accttypeName,
-        level,
-        positionLabel: level === 0 ? 'Root (Level 0)' : (node.position ? cap(node.position) : `Level ${level}`),
-        // Task 2 — what this member feeds upward through the unilevel.
-        metricLabel: 'Pts to upline',
-        metricValue: Number(node.pointsToUpline || 0),
-        childCount: kids.length,
-        hasMore: kids.length > 0,
-      },
-      position: { x: 0, y: 0 },
-    });
-
-    if (kids.length === 0) continue;
-
-    const junctionId = `${nodeId}::junction`;
-    bucket.nodes.push({
-      id: junctionId,
-      type: 'junctionNode',
-      data: { level: level + 0.5, isJunction: true },
-      position: { x: 0, y: 0 },
-    });
-    bucket.edges.push({
-      id: `${nodeId}-${junctionId}`, source: nodeId, target: junctionId,
-      type: 'treeEdge', animated: false, style: { stroke: GOLD_STRONG, strokeWidth: 2.9 },
-    });
-
-    for (const child of kids) {
-      const childId = String(child.publicUid || child.uid);
-      bucket.edges.push({
-        id: `${junctionId}-${childId}`, source: junctionId, target: childId,
-        type: 'treeEdge', animated: false, style: { stroke: 'rgba(212,175,55,0.9)', strokeWidth: 2.7 },
-      });
-      queue.push({ node: child, level: level + 1 });
-    }
+    reachable.push(node);
+    for (const c of (childrenOf.get(node.uid) || [])) if (!seen.has(c.uid)) queue.push(c);
   }
 
-  // Prune edges whose target node was cut by the budget (avoids dangling edges).
-  const renderedIds = new Set(bucket.nodes.map((n) => n.id));
-  bucket.edges = bucket.edges.filter((e) => renderedIds.has(e.source) && renderedIds.has(e.target));
+  let hierarchy;
+  try {
+    hierarchy = stratify()
+      .id((d) => String(d.uid))
+      .parentId((d) => (d.uid === root.uid ? null : String(d.parentUid)))(reachable);
+  } catch {
+    return { ...empty, total: flatNodes.length };
+  }
 
-  return {
-    nodes: layoutGraph(bucket.nodes, bucket.edges),
-    edges: bucket.edges,
-    total: flatNodes.length,
-    rendered,
-    truncated,
-  };
+  d3tree().nodeSize([NODE_WIDTH + H_GAP, NODE_HEIGHT + V_GAP])(hierarchy);
+
+  const nodes = [];
+  const edges = [];
+  hierarchy.each((d) => {
+    const n = d.data;
+    const id = String(n.publicUid || n.uid);
+    nodes.push({
+      id,
+      type: 'memberNode',
+      position: { x: d.x - NODE_WIDTH / 2, y: d.y },
+      sourcePosition: 'bottom',
+      targetPosition: 'top',
+      data: {
+        ...n,
+        packageType: n.accttypeName,
+        level: d.depth,
+        positionLabel: d.depth === 0 ? 'Root (Level 0)' : (n.position ? cap(n.position) : `Level ${d.depth}`),
+        // Task 2 — what this member feeds upward through the tree.
+        metricLabel: 'Pts to upline',
+        metricValue: Number(n.pointsToUpline || 0),
+        childCount: d.children ? d.children.length : 0,
+        hasMore: (childrenOf.get(n.uid) || []).length > 0,
+      },
+    });
+    if (d.parent) {
+      const pid = String(d.parent.data.publicUid || d.parent.data.uid);
+      edges.push({
+        id: `${pid}->${id}`,
+        source: pid,
+        target: id,
+        type: 'treeEdge',
+        animated: false,
+        style: { stroke: 'rgba(212,175,55,0.9)', strokeWidth: 2.4 },
+      });
+    }
+  });
+
+  return { nodes, edges, total: flatNodes.length, rendered: reachable.length, truncated };
 }
-
-function cap(s) { return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }

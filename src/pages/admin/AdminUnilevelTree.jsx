@@ -3,7 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { Background, BackgroundVariant, Controls, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
+  HiOutlineArrowsExpand,
   HiOutlineHome,
+  HiOutlineMinusSm,
   HiOutlineOfficeBuilding,
   HiOutlineRefresh,
   HiOutlineUserGroup,
@@ -36,6 +38,7 @@ export default function AdminUnilevelTree() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [canvasActive, setCanvasActive] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchUsername, setSearchUsername] = useState(searchParams.get('username') || '');
 
   const rootId = searchParams.get('id') || '';
@@ -70,6 +73,21 @@ export default function AdminUnilevelTree() {
     };
   }, []);
 
+  // Native fullscreen of the canvas shell (immersive "full canvas" mode).
+  useEffect(() => {
+    function onChange() { setIsFullscreen(document.fullscreenElement === flowShellRef.current); }
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  async function toggleFullscreen() {
+    if (!flowShellRef.current) return;
+    try {
+      if (document.fullscreenElement === flowShellRef.current) await document.exitFullscreen();
+      else { await flowShellRef.current.requestFullscreen(); setCanvasActive(true); }
+    } catch { /* fullscreen denied — ignore */ }
+  }
+
   function setRoot(nextRoot) {
     setSearchUsername('');
     setSearchParams(nextRoot ? { id: String(nextRoot) } : {});
@@ -82,7 +100,10 @@ export default function AdminUnilevelTree() {
   }
   function activateCanvas() { setCanvasActive(true); }
 
-  const built = useMemo(() => buildFlatTreeGraph(flatNodes, { renderBudget: 2500 }), [flatNodes]);
+  // Render the WHOLE tree (root → deepest). The budget is only an extreme safety net
+  // so a pathological 6-figure tree can't freeze the tab; normal company trees
+  // (thousands) render in full. ReactFlow onlyRenderVisibleElements keeps it smooth.
+  const built = useMemo(() => buildFlatTreeGraph(flatNodes, { renderBudget: 30000 }), [flatNodes]);
   const nodes = useMemo(() => built.nodes.map((n) => (
     n.type === 'memberNode'
       ? { ...n, data: { ...n.data, isDarkMode, canvasActive, onOpen: () => setRoot(n.id), onActivateCanvas: activateCanvas } }
@@ -192,9 +213,38 @@ export default function AdminUnilevelTree() {
       )}
 
       {hasTarget && (
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className={isFullscreen ? 'block' : 'grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]'}>
           {/* Canvas */}
-          <div ref={flowShellRef} className="relative overflow-hidden rounded-2xl" style={{ ...panelStyle, height: '70vh', zIndex: 0 }}>
+          <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-2xl'}`}
+            style={{ ...panelStyle, height: isFullscreen ? '100vh' : '70vh', zIndex: 0 }}>
+            {/* Floating control cluster (Google-Stitch style — works in & out of fullscreen) */}
+            <div className="absolute left-3 top-3 z-30 flex flex-wrap items-center gap-2">
+              <button type="button"
+                onClick={() => reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.06 })}
+                className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"
+                style={{ background: chrome.surfaceStrong, color: chrome.panelButtonText, border: `1px solid ${chrome.surfaceBorder}` }}>
+                <HiOutlineRefresh className="size-4" /> Fit
+              </button>
+              <button type="button" onClick={toggleFullscreen}
+                className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"
+                style={{ background: chrome.amberButtonBg, color: chrome.amberButtonText, border: `1px solid ${chrome.amberBorder}` }}>
+                {isFullscreen ? <HiOutlineMinusSm className="size-4" /> : <HiOutlineArrowsExpand className="size-4" />}
+                {isFullscreen ? 'Exit' : 'Full screen'}
+              </button>
+              {isFullscreen && (
+                <span className="rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"
+                  style={{ background: chrome.surfaceStrong, color: chrome.heading, border: `1px solid ${chrome.surfaceBorder}` }}>
+                  {rootName} • {fmtInt(count)} accounts
+                </span>
+              )}
+              {refreshing && (
+                <span className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"
+                  style={{ background: 'rgba(212,175,55,0.14)', color: chrome.amberButtonText, border: `1px solid ${chrome.amberBorder}` }}>
+                  <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" /> Live sync…
+                </span>
+              )}
+            </div>
+
             {!canvasActive && !loading && (
               <button type="button" aria-label="Activate unilevel canvas" onClick={activateCanvas}
                 className="absolute inset-0 z-10 block cursor-grab bg-transparent" />
