@@ -18,6 +18,7 @@ import {
   JunctionNode,
   TreeEdge,
 } from '../../components/genealogyTreeUi';
+import api from '../../api';
 import { getGenealogyTheme, NODE_WIDTH, NODE_HEIGHT } from '../../components/genealogyTreeUiUtils';
 import { buildFlatTreeGraph, expandPathTo } from '../../lib/buildFlatTreeGraph';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
@@ -43,6 +44,8 @@ export default function AdminUnilevelTree() {
   const [searchUsername, setSearchUsername] = useState(searchParams.get('username') || '');
   const [expanded, setExpanded] = useState(() => new Set()); // explicitly opened deep branches
   const [treeSearch, setTreeSearch] = useState(''); // in-tree name/username filter
+  const [excludedUids, setExcludedUids] = useState(() => new Set()); // rank-excluded accounts
+  const [savingExclusion, setSavingExclusion] = useState(0);
 
   const rootId = searchParams.get('id') || '';
   const rootUsername = searchParams.get('username') || '';
@@ -127,6 +130,29 @@ export default function AdminUnilevelTree() {
 
   // Reset expansion + in-tree search whenever a different account tree is loaded.
   useEffect(() => { setExpanded(new Set()); setTreeSearch(''); }, [cacheKey]);
+
+  // Load the current rank-exclusion list once.
+  useEffect(() => {
+    let cancelled = false;
+    api.get('/admin/genealogy/rank-exclusions')
+      .then((res) => { if (!cancelled) setExcludedUids(new Set((res.data.excludedUids || []).map(Number))); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  async function toggleExclusion(node) {
+    const uid = Number(node.uid);
+    const nextExcluded = !excludedUids.has(uid);
+    setSavingExclusion(uid);
+    try {
+      await api.post('/admin/genealogy/rank-exclusion', {
+        uid, excluded: nextExcluded, reason: nextExcluded ? 'Company/system account' : '',
+      });
+      setExcludedUids((prev) => { const n = new Set(prev); if (nextExcluded) n.add(uid); else n.delete(uid); return n; });
+    } catch { /* surfaced by axios interceptor */ } finally {
+      setSavingExclusion(0);
+    }
+  }
 
   // Render the WHOLE tree (root → deepest). The budget is only an extreme safety net
   // so a pathological 6-figure tree can't freeze the tab; normal company trees
@@ -384,11 +410,12 @@ export default function AdminUnilevelTree() {
               )}
               {listResults.map((node) => {
                 const flagged = isLikelyCompany(node);
+                const excluded = excludedUids.has(Number(node.uid));
                 return (
-                  <button key={`${node.uid}-${node.depth}`} type="button"
-                    onClick={() => jumpTo(node)}
-                    className="w-full rounded-xl p-3 text-left transition-all duration-200 hover:-translate-y-0.5"
-                    style={{ ...insetCardStyle, ...(flagged ? { border: '1px solid rgba(248,113,113,0.4)' } : {}) }}>
+                  <div key={`${node.uid}-${node.depth}`} className="rounded-xl"
+                    style={{ ...insetCardStyle, ...((flagged || excluded) ? { border: `1px solid rgba(248,113,113,${excluded ? 0.7 : 0.4})` } : {}) }}>
+                  <button type="button" onClick={() => jumpTo(node)}
+                    className="w-full rounded-t-xl p-3 text-left transition-all duration-200">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <p className="flex items-center gap-1.5 truncate text-sm font-semibold" style={{ color: chrome.heading }}>
@@ -408,13 +435,28 @@ export default function AdminUnilevelTree() {
                         {fmtInt(node.pointsToUpline || 0)}
                       </span>
                     </div>
-                    {flagged && (
+                    {flagged && !excluded && (
                       <p className="mt-2 rounded-lg px-2 py-1 text-[10px] font-medium"
                         style={{ background: 'rgba(248,113,113,0.10)', color: isDarkMode ? '#FCA5A5' : '#B91C1C' }}>
                         Possible company/system account — verify before rank exclusion
                       </p>
                     )}
                   </button>
+                  {/* Rank-exclusion toggle — blocks this account from ranking/consuming points */}
+                  <div className="flex items-center justify-between gap-2 border-t px-3 py-2" style={{ borderColor: chrome.surfaceBorder }}>
+                    <span className="text-[10px] font-semibold"
+                      style={{ color: excluded ? (isDarkMode ? '#FCA5A5' : '#B91C1C') : chrome.tertiary }}>
+                      {excluded ? '⛔ Rank-excluded — cannot consume points' : 'Eligible to rank'}
+                    </span>
+                    <button type="button" onClick={() => toggleExclusion(node)} disabled={savingExclusion === node.uid}
+                      className="rounded-lg px-2 py-1 text-[10px] font-semibold disabled:opacity-50"
+                      style={excluded
+                        ? { background: chrome.panelButtonBg, color: chrome.panelButtonText, border: `1px solid ${chrome.surfaceBorder}` }
+                        : { background: 'rgba(248,113,113,0.14)', color: isDarkMode ? '#FCA5A5' : '#B91C1C', border: '1px solid rgba(248,113,113,0.35)' }}>
+                      {savingExclusion === node.uid ? '…' : (excluded ? 'Allow rank' : 'Exclude from rank')}
+                    </button>
+                  </div>
+                  </div>
                 );
               })}
             </div>
