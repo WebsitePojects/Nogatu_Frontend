@@ -206,6 +206,81 @@
   .product-mini-image {
     animation: imageFloat 5.8s ease-in-out infinite;
   }
+  .image-carousel {
+    position: relative;
+    width: 100%;
+  }
+  .image-carousel-stage {
+    position: relative;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+  .branch-carousel-stage {
+    aspect-ratio: 16 / 10;
+  }
+  .image-carousel-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: transform 500ms ease, filter 500ms ease;
+  }
+  .image-carousel-control {
+    position: absolute;
+    top: 50%;
+    z-index: 12;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 9999px;
+    background: rgba(58, 16, 0, 0.48);
+    color: #fff;
+    transform: translateY(-50%);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 24px rgba(89, 34, 25, 0.18);
+    transition: background-color 200ms ease, transform 200ms ease;
+  }
+  .image-carousel-control:hover {
+    background: rgba(184, 134, 11, 0.92);
+    transform: translateY(-50%) scale(1.04);
+  }
+  .image-carousel-control-prev {
+    left: 0.9rem;
+  }
+  .image-carousel-control-next {
+    right: 0.9rem;
+  }
+  .image-carousel-control span {
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+  .image-carousel-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 0.9rem;
+    z-index: 12;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.72);
+    transform: translateX(-50%);
+    box-shadow: 0 10px 24px rgba(89, 34, 25, 0.12);
+  }
+  .image-carousel-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 9999px;
+    background: rgba(184, 134, 11, 0.28);
+    transition: transform 200ms ease, background-color 200ms ease;
+  }
+  .image-carousel-dot.is-active {
+    background: #B8860B;
+    transform: scale(1.18);
+  }
 .hero-carousel-shell {
   isolation: isolate;
   overflow: visible;
@@ -627,26 +702,12 @@
     background:
       linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(255,248,225,0.98) 100%);
   }
-  .leader-portrait-media {
-    position: relative;
-    z-index: 1;
-    aspect-ratio: 4 / 5;
-    min-height: 18rem;
-    overflow: hidden;
-    background: linear-gradient(135deg, #FFF9E8, #F4E5BF);
-  }
-  .leader-portrait-body {
-    position: relative;
-    z-index: 2;
-    padding: 1.25rem;
-  }
-  .leader-portrait-body-page {
-    padding: 1.35rem;
-  }
+  .leader-portrait-card-home,
   .organization-leader-card {
     background:
       linear-gradient(135deg, rgba(255, 252, 243, 0.98) 0%, rgba(255, 246, 220, 0.97) 48%, rgba(255, 250, 238, 0.98) 100%);
   }
+  .leader-portrait-card-home::before,
   .organization-leader-card::before {
     content: '';
     position: absolute;
@@ -657,11 +718,38 @@
     pointer-events: none;
     z-index: 0;
   }
+  .leader-portrait-media {
+    position: relative;
+    z-index: 1;
+    aspect-ratio: 4 / 5;
+    min-height: 18rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, #FFF9E8, #F4E5BF);
+  }
+  .leader-portrait-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(58, 16, 0, 0.12) 0%, rgba(58, 16, 0, 0) 46%);
+    pointer-events: none;
+  }
+  .leader-portrait-body {
+    position: relative;
+    z-index: 2;
+    padding: 1.25rem;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,250,238,0.98) 100%);
+  }
+  .leader-portrait-body-page {
+    padding: 1.35rem;
+  }
+  .leader-portrait-card-home .leader-portrait-media,
   .organization-leader-card .leader-portrait-media-page {
     background:
       linear-gradient(135deg, rgba(90, 55, 28, 0.12), rgba(255, 245, 214, 0.7)),
       linear-gradient(135deg, #fff8e5, #f6e3b5);
   }
+  .leader-portrait-card-home .leader-portrait-body,
   .organization-leader-card .leader-portrait-body-page {
     background:
       linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,250,238,0.98) 100%);
@@ -681,6 +769,19 @@
   }
   .leader-photo-sherwin {
     object-position: center 18%;
+  }
+  .leader-photo-home-harold {
+    object-position: center 8%;
+  }
+  .leader-photo-home-sherwin {
+    object-position: center 10%;
+  }
+  .leader-portrait-body-home {
+    text-align: center;
+  }
+  .leader-portrait-body-home .leader-portrait-divider {
+    margin-left: auto;
+    margin-right: auto;
   }
 
 @media (min-width: 640px) {
@@ -710,6 +811,21 @@
   .leader-portrait-card {
     display: grid;
     grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  }
+  .leader-portrait-card-home {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .leader-portrait-card-home .leader-portrait-media {
+    aspect-ratio: 4 / 4.45;
+    min-height: 20rem;
+  }
+  .leader-portrait-card-home .leader-portrait-media::after {
+    background: linear-gradient(180deg, rgba(58, 16, 0, 0.02) 0%, rgba(58, 16, 0, 0) 38%);
+  }
+  .leader-portrait-card-home .leader-portrait-body {
+    padding: 1.35rem 1.4rem 1.55rem;
   }
   .leader-portrait-card-page {
     display: block;
@@ -867,6 +983,23 @@
   }
   .leader-portrait-body {
     padding: 1rem;
+  }
+  .branch-carousel-stage {
+    aspect-ratio: 16 / 10;
+  }
+  .image-carousel-control {
+    width: 2rem;
+    height: 2rem;
+  }
+  .image-carousel-control-prev {
+    left: 0.55rem;
+  }
+  .image-carousel-control-next {
+    right: 0.55rem;
+  }
+  .image-carousel-dots {
+    bottom: 0.65rem;
+    padding: 0.35rem 0.55rem;
   }
 }
 

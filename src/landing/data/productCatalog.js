@@ -11,7 +11,7 @@ export const LANDING_PRODUCT_GROUPS = [
     title: 'Capsules and Supplements',
     items: [
       { name: 'Vitamin C with Zinc & Mangosteen', desc: 'Vitamin support blend with mangosteen extract', price: '580.00', img: '/legacy-img/Vitamin-C.png', imgLg: '/legacy-img/Vitamin-C.png', badge: 'Wellness Pick' },
-      { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '550.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png', badge: 'Beauty Blend' },
+      { name: 'Nogatu Glow', desc: 'L-Reduced Glutathione', price: '580.00', img: '/legacy-img/Glow-Pill.png', imgLg: '/legacy-img/Glow-Pill.png', badge: 'Beauty Blend' },
       { name: 'Vitamin C with Collagen & Glutathione', desc: 'Radiance and antioxidant support formula', price: '500.00', img: '/legacy-img/Vitamin-C-Collagen.png', imgLg: '/legacy-img/Vitamin-C-Collagen.png', badge: 'Daily Support' },
     ],
   },

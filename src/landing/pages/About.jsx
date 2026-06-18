@@ -1,6 +1,11 @@
-import { useState } from 'react';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
+import ImageCarousel from '../components/ImageCarousel';
+import {
+  MAIN_OFFICE_IMAGES,
+  OFFICE_LOCATIONS,
+  SATELLITE_BRANCH_IMAGES,
+} from '../data/companyMedia';
 
 function PageHero({ title, subtitle }) {
   return (
@@ -40,23 +45,6 @@ export default function About() {
   const ref3 = useScrollReveal({ delay: 150 });
   const ref4 = useScrollReveal();
   const lightbox = useLightbox();
-  const officeLocations = [
-    {
-      label: 'Main Office',
-      address: '94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City',
-      icon: (
-        <>
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </>
-      ),
-    },
-    {
-      label: 'Satellite Branch',
-      address: 'Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605',
-      icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />,
-    },
-  ];
 
   return (
     <>
@@ -71,9 +59,23 @@ export default function About() {
                 <div className="about-photo-glow" />
                 <div className="about-photo-orb about-photo-orb-left" />
                 <div className="about-photo-orb about-photo-orb-right" />
-                <img src="/landing/assets/img/about.jpg" alt="About NOGATU Alliance" className="relative z-10 rounded-2xl shadow-2xl w-full object-cover cursor-pointer about-photo-main" style={{ boxShadow: '0 25px 50px rgba(89,34,25,0.15)' }} loading="lazy" onClick={() => lightbox.open('/landing/assets/img/about.jpg')} />
-                <div className="absolute -bottom-6 -right-6 size-40 rounded-2xl shadow-xl overflow-hidden hidden lg:block cursor-pointer z-20" style={{ border: '4px solid #E7C679' }} onClick={() => lightbox.open('/landing/img/about-2.jpg')}>
-                  <img src="/landing/img/about-2.jpg" alt="NOGATU Products" className="size-full object-cover product-mini-image" loading="lazy" />
+                <ImageCarousel
+                  images={MAIN_OFFICE_IMAGES}
+                  alt="NOGATU main office"
+                  className="relative z-10"
+                  stageClassName="branch-carousel-stage"
+                  imageClassName="rounded-2xl shadow-2xl w-full object-cover cursor-pointer about-photo-main"
+                  onImageClick={(src) => lightbox.open(src)}
+                />
+                <div className="absolute -bottom-6 -right-6 size-40 rounded-2xl shadow-xl overflow-hidden hidden lg:block cursor-pointer z-20" style={{ border: '4px solid #E7C679' }}>
+                  <ImageCarousel
+                    images={SATELLITE_BRANCH_IMAGES}
+                    alt="NOGATU satellite branch"
+                    className="size-full"
+                    stageClassName="branch-carousel-stage"
+                    imageClassName="size-full object-cover product-mini-image"
+                    onImageClick={(src) => lightbox.open(src)}
+                  />
                 </div>
               </div>
             </div>
@@ -84,11 +86,18 @@ export default function About() {
               <p className="leading-relaxed mb-6" style={{ color: '#6d3028' }}>Nogatu Alliance is a supplier and distributor of exclusively manufactured health food supplements as well as skin care products. We are committed to helping empower people in building a sustainable livelihood through marketing and selling of high-quality products that promote improved health and wellness.</p>
               <p className="leading-relaxed mb-8" style={{ color: '#6d3028' }}>It also provides its members with competitive marketing incentives. When you choose us, you become our valued partner, working alongside us to achieve your success.</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 mb-8">
-                {officeLocations.map((office) => (
+                {OFFICE_LOCATIONS.map((office) => (
                   <div key={office.label} className="about-info-card h-full p-4 sm:p-5">
                     <div className="about-info-icon mb-3">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {office.icon}
+                        {office.icon === 'pin' ? (
+                          <>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </>
+                        ) : (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
+                        )}
                       </svg>
                     </div>
                     <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-brand-gold-dark sm:text-xs">{office.label}</p>
@@ -117,18 +126,30 @@ export default function About() {
             <div className="about-gallery-card group">
               <div className="about-gallery-glow" />
               <div className="relative overflow-hidden rounded-[1.75rem]">
-                <img src="/landing/assets/img/about.jpg" alt="Main office" className="w-full h-72 sm:h-96 object-cover cursor-pointer about-gallery-image" loading="lazy" onClick={() => lightbox.open('/landing/assets/img/about.jpg')} />
+                <ImageCarousel
+                  images={MAIN_OFFICE_IMAGES}
+                  alt="Main office"
+                  stageClassName="branch-carousel-stage"
+                  imageClassName="w-full object-cover cursor-pointer about-gallery-image"
+                  onImageClick={(src) => lightbox.open(src)}
+                />
                 <div className="about-gallery-label">Main Office</div>
               </div>
               <div className="relative z-10 p-4 sm:p-6">
                 <p className="text-base font-bold text-brand-brown sm:text-lg">Main Office Photo</p>
-                <p className="mt-1 text-sm leading-6 text-gray-600">Current office image space with a refreshed showcase treatment.</p>
+                <p className="mt-1 text-sm leading-6 text-gray-600">A rotating view of the main branch so visitors can see more of the office, display area, and customer-facing spaces.</p>
               </div>
             </div>
             <div className="about-gallery-card group">
               <div className="about-gallery-glow about-gallery-glow-alt" />
               <div className="relative overflow-hidden rounded-[1.75rem]">
-                <img src="/landing/img/about-2.jpg" alt="Satellite branch placeholder" className="w-full h-72 sm:h-96 object-cover cursor-pointer about-gallery-image" loading="lazy" onClick={() => lightbox.open('/landing/img/about-2.jpg')} />
+                <ImageCarousel
+                  images={SATELLITE_BRANCH_IMAGES}
+                  alt="Satellite branch"
+                  stageClassName="branch-carousel-stage"
+                  imageClassName="w-full object-cover cursor-pointer about-gallery-image"
+                  onImageClick={(src) => lightbox.open(src)}
+                />
                 <div className="about-gallery-label">Satellite Branch</div>
               </div>
               <div className="relative z-10 p-4 sm:p-6">

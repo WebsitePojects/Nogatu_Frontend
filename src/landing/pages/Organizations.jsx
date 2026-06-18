@@ -1,21 +1,4 @@
-const LEADERS = [
-  {
-    name: 'Harold M. Tugano',
-    image: '/landing/img/chairman.jpg',
-    role: 'Chairman',
-    motto: 'I lead with vision, stand with integrity and build with courage.',
-    message:
-      'So every member, leader, every family and every dream can rise with NOGATU Alliance Worldwide, Inc. (NAWI).',
-  },
-  {
-    name: 'Sherwin A. Catera',
-    image: '/landing/img/CEO%20Sherwin%20A.%20Catera.png',
-    role: 'CEO',
-    motto: 'Fear no limit.',
-    message:
-      'One should not be constrained by fear. Overcoming it allows greater freedom and the realization of one\'s full potential.',
-  },
-];
+import { COMPANY_LEADERS } from '../data/companyMedia';
 
 const TESTIMONIAL_VIDEO_PATH = '/landing/img/nogatu-testimonials.mp4';
 
@@ -39,7 +22,7 @@ export default function Organizations() {
         </div>
 
         <div className="organization-page-grid mx-auto max-w-6xl rounded-[2rem] border border-white/70 bg-white/70 p-4 shadow-[0_28px_60px_rgba(89,34,25,0.08)] backdrop-blur-sm sm:p-6 lg:p-7">
-          {LEADERS.map((leader) => (
+          {COMPANY_LEADERS.map((leader) => (
             <article
               key={leader.name}
               className="leader-portrait-card leader-portrait-card-page organization-leader-card group overflow-hidden rounded-[1.75rem] border border-brand-gold/25 shadow-[0_22px_48px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"

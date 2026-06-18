@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 import Lightbox, { useLightbox } from '../components/Lightbox';
+import ImageCarousel from '../components/ImageCarousel';
+import {
+  COMPANY_LEADERS,
+  MAIN_OFFICE_IMAGES,
+  OFFICE_LOCATIONS,
+  SATELLITE_BRANCH_IMAGES,
+} from '../data/companyMedia';
 import { apiUrl } from '../../utils/apiBase';
 import { LANDING_PRODUCT_GROUPS } from '../data/productCatalog';
 
@@ -218,23 +225,6 @@ function AboutPreview() {
   const ref1 = useScrollReveal();
   const ref2 = useScrollReveal({ delay: 100 });
   const lightbox = useLightbox();
-  const officeLocations = [
-    {
-      label: 'Main Office',
-      address: '94 Navarro Street, Maligaya Park, Brgy 177, Caloocan City',
-      icon: (
-        <>
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </>
-      ),
-    },
-    {
-      label: 'Satellite Branch',
-      address: 'Unit 2201, Tycoon Center Building, Pearl Drive, San Antonio, Ortigas Center, Pasig City 1605',
-      icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />,
-    },
-  ];
 
   return (
     <section className="section-padding relative overflow-hidden" style={{ background: '#FFFDF5' }}>
@@ -248,12 +238,13 @@ function AboutPreview() {
               <div className="about-photo-glow" />
               <div className="about-photo-orb about-photo-orb-left" />
               <div className="about-photo-orb about-photo-orb-right" />
-              <img
-                src="/landing/assets/img/about.jpg"
-                alt="About NOGATU Alliance"
-                className="relative z-10 rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30 about-photo-main"
-                onClick={() => lightbox.open('/landing/assets/img/about.jpg')}
-                loading="lazy"
+              <ImageCarousel
+                images={MAIN_OFFICE_IMAGES}
+                alt="NOGATU main office"
+                className="relative z-10"
+                stageClassName="branch-carousel-stage"
+                imageClassName="rounded-2xl shadow-xl w-full object-cover cursor-pointer hover:shadow-2xl motion-safe:transition-shadow motion-safe:duration-300 border border-primary-200/30 about-photo-main"
+                onImageClick={(src) => lightbox.open(src)}
               />
               {/* Accent badge */}
               <div className="absolute -bottom-4 -right-4 rounded-2xl px-5 py-3 shadow-xl about-photo-badge" style={{ background: 'linear-gradient(135deg, #B8860B, #D4A528)' }}>
@@ -270,11 +261,18 @@ function AboutPreview() {
               Members get product access, branch support, and a clearer path to growing a sustainable livelihood.
             </p>
             <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8">
-              {officeLocations.map((office) => (
+              {OFFICE_LOCATIONS.map((office) => (
                 <div key={office.label} className="about-info-card h-full p-4 sm:p-5">
                   <div className="about-info-icon mb-3">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      {office.icon}
+                      {office.icon === 'pin' ? (
+                        <>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </>
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V7l8-4 6 3v15M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" />
+                      )}
                     </svg>
                   </div>
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-brand-gold-dark sm:text-xs">{office.label}</p>
@@ -284,12 +282,13 @@ function AboutPreview() {
             </div>
             <div className="relative hidden sm:inline-block product-mini-frame">
               <div className="product-mini-glow" />
-              <img
-                src="/landing/img/about-2.jpg"
-                alt="NOGATU Products"
-                className="relative z-10 rounded-xl shadow-lg w-full max-w-sm object-cover cursor-pointer border border-primary-200/30 product-mini-image"
-                onClick={() => lightbox.open('/landing/img/about-2.jpg')}
-                loading="lazy"
+              <ImageCarousel
+                images={SATELLITE_BRANCH_IMAGES}
+                alt="NOGATU satellite branch"
+                className="relative z-10 w-full max-w-sm"
+                stageClassName="branch-carousel-stage"
+                imageClassName="rounded-xl shadow-lg w-full object-cover cursor-pointer border border-primary-200/30 product-mini-image"
+                onImageClick={(src) => lightbox.open(src)}
               />
             </div>
           </div>
@@ -450,22 +449,6 @@ function Products() {
 function OrganizationsPreview() {
   const ref = useScrollReveal();
   const testimonialVideoSrc = '/landing/img/nogatu-testimonials.mp4';
-  const leaders = [
-    {
-      name: 'Harold M. Tugano',
-      image: '/landing/img/chairman.jpg',
-      role: 'Chairman',
-      motto: 'I lead with vision, stand with integrity and build with courage.',
-      message: 'So every member, leader, every family and every dream can rise with NOGATU Alliance Worldwide, Inc. (NAWI).',
-    },
-    {
-      name: 'Sherwin A. Catera',
-      image: '/landing/img/CEO%20Sherwin%20A.%20Catera.png',
-      role: 'CEO',
-      motto: 'Fear no limit.',
-      message: 'One should not be constrained by fear. Overcoming it allows greater freedom and the realization of one\'s full potential.',
-    },
-  ];
 
   return (
     <section className="section-padding relative overflow-hidden bg-white">
@@ -483,23 +466,23 @@ function OrganizationsPreview() {
 
           <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-4 shadow-sm sm:p-7 lg:p-8">
             <div className="organization-preview-grid mx-auto max-w-5xl text-left">
-              {leaders.map((leader) => (
+              {COMPANY_LEADERS.map((leader) => (
                 <article
                   key={leader.name}
-                  className="leader-portrait-card group overflow-hidden rounded-[1.5rem] border border-brand-gold/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(255,248,225,0.99)_100%)] shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
+                  className="leader-portrait-card leader-portrait-card-home group overflow-hidden rounded-[1.5rem] border border-brand-gold/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(255,248,225,0.99)_100%)] shadow-[0_18px_45px_rgba(89,34,25,0.10)] transition-transform duration-300 hover:-translate-y-1"
                 >
                   <div className="leader-portrait-media">
                     <img
                       src={leader.image}
                       alt={leader.name}
-                      className={`h-full w-full object-cover ${leader.name.includes('Sherwin') ? 'leader-photo-sherwin' : 'leader-photo-harold'}`}
+                      className={`h-full w-full object-cover ${leader.name.includes('Sherwin') ? 'leader-photo-sherwin leader-photo-home-sherwin' : 'leader-photo-harold leader-photo-home-harold'}`}
                       loading="lazy"
                     />
                   </div>
-                  <div className="leader-portrait-body">
+                  <div className="leader-portrait-body leader-portrait-body-home">
                     <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#8A6300]">{leader.role}</p>
                     <h3 className="mt-2 text-2xl font-black leading-tight tracking-tight text-[#421100]">{leader.name}</h3>
-                    <div className="my-4 h-px w-16 bg-gradient-to-r from-brand-gold/60 to-transparent" />
+                    <div className="leader-portrait-divider my-4 h-px w-16 bg-gradient-to-r from-brand-gold/60 to-transparent" />
                     <p className="text-base font-extrabold uppercase leading-6 text-[#2B0A00]">{leader.motto}</p>
                     <p className="mt-3 text-sm leading-6 text-[#3F3125]">{leader.message}</p>
                   </div>
