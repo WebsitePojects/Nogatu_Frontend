@@ -8,7 +8,7 @@ import {
   HiOutlineSearch, HiOutlineTable, HiOutlineUsers, HiOutlineZoomIn,
 } from 'react-icons/hi';
 import {
-  Spinner, MemberNode, JunctionNode, TreeEdge,
+  Spinner, MemberNode, JunctionNode, PlaceholderNode, TreeEdge,
 } from '../../components/genealogyTreeUi';
 import {
   exportNetworkAsDocx, exportNetworkAsCsv, exportTreeAsJpeg, exportTreeAsPng, exportTreeAsSvg,
@@ -93,16 +93,28 @@ export default function GenealogyTree() {
     }, 160);
   }
 
+  // Render the WHOLE binary tree + open L/R slots so every node is visible and any
+  // empty slot can be placed into.
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expanded, initialDepth: 3 }),
-    [flatNodes, expanded],
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: true, withPlaceholders: true }),
+    [flatNodes],
   );
-  const nodes = useMemo(() => built.nodes.map((n) => (
-    n.type === 'memberNode'
-      ? { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel: n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } }
-      : n
+  function registerIntoSlot(d) {
+    const params = new URLSearchParams({
+      placement: String(d.parentUid || ''),
+      position: String(d.position || 1),
+      placementUser: String(d.parentUsername || ''),
+      placementLabel: `${d.positionLabel} of ${d.parentUsername || `UID ${d.parentUid}`}`,
+    });
+    navigate(`/register?${params.toString()}`);
+  }
+  const nodes = useMemo(() => built.nodes.map((n) => {
+    if (n.type === 'placeholderNode') {
+      return { ...n, data: { ...n.data, isDarkMode, canvasActive, onActivateCanvas: activateCanvas, onRegister: () => registerIntoSlot(n.data) } };
+    }
+    return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel: n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  )), [built, isDarkMode, canvasActive]);
+  }), [built, isDarkMode, canvasActive]);
   const edges = built.edges;
 
   useEffect(() => {
@@ -112,7 +124,7 @@ export default function GenealogyTree() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
-  const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode }), []);
+  const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode, placeholderNode: PlaceholderNode }), []);
   const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
 
   // Export expects a network[] list — the flat payload IS that list (map leg/BP).

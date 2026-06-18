@@ -159,9 +159,10 @@ export default function AdminUnilevelTree() {
   // (thousands) render in full. ReactFlow onlyRenderVisibleElements keeps it smooth.
   // Progressive render: only the open trail is laid out (first 2 levels + expanded
   // branches). Clicking a collapsed node loads the next level — fast even at 100k.
+  // Render the WHOLE unilevel tree (all nodes visible).
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, expanded, initialDepth: 2 }),
-    [flatNodes, expanded],
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, expandAll: true }),
+    [flatNodes],
   );
   const nodes = useMemo(() => built.nodes.map((n) => (
     n.type === 'memberNode'

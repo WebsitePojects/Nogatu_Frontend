@@ -99,9 +99,10 @@ export default function UnilevelTree() {
   }
 
   // Progressive render: first 2 levels + explicitly expanded branches only (fast).
+  // Render the WHOLE unilevel tree (all nodes visible).
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, expanded, initialDepth: 2 }),
-    [flatNodes, expanded],
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, expandAll: true }),
+    [flatNodes],
   );
   const nodes = useMemo(() => built.nodes.map((n) => (
     n.type === 'memberNode'
