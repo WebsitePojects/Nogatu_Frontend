@@ -179,8 +179,8 @@ export default function AdminGenealogy() {
           <h1 className="font-display text-2xl font-bold" style={{ color: chrome.heading }}>Account Genealogy</h1>
           <div className="mt-2 h-0.5 w-12 rounded-full" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
           <p className="mt-3 max-w-2xl text-sm" style={{ color: chrome.subtext }}>
-            Open any account's full binary network — root to the deepest generation, no level limit. First levels load
-            instantly; click a “+N below” card to open the next level. Search within the tree to jump to anyone.
+            Open any account's full binary network — root to the deepest generation, no level limit. Search within the
+            tree to jump to anyone.
           </p>
         </div>
         <form onSubmit={handleSearchSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -206,7 +206,7 @@ export default function AdminGenealogy() {
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
               <div>
                 <h2 className="font-display text-lg font-semibold" style={{ color: chrome.heading }}>{rootName}</h2>
-                <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>{refreshing ? 'Syncing live data…' : `${fmtInt(count)} accounts · click “+N below” to go deeper`}</p>
+                <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>{refreshing ? 'Syncing live data…' : `${fmtInt(count)} accounts`}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={() => setExpanded(new Set())} disabled={expanded.size === 0} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5 disabled:opacity-40" style={neutralButtonStyle}>
