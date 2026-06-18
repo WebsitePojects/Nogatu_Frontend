@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   HiOutlineArrowLeft,
@@ -217,6 +217,8 @@ export default function PairingReports() {
   const [historySort, setHistorySort] = useState('date');
   const [historyDir, setHistoryDir] = useState('desc');
   const [loading, setLoading] = useState(true);
+  const [tableBusy, setTableBusy] = useState(false); // silent background refetch (search/page)
+  const hasLoadedRef = useRef(false);
   const [exportingXlsx, setExportingXlsx] = useState(false);
 
   async function handleExportXlsx() {
@@ -266,7 +268,10 @@ export default function PairingReports() {
   useEffect(() => {
     let cancelled = false;
     async function loadData() {
-      setLoading(true);
+      // Only blank the page on the FIRST load. Search / page / sort changes fetch
+      // silently in the background and swap the table in when ready (no full reload).
+      if (!hasLoadedRef.current) setLoading(true);
+      else setTableBusy(true);
       try {
         const hp = new URLSearchParams({
           historyPage: String(historyPage), historyPerPage: '50',
@@ -277,10 +282,11 @@ export default function PairingReports() {
         const res = await api.get(`/pairing?${hp.toString()}`);
         if (cancelled) return;
         setData(res.data);
+        hasLoadedRef.current = true;
       } catch {
-        if (!cancelled) setData(null);
+        if (!cancelled && !hasLoadedRef.current) setData(null);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) { setLoading(false); setTableBusy(false); }
       }
     }
     loadData();
@@ -486,7 +492,10 @@ export default function PairingReports() {
       <div className="glass-card rounded-2xl overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 px-5 py-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
           <div>
-            <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing History</h3>
+            <h3 className="font-display text-base font-semibold flex items-center gap-2" style={{ color: PORTAL_TITLE }}>
+              Pairing History
+              {tableBusy && <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: '#D4AF37' }} />}
+            </h3>
             <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
               Each row is one successful matched-points event that actually credited pairing income.
             </p>
