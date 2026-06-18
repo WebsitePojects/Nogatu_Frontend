@@ -216,6 +216,8 @@ export default function PairingReports() {
   const [debouncedHistorySearch, setDebouncedHistorySearch] = useState('');
   const [historySort, setHistorySort] = useState('date');
   const [historyDir, setHistoryDir] = useState('desc');
+  const [traceSearch, setTraceSearch] = useState('');
+  const [debouncedTraceSearch, setDebouncedTraceSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [tableBusy, setTableBusy] = useState(false); // silent background refetch (search/page)
   const hasLoadedRef = useRef(false);
@@ -242,7 +244,7 @@ export default function PairingReports() {
       // Chronological + running cumulative across the WHOLE trace (not per page).
       let cum = 0;
       const orderedAll = [...allTrace]
-        .sort((a, b) => new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
+        .sort((a, b) => (Number(a.matchSeq || 0) - Number(b.matchSeq || 0)) || new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
         .map((row) => { cum += Math.round(Number(row.pairPoints || 0) / BP_PESO_VALUE); return { ...row, cumulativeMatchedPv: cum }; });
 
       const lifetime = Number(data.walletPairingTotal || 0);
@@ -264,6 +266,11 @@ export default function PairingReports() {
     return () => clearTimeout(id);
   }, [historySearch]);
   useEffect(() => { setHistoryPage(1); }, [debouncedHistorySearch, historySort, historyDir]);
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedTraceSearch(traceSearch.trim()), 350);
+    return () => clearTimeout(id);
+  }, [traceSearch]);
+  useEffect(() => { setTracePage(1); }, [debouncedTraceSearch]);
 
   useEffect(() => {
     let cancelled = false;
@@ -279,6 +286,7 @@ export default function PairingReports() {
           historySort, historyDir,
         });
         if (debouncedHistorySearch) hp.set('historySearch', debouncedHistorySearch);
+        if (debouncedTraceSearch) hp.set('traceSearch', debouncedTraceSearch);
         const res = await api.get(`/pairing?${hp.toString()}`);
         if (cancelled) return;
         setData(res.data);
@@ -292,7 +300,7 @@ export default function PairingReports() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => { cancelled = true; };
-  }, [historyPage, tracePage, debouncedHistorySearch, historySort, historyDir]);
+  }, [historyPage, tracePage, debouncedHistorySearch, debouncedTraceSearch, historySort, historyDir]);
 
   const traceRows = data?.trace?.rows || [];
   // ③ Chronological running ledger: oldest → newest so the remaining balance reads
@@ -300,7 +308,7 @@ export default function PairingReports() {
   const orderedTraceRows = useMemo(() => {
     let cumulative = 0;
     return [...traceRows]
-      .sort((a, b) => new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
+      .sort((a, b) => (Number(a.matchSeq || 0) - Number(b.matchSeq || 0)) || new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
       .map((row) => {
         const matchedPv = Math.round(Number(row.pairPoints || 0) / BP_PESO_VALUE);
         cumulative += matchedPv;
@@ -501,6 +509,16 @@ export default function PairingReports() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportXlsx}
+              disabled={exportingXlsx}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              style={{ background: 'rgba(34,197,94,0.12)', color: '#34d399', border: '1px solid rgba(34,197,94,0.3)' }}
+              title="Export pairing history + event trace (with charts) to Excel"
+            >
+              <HiOutlineDownload className="size-4" /> {exportingXlsx ? 'Exporting…' : 'Export XLSX'}
+            </button>
             <input
               value={historySearch}
               onChange={(e) => setHistorySearch(e.target.value)}
@@ -617,12 +635,21 @@ export default function PairingReports() {
       <div className="glass-card rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 gap-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
           <div>
-            <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing Event Trace</h3>
+            <h3 className="font-display text-base font-semibold flex items-center gap-2" style={{ color: PORTAL_TITLE }}>
+              Pairing Event Trace
+              {tableBusy && <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: '#D4AF37' }} />}
+            </h3>
             <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
               This page&apos;s matches in chronological order (oldest first): each left–right match, the PV matched, the running total <em>within this page</em>, the payout, and each source&apos;s remaining points — so it reads as a running ledger.
             </p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+            <input
+              value={traceSearch}
+              onChange={(e) => setTraceSearch(e.target.value)}
+              placeholder="Search trace: date or @username"
+              className="glass-input text-xs rounded-lg py-1.5 px-2.5 w-48"
+            />
             <button
               type="button"
               onClick={handleExportXlsx}
