@@ -96,7 +96,7 @@ export default function GenealogyTree() {
   // Render the WHOLE binary tree + open L/R slots so every node is visible and any
   // empty slot can be placed into.
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: true, withPlaceholders: true }),
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: true, withPlaceholders: true, metricAsPv: true }),
     [flatNodes],
   );
   function registerIntoSlot(d) {

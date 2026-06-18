@@ -98,7 +98,7 @@ export default function AdminGenealogy() {
   // Render the WHOLE binary tree + open L/R slots (placeholders) so admin can see
   // every node and manually encode into any empty slot.
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: true, withPlaceholders: true }),
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: true, withPlaceholders: true, metricAsPv: true }),
     [flatNodes],
   );
   function registerIntoSlot(d) {

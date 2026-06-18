@@ -77,6 +77,7 @@ export function buildFlatTreeGraph(flatNodes, opts = {}) {
   const expanded = opts.expanded || null;
   const expandAll = Boolean(opts.expandAll);
   const withPlaceholders = Boolean(opts.withPlaceholders);
+  const metricAsPv = Boolean(opts.metricAsPv); // binary: show points as PV (÷250), display-only
   const initialDepth = Number.isFinite(opts.initialDepth) ? opts.initialDepth : 2;
 
   const { childrenOf, root, descendants } = indexTree(flatNodes);
@@ -179,8 +180,9 @@ export function buildFlatTreeGraph(flatNodes, opts = {}) {
           packageType: n.accttypeName,
           level: d.depth,
           positionLabel: d.depth === 0 ? 'Root (Level 0)' : (n.position ? cap(n.position) : `Level ${d.depth}`),
-          metricLabel: collapsed ? `▸ +${(descendants.get(n.uid) || 0).toLocaleString('en-US')} below` : 'Pts',
-          metricValue: Number(n.pointsToUpline || 0),
+          metricLabel: collapsed ? `▸ +${(descendants.get(n.uid) || 0).toLocaleString('en-US')} below` : (metricAsPv ? 'PV' : 'Pts'),
+          metricValue: metricAsPv ? Math.round(Number(n.pointsToUpline || 0) / 250) : Number(n.pointsToUpline || 0),
+          metricUnit: metricAsPv ? 'PV' : 'pts',
           isCollapsed: collapsed,
           childCount: (it.kids || []).length,
           hiddenDescendants: collapsed ? (descendants.get(n.uid) || 0) : 0,

@@ -122,7 +122,7 @@ export function MemberNode({ data }) {
           <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: tone.muted }}>{data.metricLabel || 'Binary PV'}</p>
           <p className="mt-1 text-sm font-semibold" style={{ color: tone.text }}>
             {data.metricLabel
-              ? `${Number(data.metricValue || 0).toLocaleString('en-US')} pts`
+              ? `${Number(data.metricValue || 0).toLocaleString('en-US')} ${data.metricUnit || 'pts'}`
               : formatBinaryPackagePoints(data.binaryPoints)}
           </p>
         </div>
