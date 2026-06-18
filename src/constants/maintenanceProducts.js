@@ -1,6 +1,6 @@
 export const MAINTENANCE_PRODUCTS = [
   { key: 'bl', hifiveKey: 'bl', code: 100, name: 'Nogatu Barley Juice', price: 850, image: '/legacy-img/Barley-Mix.png' },
-  { key: 'gl', hifiveKey: 'gl', code: 101, name: 'Nogatu Glow', price: 550, image: '/legacy-img/Glow-Pill.png' },
+  { key: 'gl', hifiveKey: 'gl', code: 101, name: 'Nogatu Glow', price: 580, image: '/legacy-img/Glow-Pill.png' },
   { key: 'glc', hifiveKey: 'glc', code: 102, name: 'Vitamin C with Collagen & Glutathione', price: 500, image: '/legacy-img/Vitamin-C-Collagen.png' },
   { key: 'cm', hifiveKey: 'cm', code: 103, name: 'Nogatu Coffee Mix', price: 495, image: '/legacy-img/Coffee-Mix.png' },
   { key: 'cd', hifiveKey: 'cd', code: 104, name: 'Chocolate Drink Mix', price: 710, image: '/legacy-img/Chox-Mix.png' },
