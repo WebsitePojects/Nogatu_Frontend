@@ -179,7 +179,7 @@ export function buildFlatTreeGraph(flatNodes, opts = {}) {
           packageType: n.accttypeName,
           level: d.depth,
           positionLabel: d.depth === 0 ? 'Root (Level 0)' : (n.position ? cap(n.position) : `Level ${d.depth}`),
-          metricLabel: collapsed ? `▸ +${(descendants.get(n.uid) || 0).toLocaleString('en-US')} below` : 'Pts to upline',
+          metricLabel: collapsed ? `▸ +${(descendants.get(n.uid) || 0).toLocaleString('en-US')} below` : 'Pts',
           metricValue: Number(n.pointsToUpline || 0),
           isCollapsed: collapsed,
           childCount: (it.kids || []).length,

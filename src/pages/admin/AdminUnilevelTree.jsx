@@ -175,10 +175,21 @@ export default function AdminUnilevelTree() {
   useEffect(() => {
     if (!built.nodes.length) return undefined;
     const timer = setTimeout(() => {
-      reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.12 });
+      const rf = reactFlowRef.current;
+      if (!rf) return;
+      // Focus on load = center on the searched/root account itself (level 0), not
+      // a fit of the whole tree — so the viewer lands on who they looked up.
+      const rootNode = built.nodes.find((n) => n.type === 'memberNode' && Number(n.data?.level) === 0)
+        || built.nodes.find((n) => n.type === 'memberNode');
+      const target = rootNode?.id ? rf.getNode?.(rootNode.id) : null;
+      if (target) {
+        rf.setCenter(target.position.x + NODE_WIDTH / 2, target.position.y + NODE_HEIGHT / 2, { zoom: 0.8, duration: 400 });
+      } else {
+        rf.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.12 });
+      }
     }, 80);
     return () => clearTimeout(timer);
-    // only refit when the tree (root) changes, not on every expand
+    // only refocus when the tree (root) changes, not on every expand
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
@@ -315,6 +326,36 @@ export default function AdminUnilevelTree() {
                 </span>
               )}
             </div>
+
+            {/* Fullscreen-only search: the sidebar list is hidden in fullscreen, so
+                surface a compact search-and-jump here (expands path + centers). */}
+            {isFullscreen && (
+              <div className="absolute left-3 top-3 z-20 w-72">
+                <div className="relative">
+                  <HiOutlineSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2" style={{ color: chrome.tertiary }} />
+                  <input type="text" value={treeSearch} onChange={(e) => setTreeSearch(e.target.value)}
+                    placeholder="Search this tree…"
+                    className="w-full rounded-xl py-2.5 pl-9 pr-3 text-sm outline-none shadow-lg backdrop-blur"
+                    style={{ background: chrome.surfaceStrong, color: chrome.heading, border: `1px solid ${chrome.surfaceBorder}` }} />
+                </div>
+                {treeSearch.trim() && (
+                  <div className="mt-1 max-h-72 overflow-y-auto rounded-xl shadow-xl backdrop-blur"
+                    style={{ background: chrome.surfaceStrong, border: `1px solid ${chrome.surfaceBorder}` }}>
+                    {listResults.length === 0 && (
+                      <div className="px-3 py-2 text-xs" style={{ color: chrome.tertiary }}>No match in this tree.</div>
+                    )}
+                    {listResults.map((node) => (
+                      <button key={node.uid} type="button" onClick={() => jumpTo(node)}
+                        className="block w-full px-3 py-2 text-left text-xs transition-colors hover:bg-white/10"
+                        style={{ color: chrome.heading }}>
+                        <span className="font-semibold">{node.fullname || node.username}</span>
+                        <span className="ml-1" style={{ color: chrome.tertiary }}>@{node.username}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {!canvasActive && !loading && (
               <button type="button" aria-label="Activate unilevel canvas" onClick={activateCanvas}
