@@ -3,7 +3,8 @@ import { Handle, Position, useStore } from '@xyflow/react';
 
 // Viewport level-of-detail: below this zoom, nodes render as cheap ghost shells
 // (like game frustum LOD) and hydrate to full detail when you zoom/focus in.
-const LOD_ZOOM = 0.4;
+// Raised so shells kick in sooner (fewer heavy cards rendered at moderate zoom).
+const LOD_ZOOM = 0.55;
 import { HiOutlinePlusCircle } from 'react-icons/hi';
 import {
   JUNCTION_SIZE,
@@ -35,7 +36,6 @@ export function MemberNode({ data }) {
     statusDot,
     style,
     tone,
-    isPrimaryLong,
   } = getMemberNodeViewModel(data);
 
   // Selector returns a boolean, so the node only re-renders when it crosses the
@@ -126,11 +126,11 @@ export function MemberNode({ data }) {
 
       <div className="flex items-start justify-between gap-3 pr-5">
         <div className="min-w-0">
-          <div className={`ggenealogy-name-marquee ${isPrimaryLong ? 'is-animated' : ''}`} style={{ color: tone.text }}>
-            <div className={`ggenealogy-name-track ${isPrimaryLong ? 'is-animated' : ''}`}>
-              <span className="text-[15px] font-bold whitespace-nowrap leading-tight">{primaryLabel}</span>
-              {isPrimaryLong ? <span className="text-[15px] font-bold whitespace-nowrap genealogy-name-ghost">{primaryLabel}</span> : null}
-            </div>
+          {/* Plain truncated name (no always-on marquee animation) — the scrolling
+              marquee ran continuously on every visible long-named node, a real
+              perf drain at scale. Title shows the full name on hover. */}
+          <div className="text-[15px] font-bold leading-tight truncate" style={{ color: tone.text }} title={primaryLabel}>
+            {primaryLabel}
           </div>
           {secondaryLabel ? (
             <p className="mt-1 truncate text-[11px] font-medium" style={{ color: tone.subtext }}>
