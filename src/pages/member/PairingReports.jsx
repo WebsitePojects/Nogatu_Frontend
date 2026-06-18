@@ -216,6 +216,7 @@ export default function PairingReports() {
   const [debouncedHistorySearch, setDebouncedHistorySearch] = useState('');
   const [historySort, setHistorySort] = useState('date');
   const [historyDir, setHistoryDir] = useState('desc');
+  const [historyMonth, setHistoryMonth] = useState(''); // '' = backend defaults to latest month
   const [traceSearch, setTraceSearch] = useState('');
   const [debouncedTraceSearch, setDebouncedTraceSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -237,7 +238,7 @@ export default function PairingReports() {
       }
       for (let i = 1, hp = 1; i <= hp && i <= 100; i += 1) {
         // eslint-disable-next-line no-await-in-loop
-        const res = await api.get(`/pairing?historyPage=${i}&historyPerPage=200&tracePerPage=1`);
+        const res = await api.get(`/pairing?historyPage=${i}&historyPerPage=200&tracePerPage=1&historyMonth=all`);
         allHistory.push(...(res.data.history?.rows || []));
         hp = Number(res.data.history?.pagination?.totalPages || 1);
       }
@@ -265,7 +266,7 @@ export default function PairingReports() {
     const id = setTimeout(() => setDebouncedHistorySearch(historySearch.trim()), 350);
     return () => clearTimeout(id);
   }, [historySearch]);
-  useEffect(() => { setHistoryPage(1); }, [debouncedHistorySearch, historySort, historyDir]);
+  useEffect(() => { setHistoryPage(1); }, [debouncedHistorySearch, historySort, historyDir, historyMonth]);
   useEffect(() => {
     const id = setTimeout(() => setDebouncedTraceSearch(traceSearch.trim()), 350);
     return () => clearTimeout(id);
@@ -287,6 +288,7 @@ export default function PairingReports() {
         });
         if (debouncedHistorySearch) hp.set('historySearch', debouncedHistorySearch);
         if (debouncedTraceSearch) hp.set('traceSearch', debouncedTraceSearch);
+        if (historyMonth) hp.set('historyMonth', historyMonth);
         const res = await api.get(`/pairing?${hp.toString()}`);
         if (cancelled) return;
         setData(res.data);
@@ -300,7 +302,7 @@ export default function PairingReports() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => { cancelled = true; };
-  }, [historyPage, tracePage, debouncedHistorySearch, debouncedTraceSearch, historySort, historyDir]);
+  }, [historyPage, tracePage, debouncedHistorySearch, debouncedTraceSearch, historySort, historyDir, historyMonth]);
 
   const traceRows = data?.trace?.rows || [];
   // ③ Chronological running ledger: oldest → newest so the remaining balance reads
@@ -519,6 +521,20 @@ export default function PairingReports() {
             >
               <HiOutlineDownload className="size-4" /> {exportingXlsx ? 'Exporting…' : 'Export XLSX'}
             </button>
+            {data.history?.availableMonths?.length > 0 && (
+              <select
+                value={historyMonth || data.history?.month || ''}
+                onChange={(e) => setHistoryMonth(e.target.value)}
+                className="glass-input text-xs rounded-lg py-1.5 px-2"
+                title="View one month of pairing history at a time"
+              >
+                {data.history.availableMonths.map((m) => {
+                  const [y, mo] = m.split('-');
+                  const label = new Date(Number(y), Number(mo) - 1, 1).toLocaleString('en-US', { month: 'short', year: 'numeric' });
+                  return <option key={m} value={m}>{label}</option>;
+                })}
+              </select>
+            )}
             <input
               value={historySearch}
               onChange={(e) => setHistorySearch(e.target.value)}

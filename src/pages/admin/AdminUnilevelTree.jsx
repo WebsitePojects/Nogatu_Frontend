@@ -4,6 +4,8 @@ import { Background, BackgroundVariant, Controls, ReactFlow } from '@xyflow/reac
 import '@xyflow/react/dist/style.css';
 import {
   HiOutlineArrowsExpand,
+  HiOutlineClipboardList,
+  HiOutlineDownload,
   HiOutlineHome,
   HiOutlineMinusSm,
   HiOutlineOfficeBuilding,
@@ -11,6 +13,7 @@ import {
   HiOutlineSearch,
   HiOutlineUserGroup,
   HiOutlineUsers,
+  HiOutlineX,
 } from 'react-icons/hi';
 import {
   Spinner,
@@ -23,6 +26,11 @@ import { getGenealogyTheme, NODE_WIDTH, NODE_HEIGHT } from '../../components/gen
 import { buildFlatTreeGraph, expandPathTo } from '../../lib/buildFlatTreeGraph';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useTheme } from '../../contexts/ThemeContext';
+import { exportUnilevelXlsx } from '../../lib/unilevelXlsx';
+import { MAINTENANCE_PRODUCTS } from '../../constants/maintenanceProducts';
+
+const PRODUCT_BY_CODE = Object.fromEntries(MAINTENANCE_PRODUCTS.map((product) => [Number(product.code), product]));
+const productName = (type) => PRODUCT_BY_CODE[Number(type)]?.name || `Product ${type}`;
 
 // Heuristic only — flags accounts that LOOK like company/system/main accounts so
 // admin can verify before excluding them from rank. Never an automatic action.
@@ -46,6 +54,12 @@ export default function AdminUnilevelTree() {
   const [treeSearch, setTreeSearch] = useState(''); // in-tree name/username filter
   const [excludedUids, setExcludedUids] = useState(() => new Set()); // rank-excluded accounts
   const [savingExclusion, setSavingExclusion] = useState(0);
+
+  // Unilevel Points Entry History (per-entry repurchase points feeding this account).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyData, setHistoryData] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyExporting, setHistoryExporting] = useState(false);
 
   const rootId = searchParams.get('id') || '';
   const rootUsername = searchParams.get('username') || '';
@@ -154,6 +168,68 @@ export default function AdminUnilevelTree() {
     }
   }
 
+  // Root identity — declared before the history/export functions that close over it.
+  const rootNode = flatNodes.find((n) => n.parentUid == null) || null;
+  const rootName = rootNode?.fullname || rootNode?.username || rootUsername || 'Account';
+
+  // ── Unilevel Points Entry History ──────────────────────────────────────────
+  // Query keyed to the SAME root the canvas shows (id wins, else username).
+  const historyParam = rootId
+    ? `id=${encodeURIComponent(rootId)}`
+    : (rootUsername ? `username=${encodeURIComponent(rootUsername)}` : '');
+
+  async function loadPointsHistory(page = 1) {
+    if (!historyParam) return;
+    setHistoryLoading(true);
+    try {
+      const res = await api.get(`/admin/genealogy/unilevel/points-history?${historyParam}&page=${page}&perPage=50`);
+      setHistoryData(res.data);
+    } catch {
+      setHistoryData({ rows: [], total: 0, totalPoints: 0, page: 1, totalPages: 1 });
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
+
+  function openHistory() {
+    if (!historyParam) return;
+    setHistoryOpen(true);
+    setHistoryData(null);
+    loadPointsHistory(1);
+  }
+
+  // Export ALL entries (not just the visible page): loop pages until drained, capped.
+  async function exportHistory() {
+    if (!historyParam) return;
+    setHistoryExporting(true);
+    try {
+      const all = [];
+      let page = 1;
+      let totalPoints = 0;
+      let total = 0;
+      const HARD_CAP = 20000;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await api.get(`/admin/genealogy/unilevel/points-history?${historyParam}&page=${page}&perPage=200`);
+        const data = res.data || {};
+        totalPoints = Number(data.totalPoints || totalPoints);
+        total = Number(data.total || total);
+        (data.rows || []).forEach((r) => all.push({ ...r, productName: productName(r.productType) }));
+        if (all.length >= total || (data.rows || []).length === 0 || all.length >= HARD_CAP) break;
+        page += 1;
+      }
+      await exportUnilevelXlsx({
+        account: { name: rootName, username: rootNode?.username || rootUsername },
+        totalPoints,
+        total,
+        rows: all,
+      });
+    } catch { /* surfaced by axios interceptor */ } finally {
+      setHistoryExporting(false);
+    }
+  }
+
   // Render the WHOLE tree (root → deepest). The budget is only an extreme safety net
   // so a pathological 6-figure tree can't freeze the tab; normal company trees
   // (thousands) render in full. ReactFlow onlyRenderVisibleElements keeps it smooth.
@@ -206,8 +282,6 @@ export default function AdminUnilevelTree() {
   }, [flatNodes, treeSearch]);
 
   const flaggedCount = useMemo(() => flatNodes.filter(isLikelyCompany).length, [flatNodes]);
-  const rootNode = flatNodes.find((n) => n.parentUid == null) || null;
-  const rootName = rootNode?.fullname || rootNode?.username || rootUsername || 'Account';
 
   return (
     <div className="space-y-6">
@@ -250,6 +324,12 @@ export default function AdminUnilevelTree() {
           className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold" style={neutralButtonStyle}>
           <HiOutlineRefresh className="size-4" /> Fit View
         </button>
+        {hasTarget && (
+          <button type="button" onClick={openHistory}
+            className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold" style={amberButtonStyle}>
+            <HiOutlineClipboardList className="size-4" /> Points Entry History
+          </button>
+        )}
         {rootId && (
           <button type="button" onClick={() => setSearchParams({})}
             className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold" style={neutralButtonStyle}>
@@ -501,6 +581,95 @@ export default function AdminUnilevelTree() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unilevel Points Entry History modal */}
+      {historyOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}>
+          <div className="flex max-h-[88vh] w-full max-w-4xl flex-col rounded-3xl shadow-2xl" style={panelStyle}>
+            <div className="flex items-start justify-between gap-4 p-6 pb-4">
+              <div>
+                <h2 className="font-display text-xl font-semibold flex items-center gap-2" style={{ color: chrome.heading }}>
+                  <HiOutlineClipboardList className="size-5" style={{ color: '#D4AF37' }} />
+                  Unilevel Points Entry History
+                </h2>
+                <p className="mt-1 text-sm" style={{ color: chrome.subtext }}>
+                  Every repurchase entry from <span className="font-semibold" style={{ color: chrome.heading }}>{rootName}</span>’s sponsor downline — the events that sum into its points passed to upline.
+                </p>
+              </div>
+              <button type="button" onClick={() => setHistoryOpen(false)} className="p-1" style={{ color: chrome.tertiary }} aria-label="Close history">
+                <HiOutlineX className="size-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 px-6 sm:grid-cols-3">
+              <div className="rounded-2xl p-4" style={insetCardStyle}>
+                <p className="text-[10px] uppercase tracking-wider" style={{ color: chrome.tertiary }}>Total Points to Upline</p>
+                <p className="mt-1 text-lg font-bold tabular-nums" style={{ color: isDarkMode ? '#86EFAC' : '#166534' }}>{fmtInt(historyData?.totalPoints || 0)}</p>
+              </div>
+              <div className="rounded-2xl p-4" style={insetCardStyle}>
+                <p className="text-[10px] uppercase tracking-wider" style={{ color: chrome.tertiary }}>Total Entries</p>
+                <p className="mt-1 text-lg font-bold tabular-nums" style={{ color: chrome.heading }}>{fmtInt(historyData?.total || 0)}</p>
+              </div>
+              <div className="col-span-2 flex items-center sm:col-span-1">
+                <button type="button" onClick={exportHistory} disabled={historyExporting || !(historyData?.total > 0)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold disabled:opacity-50" style={amberButtonStyle}>
+                  <HiOutlineDownload className="size-4" /> {historyExporting ? 'Exporting…' : 'Export .xlsx'}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 min-h-0 flex-1 overflow-auto px-6 pb-2">
+              {historyLoading ? (
+                <div className="flex justify-center py-12"><Spinner /></div>
+              ) : !(historyData?.rows?.length) ? (
+                <div className="rounded-2xl p-10 text-center" style={insetCardStyle}>
+                  <HiOutlineClipboardList className="mx-auto mb-2 size-7" style={{ color: chrome.emptyIcon }} />
+                  <p className="text-sm" style={{ color: chrome.tertiary }}>No maintenance/repurchase entries in this downline yet.</p>
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr>
+                      {['Date', 'Source Member', 'Level', 'Product', 'Points'].map((h) => (
+                        <th key={h} className="sticky top-0 p-2.5 text-left text-[11px] font-semibold uppercase tracking-wide"
+                          style={{ background: chrome.surfaceStrong, color: chrome.tertiary }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyData.rows.map((r) => (
+                      <tr key={r.id} className="border-t" style={{ borderColor: chrome.surfaceBorder }}>
+                        <td className="p-2.5 text-xs" style={{ color: chrome.tertiary }}>{r.date || '-'}</td>
+                        <td className="p-2.5" style={{ color: chrome.heading }}>
+                          <div className="font-medium">{r.fullName || '-'}</div>
+                          <div className="text-[11px]" style={{ color: chrome.tertiary }}>@{r.username || `uid ${r.sourceUid}`}</div>
+                        </td>
+                        <td className="p-2.5 text-xs tabular-nums" style={{ color: chrome.tertiary }}>L{r.depth}</td>
+                        <td className="p-2.5 text-xs" style={{ color: chrome.subtext }}>{productName(r.productType)}</td>
+                        <td className="p-2.5 text-right font-semibold tabular-nums" style={{ color: isDarkMode ? '#86EFAC' : '#166534' }}>{fmtInt(r.points)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-2 border-t p-4" style={{ borderColor: chrome.surfaceBorder }}>
+              <span className="text-xs" style={{ color: chrome.tertiary }}>
+                Page {fmtInt(historyData?.page || 1)} / {fmtInt(historyData?.totalPages || 1)}
+              </span>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => loadPointsHistory((historyData?.page || 1) - 1)}
+                  disabled={historyLoading || (historyData?.page || 1) <= 1}
+                  className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40" style={neutralButtonStyle}>Prev</button>
+                <button type="button" onClick={() => loadPointsHistory((historyData?.page || 1) + 1)}
+                  disabled={historyLoading || (historyData?.page || 1) >= (historyData?.totalPages || 1)}
+                  className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40" style={neutralButtonStyle}>Next</button>
+              </div>
             </div>
           </div>
         </div>

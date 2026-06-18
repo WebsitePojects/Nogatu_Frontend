@@ -14,6 +14,7 @@ import {
 } from 'react-icons/hi';
 import { FaSitemap } from 'react-icons/fa';
 import CodeUseConfirmModal from '../components/CodeUseConfirmModal';
+import { getViewAs, clearViewAs } from '../lib/viewAs';
 
 /* ─── Nav data ──────────────────────────────────────────────── */
 
@@ -160,12 +161,33 @@ export default function MemberLayout() {
     i => location.pathname === i.to || location.pathname === `/portal${i.to}`
   );
 
+  const viewAs = getViewAs();
   const acctInitial = user?.shortname?.charAt(0)?.toUpperCase() || 'M';
   const networkItems = NAV_GROUPS.find(g => g.label === 'Network')?.items || [];
   const accountItems = NAV_GROUPS.find(g => g.label === 'Account')?.items || [];
 
   return (
     <>
+      {viewAs && (
+        <div
+          className="fixed top-2 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 rounded-full px-4 py-1.5 text-xs font-semibold shadow-lg"
+          style={{ background: 'rgba(180,83,9,0.96)', color: '#fff', border: '1px solid rgba(251,191,36,0.55)' }}
+        >
+          <HiOutlineShieldCheck className="size-4 flex-shrink-0" />
+          <span className="truncate max-w-[60vw]">
+            Admin read-only view — {viewAs.fullName || viewAs.username} (@{viewAs.username})
+          </span>
+          <button
+            type="button"
+            onClick={() => { clearViewAs(); window.location.href = '/portal/admin/accounts'; }}
+            className="rounded-full px-2.5 py-0.5"
+            style={{ background: 'rgba(0,0,0,0.28)' }}
+          >
+            Exit
+          </button>
+        </div>
+      )}
+
       <CodeUseConfirmModal
         open={showLogoutConfirm}
         tone="gold"
