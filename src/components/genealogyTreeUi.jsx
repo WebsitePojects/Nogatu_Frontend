@@ -1,5 +1,9 @@
 import React from 'react';
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, useStore } from '@xyflow/react';
+
+// Viewport level-of-detail: below this zoom, nodes render as cheap ghost shells
+// (like game frustum LOD) and hydrate to full detail when you zoom/focus in.
+const LOD_ZOOM = 0.4;
 import { HiOutlinePlusCircle } from 'react-icons/hi';
 import {
   JUNCTION_SIZE,
@@ -33,6 +37,40 @@ export function MemberNode({ data }) {
     tone,
     isPrimaryLong,
   } = getMemberNodeViewModel(data);
+
+  // Selector returns a boolean, so the node only re-renders when it crosses the
+  // LOD threshold (not on every pan) — keeps zoomed-out panning cheap.
+  const lowDetail = useStore((s) => s.transform[2] < LOD_ZOOM);
+  const handleNodeClick = () => {
+    if (!data.canvasActive) { data.onActivateCanvas?.(); return; }
+    data.onOpen?.();
+  };
+
+  if (lowDetail) {
+    return (
+      <button
+        type="button"
+        onClick={handleNodeClick}
+        className="w-full rounded-[1.35rem] p-4 text-left relative overflow-hidden"
+        style={{
+          width: NODE_WIDTH,
+          minHeight: NODE_HEIGHT,
+          background: tone.cardBg,
+          border: data.highlighted ? '2px solid rgba(74,222,128,0.9)' : `1px solid ${style.strong}66`,
+          boxShadow: tone.glow,
+        }}
+      >
+        <Handle type="target" position={Position.Top} isConnectable={false}
+          style={{ top: -9, width: 16, height: 16, borderRadius: '999px', border: `2px solid ${style.soft}`, background: tone.handleBg }} />
+        <Handle type="source" position={Position.Bottom} isConnectable={false}
+          style={{ bottom: -9, width: 16, height: 16, borderRadius: '999px', border: `2px solid ${style.soft}`, background: tone.handleBg }} />
+        <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${style.strong}, ${style.soft})` }} />
+        <div className="absolute right-4 top-4 size-2.5 rounded-full" style={{ background: statusDot }} />
+        <div className="mt-2 h-4 w-2/3 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.10)' }} />
+        <div className="mt-3 h-12 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
+      </button>
+    );
+  }
 
   return (
     <button
