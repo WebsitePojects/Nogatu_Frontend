@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiBase';
+import { getViewAs, clearViewAs } from '../lib/viewAs';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,6 +12,14 @@ api.interceptors.request.use((config) => {
   const requestId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   config.headers = config.headers || {};
   config.headers['X-Request-ID'] = requestId;
+  // Admin read-only view-as: attach the target member so MEMBER GET endpoints return
+  // that member's data. Never attach on /admin routes (defense in depth — admin
+  // endpoints must authorize on adminid, never on this header). Backend also enforces
+  // GET-only + non-persistent (see middleware/auth.js).
+  const viewAs = getViewAs();
+  if (viewAs?.uid && !String(config.url || '').includes('/admin')) {
+    config.headers['X-View-As-Member'] = String(viewAs.uid);
+  }
   // For multipart uploads (FormData), the default 'application/json' content-type
   // must be removed so the browser sets 'multipart/form-data' WITH the boundary.
   // Without this, multer on the server parses nothing -> empty body/file -> 400.
@@ -30,8 +39,15 @@ api.interceptors.response.use(
     const url = err.config?.url || '';
     const isLoginCall = url.endsWith('/login');
     if (err.response?.status === 401 && !isLoginCall) {
-      const isAdmin = window.location.pathname.startsWith('/portal/admin');
-      window.location.href = isAdmin ? '/portal/admin/login' : '/portal/login';
+      // In view-as, a 401 means the admin session lapsed — drop view-as and send the
+      // admin back to admin login (not the member login).
+      if (getViewAs()) {
+        clearViewAs();
+        window.location.href = '/portal/admin/login';
+      } else {
+        const isAdmin = window.location.pathname.startsWith('/portal/admin');
+        window.location.href = isAdmin ? '/portal/admin/login' : '/portal/login';
+      }
     }
     return Promise.reject(err);
   }
