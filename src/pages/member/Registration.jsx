@@ -249,9 +249,6 @@ export default function Registration() {
       await api.post('/registration/register', {
         ...form,
         tin: formatTin(form.tin),
-        // Registration page ALWAYS honors the sponsor's chosen leg (default = recommended,
-        // changeable). Referral-link signups force the algorithm placement on the public Join page.
-        autoPlacement: false,
       });
       setFeedbackModal({
         tone: 'gold',
@@ -500,43 +497,40 @@ export default function Registration() {
             <label className="label">Placement UID</label>
             <input
               type="text"
-              inputMode="numeric"
               value={form.placementUid}
-              onChange={(e) => setForm((prev) => ({ ...prev, placementUid: e.target.value.replace(/\D/g, '') }))}
-              className="glass-input"
+              readOnly
+              className="glass-input opacity-70"
               placeholder={placementLoading ? 'Loading placement...' : 'Placement account UID'}
               required
             />
           </div>
 
-          {/* Position — on the registration page the sponsor ALWAYS chooses Left or Right.
-              The default is the recommended (balanced / inherited) leg, but it is changeable.
-              Referral-link signups force the algorithm placement instead (landing Join page). */}
+          {/* Position */}
           <div>
             <label className="label">Position</label>
-            <select
-              value={form.position === '2' ? '2' : '1'}
-              onChange={(e) => setForm((prev) => ({ ...prev, position: e.target.value }))}
-              className="glass-input"
-              aria-label="Placement position"
-            >
-              <option value="1">Left (Position A)</option>
-              <option value="2">Right (Position B)</option>
-            </select>
+            <input
+              type="text"
+              value={form.position === '2' ? 'Right (Position B)' : 'Left (Position A)'}
+              readOnly
+              className="glass-input opacity-70"
+              placeholder="Assigned position"
+            />
           </div>
 
           <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/10 p-4">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-semibold text-white">Placement Summary</p>
+              <p className="text-sm font-semibold text-white">
+                {placementPolicyMode === 'forced' ? 'Forced First Invite Placement' : 'Placement Summary'}
+              </p>
               <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-brand-gold">
-                Default: {placementPolicyMode === 'forced' ? 'inherited leg' : 'balanced leg'} (changeable)
+                {placementPolicyMode === 'forced' ? 'Safetynet Active' : 'Manual Placement'}
               </span>
             </div>
             <p className="text-sm font-semibold text-white mt-3">
-              {form.position === '2' ? 'Right' : 'Left'} leg placement
+              {placementMeta?.positionLabel || (form.position === '2' ? 'Right' : 'Left')} leg placement
             </p>
             <p className="text-xs mt-1 text-white/70 leading-relaxed">
-              {(placementMeta?.placementUsername && String(form.placementUid) === String(placementMeta?.placementUid || ''))
+              {placementMeta?.placementUsername
                 ? `Placement account: ${placementMeta.placementUsername}`
                 : `Placement account UID: ${form.placementUid || 'Loading...'}`}
             </p>
