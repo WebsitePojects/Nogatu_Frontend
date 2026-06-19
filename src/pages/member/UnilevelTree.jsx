@@ -498,6 +498,13 @@ function UnilevelBreakdown({ summary, panelStyle }) {
         <p className="text-xs portal-card-muted mt-1">
           Current-month product-point contributors across your 10 unilevel levels.
         </p>
+        <p className="text-[11px] mt-2 rounded-lg px-3 py-2 leading-5"
+          style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.18)', color: 'var(--portal-card-muted)' }}>
+          <strong style={{ color: 'var(--brand-gold)' }}>Roll-up compression:</strong> when no members in a level
+          have product (repurchase) points this month, that level is skipped and the next qualifying generation
+          rolls up to take its place — so your paid levels stay contiguous (1, 2, 3…) and an empty middle level
+          never blocks the levels below it.
+        </p>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>

@@ -526,8 +526,9 @@ export default function PairingReports() {
                 value={historyMonth || data.history?.month || ''}
                 onChange={(e) => setHistoryMonth(e.target.value)}
                 className="glass-input text-xs rounded-lg py-1.5 px-2"
-                title="View one month of pairing history at a time"
+                title="Filter pairing history by month, or show all dates"
               >
+                <option value="all">All dates</option>
                 {data.history.availableMonths.map((m) => {
                   const [y, mo] = m.split('-');
                   const label = new Date(Number(y), Number(mo) - 1, 1).toLocaleString('en-US', { month: 'short', year: 'numeric' });
@@ -535,12 +536,18 @@ export default function PairingReports() {
                 })}
               </select>
             )}
-            <input
-              value={historySearch}
-              onChange={(e) => setHistorySearch(e.target.value)}
-              placeholder="Search date or @username"
-              className="glass-input text-xs rounded-lg py-1.5 px-2.5 w-44"
-            />
+            <div className="relative">
+              <input
+                value={historySearch}
+                onChange={(e) => setHistorySearch(e.target.value)}
+                placeholder="Search date or @username"
+                className="glass-input text-xs rounded-lg py-1.5 pl-2.5 pr-7 w-44"
+              />
+              {historySearch && (
+                <button type="button" onClick={() => setHistorySearch('')} title="Clear search"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-sm leading-none" style={{ color: PORTAL_MUTED }}>×</button>
+              )}
+            </div>
             <select value={`${historySort}:${historyDir}`} onChange={(e) => { const [s, d] = e.target.value.split(':'); setHistorySort(s); setHistoryDir(d); }}
               className="glass-input text-xs rounded-lg py-1.5 px-2">
               <option value="date:desc">Newest first</option>
@@ -660,12 +667,18 @@ export default function PairingReports() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
-            <input
-              value={traceSearch}
-              onChange={(e) => setTraceSearch(e.target.value)}
-              placeholder="Search trace: date or @username"
-              className="glass-input text-xs rounded-lg py-1.5 px-2.5 w-48"
-            />
+            <div className="relative">
+              <input
+                value={traceSearch}
+                onChange={(e) => setTraceSearch(e.target.value)}
+                placeholder="Search trace: date or @username"
+                className="glass-input text-xs rounded-lg py-1.5 pl-2.5 pr-7 w-48"
+              />
+              {traceSearch && (
+                <button type="button" onClick={() => setTraceSearch('')} title="Clear search"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-sm leading-none" style={{ color: PORTAL_MUTED }}>×</button>
+              )}
+            </div>
             <button
               type="button"
               onClick={handleExportXlsx}
