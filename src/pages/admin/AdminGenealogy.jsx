@@ -18,6 +18,7 @@ import {
 import { buildFlatTreeGraph, ORDER_BINARY, expandPathTo } from '../../lib/buildFlatTreeGraph';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useTheme } from '../../contexts/ThemeContext';
+import api from '../../api';
 
 export default function AdminGenealogy() {
   const { isDarkMode } = useTheme();
@@ -43,6 +44,9 @@ export default function AdminGenealogy() {
   const url = rootId
     ? `/admin/genealogy/binary/flat?id=${encodeURIComponent(rootId)}`
     : (rootUsername ? `/admin/genealogy/binary/flat?username=${encodeURIComponent(rootUsername)}` : '');
+  const reconcileUrl = rootId
+    ? `/admin/genealogy/pairing-reconcile?id=${encodeURIComponent(rootId)}`
+    : (rootUsername ? `/admin/genealogy/pairing-reconcile?username=${encodeURIComponent(rootUsername)}` : '');
   const { nodes: flatNodes, status, loading, refreshing, count } = useInfiniteTree({
     treeType: 'binary', cacheKey, url, enabled: hasTarget,
   });
@@ -246,6 +250,7 @@ export default function AdminGenealogy() {
 
           {/* Side list — search + jump */}
           <div className="flex min-h-0 flex-col rounded-2xl p-5" style={panelStyle}>
+            <PairingReconcile url={reconcileUrl} chrome={chrome} />
             <h2 className="font-display text-lg font-semibold" style={{ color: chrome.heading }}>Accounts in tree</h2>
             <div className="relative mt-3">
               <HiOutlineSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2" style={{ color: chrome.tertiary }} />
@@ -277,6 +282,55 @@ export default function AdminGenealogy() {
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Pairing reconciliation: leg PV totals vs paid lifetime SMB, for admin verify.
+      Snapshot (matched PV) and lifetime SMB are different quantities — shown side by
+      side, never forced equal (money-integrity rule). ─────────────────────────── */
+function PairingReconcile({ url, chrome }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!url) { setData(null); return undefined; }
+    let cancelled = false;
+    setLoading(true);
+    api.get(url)
+      .then((res) => { if (!cancelled) setData(res.data); })
+      .catch(() => { if (!cancelled) setData(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [url]);
+
+  if (!url) return null;
+  const cards = data ? [
+    { label: 'Left PV', value: fmtInt(data.leftPV), sub: `${fmtInt(data.leftAccounts)} accts` },
+    { label: 'Right PV', value: fmtInt(data.rightPV), sub: `${fmtInt(data.rightAccounts)} accts` },
+    { label: 'Matched PV', value: fmtInt(data.matchedPV), sub: `₱${fmtInt(data.matchedPeso)} snapshot` },
+    { label: 'Lifetime SMB', value: `₱${fmtInt(data.lifetimeSmb)}`, sub: 'paid · ttlincome2' },
+  ] : [];
+
+  return (
+    <div className="mb-4 pb-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
+      <h3 className="text-sm font-bold" style={{ color: chrome.heading }}>Pairing Reconciliation</h3>
+      <p className="mt-0.5 text-[11px]" style={{ color: chrome.tertiary }}>Leg totals vs paid SMB</p>
+      {loading && <p className="mt-2 text-xs" style={{ color: chrome.tertiary }}>Loading…</p>}
+      {data && (
+        <>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {cards.map((c) => (
+              <div key={c.label} className="rounded-xl px-3 py-2" style={{ background: chrome.surface, border: `1px solid ${chrome.surfaceBorder}` }}>
+                <p className="text-[10px]" style={{ color: chrome.tertiary }}>{c.label}</p>
+                <p className="mt-0.5 text-sm font-bold" style={{ color: chrome.heading }}>{c.value}</p>
+                <p className="text-[10px]" style={{ color: chrome.tertiary }}>{c.sub}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[10px] leading-4" style={{ color: chrome.tertiary }}>{data.note}</p>
+        </>
       )}
     </div>
   );
