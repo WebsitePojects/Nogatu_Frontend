@@ -202,6 +202,38 @@ export function buildFlatTreeGraph(flatNodes, opts = {}) {
   return { nodes, edges, total: flatNodes.length, rendered: realCount, truncated };
 }
 
+/**
+ * Return the subtree rooted at `rootUid` (rootUid + all descendants), with the
+ * root's parentUid nulled so buildFlatTreeGraph treats it as the tree root. Used by
+ * the re-root "Binary Tree" view so clicking a node re-roots the 15-node window.
+ */
+export function rootSubtreeAt(flatNodes, rootUid) {
+  if (rootUid == null) return flatNodes;
+  const byUid = new Map(flatNodes.map((n) => [Number(n.uid), n]));
+  const root = byUid.get(Number(rootUid));
+  if (!root) return flatNodes;
+  const childrenOf = new Map();
+  for (const n of flatNodes) {
+    if (n.parentUid == null) continue;
+    const p = Number(n.parentUid);
+    if (!childrenOf.has(p)) childrenOf.set(p, []);
+    childrenOf.get(p).push(n);
+  }
+  const out = [{ ...root, parentUid: null }];
+  const stack = [Number(rootUid)];
+  const seen = new Set([Number(rootUid)]);
+  while (stack.length) {
+    const cur = stack.pop();
+    for (const c of (childrenOf.get(cur) || [])) {
+      if (seen.has(Number(c.uid))) continue;
+      seen.add(Number(c.uid));
+      out.push(c);
+      stack.push(Number(c.uid));
+    }
+  }
+  return out;
+}
+
 /** Set of ancestor uids whose expansion reveals `targetUid` (for search "jump to"). */
 export function expandPathTo(flatNodes, targetUid) {
   const byUid = new Map(flatNodes.map((n) => [n.uid, n]));

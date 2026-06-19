@@ -15,8 +15,7 @@ import {
   fmtInt, getAccountStateChipStyle, getGenealogyTheme, legLabel,
   NODE_HEIGHT, NODE_WIDTH, PACKAGE_STYLES,
 } from '../../components/genealogyTreeUiUtils';
-import { buildFlatTreeGraph, ORDER_BINARY, expandPathTo } from '../../lib/buildFlatTreeGraph';
-import BinaryDrill from '../../components/BinaryDrill';
+import { buildFlatTreeGraph, ORDER_BINARY, expandPathTo, rootSubtreeAt } from '../../lib/buildFlatTreeGraph';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -38,7 +37,8 @@ export default function GenealogyTree() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [exportingFormat, setExportingFormat] = useState(null);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('list'); // 'list' (15-node drill) | 'tree' (canvas) | 'members'
+  const [viewMode, setViewMode] = useState('binaryTree'); // 'binaryTree' (re-root) | 'wholeTree' (expand) | 'list'
+  const [binaryRootUid, setBinaryRootUid] = useState(null); // Tab1 re-root target (null = you)
 
   const selfUid = user?.uid;
   const { nodes: flatNodes, status, loading, refreshing, count } = useInfiniteTree({
@@ -95,13 +95,18 @@ export default function GenealogyTree() {
     }, 160);
   }
 
-  // Show the "perfect 15" (root + 3 levels) by default; deeper generations stay
-  // collapsed behind a "+N below" card and load one level on click. `expanded`
-  // drives the progressive reveal, so it must be passed in AND be a dep.
-  const built = useMemo(
+  // Tab 1 "Binary Tree": 15-node window re-rooted at binaryRootUid (null = you);
+  // clicking a node re-roots to it (breadcrumb walks back up).
+  const built1 = useMemo(
+    () => buildFlatTreeGraph(rootSubtreeAt(flatNodes, binaryRootUid), { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, withPlaceholders: true, metricAsPv: true }),
+    [flatNodes, binaryRootUid],
+  );
+  // Tab 2 "Whole Tree": 15-node default, expands one level per "open N more" click.
+  const built2 = useMemo(
     () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, expanded, withPlaceholders: true, metricAsPv: true }),
     [flatNodes, expanded],
   );
+  const built = viewMode === 'binaryTree' ? built1 : built2;
   function registerIntoSlot(d) {
     const params = new URLSearchParams({
       placement: String(d.parentUid || ''),
@@ -115,10 +120,15 @@ export default function GenealogyTree() {
     if (n.type === 'placeholderNode') {
       return { ...n, data: { ...n.data, isDarkMode, canvasActive, onActivateCanvas: activateCanvas, onRegister: () => registerIntoSlot(n.data) } };
     }
-    return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel: n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } };
+    // Binary Tree tab → clicking a node re-roots to it; Whole Tree tab → expand inline.
+    const onOpen = viewMode === 'binaryTree'
+      ? () => setBinaryRootUid(Number(n.data.uid))
+      : () => toggleExpand(n.data.uid);
+    return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel: n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel, onOpen, onActivateCanvas: activateCanvas } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [built, isDarkMode, canvasActive]);
+  }), [built, isDarkMode, canvasActive, viewMode]);
   const edges = built.edges;
+  const byUidMap = useMemo(() => new Map(flatNodes.map((n) => [Number(n.uid), n])), [flatNodes]);
 
   useEffect(() => {
     if (!built.nodes.length) return undefined;
@@ -220,9 +230,9 @@ export default function GenealogyTree() {
         </div>
       ) : (
         <div className="space-y-5">
-          {/* View tabs: 15-node drill list (default), graphical tree, flat members */}
+          {/* Tabs: Binary Tree (re-root 15-node) · Whole Tree (expand to ∞) · List (flat) */}
           <div className="inline-flex flex-wrap overflow-hidden rounded-xl" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
-            {[['list', 'List View'], ['tree', 'Tree View'], ['members', 'Members']].map(([mode, label]) => (
+            {[['binaryTree', 'Binary Tree'], ['wholeTree', 'Whole Tree'], ['list', 'List View']].map(([mode, label]) => (
               <button key={mode} type="button" onClick={() => setViewMode(mode)}
                 className="px-3.5 py-2 text-sm font-semibold transition-colors"
                 style={viewMode === mode
@@ -233,11 +243,11 @@ export default function GenealogyTree() {
             ))}
           </div>
 
-          {viewMode === 'list' && (
-            <BinaryDrill nodes={flatNodes} selfUid={selfUid} chrome={chrome} panelStyle={panelStyle} loading={loading} />
+          {viewMode === 'binaryTree' && (
+            <TreeBreadcrumb flatNodes={flatNodes} rootUid={binaryRootUid} onReroot={setBinaryRootUid} chrome={chrome} panelStyle={panelStyle} />
           )}
 
-          {viewMode === 'tree' && (
+          {viewMode !== 'list' && (
           <div ref={flowShellRef} className={`relative z-10 overflow-hidden rounded-[1.75rem] ${isFullscreen ? 'genealogy-fullscreen-shell' : ''}`} style={panelStyle}>
             {/* Canvas header */}
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
@@ -313,14 +323,13 @@ export default function GenealogyTree() {
           </div>
           )}
 
-          {viewMode === 'members' && (
+          {viewMode === 'list' && (
             <div className="rounded-3xl p-5" style={panelStyle}>
-            <h2 className="font-display text-lg font-semibold" style={{ color: chrome.heading }}>Affiliated Members</h2>
-            <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>Search above to filter; click anyone to jump to them in the tree.</p>
+            <h2 className="font-display text-lg font-semibold" style={{ color: chrome.heading }}>List View — full network</h2>
+            <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>Every member with their level, placement side, and placement upline. Search above to filter; click anyone to jump to them.</p>
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {(searchTerm.trim() ? searchResults : flatNodes.slice(0, 24)).map((member) => {
-                const packageStyle = PACKAGE_STYLES[member.accttypeName] || PACKAGE_STYLES.Bronze;
-                const statusStyle = getAccountStateChipStyle(member.accountStateLabel || 'PD', isDarkMode);
+              {(searchTerm.trim() ? searchResults : flatNodes.slice(0, 300)).map((member) => {
+                const uplineName = member.parentUid != null ? (byUidMap.get(Number(member.parentUid))?.username || `UID ${member.parentUid}`) : '—';
                 return (
                   <button type="button" key={`${member.uid}-${member.depth}`} onClick={() => jumpTo(member)}
                     className="w-full rounded-2xl p-4 text-left transition-all duration-200 hover:-translate-y-0.5" style={insetCardStyle}>
@@ -332,9 +341,9 @@ export default function GenealogyTree() {
                       <span className="rounded-full px-2 py-1 text-[10px] font-bold" style={amberButtonStyle}>L{member.depth}</span>
                     </div>
                     <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
-                      <div><p style={{ color: chrome.tertiary }}>Package</p><p className="mt-1 font-semibold" style={{ color: packageStyle.strong }}>{member.accttypeName}</p></div>
+                      <div><p style={{ color: chrome.tertiary }}>Level</p><p className="mt-1 font-semibold" style={{ color: chrome.heading }}>L{member.depth}</p></div>
                       <div><p style={{ color: chrome.tertiary }}>Side</p><p className="mt-1 font-semibold" style={{ color: chrome.heading }}>{legLabel(member.position === 'right' ? 2 : 1)}</p></div>
-                      <div><p style={{ color: chrome.tertiary }}>Status</p><span className="mt-1 inline-flex rounded-full px-2 py-1 text-[10px] font-semibold" style={statusStyle}>{member.accountStateLabel || 'PD'}</span></div>
+                      <div className="min-w-0"><p style={{ color: chrome.tertiary }}>Upline</p><p className="mt-1 truncate font-semibold" style={{ color: chrome.heading }}>{uplineName}</p></div>
                     </div>
                   </button>
                 );
@@ -350,6 +359,38 @@ export default function GenealogyTree() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── Breadcrumb for the re-root "Binary Tree" tab: You / … / current root. Click a
+      crumb to re-root there (root → null = back to you). ─────────────────────── */
+function TreeBreadcrumb({ flatNodes, rootUid, onReroot, chrome, panelStyle }) {
+  const { byUid, selfRootUid } = useMemo(() => {
+    const bu = new Map(); let self = null;
+    for (const n of flatNodes) { bu.set(Number(n.uid), n); if (n.parentUid == null) self = Number(n.uid); }
+    return { byUid: bu, selfRootUid: self };
+  }, [flatNodes]);
+  const currentUid = rootUid == null ? selfRootUid : Number(rootUid);
+  const trail = useMemo(() => {
+    const arr = []; let cur = byUid.get(currentUid); let g = 0;
+    while (cur && g < 200) { arr.unshift(cur); if (cur.parentUid == null) break; cur = byUid.get(Number(cur.parentUid)); g += 1; }
+    return arr;
+  }, [byUid, currentUid]);
+  if (!trail.length) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1 rounded-2xl px-4 py-2.5 text-xs" style={panelStyle}>
+      <span className="mr-1 font-semibold" style={{ color: chrome.tertiary }}>Viewing:</span>
+      {trail.map((node, i) => (
+        <span key={node.uid} className="inline-flex items-center gap-1">
+          {i > 0 && <span style={{ color: chrome.tertiary }}>/</span>}
+          <button type="button" onClick={() => onReroot(node.parentUid == null ? null : Number(node.uid))}
+            className="rounded-lg px-2 py-1 font-semibold"
+            style={i === trail.length - 1 ? { background: 'rgba(212,175,55,0.18)', color: 'var(--brand-gold)' } : { color: chrome.panelButtonText }}>
+            {i === 0 ? 'You' : (node.username || `UID ${node.uid}`)}
+          </button>
+        </span>
+      ))}
     </div>
   );
 }
