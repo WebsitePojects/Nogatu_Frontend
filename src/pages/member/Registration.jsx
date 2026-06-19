@@ -500,9 +500,10 @@ export default function Registration() {
             <label className="label">Placement UID</label>
             <input
               type="text"
+              inputMode="numeric"
               value={form.placementUid}
-              readOnly
-              className="glass-input opacity-70"
+              onChange={(e) => setForm((prev) => ({ ...prev, placementUid: e.target.value.replace(/\D/g, '') }))}
+              className="glass-input"
               placeholder={placementLoading ? 'Loading placement...' : 'Placement account UID'}
               required
             />
@@ -535,7 +536,7 @@ export default function Registration() {
               {form.position === '2' ? 'Right' : 'Left'} leg placement
             </p>
             <p className="text-xs mt-1 text-white/70 leading-relaxed">
-              {placementMeta?.placementUsername
+              {(placementMeta?.placementUsername && String(form.placementUid) === String(placementMeta?.placementUid || ''))
                 ? `Placement account: ${placementMeta.placementUsername}`
                 : `Placement account UID: ${form.placementUid || 'Loading...'}`}
             </p>
