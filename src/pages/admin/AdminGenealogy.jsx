@@ -95,11 +95,12 @@ export default function AdminGenealogy() {
     }, 160);
   }
 
-  // Render the WHOLE binary tree + open L/R slots (placeholders) so admin can see
-  // every node and manually encode into any empty slot.
+  // Show the "perfect 15" (root + 3 levels) by default; deeper generations stay
+  // collapsed behind a "+N below" card and load one level on click. `expanded`
+  // drives the progressive reveal, so it must be passed in AND be a dep.
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: true, withPlaceholders: true, metricAsPv: true }),
-    [flatNodes],
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, expanded, withPlaceholders: true, metricAsPv: true }),
+    [flatNodes, expanded],
   );
   function registerIntoSlot(d) {
     const params = new URLSearchParams({
@@ -138,25 +139,8 @@ export default function AdminGenealogy() {
     const base = q ? flatNodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q)) : flatNodes;
     return base.slice(0, 120);
   }, [flatNodes, treeSearch]);
-  const treeStats = useMemo(() => {
-    const s = { pd: 0, cd: 0, cdPaid: 0, fs: 0, totalBp: 0 };
-    for (const n of flatNodes) {
-      const l = n.accountStateLabel || 'PD';
-      if (l === 'PD') s.pd += 1; else if (l === 'CD') s.cd += 1; else if (l === 'CD - Paid') s.cdPaid += 1; else if (l === 'FS') s.fs += 1;
-      s.totalBp += Number(n.pointsToUpline || 0);
-    }
-    return s;
-  }, [flatNodes]);
   const rootNode = flatNodes.find((n) => n.parentUid == null) || null;
   const rootName = rootNode?.fullname || rootNode?.username || rootUsername || 'Account';
-
-  const statChips = [
-    { label: 'PD', count: treeStats.pd, color: isDarkMode ? '#86EFAC' : '#166534', bg: 'rgba(34,197,94,0.10)', dot: '#22C55E' },
-    { label: 'CD', count: treeStats.cd, color: isDarkMode ? '#FCA5A5' : '#B91C1C', bg: 'rgba(239,68,68,0.10)', dot: '#EF4444' },
-    { label: 'CD-Paid', count: treeStats.cdPaid, color: isDarkMode ? '#FDE68A' : '#92400E', bg: 'rgba(234,179,8,0.10)', dot: '#F59E0B' },
-    { label: 'FS', count: treeStats.fs, color: isDarkMode ? '#BFDBFE' : '#1D4ED8', bg: 'rgba(59,130,246,0.10)', dot: '#3B82F6' },
-    { label: 'Total PV', count: fmtInt(treeStats.totalBp / 250), color: isDarkMode ? '#F4D675' : '#7A5C08', bg: 'rgba(212,175,55,0.10)', dot: '#D4AF37' },
-  ];
 
   async function runExport(format, fn) {
     if (exportingFormat) return;
@@ -258,16 +242,6 @@ export default function AdminGenealogy() {
               </ReactFlow>
             </div>
 
-            {flatNodes.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 px-5 py-3" style={{ borderTop: `1px solid ${chrome.surfaceBorder}` }}>
-                <span className="mr-1 text-[11px] font-semibold" style={{ color: chrome.tertiary }}>Tree stats:</span>
-                {statChips.map((chip) => (
-                  <div key={chip.label} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold" style={{ background: chip.bg, color: chip.color, border: `1px solid ${chip.dot}40` }}>
-                    <span className="size-1.5 rounded-full" style={{ background: chip.dot }} /> {chip.label}: {chip.count}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Side list — search + jump */}

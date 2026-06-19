@@ -93,11 +93,12 @@ export default function GenealogyTree() {
     }, 160);
   }
 
-  // Render the WHOLE binary tree + open L/R slots so every node is visible and any
-  // empty slot can be placed into.
+  // Show the "perfect 15" (root + 3 levels) by default; deeper generations stay
+  // collapsed behind a "+N below" card and load one level on click. `expanded`
+  // drives the progressive reveal, so it must be passed in AND be a dep.
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: true, withPlaceholders: true, metricAsPv: true }),
-    [flatNodes],
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, expanded, withPlaceholders: true, metricAsPv: true }),
+    [flatNodes, expanded],
   );
   function registerIntoSlot(d) {
     const params = new URLSearchParams({
@@ -138,24 +139,6 @@ export default function GenealogyTree() {
     if (!q) return [];
     return flatNodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q)).slice(0, 8);
   }, [flatNodes, searchTerm]);
-
-  const treeStats = useMemo(() => {
-    const s = { pd: 0, cd: 0, cdPaid: 0, fs: 0, totalBp: 0 };
-    for (const n of flatNodes) {
-      const l = n.accountStateLabel || 'PD';
-      if (l === 'PD') s.pd += 1; else if (l === 'CD') s.cd += 1; else if (l === 'CD - Paid') s.cdPaid += 1; else if (l === 'FS') s.fs += 1;
-      s.totalBp += Number(n.pointsToUpline || 0);
-    }
-    return s;
-  }, [flatNodes]);
-
-  const statChips = [
-    { label: 'PD', count: treeStats.pd, bg: isDarkMode ? 'rgba(74,222,128,0.10)' : 'rgba(34,197,94,0.10)', color: isDarkMode ? '#86EFAC' : '#166534', border: `1px solid ${isDarkMode ? 'rgba(74,222,128,0.22)' : 'rgba(34,197,94,0.22)'}`, dot: '#22C55E', tooltip: 'Paid accounts' },
-    { label: 'CD', count: treeStats.cd, bg: isDarkMode ? 'rgba(248,113,113,0.10)' : 'rgba(239,68,68,0.10)', color: isDarkMode ? '#FCA5A5' : '#B91C1C', border: `1px solid ${isDarkMode ? 'rgba(248,113,113,0.22)' : 'rgba(239,68,68,0.22)'}`, dot: '#EF4444', tooltip: 'Commission Deduction (unpaid)' },
-    { label: 'CD-Paid', count: treeStats.cdPaid, bg: isDarkMode ? 'rgba(250,204,21,0.10)' : 'rgba(234,179,8,0.10)', color: isDarkMode ? '#FDE68A' : '#92400E', border: `1px solid ${isDarkMode ? 'rgba(250,204,21,0.22)' : 'rgba(234,179,8,0.22)'}`, dot: '#F59E0B', tooltip: 'CD fully recovered' },
-    { label: 'FS', count: treeStats.fs, bg: isDarkMode ? 'rgba(96,165,250,0.10)' : 'rgba(59,130,246,0.10)', color: isDarkMode ? '#BFDBFE' : '#1D4ED8', border: `1px solid ${isDarkMode ? 'rgba(96,165,250,0.22)' : 'rgba(59,130,246,0.22)'}`, dot: '#3B82F6', tooltip: 'Free Slot' },
-    { label: 'Total PV', count: fmtInt(treeStats.totalBp / 250), bg: 'rgba(212,175,55,0.10)', color: isDarkMode ? '#F4D675' : '#7A5C08', border: '1px solid rgba(212,175,55,0.24)', dot: '#D4AF37', tooltip: 'Total Binary PV (1 PV = ₱250) in this view' },
-  ];
 
   async function runExport(format, fn) {
     if (exportingFormat) return;
@@ -307,16 +290,6 @@ export default function GenealogyTree() {
               </div>
             </div>
 
-            {flatNodes.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 px-5 py-3" style={{ borderTop: `1px solid ${chrome.surfaceBorder}` }}>
-                <span className="mr-1 text-[11px] font-semibold" style={{ color: chrome.tertiary }}>Tree stats:</span>
-                {statChips.map((chip) => (
-                  <div key={chip.label} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold" style={{ background: chip.bg, color: chip.color, border: chip.border }} title={chip.tooltip}>
-                    <span className="size-1.5 rounded-full" style={{ background: chip.dot }} /> {chip.label}: {chip.count}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Affiliated members (search-filtered, capped) */}
