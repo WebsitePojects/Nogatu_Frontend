@@ -11,7 +11,7 @@ const INCOME_ITEMS = [
   { key: 'directReferral', label: 'Direct Referral',  icon: HiOutlineUsers,        color: '#D4AF37' },
   { key: 'pairing',        label: 'Binary Pairing',   icon: HiOutlineChartBar,     color: '#F2D06B' },
   { key: 'leadership',     label: 'Leadership Bonus', icon: HiOutlineStar,         color: '#B8960C' },
-  { key: 'unilevel',       label: 'Uni-Level',        icon: HiOutlineTrendingUp,   color: '#D4AF37' },
+  { key: 'unilevel',       label: 'Uni-Level',        icon: HiOutlineTrendingUp,   color: '#D4AF37', note: 'Monthly · released every 5th of next month' },
   { key: 'hifive',         label: 'Hi-Five Bonus',    icon: HiOutlineGift,         color: '#F2D06B' },
   { key: 'rankingBonus',   label: 'Ranking Bonus',    icon: HiOutlineShieldCheck,  color: '#D4AF37' },
   { key: 'globalBonus',   label: 'Global Bonus',     icon: HiOutlineSparkles,     color: '#B8960C' },
@@ -386,7 +386,12 @@ export default function EWallet() {
                   >
                     <item.icon className="size-3.5" style={{ color: item.color }} />
                   </div>
-                  <span className="portal-card-text text-sm">{item.label}</span>
+                  <div className="flex flex-col">
+                    <span className="portal-card-text text-sm">{item.label}</span>
+                    {item.note && (
+                      <span className="portal-card-muted text-[10px] leading-tight">{item.note}</span>
+                    )}
+                  </div>
                 </div>
                 <span className="portal-warning-text text-sm font-semibold">
                   ₱{fmt(data[item.key])}

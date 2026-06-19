@@ -180,7 +180,7 @@ export default function RankingProgress() {
             </div>
             <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {!data.rankingEligible
-                ? 'upgrade required before ranking can begin'
+                ? 'Ranking unlocks at Gold — upgrade to begin ranking'
                 : data.nextRank
                   ? `${nextRankPct.toFixed(2)}% to ${data.nextRankLabel} (${fmtInt(data.nextRankMinPoints)} fresh repurchase pts)`
                   : (data.blockedByPackageGate ? 'upgrade required to unlock the next rank tier' : 'Maximum rank achieved')}
@@ -194,9 +194,13 @@ export default function RankingProgress() {
           <div className="flex items-start gap-3">
             <HiOutlineShieldCheck className="size-5 mt-0.5" style={{ color: '#D4AF37' }} />
             <div>
-              <p className="text-sm font-semibold text-white">Package Gate</p>
+              <p className="text-sm font-semibold text-white">
+                {data.rankingEligible ? 'Ranking Ceiling' : 'Ranking Locked'}
+              </p>
               <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                {data.rankingEligibilityReason || 'Your current package has reached its ranking ceiling.'}
+                {!data.rankingEligible
+                  ? 'Ranking unlocks at Gold. Bronze and Silver do not rank yet — upgrade your package to start ranking.'
+                  : (data.rankingEligibilityReason || 'You have reached the top rank for your current package. Upgrade to rank higher.')}
               </p>
             </div>
           </div>
