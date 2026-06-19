@@ -115,9 +115,6 @@ export function MemberNode({ data }) {
         <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold" style={placementChip}>
           {data.positionLabel}
         </span>
-        <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold" style={stateChip}>
-          {data.accountStateLabel || 'PD'}
-        </span>
       </div>
 
       <div className="mt-4">
