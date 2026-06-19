@@ -1,10 +1,5 @@
 import React from 'react';
-import { Handle, Position, useStore } from '@xyflow/react';
-
-// Viewport level-of-detail: below this zoom, nodes render as cheap ghost shells
-// (like game frustum LOD) and hydrate to full detail when you zoom/focus in.
-// Raised so shells kick in sooner (fewer heavy cards rendered at moderate zoom).
-const LOD_ZOOM = 0.55;
+import { Handle, Position } from '@xyflow/react';
 import { HiOutlinePlusCircle } from 'react-icons/hi';
 import {
   JUNCTION_SIZE,
@@ -38,49 +33,10 @@ export function MemberNode({ data }) {
     tone,
   } = getMemberNodeViewModel(data);
 
-  // Selector returns a boolean, so the node only re-renders when it crosses the
-  // LOD threshold (not on every pan) — keeps zoomed-out panning cheap.
-  const lowDetail = useStore((s) => s.transform[2] < LOD_ZOOM);
-  const handleNodeClick = () => {
-    if (!data.canvasActive) { data.onActivateCanvas?.(); return; }
-    data.onOpen?.();
-  };
-
-  if (lowDetail) {
-    return (
-      <button
-        type="button"
-        onClick={handleNodeClick}
-        className="w-full rounded-[1.35rem] p-4 text-left relative overflow-hidden"
-        style={{
-          width: NODE_WIDTH,
-          minHeight: NODE_HEIGHT,
-          background: tone.cardBg,
-          border: data.highlighted ? '2px solid rgba(74,222,128,0.9)' : `1px solid ${style.strong}66`,
-          boxShadow: tone.glow,
-        }}
-      >
-        <Handle type="target" position={Position.Top} isConnectable={false}
-          style={{ top: -9, width: 16, height: 16, borderRadius: '999px', border: `2px solid ${style.soft}`, background: tone.handleBg }} />
-        <Handle type="source" position={Position.Bottom} isConnectable={false}
-          style={{ bottom: -9, width: 16, height: 16, borderRadius: '999px', border: `2px solid ${style.soft}`, background: tone.handleBg }} />
-        <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${style.strong}, ${style.soft})` }} />
-        <div className="absolute right-4 top-4 size-2.5 rounded-full" style={{ background: statusDot }} />
-        {/* Name stays readable even in the low-detail shell. It used to be a skeleton
-            bar, which hid every distributor name when a large tree auto-fit below the
-            LOD zoom (the Android "names won't show" bug). Heavy chips/metric box stay
-            LOD-gated below — only the cheap truncated name is always drawn. */}
-        <div className="mt-2 pr-5 text-[15px] font-bold leading-tight truncate" style={{ color: tone.text }} title={primaryLabel}>
-          {primaryLabel}
-        </div>
-        {secondaryLabel ? (
-          <p className="mt-1 truncate text-[11px] font-medium" style={{ color: tone.subtext }}>@{secondaryLabel}</p>
-        ) : null}
-        <div className="mt-3 h-10 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
-      </button>
-    );
-  }
-
+  // No LOD ghost shells: every node always renders fully populated (management ask
+  // — on mobile the tree auto-fits to a low zoom, and skeleton/ghost nodes must never
+  // be shown). Safe for perf because the canvas only renders visible nodes
+  // (onlyRenderVisibleElements) and only the perfect-15 trail is laid out at a time.
   return (
     <button
       type="button"
