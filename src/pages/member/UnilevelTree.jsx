@@ -3,6 +3,7 @@ import { Background, BackgroundVariant, Controls, ReactFlow } from '@xyflow/reac
 import '@xyflow/react/dist/style.css';
 import {
   HiOutlineArrowsExpand,
+  HiOutlineChevronDown,
   HiOutlineHome,
   HiOutlineMinusSm,
   HiOutlineRefresh,
@@ -33,6 +34,7 @@ export default function UnilevelTree() {
   const [treeSearch, setTreeSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [uniSummary, setUniSummary] = useState(null);
+  const [viewMode, setViewMode] = useState('list'); // 'list' (per-level, default) | 'tree' (canvas)
 
   const selfUid = user?.uid;
   const { nodes: flatNodes, status, loading, refreshing, count } = useInfiniteTree({
@@ -132,6 +134,18 @@ export default function UnilevelTree() {
   const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
   const isCollapsed = expanded.size === 0;
 
+  // Group downline members by sponsor level (depth) for the list view. Level 0 = you.
+  const levelGroups = useMemo(() => {
+    const map = new Map();
+    for (const n of flatNodes) {
+      const d = Number(n.depth || 0);
+      if (d < 1) continue;
+      if (!map.has(d)) map.set(d, []);
+      map.get(d).push(n);
+    }
+    return [...map.entries()].sort((a, b) => a[0] - b[0]).map(([level, members]) => ({ level, members }));
+  }, [flatNodes]);
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -149,38 +163,55 @@ export default function UnilevelTree() {
 
       {/* Toolbar */}
       <div className="relative flex flex-wrap items-center gap-2 rounded-2xl p-3" style={{ ...panelStyle, zIndex: 40 }}>
-        <button type="button" onClick={() => setExpanded(new Set())} disabled={isCollapsed}
-          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold disabled:opacity-40" style={neutralButtonStyle}>
-          <HiOutlineHome className="size-4" /> Collapse all
-        </button>
-        <button type="button"
-          onClick={() => reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 })}
-          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold" style={neutralButtonStyle}>
-          <HiOutlineRefresh className="size-4" /> Fit View
-        </button>
-
-        {/* In-tree search */}
-        <div className="relative">
-          <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
-          <input type="text" value={treeSearch}
-            onChange={(e) => { setTreeSearch(e.target.value); setSearchOpen(true); }}
-            onFocus={() => setSearchOpen(true)}
-            placeholder="Search a name in your tree…"
-            className="w-56 rounded-xl py-2 pl-8 pr-3 text-xs outline-none"
-            style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
-          {searchOpen && matchResults.length > 0 && (
-            <div className="absolute left-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-xl"
-              style={{ background: chrome.popoverBg, border: `1px solid ${chrome.surfaceBorder}`, boxShadow: chrome.popoverShadow }}>
-              {matchResults.map((m) => (
-                <button key={m.uid} type="button" onClick={() => jumpTo(m)}
-                  className="w-full px-3 py-2 text-left text-xs" style={{ color: chrome.searchText }}>
-                  <span className="font-semibold">{m.fullname || m.username}</span>
-                  <span className="ml-1 portal-card-muted">@{m.username} · L{m.depth}</span>
-                </button>
-              ))}
-            </div>
-          )}
+        {/* View toggle: per-level list (default) vs graphical tree canvas */}
+        <div className="inline-flex overflow-hidden rounded-xl" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
+          {[['list', 'List view'], ['tree', 'Tree view']].map(([mode, label]) => (
+            <button key={mode} type="button" onClick={() => setViewMode(mode)}
+              className="px-3 py-2 text-xs font-semibold transition-colors"
+              style={viewMode === mode
+                ? { background: 'rgba(212,175,55,0.18)', color: 'var(--brand-gold)' }
+                : { background: 'transparent', color: chrome.panelButtonText }}>
+              {label}
+            </button>
+          ))}
         </div>
+
+        {viewMode === 'tree' && (
+          <>
+            <button type="button" onClick={() => setExpanded(new Set())} disabled={isCollapsed}
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold disabled:opacity-40" style={neutralButtonStyle}>
+              <HiOutlineHome className="size-4" /> Collapse all
+            </button>
+            <button type="button"
+              onClick={() => reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 })}
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold" style={neutralButtonStyle}>
+              <HiOutlineRefresh className="size-4" /> Fit View
+            </button>
+
+            {/* In-tree search */}
+            <div className="relative">
+              <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
+              <input type="text" value={treeSearch}
+                onChange={(e) => { setTreeSearch(e.target.value); setSearchOpen(true); }}
+                onFocus={() => setSearchOpen(true)}
+                placeholder="Search a name in your tree…"
+                className="w-56 rounded-xl py-2 pl-8 pr-3 text-xs outline-none"
+                style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
+              {searchOpen && matchResults.length > 0 && (
+                <div className="absolute left-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-xl"
+                  style={{ background: chrome.popoverBg, border: `1px solid ${chrome.surfaceBorder}`, boxShadow: chrome.popoverShadow }}>
+                  {matchResults.map((m) => (
+                    <button key={m.uid} type="button" onClick={() => jumpTo(m)}
+                      className="w-full px-3 py-2 text-left text-xs" style={{ color: chrome.searchText }}>
+                      <span className="font-semibold">{m.fullname || m.username}</span>
+                      <span className="ml-1 portal-card-muted">@{m.username} · L{m.depth}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {refreshing && (
           <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
@@ -193,7 +224,13 @@ export default function UnilevelTree() {
         </div>
       </div>
 
-      {/* Canvas */}
+      {/* List view (default): downline grouped per sponsor level */}
+      {viewMode === 'list' && (
+        <UnilevelLevelList groups={levelGroups} chrome={chrome} panelStyle={panelStyle} loading={loading} />
+      )}
+
+      {/* Canvas (graphical tree) */}
+      {viewMode === 'tree' && (
       <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-2xl'}`}
         style={{ ...panelStyle, height: isFullscreen ? '100vh' : '70vh', zIndex: 0 }}>
         <div className="absolute left-3 top-3 z-30 flex flex-wrap items-center gap-2">
@@ -264,8 +301,95 @@ export default function UnilevelTree() {
           </div>
         )}
       </div>
+      )}
 
       <UnilevelBreakdown summary={uniSummary} panelStyle={panelStyle} />
+    </div>
+  );
+}
+
+/* ── Per-level list view: downline members grouped by sponsor level ─────────── */
+function UnilevelLevelList({ groups, chrome, panelStyle, loading }) {
+  const [openLevels, setOpenLevels] = useState(() => new Set([1, 2]));
+  const [filter, setFilter] = useState('');
+  const q = filter.trim().toLowerCase();
+  const toggle = (lvl) => setOpenLevels((prev) => {
+    const next = new Set(prev);
+    if (next.has(lvl)) next.delete(lvl); else next.add(lvl);
+    return next;
+  });
+  const filtered = useMemo(() => {
+    if (!q) return groups;
+    return groups
+      .map(({ level, members }) => ({ level, members: members.filter((m) => `${m.username || ''} ${m.fullname || ''}`.toLowerCase().includes(q)) }))
+      .filter((g) => g.members.length > 0);
+  }, [groups, q]);
+
+  if (loading) {
+    return <div className="rounded-2xl p-10" style={panelStyle}><Spinner /></div>;
+  }
+  if (!groups.length) {
+    return <div className="rounded-2xl p-8 text-center text-sm portal-card-muted" style={panelStyle}>No downline members yet.</div>;
+  }
+
+  return (
+    <div className="rounded-2xl p-4 sm:p-5" style={panelStyle}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-bold portal-card-title">Downline by Level</h2>
+          <p className="text-[11px] portal-card-muted mt-0.5">Your sponsor network, listed level by level. Tap a level to expand its members.</p>
+        </div>
+        <div className="relative">
+          <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
+          <input type="text" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter members…"
+            className="w-52 rounded-xl py-2 pl-8 pr-3 text-xs outline-none"
+            style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-2.5">
+        {filtered.map(({ level, members }) => {
+          const open = q ? true : openLevels.has(level);
+          const rate = UNILEVEL_RATES[level - 1] || 0;
+          return (
+            <div key={level} className="overflow-hidden rounded-xl" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
+              <button type="button" onClick={() => toggle(level)} className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex size-7 items-center justify-center rounded-lg text-xs font-bold"
+                    style={{ background: 'rgba(212,175,55,0.14)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.28)' }}>
+                    {level}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold portal-card-title">Level {level}</p>
+                    <p className="text-[11px] portal-card-muted">{fmtInt(members.length)} member{members.length === 1 ? '' : 's'} · {rate}% unilevel</p>
+                  </div>
+                </div>
+                <HiOutlineChevronDown className="size-4 portal-card-muted transition-transform" style={{ transform: open ? 'rotate(180deg)' : 'none' }} />
+              </button>
+              {open && (
+                <div style={{ borderTop: `1px solid ${chrome.surfaceBorder}` }}>
+                  {members.map((m) => (
+                    <div key={`${m.uid}-${m.depth}`} className="flex items-center justify-between gap-3 px-4 py-2.5"
+                      style={{ borderTop: `1px solid ${chrome.surfaceBorder}` }}>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium portal-card-title">{m.fullname || m.username || `Member ${m.uid}`}</p>
+                        <p className="truncate text-[11px] portal-card-muted">@{m.username || m.uid}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold"
+                        style={{ background: 'rgba(212,175,55,0.10)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                        {m.accttypeName || '—'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {q && filtered.length === 0 && (
+          <p className="px-1 py-4 text-center text-xs portal-card-muted">No member matches “{filter}”.</p>
+        )}
+      </div>
     </div>
   );
 }
