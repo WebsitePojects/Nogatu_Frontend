@@ -66,8 +66,17 @@ export function MemberNode({ data }) {
           style={{ bottom: -9, width: 16, height: 16, borderRadius: '999px', border: `2px solid ${style.soft}`, background: tone.handleBg }} />
         <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: `linear-gradient(90deg, ${style.strong}, ${style.soft})` }} />
         <div className="absolute right-4 top-4 size-2.5 rounded-full" style={{ background: statusDot }} />
-        <div className="mt-2 h-4 w-2/3 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.10)' }} />
-        <div className="mt-3 h-12 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
+        {/* Name stays readable even in the low-detail shell. It used to be a skeleton
+            bar, which hid every distributor name when a large tree auto-fit below the
+            LOD zoom (the Android "names won't show" bug). Heavy chips/metric box stay
+            LOD-gated below — only the cheap truncated name is always drawn. */}
+        <div className="mt-2 pr-5 text-[15px] font-bold leading-tight truncate" style={{ color: tone.text }} title={primaryLabel}>
+          {primaryLabel}
+        </div>
+        {secondaryLabel ? (
+          <p className="mt-1 truncate text-[11px] font-medium" style={{ color: tone.subtext }}>@{secondaryLabel}</p>
+        ) : null}
+        <div className="mt-3 h-10 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
       </button>
     );
   }
