@@ -148,8 +148,8 @@ export default function Dashboard() {
       actionLabel: data.globalBonusEligible ? 'See global bonus entries' : 'Eligibility: Diamond, Ambassador rank, or Stockist',
       disabled: !data.globalBonusEligible,
     },
-    { label: 'Left Leg (Remaining PV)', metric: 'left-accounts', path: '/pairing', value: `${fmtInt(data.leftAccounts)} accts | ${fmtInt(data.leftRemaining ?? data.leftPoints)} PV left`, icon: HiOutlineArrowLeft, actionLabel: 'Open pairing reports' },
-    { label: 'Right Leg (Remaining PV)', metric: 'right-accounts', path: '/pairing', value: `${fmtInt(data.rightAccounts)} accts | ${fmtInt(data.rightRemaining ?? data.rightPoints)} PV left`, icon: HiOutlineArrowRight, actionLabel: 'Open pairing reports' },
+    { label: 'Left Leg (Total PV)', metric: 'left-accounts', path: '/pairing', value: `${fmtInt(data.leftAccounts)} accts | ${fmtInt(data.leftPoints)} PV total`, icon: HiOutlineArrowLeft, actionLabel: `${fmtInt(data.leftRemaining ?? 0)} PV unmatched · open pairing reports` },
+    { label: 'Right Leg (Total PV)', metric: 'right-accounts', path: '/pairing', value: `${fmtInt(data.rightAccounts)} accts | ${fmtInt(data.rightPoints)} PV total`, icon: HiOutlineArrowRight, actionLabel: `${fmtInt(data.rightRemaining ?? 0)} PV unmatched · open pairing reports` },
   ];
 
   const maintenancePct = Math.min(100, Math.max(0, ((data.unilevelMaintenance?.currentPoints ?? data.maintenancePoints) / 200) * 100));
