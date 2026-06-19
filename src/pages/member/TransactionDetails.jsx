@@ -400,6 +400,9 @@ export default function TransactionDetails() {
             renderRow={(row, index) => (
               <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
                 {index + 1}. {row.fullName || row.username}
+                <span className={supportMutedTone}>
+                  {row.rankName ? ` · ${row.rankName}` : ''} · {Number(row.pointsConsumed || 0).toLocaleString('en-US')} pts consumed
+                </span>
               </div>
             )}
           />
