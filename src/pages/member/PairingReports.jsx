@@ -217,6 +217,8 @@ export default function PairingReports() {
   const [historySort, setHistorySort] = useState('date');
   const [historyDir, setHistoryDir] = useState('desc');
   const [historyMonth, setHistoryMonth] = useState(''); // '' = backend defaults to latest month
+  const [historyFrom, setHistoryFrom] = useState(''); // YYYY-MM-DD range (overrides month)
+  const [historyTo, setHistoryTo] = useState('');
   const [traceSearch, setTraceSearch] = useState('');
   const [debouncedTraceSearch, setDebouncedTraceSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -266,7 +268,7 @@ export default function PairingReports() {
     const id = setTimeout(() => setDebouncedHistorySearch(historySearch.trim()), 350);
     return () => clearTimeout(id);
   }, [historySearch]);
-  useEffect(() => { setHistoryPage(1); }, [debouncedHistorySearch, historySort, historyDir, historyMonth]);
+  useEffect(() => { setHistoryPage(1); }, [debouncedHistorySearch, historySort, historyDir, historyMonth, historyFrom, historyTo]);
   useEffect(() => {
     const id = setTimeout(() => setDebouncedTraceSearch(traceSearch.trim()), 350);
     return () => clearTimeout(id);
@@ -289,6 +291,8 @@ export default function PairingReports() {
         if (debouncedHistorySearch) hp.set('historySearch', debouncedHistorySearch);
         if (debouncedTraceSearch) hp.set('traceSearch', debouncedTraceSearch);
         if (historyMonth) hp.set('historyMonth', historyMonth);
+        if (historyFrom) hp.set('historyFrom', historyFrom);
+        if (historyTo) hp.set('historyTo', historyTo);
         const res = await api.get(`/pairing?${hp.toString()}`);
         if (cancelled) return;
         setData(res.data);
@@ -302,7 +306,7 @@ export default function PairingReports() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => { cancelled = true; };
-  }, [historyPage, tracePage, debouncedHistorySearch, debouncedTraceSearch, historySort, historyDir, historyMonth]);
+  }, [historyPage, tracePage, debouncedHistorySearch, debouncedTraceSearch, historySort, historyDir, historyMonth, historyFrom, historyTo]);
 
   const traceRows = data?.trace?.rows || [];
   // ③ Chronological running ledger: oldest → newest so the remaining balance reads
@@ -536,6 +540,17 @@ export default function PairingReports() {
                 })}
               </select>
             )}
+            <div className="flex items-center gap-1">
+              <input type="date" value={historyFrom} onChange={(e) => setHistoryFrom(e.target.value)} title="From date"
+                className="glass-input text-xs rounded-lg py-1.5 px-2" />
+              <span className="text-xs" style={{ color: PORTAL_MUTED }}>→</span>
+              <input type="date" value={historyTo} onChange={(e) => setHistoryTo(e.target.value)} title="To date"
+                className="glass-input text-xs rounded-lg py-1.5 px-2" />
+              {(historyFrom || historyTo) && (
+                <button type="button" onClick={() => { setHistoryFrom(''); setHistoryTo(''); }} title="Clear date range"
+                  className="text-sm leading-none px-1" style={{ color: PORTAL_MUTED }}>×</button>
+              )}
+            </div>
             <div className="relative">
               <input
                 value={historySearch}
