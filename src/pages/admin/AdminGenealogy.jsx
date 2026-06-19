@@ -16,6 +16,7 @@ import {
   NODE_HEIGHT, NODE_WIDTH, PACKAGE_STYLES,
 } from '../../components/genealogyTreeUiUtils';
 import { buildFlatTreeGraph, ORDER_BINARY, expandPathTo } from '../../lib/buildFlatTreeGraph';
+import BinaryDrill from '../../components/BinaryDrill';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../api';
@@ -36,6 +37,7 @@ export default function AdminGenealogy() {
   const [treeSearch, setTreeSearch] = useState('');
   const [exportingFormat, setExportingFormat] = useState(null);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list' (15-node drill) | 'tree' (canvas)
 
   const rootId = searchParams.get('id') || '';
   const rootUsername = searchParams.get('username') || '';
@@ -189,8 +191,24 @@ export default function AdminGenealogy() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          {/* Canvas */}
-          <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-[1.75rem]'}`} style={{ ...panelStyle, zIndex: 0 }}>
+          {/* Canvas column: List (drill) / Tree (canvas) */}
+          <div className="min-w-0 space-y-3">
+            <div className="inline-flex overflow-hidden rounded-xl" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
+              {[['list', 'List View'], ['tree', 'Tree View']].map(([mode, label]) => (
+                <button key={mode} type="button" onClick={() => setViewMode(mode)}
+                  className="px-3.5 py-2 text-sm font-semibold transition-colors"
+                  style={viewMode === mode ? { background: 'rgba(212,175,55,0.18)', color: 'var(--brand-gold)' } : { background: 'transparent', color: chrome.panelButtonText }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {viewMode === 'list' && (
+              <BinaryDrill nodes={flatNodes} selfUid={rootNode?.uid} chrome={chrome} panelStyle={panelStyle} loading={loading} />
+            )}
+
+            {viewMode === 'tree' && (
+            <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-[1.75rem]'}`} style={{ ...panelStyle, zIndex: 0 }}>
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
               <div>
                 <h2 className="font-display text-lg font-semibold" style={{ color: chrome.heading }}>{rootName}</h2>
@@ -246,6 +264,8 @@ export default function AdminGenealogy() {
               </ReactFlow>
             </div>
 
+          </div>
+          )}
           </div>
 
           {/* Side list — search + jump */}
