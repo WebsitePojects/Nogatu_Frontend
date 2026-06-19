@@ -249,6 +249,9 @@ export default function Registration() {
       await api.post('/registration/register', {
         ...form,
         tin: formatTin(form.tin),
+        // Forced first-invite (safety net) auto-places on the inherited side; manual mode
+        // honors the chosen placement UID + leg (autoPlacement=false => backend keeps them).
+        autoPlacement: (placementMeta?.placementPolicy?.mode || 'manual') === 'forced',
       });
       setFeedbackModal({
         tone: 'gold',
@@ -505,16 +508,29 @@ export default function Registration() {
             />
           </div>
 
-          {/* Position */}
+          {/* Position — forced first invite is locked to the safety-net side; after that,
+              the sponsor chooses Left or Right under the placement account. */}
           <div>
             <label className="label">Position</label>
-            <input
-              type="text"
-              value={form.position === '2' ? 'Right (Position B)' : 'Left (Position A)'}
-              readOnly
-              className="glass-input opacity-70"
-              placeholder="Assigned position"
-            />
+            {placementPolicyMode === 'forced' ? (
+              <input
+                type="text"
+                value={form.position === '2' ? 'Right (Position B)' : 'Left (Position A)'}
+                readOnly
+                className="glass-input opacity-70"
+                placeholder="Assigned position"
+              />
+            ) : (
+              <select
+                value={form.position === '2' ? '2' : '1'}
+                onChange={(e) => setForm((prev) => ({ ...prev, position: e.target.value }))}
+                className="glass-input"
+                aria-label="Placement position"
+              >
+                <option value="1">Left (Position A)</option>
+                <option value="2">Right (Position B)</option>
+              </select>
+            )}
           </div>
 
           <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/10 p-4">
@@ -527,7 +543,7 @@ export default function Registration() {
               </span>
             </div>
             <p className="text-sm font-semibold text-white mt-3">
-              {placementMeta?.positionLabel || (form.position === '2' ? 'Right' : 'Left')} leg placement
+              {(placementPolicyMode === 'forced' ? placementMeta?.positionLabel : null) || (form.position === '2' ? 'Right' : 'Left')} leg placement
             </p>
             <p className="text-xs mt-1 text-white/70 leading-relaxed">
               {placementMeta?.placementUsername
