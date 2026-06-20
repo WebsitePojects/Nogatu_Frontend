@@ -569,6 +569,8 @@ export default function PairingReports() {
               <option value="date:asc">Oldest first</option>
               <option value="amount:desc">Amount: high → low</option>
               <option value="amount:asc">Amount: low → high</option>
+              <option value="package:desc">Package: high → low</option>
+              <option value="package:asc">Package: low → high</option>
             </select>
             <Pager
               page={data.history?.page || 1}
