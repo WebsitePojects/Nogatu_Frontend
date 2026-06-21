@@ -431,18 +431,8 @@ export default function HiFiveBonus() {
     }
   }
 
-  async function handleClaimPackage(bonusType, quantity) {
-    try {
-      setBusyKey(`package-${bonusType}`);
-      const res = await api.post('/hifive/redeem', { claimType: 'package', bonusType, quantity });
-      toast.success(res.data?.message || 'Package Hi-Five claim submitted.');
-      await loadData();
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Package claim failed.');
-    } finally {
-      setBusyKey('');
-    }
-  }
+  // Package Hi-Five claim submission removed 2026-06-21 — package cash bonus is now
+  // auto-credited on the backend (monotonic via ttlincome5). No member action needed.
 
   if (loading) return <Spinner />;
 
