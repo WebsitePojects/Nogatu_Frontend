@@ -1,20 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Background, BackgroundVariant, Controls, ReactFlow } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  HiOutlineArrowsExpand,
-  HiOutlineChevronDown,
   HiOutlineChevronRight,
-  HiOutlineHome,
-  HiOutlineMinusSm,
-  HiOutlineRefresh,
   HiOutlineSearch,
   HiOutlineUsers,
 } from 'react-icons/hi';
 import api from '../../api';
-import { Spinner, MemberNode, JunctionNode, TreeEdge } from '../../components/genealogyTreeUi';
-import { getGenealogyTheme, NODE_WIDTH, NODE_HEIGHT } from '../../components/genealogyTreeUiUtils';
-import { buildFlatTreeGraph, expandPathTo } from '../../lib/buildFlatTreeGraph';
+import { Spinner } from '../../components/genealogyTreeUi';
+import { getGenealogyTheme } from '../../components/genealogyTreeUiUtils';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -26,19 +18,11 @@ const fmtMoney = (n) => `₱${Number(n || 0).toLocaleString('en-US', { minimumFr
 export default function UnilevelTree() {
   const { user } = useAuth();
   const { isDarkMode } = useTheme();
-  const reactFlowRef = useRef(null);
-  const flowShellRef = useRef(null);
 
-  const [canvasActive, setCanvasActive] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [expanded, setExpanded] = useState(() => new Set()); // explicitly opened deep branches
-  const [treeSearch, setTreeSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
   const [uniSummary, setUniSummary] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list' (per-level, default) | 'tree' (canvas)
 
   const selfUid = user?.uid;
-  const { nodes: flatNodes, status, loading, refreshing, count } = useInfiniteTree({
+  const { nodes: flatNodes, loading, refreshing, count } = useInfiniteTree({
     treeType: 'unilevel',
     cacheKey: selfUid ? String(selfUid) : '',
     url: '/genealogy/unilevel/flat',
@@ -47,9 +31,8 @@ export default function UnilevelTree() {
 
   const chrome = getGenealogyTheme(isDarkMode);
   const panelStyle = { background: chrome.surfaceStrong, border: `1px solid ${chrome.surfaceBorder}`, backdropFilter: 'blur(18px)' };
-  const neutralButtonStyle = { background: chrome.panelButtonBg, color: chrome.panelButtonText, border: `1px solid ${chrome.surfaceBorder}` };
 
-  // Your own maintenance status + per-level breakdown (independent of canvas root).
+  // Your own maintenance status + per-level breakdown.
   useEffect(() => {
     let cancelled = false;
     api.get('/dashboard/breakdown/uni-level')
@@ -57,83 +40,6 @@ export default function UnilevelTree() {
       .catch(() => { if (!cancelled) setUniSummary(null); });
     return () => { cancelled = true; };
   }, []);
-
-  useEffect(() => {
-    function onChange() { setIsFullscreen(document.fullscreenElement === flowShellRef.current); }
-    function onPointer(e) { if (!flowShellRef.current?.contains(e.target)) setCanvasActive(false); }
-    function onEsc(e) { if (e.key === 'Escape') setCanvasActive(false); }
-    document.addEventListener('fullscreenchange', onChange);
-    document.addEventListener('pointerdown', onPointer);
-    document.addEventListener('keydown', onEsc);
-    return () => {
-      document.removeEventListener('fullscreenchange', onChange);
-      document.removeEventListener('pointerdown', onPointer);
-      document.removeEventListener('keydown', onEsc);
-    };
-  }, []);
-
-  async function toggleFullscreen() {
-    if (!flowShellRef.current) return;
-    try {
-      if (document.fullscreenElement === flowShellRef.current) await document.exitFullscreen();
-      else { await flowShellRef.current.requestFullscreen(); setCanvasActive(true); }
-    } catch { /* denied */ }
-  }
-  function activateCanvas() { setCanvasActive(true); }
-
-  function toggleExpand(uid) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(uid)) next.delete(uid); else next.add(uid);
-      return next;
-    });
-  }
-  function jumpTo(node) {
-    const path = expandPathTo(flatNodes, node.uid);
-    setExpanded((prev) => { const next = new Set(prev); path.forEach((u) => next.add(u)); return next; });
-    setCanvasActive(true);
-    setTreeSearch(''); setSearchOpen(false);
-    const id = String(node.publicUid || node.uid);
-    setTimeout(() => {
-      const rf = reactFlowRef.current;
-      const target = rf?.getNode?.(id);
-      if (target) rf.setCenter(target.position.x + NODE_WIDTH / 2, target.position.y + NODE_HEIGHT / 2, { zoom: 0.9, duration: 500 });
-    }, 160);
-  }
-
-  // Progressive render: first 2 levels + explicitly expanded branches only (fast).
-  // Render the WHOLE unilevel tree (all nodes visible).
-  const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, expandAll: true }),
-    [flatNodes],
-  );
-  const nodes = useMemo(() => built.nodes.map((n) => (
-    n.type === 'memberNode'
-      ? { ...n, data: { ...n.data, isDarkMode, canvasActive, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } }
-      : n
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  )), [built, isDarkMode, canvasActive]);
-  const edges = built.edges;
-
-  useEffect(() => {
-    if (!built.nodes.length) return undefined;
-    const timer = setTimeout(() => {
-      reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 });
-    }, 80);
-    return () => clearTimeout(timer);
-    // refit only when the tree (size) changes, not on every expand
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count]);
-
-  const matchResults = useMemo(() => {
-    const q = treeSearch.trim().toLowerCase();
-    if (!q) return [];
-    return flatNodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q)).slice(0, 8);
-  }, [flatNodes, treeSearch]);
-
-  const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode }), []);
-  const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
-  const isCollapsed = expanded.size === 0;
 
   return (
     <div className="space-y-5">
@@ -144,65 +50,15 @@ export default function UnilevelTree() {
             Unilevel Tree
           </h1>
           <p className="text-sm portal-card-muted mt-1">
-            Your sponsor (direct-referral) network. List view shows one level at a time — click a member to drill
+            Your sponsor (direct-referral) network. This list shows one level at a time — click a member to drill
             into their bloodline (they become the root); use the breadcrumb to step back. Search jumps straight to
-            anyone's bloodline. Switch to Tree view for the full graphical canvas.
+            anyone's bloodline.
           </p>
         </div>
       </div>
 
       {/* Toolbar */}
       <div className="relative flex flex-wrap items-center gap-2 rounded-2xl p-3" style={{ ...panelStyle, zIndex: 40 }}>
-        {/* View toggle: per-level list (default) vs graphical tree canvas */}
-        <div className="inline-flex overflow-hidden rounded-xl" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
-          {[['list', 'List view'], ['tree', 'Tree view']].map(([mode, label]) => (
-            <button key={mode} type="button" onClick={() => setViewMode(mode)}
-              className="px-3 py-2 text-xs font-semibold transition-colors"
-              style={viewMode === mode
-                ? { background: 'rgba(212,175,55,0.18)', color: 'var(--brand-gold)' }
-                : { background: 'transparent', color: chrome.panelButtonText }}>
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {viewMode === 'tree' && (
-          <>
-            <button type="button" onClick={() => setExpanded(new Set())} disabled={isCollapsed}
-              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold disabled:opacity-40" style={neutralButtonStyle}>
-              <HiOutlineHome className="size-4" /> Collapse all
-            </button>
-            <button type="button"
-              onClick={() => reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 })}
-              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold" style={neutralButtonStyle}>
-              <HiOutlineRefresh className="size-4" /> Fit View
-            </button>
-
-            {/* In-tree search */}
-            <div className="relative">
-              <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
-              <input type="text" value={treeSearch}
-                onChange={(e) => { setTreeSearch(e.target.value); setSearchOpen(true); }}
-                onFocus={() => setSearchOpen(true)}
-                placeholder="Search a name in your tree…"
-                className="w-56 rounded-xl py-2 pl-8 pr-3 text-xs outline-none"
-                style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
-              {searchOpen && matchResults.length > 0 && (
-                <div className="absolute left-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-xl"
-                  style={{ background: chrome.popoverBg, border: `1px solid ${chrome.surfaceBorder}`, boxShadow: chrome.popoverShadow }}>
-                  {matchResults.map((m) => (
-                    <button key={m.uid} type="button" onClick={() => jumpTo(m)}
-                      className="w-full px-3 py-2 text-left text-xs" style={{ color: chrome.searchText }}>
-                      <span className="font-semibold">{m.fullname || m.username}</span>
-                      <span className="ml-1 portal-card-muted">@{m.username} · L{m.depth}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
         {refreshing && (
           <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
             style={{ background: 'rgba(212,175,55,0.14)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.3)' }}>
@@ -214,84 +70,8 @@ export default function UnilevelTree() {
         </div>
       </div>
 
-      {/* List view (default): drill-down explorer — click a member to re-root */}
-      {viewMode === 'list' && (
-        <UnilevelDrill nodes={flatNodes} selfUid={selfUid} chrome={chrome} panelStyle={panelStyle} loading={loading} />
-      )}
-
-      {/* Canvas (graphical tree) */}
-      {viewMode === 'tree' && (
-      <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-2xl'}`}
-        style={{ ...panelStyle, height: isFullscreen ? '100vh' : '70vh', zIndex: 0 }}>
-        <div className="absolute left-3 top-3 z-30 flex flex-wrap items-center gap-2">
-          <button type="button"
-            onClick={() => reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 })}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"
-            style={neutralButtonStyle}>
-            <HiOutlineRefresh className="size-4" /> Fit
-          </button>
-          <button type="button" onClick={toggleFullscreen}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"
-            style={{ background: 'rgba(212,175,55,0.16)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.35)' }}>
-            {isFullscreen ? <HiOutlineMinusSm className="size-4" /> : <HiOutlineArrowsExpand className="size-4" />}
-            {isFullscreen ? 'Exit' : 'Full screen'}
-          </button>
-          {isFullscreen && !isCollapsed && (
-            <button type="button" onClick={() => setExpanded(new Set())}
-              className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur" style={neutralButtonStyle}>
-              <HiOutlineHome className="size-4" /> Collapse all
-            </button>
-          )}
-        </div>
-
-        {!canvasActive && !loading && (
-          <button type="button" aria-label="Activate unilevel canvas" onClick={activateCanvas}
-            className="absolute inset-0 z-10 block cursor-grab bg-transparent" />
-        )}
-        {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center backdrop-blur-[2px]" style={{ background: chrome.canvasOverlay }}>
-            <Spinner />
-          </div>
-        )}
-        {!loading && status !== 'error' && nodes.length === 0 && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center text-sm portal-card-muted">
-            No downline to display yet.
-          </div>
-        )}
-        <ReactFlow
-          onInit={(instance) => { reactFlowRef.current = instance; }}
-          className="genealogy-flow size-full"
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          onlyRenderVisibleElements
-          minZoom={0.06}
-          maxZoom={1.6}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable={canvasActive}
-          panOnDrag={canvasActive}
-          panOnScroll={false}
-          zoomOnScroll={canvasActive}
-          zoomOnPinch={canvasActive}
-          zoomOnDoubleClick={canvasActive}
-          preventScrolling={canvasActive}
-          proOptions={{ hideAttribution: true }}
-          defaultEdgeOptions={{ type: 'treeEdge' }}
-        >
-          <Controls className="genealogy-controls" showInteractive={false} position="top-right" />
-          <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color={chrome.backgroundDot} />
-        </ReactFlow>
-
-        {!canvasActive && !loading && nodes.length > 0 && (
-          <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full px-3 py-1.5 text-[11px] font-medium"
-            style={{ background: 'rgba(15,23,42,0.72)', color: 'rgba(255,255,255,0.85)' }}>
-            Tap the canvas to pan, zoom, and open members
-          </div>
-        )}
-      </div>
-      )}
+      {/* Drill-down explorer — click a member to re-root */}
+      <UnilevelDrill nodes={flatNodes} selfUid={selfUid} chrome={chrome} panelStyle={panelStyle} loading={loading} />
 
       <UnilevelBreakdown summary={uniSummary} panelStyle={panelStyle} />
     </div>
