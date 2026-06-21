@@ -220,9 +220,8 @@ function ContributorList({ title, contributors, accent, onViewAll, emptyMessage 
   );
 }
 
-function PackageCard({ item, onClaim, onViewContributors, busy }) {
+function PackageCard({ item, onViewContributors }) {
   const accent = PACKAGE_ACCENTS[item.key] || '#D4AF37';
-  const hasClaim = item.availableClaims > 0;
 
   return (
     <div
@@ -236,7 +235,7 @@ function PackageCard({ item, onClaim, onViewContributors, busy }) {
           <p className="text-xs font-medium" style={{ color: accent }}>{item.name} Package</p>
           <h3 className="font-semibold text-white text-lg mt-1">PHP {fmtMoney(item.rewardAmount)}</h3>
           <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
-            Every 5 direct referrals with the same package unlock 1 cash claim.
+            Every 5 same-package direct referrals auto-credit 1 cash bonus to your e-wallet — no claim needed.
           </p>
         </div>
         <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}35` }}>
@@ -246,7 +245,7 @@ function PackageCard({ item, onClaim, onViewContributors, busy }) {
 
       <div className="grid grid-cols-2 gap-3 mt-5">
         <SummaryStat label="Direct Referrals" value={fmtInt(item.directReferralCount)} subtitle="same-package referrals" icon={HiOutlineUsers} />
-        <SummaryStat label="Available Claims" value={fmtInt(item.availableClaims)} subtitle={`PHP ${fmtMoney(item.availableCashAmount)} claimable`} icon={HiOutlineCheckCircle} />
+        <SummaryStat label="Cash Bonus" value={`PHP ${fmtMoney(item.availableCashAmount)}`} subtitle="auto-credited to your e-wallet" icon={HiOutlineCheckCircle} />
       </div>
 
       <div className="grid grid-cols-3 gap-2 mt-4 text-center">
@@ -280,23 +279,16 @@ function PackageCard({ item, onClaim, onViewContributors, busy }) {
         emptyMessage="No contributor history has been consumed into claims yet."
       />
 
-      {hasClaim ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => onClaim(item.key, item.availableClaims)}
-          className="w-full mt-4 rounded-xl py-3 text-sm font-semibold"
-          style={{ background: accent, color: '#120c02' }}
-        >
-          {busy ? 'Submitting...' : `Submit ${item.availableClaims} cash claim${item.availableClaims > 1 ? 's' : ''}`}
-        </button>
-      ) : (
-        <div className="mt-4 rounded-xl py-3 px-4 text-sm" style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.38)' }}>
-          {item.remainingToNextSet > 0
-            ? `Need ${item.remainingToNextSet} more ${item.name.toLowerCase()} direct referral${item.remainingToNextSet === 1 ? '' : 's'} for the next cash claim.`
-            : 'No available cash claim right now.'}
-        </div>
-      )}
+      <div className="mt-4 rounded-xl py-3 px-4 text-sm flex items-start gap-2" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)', color: 'rgba(255,255,255,0.6)' }}>
+        <HiOutlineSparkles className="size-4 shrink-0 mt-0.5" style={{ color: accent }} />
+        <span>
+          {item.qualifiedSets > 0
+            ? 'Your cash bonus is credited automatically to your e-wallet as you qualify — no claim to submit.'
+            : item.remainingToNextSet > 0
+              ? `Need ${item.remainingToNextSet} more ${item.name.toLowerCase()} direct referral${item.remainingToNextSet === 1 ? '' : 's'} to auto-credit the next cash bonus.`
+              : 'Cash bonus auto-credits to your e-wallet when you qualify.'}
+        </span>
+      </div>
     </div>
   );
 }
@@ -439,18 +431,8 @@ export default function HiFiveBonus() {
     }
   }
 
-  async function handleClaimPackage(bonusType, quantity) {
-    try {
-      setBusyKey(`package-${bonusType}`);
-      const res = await api.post('/hifive/redeem', { claimType: 'package', bonusType, quantity });
-      toast.success(res.data?.message || 'Package Hi-Five claim submitted.');
-      await loadData();
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Package claim failed.');
-    } finally {
-      setBusyKey('');
-    }
-  }
+  // Package Hi-Five claim submission removed 2026-06-21 — package cash bonus is now
+  // auto-credited on the backend (monotonic via ttlincome5). No member action needed.
 
   if (loading) return <Spinner />;
 
@@ -521,13 +503,13 @@ export default function HiFiveBonus() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: '#D4AF37' }}>Hi-Five Bonus - Package</p>
             <h2 className="font-display text-xl font-semibold text-white mt-2">Cash bonus for every 5 same-package direct referrals</h2>
             <p className="text-sm mt-2 max-w-3xl" style={{ color: 'rgba(255,255,255,0.42)' }}>
-              If you directly refer 5 members with the same package, you can submit one cash claim equal to that package amount.
-              Example: 5 Silver direct referrals unlock a PHP 5,000 cash Hi-Five claim.
+              If you directly refer 5 members with the same package, one cash bonus equal to that package amount is
+              auto-credited to your e-wallet. Example: 5 Silver direct referrals auto-credit a PHP 5,000 cash Hi-Five bonus.
             </p>
           </div>
           <div className="portal-soft-panel rounded-2xl px-4 py-3">
-            <p className="portal-card-muted text-xs">Guardrail</p>
-            <p className="portal-card-title text-sm font-semibold mt-1">Claims are submitted for review before payout release.</p>
+            <p className="portal-card-muted text-xs">How it works</p>
+            <p className="portal-card-title text-sm font-semibold mt-1">Cash bonus auto-credits to your e-wallet — no claim to submit.</p>
           </div>
         </div>
 
@@ -551,8 +533,6 @@ export default function HiFiveBonus() {
                       accent: PACKAGE_ACCENTS[card.key] || '#D4AF37',
                     }
               )}
-              busy={busyKey === `package-${item.key}`}
-              onClaim={handleClaimPackage}
             />
           ))}
         </div>
