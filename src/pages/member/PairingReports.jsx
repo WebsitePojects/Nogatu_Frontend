@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   HiOutlineArrowLeft,
   HiOutlineArrowRight,
@@ -206,7 +205,6 @@ function TraceEventCard({ row, expanded, onToggle }) {
 }
 
 export default function PairingReports() {
-  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [historyPage, setHistoryPage] = useState(1);
   const [tracePage, setTracePage] = useState(1);
@@ -338,8 +336,7 @@ export default function PairingReports() {
         label: 'Left Accounts',
         value: data?.counts?.totalLeft || 0,
         icon: HiOutlineArrowLeft,
-        helper: 'Open left-leg account list',
-        onClick: () => navigate('/pairing/leg/left'),
+        helper: 'Total accounts on your left leg',
       },
       {
         label: 'Left Remaining',
@@ -352,8 +349,7 @@ export default function PairingReports() {
         label: 'Right Accounts',
         value: data?.counts?.totalRight || 0,
         icon: HiOutlineArrowRight,
-        helper: 'Open right-leg account list',
-        onClick: () => navigate('/pairing/leg/right'),
+        helper: 'Total accounts on your right leg',
       },
       {
         label: 'Right Remaining',
@@ -363,7 +359,7 @@ export default function PairingReports() {
         helper: rightPV > leftPV ? 'Strong leg — unmatched surplus' : 'Weak leg — fully consumed',
       },
     ];
-  }, [data, navigate]);
+  }, [data]);
 
   if (loading) return <Spinner />;
   if (!data) return <p style={{ color: PORTAL_MUTED }}>Failed to load pairing data.</p>;
