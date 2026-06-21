@@ -17,7 +17,6 @@ const DirectReferrals = lazy(() => import('./pages/member/DirectReferrals'));
 const GenealogyTree = lazy(() => import('./pages/member/GenealogyTree'));
 const UnilevelTree = lazy(() => import('./pages/member/UnilevelTree'));
 const PairingReports = lazy(() => import('./pages/member/PairingReports'));
-const PairingLegAccounts = lazy(() => import('./pages/member/PairingLegAccounts'));
 const HiFiveBonus = lazy(() => import('./pages/member/HiFiveBonus'));
 const RankingProgress = lazy(() => import('./pages/member/RankingProgress'));
 const Leaderboard = lazy(() => import('./pages/member/Leaderboard'));
@@ -135,7 +134,6 @@ export default function App() {
             <Route path="genealogy" element={<GenealogyTree />} />
             <Route path="unilevel" element={<UnilevelTree />} />
             <Route path="pairing" element={<PairingReports />} />
-            <Route path="pairing/leg/:side" element={<PairingLegAccounts />} />
             <Route path="hifive" element={<HiFiveBonus />} />
             <Route path="ranking" element={<RankingProgress />} />
             <Route path="leaderboard" element={<Leaderboard />} />

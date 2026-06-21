@@ -35,7 +35,6 @@ const NAV_GROUPS = [
       { to: '/pairing',                          label: 'Pairing Reports',        icon: HiOutlineChartBar },
       { to: '/dashboard/details/uni-level',      label: 'Uni-Level',             icon: HiOutlineTrendingUp },
       { to: '/dashboard/details/leadership-bonus', label: 'Leadership',          icon: HiOutlineStar },
-      { to: '/dashboard/details/ranking-bonus',  label: 'Ranking Bonus',         icon: HiOutlineShieldCheck },
       { to: '/hifive',                           label: 'Hi-Five Bonus',          icon: HiOutlineGift },
       { to: '/ranking',                          label: 'Rank Progress',         icon: HiOutlineShieldCheck },
       { to: '/leaderboard',                      label: 'Leaderboard',           icon: HiOutlineChartBar },
