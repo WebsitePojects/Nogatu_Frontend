@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
-import { HiOutlineKey, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
+import { HiOutlineKey, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineLockClosed } from 'react-icons/hi';
 import { useAuth } from '../../contexts/AuthContext';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
 import { formatDateTimeManila } from '../../utils/dateTime';
@@ -34,9 +34,24 @@ export default function ActivationCodes() {
   const [selected, setSelected]     = useState([]);
   const [targetUsername, setTargetUsername] = useState('');
   const [confirmModal, setConfirmModal] = useState(null);
+  const [maintenancePoints, setMaintenancePoints] = useState(null);
 
   useEffect(() => { loadCodes(); }, [page]);
   useEffect(() => { loadHistory(); }, [historyPage]);
+  useEffect(() => {
+    // Hi-Five product purchases unlock only after 200 unilevel-maintenance points this month
+    // (mirrors the backend gate on /codes/maintenance transType=2). Fetch the member's current
+    // maintenance points so the Hi-Five action is disabled proactively, not just rejected on click.
+    api.get('/hifive')
+      .then((r) => setMaintenancePoints(Number(r.data?.summary?.maintenancePoints ?? 0)))
+      .catch(() => setMaintenancePoints(null));
+  }, []);
+
+  const HIFIVE_THRESHOLD = 200;
+  const hifiveUnlocked = maintenancePoints != null && maintenancePoints >= HIFIVE_THRESHOLD;
+  const hifiveLockHint = maintenancePoints == null
+    ? `Reach ${HIFIVE_THRESHOLD} unilevel-maintenance points this month to unlock Hi-Five.`
+    : `Reach ${HIFIVE_THRESHOLD} unilevel-maintenance points this month to unlock Hi-Five (${maintenancePoints}/${HIFIVE_THRESHOLD}).`;
 
   async function loadCodes() {
     setLoading(true);
@@ -117,6 +132,9 @@ export default function ActivationCodes() {
   }
 
   function handleMaintenance(code, transType) {
+    if (transType === 2 && !hifiveUnlocked) {
+      return toast.error(hifiveLockHint);
+    }
     const codeRow = findCodeRecord(code);
     const isHiFive = transType === 2;
     setConfirmModal({
@@ -243,6 +261,16 @@ export default function ActivationCodes() {
 
         {loading ? <Spinner /> : (
           <>
+          {codes.some((c) => c.codestatus === 1 && Number(c.producttype) >= 100) && !hifiveUnlocked && (
+            <div
+              className="mx-4 mt-4 flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs"
+              style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.18)', color: 'rgba(147,197,253,0.95)' }}
+              role="status"
+            >
+              <HiOutlineLockClosed className="size-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <span><strong className="font-semibold">Hi-Five locked.</strong> {hifiveLockHint}</span>
+            </div>
+          )}
           <div className="space-y-3 p-4 md:hidden">
             {codes.map((c) => {
               const statusStyle = STATUS_STYLES[c.codestatus] || STATUS_STYLES[0];
@@ -296,9 +324,13 @@ export default function ActivationCodes() {
                         </button>
                         <button
                           onClick={() => handleMaintenance(c.code, 2)}
-                          className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
-                          style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)' }}
+                          disabled={!hifiveUnlocked}
+                          title={!hifiveUnlocked ? hifiveLockHint : undefined}
+                          aria-label={!hifiveUnlocked ? `Set as Hi-Five — locked. ${hifiveLockHint}` : 'Set as Hi-Five'}
+                          className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors inline-flex items-center gap-1"
+                          style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)', opacity: hifiveUnlocked ? 1 : 0.45, cursor: hifiveUnlocked ? 'pointer' : 'not-allowed' }}
                          type="button">
+                          {!hifiveUnlocked && <HiOutlineLockClosed className="size-3.5" aria-hidden="true" />}
                           Set as Hi-Five
                         </button>
                       </>
@@ -384,11 +416,15 @@ export default function ActivationCodes() {
                             </button>
                             <button
                               onClick={() => handleMaintenance(c.code, 2)}
-                              className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
-                              style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)' }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.18)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
+                              disabled={!hifiveUnlocked}
+                              title={!hifiveUnlocked ? hifiveLockHint : undefined}
+                              aria-label={!hifiveUnlocked ? `Set as Hi-Five — locked. ${hifiveLockHint}` : 'Set as Hi-Five'}
+                              className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors inline-flex items-center gap-1"
+                              style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)', opacity: hifiveUnlocked ? 1 : 0.45, cursor: hifiveUnlocked ? 'pointer' : 'not-allowed' }}
+                              onMouseEnter={e => { if (hifiveUnlocked) e.currentTarget.style.background = 'rgba(59,130,246,0.18)'; }}
+                              onMouseLeave={e => { if (hifiveUnlocked) e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; }}
                              type="button">
+                              {!hifiveUnlocked && <HiOutlineLockClosed className="size-3.5" aria-hidden="true" />}
                               Set as Hi-Five
                             </button>
                           </div>
