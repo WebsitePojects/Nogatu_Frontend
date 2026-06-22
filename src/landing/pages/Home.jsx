@@ -14,6 +14,12 @@ import { LANDING_PRODUCT_GROUPS } from '../data/productCatalog';
 
 const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
 
+function formatProductPrice(price) {
+  if (price === 'TBA') return price;
+  const formatted = Number(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `₱${formatted}`;
+}
+
 function WhyFeatureCard({ feature, delay }) {
   const cardRef = useScrollReveal({ delay });
 
@@ -69,7 +75,7 @@ function ProductGroupSection({ group, groupIndex, onOpenLightbox }) {
                 <h4 className="text-base font-bold text-gray-900 sm:text-lg">{p.name}</h4>
                 <p className="mt-2 text-sm leading-6 text-gray-500">{p.desc}</p>
               </div>
-              <p className="mt-4 text-xl font-bold text-brand-gold-dark">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
+              <p className="mt-4 text-xl font-bold text-brand-gold-dark">{formatProductPrice(p.price)}</p>
             </div>
           </article>
         ))}
@@ -430,7 +436,7 @@ function Products() {
                           <h4 className="text-lg font-bold leading-snug text-gray-900">{p.name}</h4>
                           <p className="mt-2 text-sm leading-6 text-gray-500 sm:text-[0.95rem]">{p.desc}</p>
                         </div>
-                        <p className="text-[1.35rem] font-bold text-brand-gold-dark sm:text-2xl">{p.price === 'TBA' ? p.price : `Php ${p.price}`}</p>
+                        <p className="text-[1.35rem] font-bold text-brand-gold-dark sm:text-2xl">{formatProductPrice(p.price)}</p>
                       </div>
                     </article>
                   ))}
