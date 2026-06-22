@@ -557,7 +557,7 @@ export default function VoucherManagement() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Voucher Code', 'Username', 'Full Name', 'Package', 'Amount', 'Remaining', 'Status', 'Issued', 'Expiry', 'Actions'].map((header) => (
+                  {['Voucher Code', 'ER Reference', 'Username', 'Full Name', 'Package', 'Amount', 'Remaining', 'Status', 'Issued', 'Expiry', 'Actions'].map((header) => (
                     <th key={header} className="table-header p-3 text-left text-xs uppercase tracking-wide">{header}</th>
                   ))}
                 </tr>
@@ -566,6 +566,24 @@ export default function VoucherManagement() {
                 {rows.map((row) => (
                   <tr key={row.id} className="hover:bg-white/[0.04] transition-colors">
                     <td className="p-3 text-white/80 font-mono text-xs">{voucherCode(row)}</td>
+                    <td className="p-3 font-mono text-xs">
+                      {row.latestEr ? (
+                        <span className="inline-flex items-center gap-1">
+                          <span style={{ color: 'rgba(212,175,55,0.9)' }}>{row.latestEr}</span>
+                          {Number(row.erCount) > 1 && (
+                            <span
+                              className="text-[10px] px-1.5 py-0.5 rounded-full"
+                              style={{ color: 'rgba(191,219,254,0.95)', background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.22)' }}
+                              title={`${row.erCount} ER transactions on this voucher`}
+                            >
+                              +{Number(row.erCount) - 1}
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-white/30">—</span>
+                      )}
+                    </td>
                     <td className="p-3 text-white/80">{row.username}</td>
                     <td className="p-3 text-white/60">{row.fullName || 'N/A'}</td>
                     <td className="p-3 text-white/70">{row.package || '-'}</td>
@@ -634,7 +652,7 @@ export default function VoucherManagement() {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan="10" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    <td colSpan="11" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
                       No vouchers found.
                     </td>
                   </tr>
