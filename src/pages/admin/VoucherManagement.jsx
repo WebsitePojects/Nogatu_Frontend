@@ -529,6 +529,16 @@ export default function VoucherManagement() {
           >
             Search
           </button>
+          {(search || searchInput) && (
+            <button
+              type="button"
+              onClick={() => { setSearchInput(''); setSearch(''); setPage(1); }}
+              className="portal-button portal-neutral-button px-4 py-2.5 text-sm"
+              title="Clear search and show all vouchers"
+            >
+              Clear
+            </button>
+          )}
         </form>
 
         <div className="flex flex-wrap items-center gap-2">

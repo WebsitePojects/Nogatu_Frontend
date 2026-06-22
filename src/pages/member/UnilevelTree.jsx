@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  HiOutlineChevronDown,
   HiOutlineSearch,
   HiOutlineUsers,
 } from 'react-icons/hi';
@@ -82,6 +83,7 @@ export default function UnilevelTree() {
       Uses the already-loaded flat list. ──────────────────────────────────────────── */
 function UnilevelAllLevels({ nodes, chrome, panelStyle, loading }) {
   const [q, setQ] = useState('');
+  const [openLevels, setOpenLevels] = useState(() => new Set([1])); // only Level 1 expanded by default
 
   // Group by level (depth >= 1 excludes the member themselves), sorted shallow→deep.
   const levels = useMemo(() => {
@@ -125,36 +127,62 @@ function UnilevelAllLevels({ nodes, chrome, panelStyle, loading }) {
             className="w-full sm:w-72 rounded-xl py-2 pl-8 pr-3 text-sm outline-none"
             style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
         </div>
-        <span className="text-xs portal-card-muted">
-          <span className="portal-card-title font-semibold">{fmtInt(totalMembers)}</span> members across{' '}
-          <span className="portal-card-title font-semibold">{fmtInt(deepest)}</span> level{deepest === 1 ? '' : 's'}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => setOpenLevels(new Set(levels.map(([lvl]) => lvl)))}
+            className="text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(212,175,55,0.08)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
+            Expand all
+          </button>
+          <button type="button" onClick={() => setOpenLevels(new Set())}
+            className="text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(148,163,184,0.10)', color: chrome.panelButtonText, border: '1px solid rgba(148,163,184,0.2)' }}>
+            Collapse all
+          </button>
+          <span className="text-xs portal-card-muted">
+            <span className="portal-card-title font-semibold">{fmtInt(totalMembers)}</span> members ·{' '}
+            <span className="portal-card-title font-semibold">{fmtInt(deepest)}</span> level{deepest === 1 ? '' : 's'}
+          </span>
+        </div>
       </div>
 
       {visible.length === 0 && (
         <p className="px-1 py-6 text-center text-xs portal-card-muted">No members match “{q}”.</p>
       )}
 
-      {visible.map(([level, members]) => (
-        <section key={level}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="rounded-lg px-2.5 py-1 text-xs font-bold"
-              style={{ background: 'rgba(212,175,55,0.16)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.3)' }}>
-              Level {level}
-            </span>
-            <span className="text-xs portal-card-muted">{fmtInt(members.length)} member{members.length === 1 ? '' : 's'}</span>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {members.map((m) => (
-              <div key={m.uid} className="rounded-xl px-3.5 py-2.5"
-                style={{ border: `1px solid ${chrome.surfaceBorder}`, background: chrome.surface }}>
-                <p className="truncate text-sm font-medium portal-card-title">{m.fullname || m.username || `Member ${m.uid}`}</p>
-                <p className="truncate text-[11px] portal-card-muted">@{m.username || m.uid} · {m.accttypeName || '—'}</p>
+      {visible.map(([level, members]) => {
+        const open = Boolean(term) || openLevels.has(level);
+        return (
+          <section key={level} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
+            <button type="button"
+              onClick={() => setOpenLevels((prev) => {
+                const next = new Set(prev);
+                if (next.has(level)) next.delete(level); else next.add(level);
+                return next;
+              })}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors"
+              style={{ background: 'rgba(212,175,55,0.06)' }}>
+              <HiOutlineChevronDown className="size-4 transition-transform" aria-hidden
+                style={{ color: 'var(--brand-gold)', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+              <span className="rounded-lg px-2.5 py-0.5 text-xs font-bold"
+                style={{ background: 'rgba(212,175,55,0.16)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.3)' }}>
+                Level {level}
+              </span>
+              <span className="text-xs portal-card-muted">{fmtInt(members.length)} member{members.length === 1 ? '' : 's'}</span>
+            </button>
+            {open && (
+              <div className="grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3">
+                {members.map((m) => (
+                  <div key={m.uid} className="rounded-xl px-3.5 py-2.5"
+                    style={{ border: `1px solid ${chrome.surfaceBorder}`, background: chrome.surface }}>
+                    <p className="truncate text-sm font-medium portal-card-title">{m.fullname || m.username || `Member ${m.uid}`}</p>
+                    <p className="truncate text-[11px] portal-card-muted">@{m.username || m.uid} · {m.accttypeName || '—'}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
-      ))}
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
