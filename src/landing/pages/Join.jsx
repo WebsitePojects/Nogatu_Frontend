@@ -25,7 +25,6 @@ export default function Join() {
     tin: '',
     contactno: '',
     dob: '',
-    sponsor: '',
   });
 
   useEffect(() => {
@@ -204,10 +203,6 @@ export default function Join() {
           </p>
         </div>
 
-        <div className="max-w-2xl mx-auto mb-4 rounded-xl border border-brand-gold/30 bg-[#FFF8E1] px-4 py-3 text-sm text-brand-brown text-center">
-          This form is for distributor application only.
-        </div>
-
         <div className="max-w-2xl mx-auto rounded-2xl border border-brand-gold/25 bg-white p-6 sm:p-8 shadow-xl">
           {loading ? (
             <p className="text-gray-600">Checking referral ID...</p>
@@ -229,7 +224,6 @@ export default function Join() {
                   { key: 'tin', label: 'TIN', type: 'text', optional: true },
                   { key: 'username', label: 'Username', type: 'text' },
                   { key: 'password', label: 'Password', type: 'password' },
-                  { key: 'sponsor', label: 'Sponsor (Username or Full Name)', type: 'text', optional: true },
                 ].map((field) => (
                   <label key={field.key} className="block">
                     <span className="block text-sm font-semibold text-brand-brown mb-2">
@@ -270,9 +264,6 @@ export default function Join() {
                     This code will consume: <strong>{codePreview.accountLabel}</strong>
                   </div>
                 ) : null}
-                <p className="text-xs text-gray-500 text-center">
-                  This form is for distributor application only.
-                </p>
                 <button type="submit" disabled={submitting} className="btn-landing-primary w-full disabled:opacity-60">
                   {submitting ? 'Registering...' : 'Register Account'}
                 </button>
