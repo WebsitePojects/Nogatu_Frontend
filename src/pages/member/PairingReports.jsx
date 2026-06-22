@@ -287,6 +287,24 @@ export default function PairingReports() {
     }
   }, [expandedTraceUid, traceRows]);
 
+  // Encode-based ledger (Minutes refinement): ONE row per binary encode (newest first) — the new
+  // member, their package PV, whether it grew the strong leg (+PV) or matched the weak leg (−PV),
+  // and the running strong-leg remaining. Replaces the per-matched-pair rows (which split one
+  // encode into many). Backend returns the full encode ledger; we filter + paginate client-side.
+  const ENCODE_PER_PAGE = 50;
+  const ENCODE_PKG = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum', 50: 'Garnet', 60: 'Diamond' };
+  const encodeAll = useMemo(() => {
+    const all = data?.trace?.encodeTrace || [];
+    const q = debouncedTraceSearch.trim().toLowerCase();
+    const filtered = q
+      ? all.filter((r) => `${r.pairedAt || ''} ${r.username || ''} ${r.fullName || ''}`.toLowerCase().includes(q))
+      : all;
+    return [...filtered].reverse(); // newest first
+  }, [data, debouncedTraceSearch]);
+  const encodeTotalPages = Math.max(1, Math.ceil(encodeAll.length / ENCODE_PER_PAGE));
+  const encodePage = Math.min(tracePage, encodeTotalPages);
+  const encodeRows = encodeAll.slice((encodePage - 1) * ENCODE_PER_PAGE, encodePage * ENCODE_PER_PAGE);
+
   const summaryCards = useMemo(() => {
     const leftPV = Math.round((data?.counts?.totalPointsLeft || 0) / 250);
     const rightPV = Math.round((data?.counts?.totalPointsRight || 0) / 250);
@@ -475,7 +493,9 @@ export default function PairingReports() {
               {tableBusy && <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: '#D4AF37' }} />}
             </h3>
             <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
-              This page&apos;s matches in chronological order (oldest first): each left–right match, the PV matched, the running total <em>within this page</em>, the payout, and each source&apos;s remaining points — so it reads as a running ledger.
+              One record per encode (newest first): each new member added to a leg — their package PV, whether it
+              grew the strong leg (<span style={{ color: '#34d399' }}>+PV</span>) or matched the weak leg
+              (<span style={{ color: '#f2d06b' }}>−PV</span>), and the running strong-leg remaining.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
@@ -483,7 +503,7 @@ export default function PairingReports() {
               <input
                 value={traceSearch}
                 onChange={(e) => setTraceSearch(e.target.value)}
-                placeholder="Search trace: date or @username"
+                placeholder="Search: date or @username"
                 className="glass-input text-xs rounded-lg py-1.5 pl-2.5 pr-7 w-48"
               />
               {traceSearch && (
@@ -497,109 +517,62 @@ export default function PairingReports() {
               disabled={exportingXlsx}
               className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
               style={{ background: 'rgba(34,197,94,0.12)', color: '#34d399', border: '1px solid rgba(34,197,94,0.3)' }}
-              title="Export full pairing history + event trace (with chart) to Excel"
+              title="Export to Excel"
             >
               <HiOutlineDownload className="size-4" /> {exportingXlsx ? 'Exporting…' : 'Export XLSX'}
             </button>
-            <button
-              type="button"
-              onClick={() => setGroupTrace((v) => !v)}
-              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors"
-              style={groupTrace
-                ? { background: 'rgba(212,175,55,0.18)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.4)' }
-                : { background: 'rgba(212,175,55,0.06)', color: PORTAL_MUTED, border: '1px solid rgba(212,175,55,0.18)' }}
-            >
-              {groupTrace ? 'Grouped by tier' : 'Group by tier'}
-            </button>
             <Pager
-              page={data.trace?.pagination?.page || 1}
-              totalPages={data.trace?.pagination?.totalPages || 1}
+              page={encodePage}
+              totalPages={encodeTotalPages}
               onPrev={() => setTracePage((p) => Math.max(1, p - 1))}
-              onNext={() => setTracePage((p) => Math.min(Number(data.trace?.pagination?.totalPages || 1), p + 1))}
+              onNext={() => setTracePage((p) => Math.min(encodeTotalPages, p + 1))}
             />
           </div>
         </div>
 
-        {groupTrace && (
-          <div className="p-4">
-            <p className="text-xs mb-3" style={{ color: PORTAL_MUTED }}>
-              This page&apos;s {traceRows.length} matched event{traceRows.length === 1 ? '' : 's'} grouped by the matched source&apos;s package tier.
-            </p>
-            <div className="overflow-x-auto rounded-xl" style={{ border: `1px solid ${PORTAL_BORDER}` }}>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr>
-                    <th className="table-header py-2.5 px-4 text-left">Package Tier</th>
-                    <th className="table-header py-2.5 px-4 text-left">Matches</th>
-                    <th className="table-header py-2.5 px-4 text-left">Total Matched PV</th>
-                    <th className="table-header py-2.5 px-4 text-left">Total Credited</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {groupTraceByTier(traceRows).map((b, i) => (
-                    <tr key={b.label} style={{ background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent', borderTop: `1px solid ${PORTAL_ROW}` }}>
-                      <td className="py-2.5 px-4 font-semibold" style={{ color: PORTAL_TITLE }}>{b.label}</td>
-                      <td className="py-2.5 px-4" style={{ color: PORTAL_TEXT }}>{fmtInt(b.count)}</td>
-                      <td className="py-2.5 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(b.totalPv)} PV</td>
-                      <td className="py-2.5 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(b.credited)}</td>
-                    </tr>
-                  ))}
-                  {traceRows.length === 0 && (
-                    <tr><td colSpan="4" className="py-8 text-center text-xs" style={{ color: PORTAL_MUTED }}>No events on this page.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <div className={`overflow-x-auto hidden ${groupTrace ? '' : 'lg:block'}`} style={groupTrace ? { display: 'none' } : undefined}>
-          <table className="w-full text-sm min-w-[1240px]">
+        <div className="overflow-x-auto hidden lg:block">
+          <table className="w-full text-sm min-w-[860px]">
             <thead>
               <tr>
                 <th className="table-header py-3 px-4">#</th>
                 <th className="table-header py-3 px-4">Date</th>
-                <th className="table-header py-3 px-4">New weak-leg entry</th>
-                <th className="table-header py-3 px-4">Matched</th>
+                <th className="table-header py-3 px-4">Encoded member</th>
+                <th className="table-header py-3 px-4">Leg effect</th>
                 <th className="table-header py-3 px-4">Strong leg remaining</th>
-                <th className="table-header py-3 px-4">Credited</th>
-                <th className="table-header py-3 px-4">Status</th>
               </tr>
             </thead>
             <tbody>
-              {orderedTraceRows.map((row, index) => {
-                const styles = statusStyles(row);
-                const entry = row[weakSide] || {};
+              {encodeRows.map((row, index) => {
+                const pv = toBp(row.pointValue);
+                const num = (encodePage - 1) * ENCODE_PER_PAGE + index + 1;
                 return (
                   <tr
-                    key={row.ledgerUid || index}
+                    key={row.encodeUid || index}
                     style={{
                       background: index % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent',
                       borderBottom: `1px solid ${PORTAL_ROW}`,
                     }}
                     className="portal-table-row-hover transition-colors"
                   >
-                    <td className="py-3 px-4 text-xs font-mono" style={{ color: PORTAL_MUTED }}>{index + 1}</td>
+                    <td className="py-3 px-4 text-xs font-mono" style={{ color: PORTAL_MUTED }}>{num}</td>
                     <td className="py-3 px-4 text-xs" style={{ color: PORTAL_MUTED }}>{formatDateTimeManila(row.pairedAt)}</td>
                     <td className="py-3 px-4">
-                      <div className="text-xs" style={{ color: PORTAL_TITLE }}>{entry.fullName || entry.username || '-'}</div>
-                      <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{entry.username || ''}</div>
-                      <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{entry.packageLabel || 'Unknown'} - {entry.accountStateLabel || 'Unknown'}</div>
+                      <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.fullName || row.username || '-'}</div>
+                      <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.username || ''}</div>
+                      <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{ENCODE_PKG[row.packageType] || 'Unknown'} · {row.eventType === 'upgrade' ? 'Upgrade' : 'New'} · {row.leg === 'left' ? 'Left' : 'Right'} leg</div>
                     </td>
-                    <td className="py-3 px-4 font-semibold" style={{ color: PORTAL_TITLE }}>&minus;{fmtInt(toBp(row.pairPoints))} PV</td>
-                    <td className="py-3 px-4 font-semibold" style={{ color: 'rgba(212,175,55,0.82)' }}>{fmtInt(toBp(row[strongSide]?.remainingAfter))} PV</td>
-                    <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
-                    <td className="py-3 px-4">
-                      <span className="text-[11px] px-2 py-1 rounded-full font-semibold" style={styles}>{traceStatus(row)}</span>
+                    <td className="py-3 px-4 font-semibold" style={{ color: row.addsToStrong ? '#34d399' : '#f2d06b' }}>
+                      {row.addsToStrong ? '+' : '−'}{fmtInt(pv)} PV
                     </td>
+                    <td className="py-3 px-4 font-semibold" style={{ color: 'rgba(212,175,55,0.82)' }}>{fmtInt(toBp(row.strongRemainingAfter))} PV</td>
                   </tr>
                 );
               })}
-              {traceRows.length === 0 && (
+              {encodeAll.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="py-14 text-center">
+                  <td colSpan="5" className="py-14 text-center">
                     <HiOutlineChartBar className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
-                    <p style={{ color: PORTAL_MUTED }}>No pairing event trace yet.</p>
+                    <p style={{ color: PORTAL_MUTED }}>No pairing encodes yet.</p>
                   </td>
                 </tr>
               )}
@@ -607,27 +580,34 @@ export default function PairingReports() {
           </table>
         </div>
 
-        <div className={`${groupTrace ? 'hidden' : 'lg:hidden'} p-4 space-y-3`}>
-          {orderedTraceRows.map((row, index) => (
-            <TraceEventCard
-              key={row.ledgerUid || index}
-              row={row}
-              weakSide={weakSide}
-              strongSide={strongSide}
-            />
-          ))}
-          {traceRows.length === 0 && (
+        <div className="lg:hidden p-4 space-y-3">
+          {encodeRows.map((row, index) => {
+            const pv = toBp(row.pointValue);
+            return (
+              <div key={row.encodeUid || index} className="glass-card rounded-2xl p-4 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold truncate" style={{ color: PORTAL_TITLE }}>{row.fullName || row.username || '-'}</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: PORTAL_MUTED }}>{ENCODE_PKG[row.packageType] || 'Unknown'} · {row.leg === 'left' ? 'Left' : 'Right'} leg · {formatDateTimeManila(row.pairedAt)}</div>
+                  </div>
+                  <span className="text-sm font-bold flex-shrink-0" style={{ color: row.addsToStrong ? '#34d399' : '#f2d06b' }}>{row.addsToStrong ? '+' : '−'}{fmtInt(pv)} PV</span>
+                </div>
+                <div className="text-xs" style={{ color: PORTAL_TEXT }}>Strong leg remaining: <strong style={{ color: 'rgba(212,175,55,0.82)' }}>{fmtInt(toBp(row.strongRemainingAfter))} PV</strong></div>
+              </div>
+            );
+          })}
+          {encodeAll.length === 0 && (
             <div className="rounded-2xl border p-4 text-center" style={{ borderColor: PORTAL_BORDER, color: PORTAL_MUTED, background: PORTAL_SURFACE }}>
-              No pairing event trace yet.
+              No pairing encodes yet.
             </div>
           )}
         </div>
         <div className="px-4 sm:px-5 pb-4">
           <Pager
-            page={data.trace?.pagination?.page || 1}
-            totalPages={data.trace?.pagination?.totalPages || 1}
+            page={encodePage}
+            totalPages={encodeTotalPages}
             onPrev={() => setTracePage((p) => Math.max(1, p - 1))}
-            onNext={() => setTracePage((p) => Math.min(Number(data.trace?.pagination?.totalPages || 1), p + 1))}
+            onNext={() => setTracePage((p) => Math.min(encodeTotalPages, p + 1))}
           />
         </div>
       </div>

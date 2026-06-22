@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   HiOutlineChevronDown,
+  HiOutlineDownload,
   HiOutlineSearch,
   HiOutlineUsers,
 } from 'react-icons/hi';
@@ -14,6 +15,35 @@ import { useTheme } from '../../contexts/ThemeContext';
 const UNILEVEL_RATES = [5, 3, 3, 2, 2, 1, 1, 1, 1, 1];
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US');
 const fmtMoney = (n) => `₱${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+// Export the per-level downline to a Word document (HTML→.doc — opens in Word, no extra
+// dependency). Each level lists its members and their repurchase points contributed to ranking.
+function exportUnilevelDocx(levels, label) {
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const sections = levels.map(([lvl, members]) => {
+    const total = members.reduce((s, m) => s + Number(m.rankingPoints || 0), 0);
+    const rows = members.map((m, i) =>
+      `<tr><td>${i + 1}</td><td>${esc(m.fullname || m.username)}</td><td>${esc(m.username || m.uid)}</td>`
+      + `<td>${esc(m.accttypeName || '—')}</td><td style="text-align:right">${fmtInt(m.rankingPoints || 0)}</td></tr>`).join('');
+    return `<h2 style="color:#9a7b1f">Level ${lvl} — ${members.length} member${members.length === 1 ? '' : 's'} · ${fmtInt(total)} ranking pts</h2>`
+      + `<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:11pt">`
+      + `<tr style="background:#f3e9c9"><th>#</th><th>Member</th><th>Username</th><th>Package</th><th>Ranking Points</th></tr>${rows}</table><br/>`;
+  }).join('');
+  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>`
+    + `<head><meta charset='utf-8'></head><body style="font-family:Calibri,Arial,sans-serif">`
+    + `<h1>Unilevel Network — ${esc(label)}</h1>`
+    + `<p style="color:#666">Per-level members and the repurchase points each contributed to ranking. Generated ${new Date().toLocaleString('en-US')}.</p>`
+    + `${sections}</body></html>`;
+  const blob = new Blob(['﻿', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `unilevel-network-${String(label || 'export').replace(/[^a-z0-9]/gi, '_')}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 export default function UnilevelTree() {
   const { user } = useAuth();
@@ -70,7 +100,8 @@ export default function UnilevelTree() {
       </div>
 
       {/* All levels at once — static, every member visible */}
-      <UnilevelAllLevels nodes={flatNodes} chrome={chrome} panelStyle={panelStyle} loading={loading} />
+      <UnilevelAllLevels nodes={flatNodes} chrome={chrome} panelStyle={panelStyle} loading={loading}
+        selfLabel={user?.username || user?.fullname} />
 
       <UnilevelBreakdown summary={uniSummary} panelStyle={panelStyle} />
     </div>
@@ -81,7 +112,7 @@ export default function UnilevelTree() {
       level (Level 1 = direct downline … deepest) with all members visible — no
       drill-down, no clicking. A name filter narrows across all levels for quick lookup.
       Uses the already-loaded flat list. ──────────────────────────────────────────── */
-function UnilevelAllLevels({ nodes, chrome, panelStyle, loading }) {
+function UnilevelAllLevels({ nodes, chrome, panelStyle, loading, selfLabel }) {
   const [q, setQ] = useState('');
   const [openLevels, setOpenLevels] = useState(() => new Set([1])); // only Level 1 expanded by default
 
@@ -128,6 +159,12 @@ function UnilevelAllLevels({ nodes, chrome, panelStyle, loading }) {
             style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => exportUnilevelDocx(levels, selfLabel)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(34,197,94,0.12)', color: '#34d399', border: '1px solid rgba(34,197,94,0.3)' }}
+            title="Export all levels + ranking-point contributions to Word (.doc)">
+            <HiOutlineDownload className="size-4" /> Export DOCX
+          </button>
           <button type="button" onClick={() => setOpenLevels(new Set(levels.map(([lvl]) => lvl)))}
             className="text-xs font-semibold rounded-lg px-2.5 py-1.5"
             style={{ background: 'rgba(212,175,55,0.08)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
