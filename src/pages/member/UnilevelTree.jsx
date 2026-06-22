@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  HiOutlineChevronRight,
   HiOutlineSearch,
   HiOutlineUsers,
 } from 'react-icons/hi';
@@ -50,9 +49,8 @@ export default function UnilevelTree() {
             Unilevel Tree
           </h1>
           <p className="text-sm portal-card-muted mt-1">
-            Your sponsor (direct-referral) network. This list shows one level at a time — click a member to drill
-            into their bloodline (they become the root); use the breadcrumb to step back. Search jumps straight to
-            anyone's bloodline.
+            Your sponsor (direct-referral) network — every level at a glance. Level 1 (your direct downline) through
+            your deepest level, with all members listed. Filter by name to find anyone quickly.
           </p>
         </div>
       </div>
@@ -70,147 +68,93 @@ export default function UnilevelTree() {
         </div>
       </div>
 
-      {/* Drill-down explorer — click a member to re-root */}
-      <UnilevelDrill nodes={flatNodes} selfUid={selfUid} chrome={chrome} panelStyle={panelStyle} loading={loading} />
+      {/* All levels at once — static, every member visible */}
+      <UnilevelAllLevels nodes={flatNodes} chrome={chrome} panelStyle={panelStyle} loading={loading} />
 
       <UnilevelBreakdown summary={uniSummary} panelStyle={panelStyle} />
     </div>
   );
 }
 
-/* ── Drill-down explorer: render ONE level at a time. Click a member to re-root
-      (they become the root, their direct downline shows). Breadcrumb walks back up.
-      Search jumps straight into anyone's bloodline (re-roots to them), instead of
-      expanding the whole path. Uses the already-loaded flat list — only the current
-      root's direct children are rendered, so it stays light. ─────────────────── */
-function UnilevelDrill({ nodes, selfUid, chrome, panelStyle, loading }) {
-  const rootDefault = Number(selfUid) || Number(nodes.find((n) => n.parentUid == null)?.uid) || null;
-  const [rootUid, setRootUid] = useState(rootDefault);
-  const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
+/* ── All levels at once: group the flat downline by level (depth) and render every
+      level (Level 1 = direct downline … deepest) with all members visible — no
+      drill-down, no clicking. A name filter narrows across all levels for quick lookup.
+      Uses the already-loaded flat list. ──────────────────────────────────────────── */
+function UnilevelAllLevels({ nodes, chrome, panelStyle, loading }) {
+  const [q, setQ] = useState('');
 
-  useEffect(() => {
-    if (rootUid == null && rootDefault != null) setRootUid(rootDefault);
-  }, [rootDefault, rootUid]);
-
-  const { byUid, childrenOf } = useMemo(() => {
-    const bu = new Map();
-    const ch = new Map();
-    for (const n of nodes) bu.set(Number(n.uid), n);
+  // Group by level (depth >= 1 excludes the member themselves), sorted shallow→deep.
+  const levels = useMemo(() => {
+    const byLevel = new Map();
     for (const n of nodes) {
-      if (n.parentUid == null) continue;
-      const p = Number(n.parentUid);
-      if (!ch.has(p)) ch.set(p, []);
-      ch.get(p).push(n);
+      const d = Number(n.depth || 0);
+      if (d < 1) continue;
+      if (!byLevel.has(d)) byLevel.set(d, []);
+      byLevel.get(d).push(n);
     }
-    return { byUid: bu, childrenOf: ch };
+    const sorted = [...byLevel.entries()].sort((a, b) => a[0] - b[0]);
+    for (const [, arr] of sorted) {
+      arr.sort((a, b) => String(a.username || '').localeCompare(String(b.username || '')));
+    }
+    return sorted; // [ [level, members[]], … ]
   }, [nodes]);
 
-  const rootNode = byUid.get(Number(rootUid)) || null;
-  const children = (childrenOf.get(Number(rootUid)) || [])
-    .slice()
-    .sort((a, b) => String(a.username || '').localeCompare(String(b.username || '')));
-
-  const trail = useMemo(() => {
-    const arr = [];
-    let cur = rootNode;
-    let guard = 0;
-    while (cur && guard < 100) {
-      arr.unshift(cur);
-      if (cur.parentUid == null) break;
-      cur = byUid.get(Number(cur.parentUid));
-      guard += 1;
-    }
-    return arr;
-  }, [rootNode, byUid]);
-
-  const matches = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return [];
-    return nodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q)).slice(0, 8);
-  }, [nodes, search]);
+  const term = q.trim().toLowerCase();
+  const visible = useMemo(() => {
+    if (!term) return levels;
+    return levels
+      .map(([lvl, arr]) => [lvl, arr.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(term))])
+      .filter(([, arr]) => arr.length > 0);
+  }, [levels, term]);
 
   if (loading) return <div className="rounded-2xl p-10" style={panelStyle}><Spinner /></div>;
-  if (!nodes.length) return <div className="rounded-2xl p-8 text-center text-sm portal-card-muted" style={panelStyle}>No downline members yet.</div>;
+  if (!nodes.length || levels.length === 0) {
+    return <div className="rounded-2xl p-8 text-center text-sm portal-card-muted" style={panelStyle}>No downline members yet.</div>;
+  }
+
+  const totalMembers = levels.reduce((s, [, arr]) => s + arr.length, 0);
+  const deepest = levels[levels.length - 1][0];
 
   return (
-    <div className="rounded-2xl p-4 sm:p-5 space-y-4" style={panelStyle}>
-      {/* Search → jump into any member's bloodline */}
-      <div className="relative">
-        <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
-        <input type="text" value={search}
-          onChange={(e) => { setSearch(e.target.value); setSearchOpen(true); }}
-          onFocus={() => setSearchOpen(true)}
-          placeholder="Search anyone — jump into their bloodline…"
-          className="w-full sm:w-80 rounded-xl py-2 pl-8 pr-3 text-sm outline-none"
-          style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
-        {searchOpen && matches.length > 0 && (
-          <div className="absolute left-0 top-full z-50 mt-1 w-full sm:w-80 overflow-hidden rounded-xl"
-            style={{ background: chrome.popoverBg, border: `1px solid ${chrome.surfaceBorder}`, boxShadow: chrome.popoverShadow }}>
-            {matches.map((m) => (
-              <button key={m.uid} type="button"
-                onClick={() => { setRootUid(Number(m.uid)); setSearch(''); setSearchOpen(false); }}
-                className="w-full px-3 py-2 text-left text-xs" style={{ color: chrome.searchText }}>
-                <span className="font-semibold">{m.fullname || m.username}</span>
-                <span className="ml-1 portal-card-muted">@{m.username} · L{m.depth}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Breadcrumb (re-root by clicking an ancestor) */}
-      <div className="flex flex-wrap items-center gap-1 text-xs">
-        {trail.map((node, i) => (
-          <span key={node.uid} className="inline-flex items-center gap-1">
-            {i > 0 && <span className="portal-card-muted">/</span>}
-            <button type="button" onClick={() => setRootUid(Number(node.uid))}
-              className="rounded-lg px-2 py-1 font-semibold"
-              style={i === trail.length - 1
-                ? { background: 'rgba(212,175,55,0.18)', color: 'var(--brand-gold)' }
-                : { color: chrome.panelButtonText }}>
-              {i === 0 ? 'You' : (node.username || `UID ${node.uid}`)}
-            </button>
-          </span>
-        ))}
-      </div>
-
-      {/* Current root summary */}
-      {rootNode && (
-        <div className="rounded-xl p-4" style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.18)' }}>
-          <p className="text-sm font-bold portal-card-title">{rootNode.fullname || rootNode.username || `UID ${rootNode.uid}`}</p>
-          <p className="text-[11px] portal-card-muted mt-0.5">
-            @{rootNode.username || rootNode.uid} · {rootNode.accttypeName || '—'} · {fmtInt(children.length)} direct downline
-          </p>
+    <div className="rounded-2xl p-4 sm:p-5 space-y-5" style={panelStyle}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative">
+          <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
+          <input type="text" value={q} onChange={(e) => setQ(e.target.value)}
+            placeholder="Filter members by name…"
+            className="w-full sm:w-72 rounded-xl py-2 pl-8 pr-3 text-sm outline-none"
+            style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
         </div>
+        <span className="text-xs portal-card-muted">
+          <span className="portal-card-title font-semibold">{fmtInt(totalMembers)}</span> members across{' '}
+          <span className="portal-card-title font-semibold">{fmtInt(deepest)}</span> level{deepest === 1 ? '' : 's'}
+        </span>
+      </div>
+
+      {visible.length === 0 && (
+        <p className="px-1 py-6 text-center text-xs portal-card-muted">No members match “{q}”.</p>
       )}
 
-      {/* Direct children — one level; click to drill deeper */}
-      <div className="space-y-2">
-        {children.length === 0 && (
-          <p className="px-1 py-6 text-center text-xs portal-card-muted">No direct downline under this member.</p>
-        )}
-        {children.map((c) => {
-          const grandkids = (childrenOf.get(Number(c.uid)) || []).length;
-          return (
-            <button key={c.uid} type="button" onClick={() => setRootUid(Number(c.uid))}
-              className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-all hover:-translate-y-0.5"
-              style={{ border: `1px solid ${chrome.surfaceBorder}`, background: chrome.surface }}>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium portal-card-title">{c.fullname || c.username || `Member ${c.uid}`}</p>
-                <p className="truncate text-[11px] portal-card-muted">@{c.username || c.uid} · {c.accttypeName || '—'}</p>
+      {visible.map(([level, members]) => (
+        <section key={level}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="rounded-lg px-2.5 py-1 text-xs font-bold"
+              style={{ background: 'rgba(212,175,55,0.16)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.3)' }}>
+              Level {level}
+            </span>
+            <span className="text-xs portal-card-muted">{fmtInt(members.length)} member{members.length === 1 ? '' : 's'}</span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {members.map((m) => (
+              <div key={m.uid} className="rounded-xl px-3.5 py-2.5"
+                style={{ border: `1px solid ${chrome.surfaceBorder}`, background: chrome.surface }}>
+                <p className="truncate text-sm font-medium portal-card-title">{m.fullname || m.username || `Member ${m.uid}`}</p>
+                <p className="truncate text-[11px] portal-card-muted">@{m.username || m.uid} · {m.accttypeName || '—'}</p>
               </div>
-              <span className="inline-flex shrink-0 items-center gap-2">
-                <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
-                  style={{ background: 'rgba(212,175,55,0.10)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
-                  {grandkids > 0 ? `${fmtInt(grandkids)} below` : 'leaf'}
-                </span>
-                <HiOutlineChevronRight className="size-4 portal-card-muted" />
-              </span>
-            </button>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

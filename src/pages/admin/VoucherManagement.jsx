@@ -519,7 +519,7 @@ export default function VoucherManagement() {
               type="text"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Search by username or voucher code (e.g. VCH-000123)..."
+              placeholder="Search by username, voucher code (VCH-000123), or ER reference (ER-2026-00124)..."
               className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm portal-card-title outline-none bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)] placeholder:text-[color:var(--portal-card-muted)]"
             />
           </div>
