@@ -576,6 +576,22 @@ html:not(.dark) .label {
     box-shadow: var(--portal-box-shadow);
   }
 
+  .portal-release-highlight {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--portal-warning-bg) 92%, rgba(255, 255, 255, 0.08));
+    border: 1px solid color-mix(in srgb, var(--portal-warning-border) 92%, rgba(255, 255, 255, 0.08));
+    color: var(--portal-warning-text);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.35;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+
   .portal-accent-chip {
     background: var(--portal-accent-bg);
     border: 1px solid var(--portal-accent-border);

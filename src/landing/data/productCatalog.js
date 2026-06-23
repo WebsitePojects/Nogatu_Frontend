@@ -3,8 +3,8 @@ export const LANDING_PRODUCT_GROUPS = [
     title: 'New Products',
     layout: 'featured',
     items: [
-      { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7998.00', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png', badge: 'New Product' },
-      { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2500.00', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png', badge: 'New Product' },
+      { name: 'Berry NAD+', desc: 'Berry NAD+ wellness supplement', price: '7,998.00', img: '/legacy-img/Berry-Nad.png', imgLg: '/legacy-img/Berry-Nad.png', badge: 'New Product' },
+      { name: 'Nogatu Max Fuel Coffee Drink Mix', desc: 'Max fuel coffee blend', price: '2,500.00', img: '/legacy-img/Max-Fuel.png', imgLg: '/legacy-img/Max-Fuel.png', badge: 'New Product' },
     ],
   },
   {

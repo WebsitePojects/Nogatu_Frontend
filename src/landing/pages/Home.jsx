@@ -13,6 +13,43 @@ import { apiUrl } from '../../utils/apiBase';
 import { LANDING_PRODUCT_GROUPS } from '../data/productCatalog';
 
 const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
+const CERTIFICATION_LOGOS = [
+  { name: 'ISO', src: '/img/ISO-logo.png' },
+  { name: 'GMP', src: '/img/GMP-logo.png' },
+  { name: 'FDA', src: '/img/FDA-logo.png' },
+  { name: 'Halal', src: '/img/HALAL-logo.png' },
+];
+
+function CertificationLogoStrip({ className = '', compact = false }) {
+  const ref = useScrollReveal();
+
+  return (
+    <div ref={ref} className={`reveal certification-strip-shell ${className}`.trim()}>
+      <div className={`certification-strip ${compact ? 'is-compact' : ''}`.trim()}>
+        <div className="certification-strip-copy">
+          <p className="certification-strip-label">Trusted Standards</p>
+        </div>
+        <div className="certification-strip-logos" aria-label="NOGATU certification logos">
+          {CERTIFICATION_LOGOS.map((logo, index) => (
+            <div
+              key={logo.name}
+              className="certification-logo-badge"
+              style={{ animationDelay: `${index * 160}ms` }}
+            >
+              <img
+                src={logo.src}
+                alt={`${logo.name} certification logo`}
+                className="certification-logo-image"
+                loading="lazy"
+              />
+              <span className="certification-logo-name">{logo.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function WhyFeatureCard({ feature, delay }) {
   const cardRef = useScrollReveal({ delay });
@@ -194,6 +231,8 @@ function Hero() {
             </div>
           </div>
         </div>
+
+        <CertificationLogoStrip className="mt-6 sm:mt-8" compact />
       </div>
     </section>
   );
@@ -439,6 +478,7 @@ function Products() {
             );
           })}
         </div>
+        <CertificationLogoStrip className="mt-10 sm:mt-14" />
       </div>
       <Lightbox src={lightbox.src} type={lightbox.type} onClose={lightbox.close} />
     </section>

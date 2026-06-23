@@ -386,7 +386,14 @@ export default function EWallet() {
                   >
                     <item.icon className="size-3.5" style={{ color: item.color }} />
                   </div>
-                  <span className="portal-card-text text-sm">{item.label}</span>
+                  <div className="min-w-0">
+                    <span className="portal-card-text text-sm">{item.label}</span>
+                    {item.key === 'unilevel' ? (
+                      <div className="portal-release-highlight mt-1">
+                        Monthly release every 5th of next month
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
                 <span className="portal-warning-text text-sm font-semibold">
                   ₱{fmt(data[item.key])}
