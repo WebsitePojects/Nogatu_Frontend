@@ -100,7 +100,7 @@ export default function Applications() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Name', 'Contact No.', 'Email', 'Submitted', 'Follow Up', 'Action'].map((heading) => (
+                  {['Name', 'Sponsor', 'Contact No.', 'Email', 'Submitted', 'Follow Up', 'Action'].map((heading) => (
                     <th key={heading} className="table-header p-3 text-left text-xs uppercase tracking-wide">{heading}</th>
                   ))}
                 </tr>
@@ -109,6 +109,7 @@ export default function Applications() {
                 {rows.map((row) => (
                   <tr key={row.id} className="hover:bg-white/[0.04] transition-colors">
                     <td className="p-3 text-white/80">{row.name}</td>
+                    <td className="p-3 text-white/60">{row.sponsorName}</td>
                     <td className="p-3 text-white/60">{row.phone}</td>
                     <td className="p-3 text-white/60">{row.email}</td>
                     <td className="p-3 text-white/50 text-xs">{row.submittedAt}</td>
@@ -170,6 +171,7 @@ export default function Applications() {
             </div>
             <div className="portal-modal-text mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <p><strong className="portal-modal-title">Name:</strong> {active.name}</p>
+              <p><strong className="portal-modal-title">Sponsor Full Name:</strong> {active.sponsorName}</p>
               <p><strong className="portal-modal-title">Contact No.:</strong> {active.phone}</p>
               <p><strong className="portal-modal-title">Email:</strong> {active.email}</p>
               <p><strong className="portal-modal-title">Submitted:</strong> {active.submittedAt}</p>

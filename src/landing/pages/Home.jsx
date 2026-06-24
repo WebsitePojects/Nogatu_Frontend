@@ -53,7 +53,8 @@ function CertificationLogoStrip({ className = '', compact = false }) {
 
 function formatProductPrice(price) {
   if (price === 'TBA') return price;
-  const formatted = Number(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const numeric = Number(String(price).replace(/,/g, ''));
+  const formatted = numeric.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return `₱${formatted}`;
 }
 
@@ -632,7 +633,7 @@ function DownloadableMaterials() {
 }
 
 function ApplicationForm() {
-  const [form, setForm] = useState({ name: '', phone: '', email: '' });
+  const [form, setForm] = useState({ name: '', sponsorName: '', phone: '', email: '' });
   const [fieldErrors, setFieldErrors] = useState({});
   const [status, setStatus] = useState({ type: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -640,6 +641,7 @@ function ApplicationForm() {
   const ref = useScrollReveal();
   const requiredFields = [
     { key: 'name', label: 'Full Name', type: 'text' },
+    { key: 'sponsorName', label: 'Sponsor Full Name', type: 'text' },
     { key: 'phone', label: 'Contact No.', type: 'tel' },
     { key: 'email', label: 'Email Address', type: 'email' },
   ];
@@ -679,7 +681,7 @@ function ApplicationForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Unable to submit application.');
-      setForm({ name: '', phone: '', email: '' });
+      setForm({ name: '', sponsorName: '', phone: '', email: '' });
       setShowApplicationPrompt(true);
       setStatus({ type: 'success', message: data.message || 'Distributor application interest submitted.' });
     } catch (err) {
@@ -697,12 +699,16 @@ function ApplicationForm() {
           <div className="rounded-2xl p-8 text-white" style={{ background: 'linear-gradient(135deg, #592219 0%, #6d3028 100%)' }}>
             <h3 className="text-2xl font-bold mb-4">Become a Distributor Today</h3>
             <p className="text-white/75 leading-relaxed mb-6">
-              Start with your full name, contact number, and email address. Once submitted, we will give you the ready-to-print distributor form you can download, print, and personally submit at the nearest branch office.
+              This form downloads a softcopy for recording purposes only — it does not register or create your account.
             </p>
             <div className="space-y-4 text-sm text-white/70">
-              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your full name, contact number, and email address.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your full name, sponsor's full name, contact number, and email address.</span></div>
               <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Download the printable distributor application form from the confirmation popup.</span></div>
               <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Print the form and submit it to the nearest NOGATU branch office if you want to proceed.</span></div>
+              <div className="flex gap-3 rounded-xl bg-brand-gold/15 border border-brand-gold/40 px-3 py-2.5">
+                <span className="text-brand-gold-light font-bold">04</span>
+                <span className="font-semibold text-white">This is not account registration — just a recording-purposes softcopy download.</span>
+              </div>
             </div>
           </div>
           <form onSubmit={submitApplication} noValidate className="rounded-2xl border border-primary-200/40 bg-white p-6 shadow-lg space-y-4 sm:p-8">

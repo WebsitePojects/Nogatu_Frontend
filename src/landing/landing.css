@@ -438,15 +438,22 @@
     text-align: center;
   }
   .certification-strip-label {
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     font-weight: 800;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: #9a6e04;
+    color: #b8860b;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
   }
   .certification-strip.is-compact .certification-strip-label {
-    color: #fff9eb;
-    text-shadow: 0 2px 14px rgba(38, 22, 9, 0.22);
+    display: inline-block;
+    color: #9A7B0A;
+    text-shadow: none;
+    padding: 0.4rem 0.85rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(212, 165, 40, 0.3);
+    box-shadow: 0 8px 18px rgba(89, 34, 25, 0.1);
   }
   .certification-strip-logos {
     position: relative;
@@ -482,15 +489,15 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.55rem;
-    min-height: 6.8rem;
+    gap: 0.6rem;
+    min-height: 9.2rem;
     padding: 0.15rem 0.25rem;
     animation: certificationLogoFloat 4.8s ease-in-out infinite;
   }
   .certification-logo-image {
     width: auto;
-    max-width: min(100%, 5.2rem);
-    max-height: 3.7rem;
+    max-width: min(100%, 7.6rem);
+    max-height: 5.6rem;
     object-fit: contain;
     filter:
       saturate(1.12)
@@ -1051,17 +1058,17 @@
     gap: 0.4rem;
   }
   .certification-logo-badge {
-    min-height: 4.8rem;
-    gap: 0.22rem;
+    min-height: 6.4rem;
+    gap: 0.3rem;
     padding: 0;
   }
   .certification-logo-image {
-    max-width: 3.45rem;
-    max-height: 2.45rem;
+    max-width: 4.8rem;
+    max-height: 3.4rem;
   }
   .certification-logo-name {
-    font-size: 0.5rem;
-    letter-spacing: 0.11em;
+    font-size: 0.58rem;
+    letter-spacing: 0.13em;
   }
   .product-card-media {
     min-height: 11.5rem;
