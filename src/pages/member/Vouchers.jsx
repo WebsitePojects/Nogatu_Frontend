@@ -10,6 +10,9 @@ import {
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+// Unique, searchable voucher code (matches admin Voucher Management VCH-000123).
+const voucherCode = (id) => `VCH-${String(Number(id) || 0).padStart(6, '0')}`;
+
 const PACKAGE_LABELS = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum', 50: 'Garnet', 60: 'Diamond' };
 
 function Spinner() {
@@ -322,7 +325,7 @@ export default function Vouchers() {
                 <tbody>
                   {rows.map((r) => (
                     <tr key={r.id} className="border-t" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
-                      <td className="py-2.5 px-2 text-white/85">#{r.id}</td>
+                      <td className="py-2.5 px-2 text-white/85 font-mono text-xs">{voucherCode(r.id)}</td>
                       <td className="py-2.5 px-2 text-white/70">{PACKAGE_LABELS[r.package_type] || r.package_type}</td>
                       <td className="py-2.5 px-2 text-white/80">P{fmt(r.voucher_amount)}</td>
                       <td className="py-2.5 px-2 text-white/80">P{fmt(r.remaining_balance)}</td>
@@ -346,7 +349,7 @@ export default function Vouchers() {
               {rows.map((r) => (
                 <div key={r.id} className="rounded-xl p-4" style={{ border: '1px solid rgba(212,175,55,0.12)', background: 'rgba(255,255,255,0.02)' }}>
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-white font-semibold">Voucher #{r.id}</p>
+                    <p className="text-white font-semibold font-mono">{voucherCode(r.id)}</p>
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs" style={statusStyle(r.status)}>
                       {Number(r.status) === 4 ? 'Suspended' : r.status_label}
                     </span>
@@ -485,7 +488,7 @@ export default function Vouchers() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{t.transaction_date}</p>
-                    <p className="text-sm mt-2 text-white/80">Voucher #{t.voucher_id}</p>
+                    <p className="text-sm mt-2 text-white/80 font-mono">{voucherCode(t.voucher_id)}</p>
                   </div>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)' }}>
                     Voucher
@@ -521,7 +524,7 @@ export default function Vouchers() {
                 {transactions.map((t, i) => (
                   <tr key={t.id || i} className="border-t" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
                     <td className="py-2.5 px-2 text-white/60 text-xs">{t.transaction_date}</td>
-                    <td className="py-2.5 px-2 text-white/70">#{t.voucher_id}</td>
+                    <td className="py-2.5 px-2 text-white/70 font-mono text-xs">{voucherCode(t.voucher_id)}</td>
                     <td className="py-2.5 px-2 text-white/80">P{fmt(t.cash_paid)}</td>
                     <td className="py-2.5 px-2" style={{ color: '#f87171' }}>-P{fmt(t.voucher_used)}</td>
                     <td className="py-2.5 px-2 font-semibold" style={{ color: '#D4AF37' }}>P{fmt(t.total_value)}</td>
@@ -606,7 +609,7 @@ export default function Vouchers() {
               <div className="flex items-center justify-between text-sm">
                 <span style={{ color: modalStyles.body }}>Voucher Deduction</span>
                 <span className="font-semibold" style={{ color: modalStyles.deduct }}>
-                  -P{fmt(checkoutModal.voucherMatch)} (#{checkoutModal.voucher.id})
+                  -P{fmt(checkoutModal.voucherMatch)} ({voucherCode(checkoutModal.voucher.id)})
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm pt-2 border-t" style={{ borderColor: isDarkMode ? 'rgba(148,163,184,0.25)' : 'rgba(148,163,184,0.4)' }}>

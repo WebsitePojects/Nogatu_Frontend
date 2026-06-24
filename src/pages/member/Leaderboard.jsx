@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api';
-import { HiOutlineStar, HiOutlineSparkles, HiOutlineDownload, HiOutlineUsers, HiOutlineChevronDown } from 'react-icons/hi';
+import { HiOutlineStar, HiOutlineSparkles, HiOutlineDownload, HiOutlineUsers, HiOutlineChevronDown, HiOutlineClipboardList } from 'react-icons/hi';
 import { useAuth } from '../../contexts/AuthContext';
 import { getMemberCache, setMemberCache } from '../../utils/memberWarmCache';
 
@@ -109,7 +109,7 @@ export default function Leaderboard() {
               Current race title: {userCurrentRankLabel}
             </p>
             <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.42)' }}>
-              {pointsBasis}: {fmt(userRemaining)} | Consumed: {fmt(userConsumed)}
+              Remaining points: <span style={{ color: '#D4AF37', fontWeight: 700 }}>{fmt(userRemaining)}</span>
             </p>
           </div>
           <div className="w-full sm:w-72">
@@ -275,6 +275,7 @@ export default function Leaderboard() {
       </div>
 
       <BloodlineBreakdown />
+      <RankableEventsLedger />
     </div>
   );
 }
@@ -397,6 +398,90 @@ function BloodlineBreakdown() {
             </table>
           </div>
 
+          {totalPages > 1 && (
+            <Pager page={page} totalPages={totalPages}
+              onPrev={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(totalPages, p + 1))} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Rankable Points Ledger: one row per VALID repurchase event behind your
+      remaining points (source member, level, basis points, date). Server-paginated
+      from /api/ranking/events so it always reconciles to the remaining total. ── */
+function RankableEventsLedger() {
+  const [open, setOpen] = useState(true);
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    let cancelled = false;
+    setLoading(true);
+    api.get(`/ranking/events?page=${page}&perPage=25`)
+      .then((res) => { if (!cancelled) setData(res.data); })
+      .catch(() => { if (!cancelled) setData(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [open, page]);
+
+  const events = data?.events || [];
+  const totalPages = Number(data?.totalPages || 1);
+
+  return (
+    <div className="glass-card rounded-2xl overflow-hidden">
+      <button type="button" onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left"
+        style={{ borderBottom: open ? '1px solid rgba(212,175,55,0.08)' : 'none' }}>
+        <div className="flex items-center gap-2">
+          <HiOutlineClipboardList className="size-5" style={{ color: '#D4AF37' }} />
+          <div>
+            <p className="font-display text-base font-semibold text-white">Rankable Points Ledger</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Every valid repurchase event behind your remaining points
+              {data ? ` · ${fmt(data.total)} events · ${fmt(data.totalPoints)} pts` : ''}
+            </p>
+          </div>
+        </div>
+        <HiOutlineChevronDown className="size-5 transition-transform" style={{ color: 'rgba(212,175,55,0.7)', transform: open ? 'rotate(180deg)' : 'none' }} />
+      </button>
+
+      {open && (
+        <div className="p-5 space-y-4">
+          <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid rgba(212,175,55,0.12)' }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  {['Date', 'Source member', 'Level', 'Basis points'].map((h) => (
+                    <th key={h} className="text-left py-2.5 px-3 text-xs font-semibold" style={{ color: 'rgba(212,175,55,0.7)', borderBottom: '1px solid rgba(212,175,55,0.12)' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading && (
+                  <tr><td colSpan="4" className="py-8 text-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading…</td></tr>
+                )}
+                {!loading && events.map((e, i) => (
+                  <tr key={`${e.repurchaseId}-${i}`} style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                    <td className="py-2.5 px-3 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{e.eventTs ? String(e.eventTs).slice(0, 10) : '—'}</td>
+                    <td className="py-2.5 px-3">
+                      <div className="text-white text-xs font-medium">{e.sourceName}</div>
+                      <div className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.45)' }}>@{e.sourceUsername || e.sourceUid}</div>
+                    </td>
+                    <td className="py-2.5 px-3 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>L{e.depth}</td>
+                    <td className="py-2.5 px-3 text-xs font-semibold" style={{ color: '#D4AF37' }}>{fmt(e.points)}</td>
+                  </tr>
+                ))}
+                {!loading && events.length === 0 && (
+                  <tr><td colSpan="4" className="py-8 text-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>No rankable repurchase events yet.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
           {totalPages > 1 && (
             <Pager page={page} totalPages={totalPages}
               onPrev={() => setPage((p) => Math.max(1, p - 1))}

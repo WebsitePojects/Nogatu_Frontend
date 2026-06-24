@@ -45,7 +45,16 @@ export default function AccountDetails() {
   async function loadData() {
     try {
       const res = await api.get('/account');
-      setData(res.data);
+      const acct = res.data || {};
+      // payoutid may be stored as the option LABEL (e.g. "PSBank"), but the Payout
+      // Option <select> matches numeric option ids — so it showed blank "Select...".
+      // Coerce to the resolved numeric id (backend resolves the stored value into
+      // payoutOption; also match the label or an already-numeric value as fallbacks).
+      const labelMatch = PAYOUT_OPTIONS.find(
+        (o) => o.label.toLowerCase() === String(acct.payoutid || '').trim().toLowerCase()
+      );
+      const resolvedPayoutId = Number(acct.payoutOption?.id) || labelMatch?.id || Number(acct.payoutid) || '';
+      setData({ ...acct, payoutid: resolvedPayoutId });
     } catch { } finally { setLoading(false); }
   }
 

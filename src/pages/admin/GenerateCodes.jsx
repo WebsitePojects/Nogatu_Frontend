@@ -20,7 +20,7 @@ const CODE_TYPES = [
 ];
 
 export default function GenerateCodes() {
-  const [noOfCodes, setNoOfCodes] = useState(1);
+  const [noOfCodes, setNoOfCodes] = useState('');
   const [productType, setProductType] = useState(10);
   const [codeType, setCodeType] = useState(1);
   const [generating, setGenerating] = useState(false);
@@ -28,9 +28,11 @@ export default function GenerateCodes() {
 
   async function handleGenerate(e) {
     e.preventDefault();
+    const n = Number(noOfCodes);
+    if (!Number.isFinite(n) || n < 1) { toast.error('Enter how many codes to generate'); return; }
     setGenerating(true);
     try {
-      const res = await api.post('/admin/codes/generate', { noOfCodes, productType, codeType });
+      const res = await api.post('/admin/codes/generate', { noOfCodes: n, productType, codeType });
       setGeneratedCodes(res.data.codes);
       toast.success(`${res.data.count} code(s) generated!`);
     } catch (err) {
@@ -70,10 +72,11 @@ export default function GenerateCodes() {
               <input
                 type="number"
                 value={noOfCodes}
-                onChange={(e) => setNoOfCodes(Number(e.target.value))}
+                onChange={(e) => setNoOfCodes(e.target.value === '' ? '' : Number(e.target.value))}
                 className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
                 min="1"
                 max="1000"
+                placeholder="e.g. 10"
                 required
               />
             </div>

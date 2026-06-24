@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Background, BackgroundVariant, Controls, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -8,7 +8,7 @@ import {
   HiOutlineSearch, HiOutlineTable, HiOutlineUsers,
 } from 'react-icons/hi';
 import {
-  Spinner, MemberNode, JunctionNode, TreeEdge,
+  Spinner, MemberNode, JunctionNode, PlaceholderNode, TreeEdge,
 } from '../../components/genealogyTreeUi';
 import {
   exportNetworkAsDocx, exportNetworkAsCsv, exportTreeAsJpeg, exportTreeAsPng, exportTreeAsSvg,
@@ -16,11 +16,14 @@ import {
   NODE_HEIGHT, NODE_WIDTH, PACKAGE_STYLES,
 } from '../../components/genealogyTreeUiUtils';
 import { buildFlatTreeGraph, ORDER_BINARY, expandPathTo } from '../../lib/buildFlatTreeGraph';
+import BinaryDrill from '../../components/BinaryDrill';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useTheme } from '../../contexts/ThemeContext';
+import api from '../../api';
 
 export default function AdminGenealogy() {
   const { isDarkMode } = useTheme();
+  const navigate = useNavigate();
   const reactFlowRef = useRef(null);
   const flowShellRef = useRef(null);
   const canvasDivRef = useRef(null);
@@ -34,6 +37,7 @@ export default function AdminGenealogy() {
   const [treeSearch, setTreeSearch] = useState('');
   const [exportingFormat, setExportingFormat] = useState(null);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list' (15-node drill) | 'tree' (canvas)
 
   const rootId = searchParams.get('id') || '';
   const rootUsername = searchParams.get('username') || '';
@@ -42,6 +46,9 @@ export default function AdminGenealogy() {
   const url = rootId
     ? `/admin/genealogy/binary/flat?id=${encodeURIComponent(rootId)}`
     : (rootUsername ? `/admin/genealogy/binary/flat?username=${encodeURIComponent(rootUsername)}` : '');
+  const reconcileUrl = rootId
+    ? `/admin/genealogy/pairing-reconcile?id=${encodeURIComponent(rootId)}`
+    : (rootUsername ? `/admin/genealogy/pairing-reconcile?username=${encodeURIComponent(rootUsername)}` : '');
   const { nodes: flatNodes, status, loading, refreshing, count } = useInfiniteTree({
     treeType: 'binary', cacheKey, url, enabled: hasTarget,
   });
@@ -94,16 +101,29 @@ export default function AdminGenealogy() {
     }, 160);
   }
 
+  // Show the "perfect 15" (root + 3 levels) by default; deeper generations stay
+  // collapsed behind a "+N below" card and load one level on click. `expanded`
+  // drives the progressive reveal, so it must be passed in AND be a dep.
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expanded, initialDepth: 3 }),
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, expanded, withPlaceholders: true, metricAsPv: true }),
     [flatNodes, expanded],
   );
-  const nodes = useMemo(() => built.nodes.map((n) => (
-    n.type === 'memberNode'
-      ? { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel: n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } }
-      : n
+  function registerIntoSlot(d) {
+    const params = new URLSearchParams({
+      placement: String(d.parentUid || ''),
+      position: String(d.position || 1),
+      placementUser: String(d.parentUsername || ''),
+      placementLabel: `${d.positionLabel} of ${d.parentUsername || `UID ${d.parentUid}`}`,
+    });
+    navigate(`/register?${params.toString()}`);
+  }
+  const nodes = useMemo(() => built.nodes.map((n) => {
+    if (n.type === 'placeholderNode') {
+      return { ...n, data: { ...n.data, isDarkMode, canvasActive, onActivateCanvas: activateCanvas, placeholderCta: 'Register here', placeholderHint: 'Manually encode a new member into this open binary slot.', onRegister: () => registerIntoSlot(n.data) } };
+    }
+    return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel: n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  )), [built, isDarkMode, canvasActive]);
+  }), [built, isDarkMode, canvasActive]);
   const edges = built.edges;
 
   useEffect(() => {
@@ -113,7 +133,7 @@ export default function AdminGenealogy() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
-  const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode }), []);
+  const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode, placeholderNode: PlaceholderNode }), []);
   const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
 
   const networkForExport = useMemo(
@@ -125,25 +145,8 @@ export default function AdminGenealogy() {
     const base = q ? flatNodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q)) : flatNodes;
     return base.slice(0, 120);
   }, [flatNodes, treeSearch]);
-  const treeStats = useMemo(() => {
-    const s = { pd: 0, cd: 0, cdPaid: 0, fs: 0, totalBp: 0 };
-    for (const n of flatNodes) {
-      const l = n.accountStateLabel || 'PD';
-      if (l === 'PD') s.pd += 1; else if (l === 'CD') s.cd += 1; else if (l === 'CD - Paid') s.cdPaid += 1; else if (l === 'FS') s.fs += 1;
-      s.totalBp += Number(n.pointsToUpline || 0);
-    }
-    return s;
-  }, [flatNodes]);
   const rootNode = flatNodes.find((n) => n.parentUid == null) || null;
   const rootName = rootNode?.fullname || rootNode?.username || rootUsername || 'Account';
-
-  const statChips = [
-    { label: 'PD', count: treeStats.pd, color: isDarkMode ? '#86EFAC' : '#166534', bg: 'rgba(34,197,94,0.10)', dot: '#22C55E' },
-    { label: 'CD', count: treeStats.cd, color: isDarkMode ? '#FCA5A5' : '#B91C1C', bg: 'rgba(239,68,68,0.10)', dot: '#EF4444' },
-    { label: 'CD-Paid', count: treeStats.cdPaid, color: isDarkMode ? '#FDE68A' : '#92400E', bg: 'rgba(234,179,8,0.10)', dot: '#F59E0B' },
-    { label: 'FS', count: treeStats.fs, color: isDarkMode ? '#BFDBFE' : '#1D4ED8', bg: 'rgba(59,130,246,0.10)', dot: '#3B82F6' },
-    { label: 'Total PV', count: fmtInt(treeStats.totalBp / 250), color: isDarkMode ? '#F4D675' : '#7A5C08', bg: 'rgba(212,175,55,0.10)', dot: '#D4AF37' },
-  ];
 
   async function runExport(format, fn) {
     if (exportingFormat) return;
@@ -166,8 +169,8 @@ export default function AdminGenealogy() {
           <h1 className="font-display text-2xl font-bold" style={{ color: chrome.heading }}>Account Genealogy</h1>
           <div className="mt-2 h-0.5 w-12 rounded-full" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
           <p className="mt-3 max-w-2xl text-sm" style={{ color: chrome.subtext }}>
-            Open any account's full binary network — root to the deepest generation, no level limit. First levels load
-            instantly; click a “+N below” card to open the next level. Search within the tree to jump to anyone.
+            Open any account's full binary network — root to the deepest generation, no level limit. Search within the
+            tree to jump to anyone.
           </p>
         </div>
         <form onSubmit={handleSearchSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -188,12 +191,28 @@ export default function AdminGenealogy() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          {/* Canvas */}
-          <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-[1.75rem]'}`} style={{ ...panelStyle, zIndex: 0 }}>
+          {/* Canvas column: List (drill) / Tree (canvas) */}
+          <div className="min-w-0 space-y-3">
+            <div className="inline-flex overflow-hidden rounded-xl" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
+              {[['list', 'List View'], ['tree', 'Tree View']].map(([mode, label]) => (
+                <button key={mode} type="button" onClick={() => setViewMode(mode)}
+                  className="px-3.5 py-2 text-sm font-semibold transition-colors"
+                  style={viewMode === mode ? { background: 'rgba(212,175,55,0.18)', color: 'var(--brand-gold)' } : { background: 'transparent', color: chrome.panelButtonText }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {viewMode === 'list' && (
+              <BinaryDrill nodes={flatNodes} selfUid={rootNode?.uid} chrome={chrome} panelStyle={panelStyle} loading={loading} />
+            )}
+
+            {viewMode === 'tree' && (
+            <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-[1.75rem]'}`} style={{ ...panelStyle, zIndex: 0 }}>
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
               <div>
                 <h2 className="font-display text-lg font-semibold" style={{ color: chrome.heading }}>{rootName}</h2>
-                <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>{refreshing ? 'Syncing live data…' : `${fmtInt(count)} accounts · click “+N below” to go deeper`}</p>
+                <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>{refreshing ? 'Syncing live data…' : `${fmtInt(count)} accounts`}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={() => setExpanded(new Set())} disabled={expanded.size === 0} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5 disabled:opacity-40" style={neutralButtonStyle}>
@@ -245,20 +264,13 @@ export default function AdminGenealogy() {
               </ReactFlow>
             </div>
 
-            {flatNodes.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 px-5 py-3" style={{ borderTop: `1px solid ${chrome.surfaceBorder}` }}>
-                <span className="mr-1 text-[11px] font-semibold" style={{ color: chrome.tertiary }}>Tree stats:</span>
-                {statChips.map((chip) => (
-                  <div key={chip.label} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold" style={{ background: chip.bg, color: chip.color, border: `1px solid ${chip.dot}40` }}>
-                    <span className="size-1.5 rounded-full" style={{ background: chip.dot }} /> {chip.label}: {chip.count}
-                  </div>
-                ))}
-              </div>
-            )}
+          </div>
+          )}
           </div>
 
           {/* Side list — search + jump */}
           <div className="flex min-h-0 flex-col rounded-2xl p-5" style={panelStyle}>
+            <PairingReconcile url={reconcileUrl} chrome={chrome} />
             <h2 className="font-display text-lg font-semibold" style={{ color: chrome.heading }}>Accounts in tree</h2>
             <div className="relative mt-3">
               <HiOutlineSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2" style={{ color: chrome.tertiary }} />
@@ -290,6 +302,55 @@ export default function AdminGenealogy() {
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Pairing reconciliation: leg PV totals vs paid lifetime SMB, for admin verify.
+      Snapshot (matched PV) and lifetime SMB are different quantities — shown side by
+      side, never forced equal (money-integrity rule). ─────────────────────────── */
+function PairingReconcile({ url, chrome }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!url) { setData(null); return undefined; }
+    let cancelled = false;
+    setLoading(true);
+    api.get(url)
+      .then((res) => { if (!cancelled) setData(res.data); })
+      .catch(() => { if (!cancelled) setData(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [url]);
+
+  if (!url) return null;
+  const cards = data ? [
+    { label: 'Left PV', value: fmtInt(data.leftPV), sub: `${fmtInt(data.leftAccounts)} accts` },
+    { label: 'Right PV', value: fmtInt(data.rightPV), sub: `${fmtInt(data.rightAccounts)} accts` },
+    { label: 'Matched PV', value: fmtInt(data.matchedPV), sub: `₱${fmtInt(data.matchedPeso)} snapshot` },
+    { label: 'Lifetime SMB', value: `₱${fmtInt(data.lifetimeSmb)}`, sub: 'paid · ttlincome2' },
+  ] : [];
+
+  return (
+    <div className="mb-4 pb-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
+      <h3 className="text-sm font-bold" style={{ color: chrome.heading }}>Pairing Reconciliation</h3>
+      <p className="mt-0.5 text-[11px]" style={{ color: chrome.tertiary }}>Leg totals vs paid SMB</p>
+      {loading && <p className="mt-2 text-xs" style={{ color: chrome.tertiary }}>Loading…</p>}
+      {data && (
+        <>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {cards.map((c) => (
+              <div key={c.label} className="rounded-xl px-3 py-2" style={{ background: chrome.surface, border: `1px solid ${chrome.surfaceBorder}` }}>
+                <p className="text-[10px]" style={{ color: chrome.tertiary }}>{c.label}</p>
+                <p className="mt-0.5 text-sm font-bold" style={{ color: chrome.heading }}>{c.value}</p>
+                <p className="text-[10px]" style={{ color: chrome.tertiary }}>{c.sub}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[10px] leading-4" style={{ color: chrome.tertiary }}>{data.note}</p>
+        </>
       )}
     </div>
   );

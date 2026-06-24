@@ -62,7 +62,11 @@ function indexTree(flatNodes) {
 
 /**
  * @param {Array} flatNodes
- * @param {object} opts { renderBudget, orderBy, expanded:Set<uid>, initialDepth }
+ * @param {object} opts {
+ *   renderBudget, orderBy, expanded:Set<uid>, initialDepth,
+ *   expandAll:boolean,        // render EVERY node (needed so binary open slots are all visible)
+ *   withPlaceholders:boolean  // binary: emit an open-slot placeholder for each missing left/right child
+ * }
  */
 export function buildFlatTreeGraph(flatNodes, opts = {}) {
   const empty = { nodes: [], edges: [], total: 0, rendered: 0, truncated: false };
@@ -71,42 +75,66 @@ export function buildFlatTreeGraph(flatNodes, opts = {}) {
   const budget = Math.max(50, Number(opts.renderBudget) || DEFAULT_RENDER_BUDGET);
   const orderBy = opts.orderBy || ((a, b) => a.uid - b.uid);
   const expanded = opts.expanded || null;
+  const expandAll = Boolean(opts.expandAll);
+  const withPlaceholders = Boolean(opts.withPlaceholders);
+  const metricAsPv = Boolean(opts.metricAsPv); // binary: show points as PV (÷250), display-only
   const initialDepth = Number.isFinite(opts.initialDepth) ? opts.initialDepth : 2;
 
   const { childrenOf, root, descendants } = indexTree(flatNodes);
   if (!root) return { ...empty, total: flatNodes.length };
   for (const arr of childrenOf.values()) arr.sort(orderBy);
 
-  // Always show the first `initialDepth` levels; deeper branches only when the user
-  // has explicitly expanded that node (progressive loading along the chosen trail).
+  // expandAll → render everything; else first `initialDepth` levels + explicitly expanded branches.
   const isOpen = (uid, depth, hasKids) => {
     if (!hasKids) return true;
+    if (expandAll) return true;
     if (depth < initialDepth) return true;
     return expanded ? expanded.has(uid) : false;
   };
 
-  // BFS over the OPEN trail only.
-  const reachable = [];
+  // BFS over the open trail; items are a uniform {kind,id,parentId,...} shape so
+  // member nodes and open-slot placeholders can share one d3 hierarchy.
+  const items = [];
   const seen = new Set();
   const queue = [{ node: root, depth: 0 }];
   let truncated = false;
+  let realCount = 0;
   while (queue.length) {
     const { node, depth } = queue.shift();
     if (seen.has(node.uid)) continue;
-    if (reachable.length >= budget) { truncated = true; break; }
+    if (items.length >= budget) { truncated = true; break; }
     seen.add(node.uid);
     const kids = childrenOf.get(node.uid) || [];
     const open = isOpen(node.uid, depth, kids.length > 0);
-    reachable.push({ node, depth, kids, open });
+    const id = String(node.uid);
+    items.push({ kind: 'member', id, parentId: node === root ? null : String(node.parentUid), node, depth, kids, open });
+    realCount += 1;
     if (open) for (const c of kids) if (!seen.has(c.uid)) queue.push({ node: c, depth: depth + 1 });
+  }
+
+  // Binary open slots: for each rendered, fully-open node missing a left/right child,
+  // emit a placeholder so the slot is visible and manually encodable.
+  if (withPlaceholders) {
+    const inSet = new Set(items.map((it) => it.id));
+    for (const it of [...items]) {
+      if (it.kind !== 'member' || !it.open) continue;
+      if (items.length >= budget) { truncated = true; break; }
+      const kids = it.kids || [];
+      const hasLeft = kids.some((k) => k.position === 'left');
+      const hasRight = kids.some((k) => k.position === 'right');
+      for (const side of ['left', 'right']) {
+        if ((side === 'left' && hasLeft) || (side === 'right' && hasRight)) continue;
+        const phId = `${it.id}::ph-${side}`;
+        if (inSet.has(phId)) continue;
+        inSet.add(phId);
+        items.push({ kind: 'placeholder', id: phId, parentId: it.id, side, parent: it.node, depth: it.depth + 1 });
+      }
+    }
   }
 
   let hierarchy;
   try {
-    const set = new Set(reachable.map((r) => r.node.uid));
-    hierarchy = stratify()
-      .id((d) => String(d.node.uid))
-      .parentId((d) => (d.node.uid === root.uid ? null : (set.has(d.node.parentUid) ? String(d.node.parentUid) : null)))(reachable);
+    hierarchy = stratify().id((d) => d.id).parentId((d) => d.parentId)(items);
   } catch {
     return { ...empty, total: flatNodes.length };
   }
@@ -116,37 +144,94 @@ export function buildFlatTreeGraph(flatNodes, opts = {}) {
   const nodes = [];
   const edges = [];
   hierarchy.each((d) => {
-    const { node: n, kids, open } = d.data;
-    const id = String(n.publicUid || n.uid);
-    const collapsed = kids.length > 0 && !open;
-    nodes.push({
-      id,
-      type: 'memberNode',
-      position: { x: d.x - NODE_WIDTH / 2, y: d.y },
-      sourcePosition: 'bottom',
-      targetPosition: 'top',
-      data: {
-        ...n,
-        packageType: n.accttypeName,
-        level: d.depth,
-        positionLabel: d.depth === 0 ? 'Root (Level 0)' : (n.position ? cap(n.position) : `Level ${d.depth}`),
-        metricLabel: collapsed ? `▸ +${(descendants.get(n.uid) || 0).toLocaleString('en-US')} below` : 'Pts to upline',
-        metricValue: Number(n.pointsToUpline || 0),
-        isCollapsed: collapsed,
-        childCount: kids.length,
-        hiddenDescendants: collapsed ? (descendants.get(n.uid) || 0) : 0,
-      },
-    });
-    if (d.parent) {
-      const pid = String(d.parent.data.node.publicUid || d.parent.data.node.uid);
+    const it = d.data;
+    const id = it.kind === 'placeholder' ? it.id : String(it.node.publicUid || it.node.uid);
+    const pid = d.parent ? (d.parent.data.kind === 'placeholder' ? d.parent.data.id : String(d.parent.data.node.publicUid || d.parent.data.node.uid)) : null;
+
+    if (it.kind === 'placeholder') {
+      nodes.push({
+        id,
+        type: 'placeholderNode',
+        position: { x: d.x - NODE_WIDTH / 2, y: d.y },
+        sourcePosition: 'bottom',
+        targetPosition: 'top',
+        data: {
+          isPlaceholder: true,
+          side: it.side,
+          position: it.side === 'right' ? 2 : 1,
+          positionLabel: it.side === 'right' ? 'Right Leg' : 'Left Leg',
+          parentUid: it.parent?.uid,
+          parentPublicUid: it.parent?.publicUid,
+          parentUsername: it.parent?.username,
+          level: d.depth,
+        },
+      });
+    } else {
+      const n = it.node;
+      const collapsed = (it.kids || []).length > 0 && !it.open;
+      nodes.push({
+        id,
+        type: 'memberNode',
+        position: { x: d.x - NODE_WIDTH / 2, y: d.y },
+        sourcePosition: 'bottom',
+        targetPosition: 'top',
+        data: {
+          ...n,
+          packageType: n.accttypeName,
+          level: d.depth,
+          positionLabel: d.depth === 0 ? 'Root (Level 0)' : (n.position ? cap(n.position) : `Level ${d.depth}`),
+          metricLabel: collapsed ? `▸ open ${(descendants.get(n.uid) || 0).toLocaleString('en-US')} more` : (metricAsPv ? 'PV' : 'Pts'),
+          metricValue: metricAsPv ? Math.round(Number(n.pointsToUpline || 0) / 250) : Number(n.pointsToUpline || 0),
+          metricUnit: metricAsPv ? 'PV' : 'pts',
+          isCollapsed: collapsed,
+          childCount: (it.kids || []).length,
+          hiddenDescendants: collapsed ? (descendants.get(n.uid) || 0) : 0,
+        },
+      });
+    }
+    if (pid != null) {
       edges.push({
         id: `${pid}->${id}`, source: pid, target: id, type: 'treeEdge', animated: false,
-        style: { stroke: 'rgba(212,175,55,0.9)', strokeWidth: 2.4 },
+        style: it.kind === 'placeholder'
+          ? { stroke: 'rgba(212,175,55,0.4)', strokeWidth: 2, strokeDasharray: '5 4' }
+          : { stroke: 'rgba(212,175,55,0.9)', strokeWidth: 2.4 },
       });
     }
   });
 
-  return { nodes, edges, total: flatNodes.length, rendered: reachable.length, truncated };
+  return { nodes, edges, total: flatNodes.length, rendered: realCount, truncated };
+}
+
+/**
+ * Return the subtree rooted at `rootUid` (rootUid + all descendants), with the
+ * root's parentUid nulled so buildFlatTreeGraph treats it as the tree root. Used by
+ * the re-root "Binary Tree" view so clicking a node re-roots the 15-node window.
+ */
+export function rootSubtreeAt(flatNodes, rootUid) {
+  if (rootUid == null) return flatNodes;
+  const byUid = new Map(flatNodes.map((n) => [Number(n.uid), n]));
+  const root = byUid.get(Number(rootUid));
+  if (!root) return flatNodes;
+  const childrenOf = new Map();
+  for (const n of flatNodes) {
+    if (n.parentUid == null) continue;
+    const p = Number(n.parentUid);
+    if (!childrenOf.has(p)) childrenOf.set(p, []);
+    childrenOf.get(p).push(n);
+  }
+  const out = [{ ...root, parentUid: null }];
+  const stack = [Number(rootUid)];
+  const seen = new Set([Number(rootUid)]);
+  while (stack.length) {
+    const cur = stack.pop();
+    for (const c of (childrenOf.get(cur) || [])) {
+      if (seen.has(Number(c.uid))) continue;
+      seen.add(Number(c.uid));
+      out.push(c);
+      stack.push(Number(c.uid));
+    }
+  }
+  return out;
 }
 
 /** Set of ancestor uids whose expansion reveals `targetUid` (for search "jump to"). */

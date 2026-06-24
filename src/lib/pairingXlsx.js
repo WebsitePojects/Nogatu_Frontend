@@ -51,6 +51,53 @@ function drawTierChart(tierGroups) {
   return canvas.toDataURL('image/png');
 }
 
+// Cumulative credited pairing income across matched events (chronological) → PNG.
+function drawCumulativeChart(history) {
+  const rows = [...(history || [])]
+    .filter((r) => Number(r.creditedIncome || 0) > 0)
+    .sort((a, b) => (Number(a.matchSeq || 0) - Number(b.matchSeq || 0)) || (new Date(a.pairedAt) - new Date(b.pairedAt)));
+  const w = 620; const h = 240;
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#1f2937'; ctx.font = 'bold 16px Arial'; ctx.textAlign = 'left';
+  ctx.fillText('Cumulative Credited Pairing Income (₱)', 16, 26);
+  if (rows.length === 0) return canvas.toDataURL('image/png');
+
+  let cum = 0; const pts = rows.map((r) => { cum += Number(r.creditedIncome || 0); return cum; });
+  const max = Math.max(1, cum);
+  const x0 = 64; const yTop = 42; const yBot = h - 28; const chartW = w - x0 - 20; const chartH = yBot - yTop;
+
+  ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1; ctx.beginPath();
+  ctx.moveTo(x0, yTop); ctx.lineTo(x0, yBot); ctx.lineTo(w - 20, yBot); ctx.stroke();
+
+  // filled area + line
+  ctx.beginPath();
+  pts.forEach((v, i) => {
+    const x = x0 + (pts.length === 1 ? chartW : (i / (pts.length - 1)) * chartW);
+    const y = yBot - (v / max) * chartH;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.lineTo(x0 + chartW, yBot); ctx.lineTo(x0, yBot); ctx.closePath();
+  ctx.fillStyle = 'rgba(212,175,55,0.18)'; ctx.fill();
+
+  ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2; ctx.beginPath();
+  pts.forEach((v, i) => {
+    const x = x0 + (pts.length === 1 ? chartW : (i / (pts.length - 1)) * chartW);
+    const y = yBot - (v / max) * chartH;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  ctx.fillStyle = '#111827'; ctx.font = '11px Arial'; ctx.textAlign = 'right';
+  ctx.fillText(`₱${max.toLocaleString('en-US')}`, x0 - 6, yTop + 6);
+  ctx.fillText('₱0', x0 - 6, yBot);
+  ctx.textAlign = 'center';
+  ctx.fillText(`${pts.length} matched events`, x0 + chartW / 2, h - 10);
+  return canvas.toDataURL('image/png');
+}
+
 function triggerDownload(buffer, filename) {
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const url = URL.createObjectURL(blob);
@@ -109,24 +156,44 @@ export async function exportPairingXlsx(p) {
   // ── Pairing History ──
   const h = wb.addWorksheet('Pairing History');
   h.columns = [
+    { header: 'Seq', key: 'seq', width: 7 },
     { header: 'Date', key: 'date', width: 20 },
-    { header: 'Left Source', key: 'left', width: 26 },
-    { header: 'Right Source', key: 'right', width: 26 },
-    { header: 'Matched PV', key: 'pv', width: 14 },
-    { header: 'Credited (₱)', key: 'credited', width: 16 },
+    { header: 'Left Source', key: 'left', width: 28 },
+    { header: 'Right Source', key: 'right', width: 28 },
+    { header: 'Matched PV', key: 'pv', width: 13 },
+    { header: 'Left Remaining PV', key: 'lr', width: 17 },
+    { header: 'Right Remaining PV', key: 'rr', width: 18 },
+    { header: 'Credited (₱)', key: 'credited', width: 15 },
   ];
   styleHeader(h.getRow(1));
   h.views = [{ state: 'frozen', ySplit: 1 }];
-  (p.history || []).forEach((row) => {
+  // history arrives in the table's display order; surface the match sequence so
+  // the chronological order is explicit and the remaining columns read in step.
+  (p.history || []).forEach((row, i) => {
     const r = h.addRow({
+      seq: row.matchSeq || (i + 1),
       date: row.pairedAt ? new Date(row.pairedAt).toLocaleString('en-US') : '',
       left: row.left ? `${row.left.fullName || row.left.username || ''}` : (row.isLegacy ? 'Legacy import' : '-'),
       right: row.right ? `${row.right.fullName || row.right.username || ''}` : '-',
       pv: row.matchedPoints != null ? Math.round(Number(row.matchedPoints) / 250) : null,
+      lr: row.leftRemainingAfter != null ? Math.round(Number(row.leftRemainingAfter) / 250) : null,
+      rr: row.rightRemainingAfter != null ? Math.round(Number(row.rightRemainingAfter) / 250) : null,
       credited: Number(row.creditedIncome || 0),
     });
-    r.getCell('pv').numFmt = int; r.getCell('credited').numFmt = peso;
+    ['pv', 'lr', 'rr'].forEach((k) => { r.getCell(k).numFmt = int; });
+    r.getCell('credited').numFmt = peso;
   });
+
+  // Embedded cumulative-income chart on its own sheet (no overlap with data).
+  if ((p.history || []).some((row) => Number(row.creditedIncome || 0) > 0)) {
+    try {
+      const cw = wb.addWorksheet('Income Trend');
+      cw.getCell('A1').value = `Cumulative Pairing Income — ${p.username || 'Member'}`;
+      cw.getCell('A1').font = { bold: true, size: 14, color: { argb: GOLD } };
+      const cumId = wb.addImage({ base64: drawCumulativeChart(p.history), extension: 'png' });
+      cw.addImage(cumId, { tl: { col: 0, row: 2 }, ext: { width: 620, height: 240 } });
+    } catch { /* chart optional */ }
+  }
 
   // ── Pairing Event Trace ──
   const t = wb.addWorksheet('Pairing Event Trace');

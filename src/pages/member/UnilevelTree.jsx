@@ -1,18 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Background, BackgroundVariant, Controls, ReactFlow } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  HiOutlineArrowsExpand,
-  HiOutlineHome,
-  HiOutlineMinusSm,
-  HiOutlineRefresh,
+  HiOutlineChevronDown,
+  HiOutlineDownload,
   HiOutlineSearch,
   HiOutlineUsers,
 } from 'react-icons/hi';
 import api from '../../api';
-import { Spinner, MemberNode, JunctionNode, TreeEdge } from '../../components/genealogyTreeUi';
-import { getGenealogyTheme, NODE_WIDTH, NODE_HEIGHT } from '../../components/genealogyTreeUiUtils';
-import { buildFlatTreeGraph, expandPathTo } from '../../lib/buildFlatTreeGraph';
+import { Spinner } from '../../components/genealogyTreeUi';
+import { getGenealogyTheme } from '../../components/genealogyTreeUiUtils';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -21,21 +16,43 @@ const UNILEVEL_RATES = [5, 3, 3, 2, 2, 1, 1, 1, 1, 1];
 const fmtInt = (n) => Number(n || 0).toLocaleString('en-US');
 const fmtMoney = (n) => `₱${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+// Export the per-level downline to a Word document (HTML→.doc — opens in Word, no extra
+// dependency). Each level lists its members and their repurchase points contributed to ranking.
+function exportUnilevelDocx(levels, label) {
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const sections = levels.map(([lvl, members]) => {
+    const total = members.reduce((s, m) => s + Number(m.rankingPoints || 0), 0);
+    const rows = members.map((m, i) =>
+      `<tr><td>${i + 1}</td><td>${esc(m.fullname || m.username)}</td><td>${esc(m.username || m.uid)}</td>`
+      + `<td>${esc(m.accttypeName || '—')}</td><td style="text-align:right">${fmtInt(m.rankingPoints || 0)}</td></tr>`).join('');
+    return `<h2 style="color:#9a7b1f">Level ${lvl} — ${members.length} member${members.length === 1 ? '' : 's'} · ${fmtInt(total)} ranking pts</h2>`
+      + `<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:11pt">`
+      + `<tr style="background:#f3e9c9"><th>#</th><th>Member</th><th>Username</th><th>Package</th><th>Ranking Points</th></tr>${rows}</table><br/>`;
+  }).join('');
+  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>`
+    + `<head><meta charset='utf-8'></head><body style="font-family:Calibri,Arial,sans-serif">`
+    + `<h1>Unilevel Network — ${esc(label)}</h1>`
+    + `<p style="color:#666">Per-level members and the repurchase points each contributed to ranking. Generated ${new Date().toLocaleString('en-US')}.</p>`
+    + `${sections}</body></html>`;
+  const blob = new Blob(['﻿', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `unilevel-network-${String(label || 'export').replace(/[^a-z0-9]/gi, '_')}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 export default function UnilevelTree() {
   const { user } = useAuth();
   const { isDarkMode } = useTheme();
-  const reactFlowRef = useRef(null);
-  const flowShellRef = useRef(null);
 
-  const [canvasActive, setCanvasActive] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [expanded, setExpanded] = useState(() => new Set()); // explicitly opened deep branches
-  const [treeSearch, setTreeSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
   const [uniSummary, setUniSummary] = useState(null);
 
   const selfUid = user?.uid;
-  const { nodes: flatNodes, status, loading, refreshing, count } = useInfiniteTree({
+  const { nodes: flatNodes, loading, refreshing, count } = useInfiniteTree({
     treeType: 'unilevel',
     cacheKey: selfUid ? String(selfUid) : '',
     url: '/genealogy/unilevel/flat',
@@ -44,9 +61,8 @@ export default function UnilevelTree() {
 
   const chrome = getGenealogyTheme(isDarkMode);
   const panelStyle = { background: chrome.surfaceStrong, border: `1px solid ${chrome.surfaceBorder}`, backdropFilter: 'blur(18px)' };
-  const neutralButtonStyle = { background: chrome.panelButtonBg, color: chrome.panelButtonText, border: `1px solid ${chrome.surfaceBorder}` };
 
-  // Your own maintenance status + per-level breakdown (independent of canvas root).
+  // Your own maintenance status + per-level breakdown.
   useEffect(() => {
     let cancelled = false;
     api.get('/dashboard/breakdown/uni-level')
@@ -54,82 +70,6 @@ export default function UnilevelTree() {
       .catch(() => { if (!cancelled) setUniSummary(null); });
     return () => { cancelled = true; };
   }, []);
-
-  useEffect(() => {
-    function onChange() { setIsFullscreen(document.fullscreenElement === flowShellRef.current); }
-    function onPointer(e) { if (!flowShellRef.current?.contains(e.target)) setCanvasActive(false); }
-    function onEsc(e) { if (e.key === 'Escape') setCanvasActive(false); }
-    document.addEventListener('fullscreenchange', onChange);
-    document.addEventListener('pointerdown', onPointer);
-    document.addEventListener('keydown', onEsc);
-    return () => {
-      document.removeEventListener('fullscreenchange', onChange);
-      document.removeEventListener('pointerdown', onPointer);
-      document.removeEventListener('keydown', onEsc);
-    };
-  }, []);
-
-  async function toggleFullscreen() {
-    if (!flowShellRef.current) return;
-    try {
-      if (document.fullscreenElement === flowShellRef.current) await document.exitFullscreen();
-      else { await flowShellRef.current.requestFullscreen(); setCanvasActive(true); }
-    } catch { /* denied */ }
-  }
-  function activateCanvas() { setCanvasActive(true); }
-
-  function toggleExpand(uid) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(uid)) next.delete(uid); else next.add(uid);
-      return next;
-    });
-  }
-  function jumpTo(node) {
-    const path = expandPathTo(flatNodes, node.uid);
-    setExpanded((prev) => { const next = new Set(prev); path.forEach((u) => next.add(u)); return next; });
-    setCanvasActive(true);
-    setTreeSearch(''); setSearchOpen(false);
-    const id = String(node.publicUid || node.uid);
-    setTimeout(() => {
-      const rf = reactFlowRef.current;
-      const target = rf?.getNode?.(id);
-      if (target) rf.setCenter(target.position.x + NODE_WIDTH / 2, target.position.y + NODE_HEIGHT / 2, { zoom: 0.9, duration: 500 });
-    }, 160);
-  }
-
-  // Progressive render: first 2 levels + explicitly expanded branches only (fast).
-  const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, expanded, initialDepth: 2 }),
-    [flatNodes, expanded],
-  );
-  const nodes = useMemo(() => built.nodes.map((n) => (
-    n.type === 'memberNode'
-      ? { ...n, data: { ...n.data, isDarkMode, canvasActive, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } }
-      : n
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  )), [built, isDarkMode, canvasActive]);
-  const edges = built.edges;
-
-  useEffect(() => {
-    if (!built.nodes.length) return undefined;
-    const timer = setTimeout(() => {
-      reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 });
-    }, 80);
-    return () => clearTimeout(timer);
-    // refit only when the tree (size) changes, not on every expand
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count]);
-
-  const matchResults = useMemo(() => {
-    const q = treeSearch.trim().toLowerCase();
-    if (!q) return [];
-    return flatNodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q)).slice(0, 8);
-  }, [flatNodes, treeSearch]);
-
-  const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode }), []);
-  const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
-  const isCollapsed = expanded.size === 0;
 
   return (
     <div className="space-y-5">
@@ -140,47 +80,14 @@ export default function UnilevelTree() {
             Unilevel Tree
           </h1>
           <p className="text-sm portal-card-muted mt-1">
-            Your full sponsor (direct-referral) network — Level 0 is you, down to the deepest generation. The first
-            levels load instantly; click any “+N below” card to open the next level. Search a name to jump anywhere.
+            Your sponsor (direct-referral) network — every level at a glance. Level 1 (your direct downline) through
+            your deepest level, with all members listed. Filter by name to find anyone quickly.
           </p>
         </div>
       </div>
 
       {/* Toolbar */}
       <div className="relative flex flex-wrap items-center gap-2 rounded-2xl p-3" style={{ ...panelStyle, zIndex: 40 }}>
-        <button type="button" onClick={() => setExpanded(new Set())} disabled={isCollapsed}
-          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold disabled:opacity-40" style={neutralButtonStyle}>
-          <HiOutlineHome className="size-4" /> Collapse all
-        </button>
-        <button type="button"
-          onClick={() => reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 })}
-          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold" style={neutralButtonStyle}>
-          <HiOutlineRefresh className="size-4" /> Fit View
-        </button>
-
-        {/* In-tree search */}
-        <div className="relative">
-          <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
-          <input type="text" value={treeSearch}
-            onChange={(e) => { setTreeSearch(e.target.value); setSearchOpen(true); }}
-            onFocus={() => setSearchOpen(true)}
-            placeholder="Search a name in your tree…"
-            className="w-56 rounded-xl py-2 pl-8 pr-3 text-xs outline-none"
-            style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
-          {searchOpen && matchResults.length > 0 && (
-            <div className="absolute left-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-xl"
-              style={{ background: chrome.popoverBg, border: `1px solid ${chrome.surfaceBorder}`, boxShadow: chrome.popoverShadow }}>
-              {matchResults.map((m) => (
-                <button key={m.uid} type="button" onClick={() => jumpTo(m)}
-                  className="w-full px-3 py-2 text-left text-xs" style={{ color: chrome.searchText }}>
-                  <span className="font-semibold">{m.fullname || m.username}</span>
-                  <span className="ml-1 portal-card-muted">@{m.username} · L{m.depth}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         {refreshing && (
           <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
             style={{ background: 'rgba(212,175,55,0.14)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.3)' }}>
@@ -192,79 +99,127 @@ export default function UnilevelTree() {
         </div>
       </div>
 
-      {/* Canvas */}
-      <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-2xl'}`}
-        style={{ ...panelStyle, height: isFullscreen ? '100vh' : '70vh', zIndex: 0 }}>
-        <div className="absolute left-3 top-3 z-30 flex flex-wrap items-center gap-2">
-          <button type="button"
-            onClick={() => reactFlowRef.current?.fitView({ padding: 0.1, duration: 350, maxZoom: 1.2, minZoom: 0.08 })}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"
-            style={neutralButtonStyle}>
-            <HiOutlineRefresh className="size-4" /> Fit
-          </button>
-          <button type="button" onClick={toggleFullscreen}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"
-            style={{ background: 'rgba(212,175,55,0.16)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.35)' }}>
-            {isFullscreen ? <HiOutlineMinusSm className="size-4" /> : <HiOutlineArrowsExpand className="size-4" />}
-            {isFullscreen ? 'Exit' : 'Full screen'}
-          </button>
-          {isFullscreen && !isCollapsed && (
-            <button type="button" onClick={() => setExpanded(new Set())}
-              className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur" style={neutralButtonStyle}>
-              <HiOutlineHome className="size-4" /> Collapse all
-            </button>
-          )}
-        </div>
-
-        {!canvasActive && !loading && (
-          <button type="button" aria-label="Activate unilevel canvas" onClick={activateCanvas}
-            className="absolute inset-0 z-10 block cursor-grab bg-transparent" />
-        )}
-        {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center backdrop-blur-[2px]" style={{ background: chrome.canvasOverlay }}>
-            <Spinner />
-          </div>
-        )}
-        {!loading && status !== 'error' && nodes.length === 0 && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center text-sm portal-card-muted">
-            No downline to display yet.
-          </div>
-        )}
-        <ReactFlow
-          onInit={(instance) => { reactFlowRef.current = instance; }}
-          className="genealogy-flow size-full"
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          onlyRenderVisibleElements
-          minZoom={0.06}
-          maxZoom={1.6}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable={canvasActive}
-          panOnDrag={canvasActive}
-          panOnScroll={false}
-          zoomOnScroll={canvasActive}
-          zoomOnPinch={canvasActive}
-          zoomOnDoubleClick={canvasActive}
-          preventScrolling={canvasActive}
-          proOptions={{ hideAttribution: true }}
-          defaultEdgeOptions={{ type: 'treeEdge' }}
-        >
-          <Controls className="genealogy-controls" showInteractive={false} position="top-right" />
-          <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color={chrome.backgroundDot} />
-        </ReactFlow>
-
-        {!canvasActive && !loading && nodes.length > 0 && (
-          <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full px-3 py-1.5 text-[11px] font-medium"
-            style={{ background: 'rgba(15,23,42,0.72)', color: 'rgba(255,255,255,0.85)' }}>
-            Tap the canvas to pan, zoom, and open members
-          </div>
-        )}
-      </div>
+      {/* All levels at once — static, every member visible */}
+      <UnilevelAllLevels nodes={flatNodes} chrome={chrome} panelStyle={panelStyle} loading={loading}
+        selfLabel={user?.username || user?.fullname} />
 
       <UnilevelBreakdown summary={uniSummary} panelStyle={panelStyle} />
+    </div>
+  );
+}
+
+/* ── All levels at once: group the flat downline by level (depth) and render every
+      level (Level 1 = direct downline … deepest) with all members visible — no
+      drill-down, no clicking. A name filter narrows across all levels for quick lookup.
+      Uses the already-loaded flat list. ──────────────────────────────────────────── */
+function UnilevelAllLevels({ nodes, chrome, panelStyle, loading, selfLabel }) {
+  const [q, setQ] = useState('');
+  const [openLevels, setOpenLevels] = useState(() => new Set([1])); // only Level 1 expanded by default
+
+  // Group by level (depth >= 1 excludes the member themselves), sorted shallow→deep.
+  const levels = useMemo(() => {
+    const byLevel = new Map();
+    for (const n of nodes) {
+      const d = Number(n.depth || 0);
+      if (d < 1) continue;
+      if (!byLevel.has(d)) byLevel.set(d, []);
+      byLevel.get(d).push(n);
+    }
+    const sorted = [...byLevel.entries()].sort((a, b) => a[0] - b[0]);
+    for (const [, arr] of sorted) {
+      arr.sort((a, b) => String(a.username || '').localeCompare(String(b.username || '')));
+    }
+    return sorted; // [ [level, members[]], … ]
+  }, [nodes]);
+
+  const term = q.trim().toLowerCase();
+  const visible = useMemo(() => {
+    if (!term) return levels;
+    return levels
+      .map(([lvl, arr]) => [lvl, arr.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(term))])
+      .filter(([, arr]) => arr.length > 0);
+  }, [levels, term]);
+
+  if (loading) return <div className="rounded-2xl p-10" style={panelStyle}><Spinner /></div>;
+  if (!nodes.length || levels.length === 0) {
+    return <div className="rounded-2xl p-8 text-center text-sm portal-card-muted" style={panelStyle}>No downline members yet.</div>;
+  }
+
+  const totalMembers = levels.reduce((s, [, arr]) => s + arr.length, 0);
+  const deepest = levels[levels.length - 1][0];
+
+  return (
+    <div className="rounded-2xl p-4 sm:p-5 space-y-5" style={panelStyle}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative">
+          <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 portal-card-muted" />
+          <input type="text" value={q} onChange={(e) => setQ(e.target.value)}
+            placeholder="Filter members by name…"
+            className="w-full sm:w-72 rounded-xl py-2 pl-8 pr-3 text-sm outline-none"
+            style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => exportUnilevelDocx(levels, selfLabel)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(34,197,94,0.12)', color: '#34d399', border: '1px solid rgba(34,197,94,0.3)' }}
+            title="Export all levels + ranking-point contributions to Word (.doc)">
+            <HiOutlineDownload className="size-4" /> Export DOCX
+          </button>
+          <button type="button" onClick={() => setOpenLevels(new Set(levels.map(([lvl]) => lvl)))}
+            className="text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(212,175,55,0.08)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
+            Expand all
+          </button>
+          <button type="button" onClick={() => setOpenLevels(new Set())}
+            className="text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(148,163,184,0.10)', color: chrome.panelButtonText, border: '1px solid rgba(148,163,184,0.2)' }}>
+            Collapse all
+          </button>
+          <span className="text-xs portal-card-muted">
+            <span className="portal-card-title font-semibold">{fmtInt(totalMembers)}</span> members ·{' '}
+            <span className="portal-card-title font-semibold">{fmtInt(deepest)}</span> level{deepest === 1 ? '' : 's'}
+          </span>
+        </div>
+      </div>
+
+      {visible.length === 0 && (
+        <p className="px-1 py-6 text-center text-xs portal-card-muted">No members match “{q}”.</p>
+      )}
+
+      {visible.map(([level, members]) => {
+        const open = Boolean(term) || openLevels.has(level);
+        return (
+          <section key={level} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
+            <button type="button"
+              onClick={() => setOpenLevels((prev) => {
+                const next = new Set(prev);
+                if (next.has(level)) next.delete(level); else next.add(level);
+                return next;
+              })}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors"
+              style={{ background: 'rgba(212,175,55,0.06)' }}>
+              <HiOutlineChevronDown className="size-4 transition-transform" aria-hidden
+                style={{ color: 'var(--brand-gold)', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+              <span className="rounded-lg px-2.5 py-0.5 text-xs font-bold"
+                style={{ background: 'rgba(212,175,55,0.16)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.3)' }}>
+                Level {level}
+              </span>
+              <span className="text-xs portal-card-muted">{fmtInt(members.length)} member{members.length === 1 ? '' : 's'}</span>
+            </button>
+            {open && (
+              <div className="grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3">
+                {members.map((m) => (
+                  <div key={m.uid} className="rounded-xl px-3.5 py-2.5"
+                    style={{ border: `1px solid ${chrome.surfaceBorder}`, background: chrome.surface }}>
+                    <p className="truncate text-sm font-medium portal-card-title">{m.fullname || m.username || `Member ${m.uid}`}</p>
+                    <p className="truncate text-[11px] portal-card-muted">@{m.username || m.uid} · {m.accttypeName || '—'}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
@@ -331,6 +286,13 @@ function UnilevelBreakdown({ summary, panelStyle }) {
         <h2 className="text-sm font-bold portal-card-title">Per-Level Breakdown</h2>
         <p className="text-xs portal-card-muted mt-1">
           Current-month product-point contributors across your 10 unilevel levels.
+        </p>
+        <p className="text-[11px] mt-2 rounded-lg px-3 py-2 leading-5"
+          style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.18)', color: 'var(--portal-card-muted)' }}>
+          <strong style={{ color: 'var(--brand-gold)' }}>Roll-up compression:</strong> when no members in a level
+          have product (repurchase) points this month, that level is skipped and the next qualifying generation
+          rolls up to take its place — so your paid levels stay contiguous (1, 2, 3…) and an empty middle level
+          never blocks the levels below it.
         </p>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-xs">

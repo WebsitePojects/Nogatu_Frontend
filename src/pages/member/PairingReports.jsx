@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   HiOutlineArrowLeft,
   HiOutlineArrowRight,
@@ -143,70 +142,30 @@ function SummaryCard({ label, value, icon: Icon, color = '#D4AF37', onClick, hel
   );
 }
 
-function TraceEventCard({ row, expanded, onToggle }) {
+function TraceEventCard({ row, weakSide, strongSide }) {
   const styles = statusStyles(row);
+  const entry = row[weakSide] || {};
   return (
-    <div className="glass-card rounded-2xl p-4 space-y-3">
-      <button type="button" className="w-full text-left" onClick={onToggle}>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="text-xs font-semibold" style={{ color: PORTAL_TITLE }}>{formatDateTimeManila(row.pairedAt)}</div>
-            <div className="text-[11px] mt-1" style={{ color: PORTAL_MUTED }}>
-              {(row.left?.username || '-')} x {(row.right?.username || '-')}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] px-2 py-1 rounded-full font-semibold" style={styles}>
-              {traceStatus(row)}
-            </span>
-            {expanded ? <HiOutlineChevronUp className="size-4" style={{ color: '#D4AF37' }} /> : <HiOutlineChevronDown className="size-4" style={{ color: '#D4AF37' }} />}
-          </div>
+    <div className="glass-card rounded-2xl p-4 space-y-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold truncate" style={{ color: PORTAL_TITLE }}>{entry.fullName || entry.username || '-'}</div>
+          <div className="text-[11px] mt-0.5" style={{ color: PORTAL_MUTED }}>New weak-leg entry · {formatDateTimeManila(row.pairedAt)}</div>
         </div>
-      </button>
-
-      <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: PORTAL_TEXT }}>
-        <div>Matched: {fmtInt(toBp(row.pairPoints))} PV</div>
-        <div>Credited: PHP {fmt(row.creditedIncome)}</div>
-        <div>Gross: PHP {fmt(row.grossIncome)}</div>
-        <div>Blocked: PHP {fmt(row.blockedIncome)}</div>
+        <span className="text-[11px] px-2 py-1 rounded-full font-semibold flex-shrink-0" style={styles}>
+          {traceStatus(row)}
+        </span>
       </div>
-
-      {expanded ? (
-        <div className="rounded-2xl p-4 space-y-4" style={{ background: PORTAL_SURFACE, border: `1px solid ${PORTAL_BORDER}` }}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl p-3" style={{ background: 'color-mix(in srgb, var(--portal-soft-bg) 74%, rgba(15,23,42,0.06))' }}>
-              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#D4AF37' }}>Left Source</p>
-              <p className="font-semibold mt-2" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</p>
-              <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>@{row.left?.username || '-'}</p>
-              <SourceMetaLine source={row.left} />
-              <div className="grid grid-cols-2 gap-2 mt-3 text-xs" style={{ color: PORTAL_TEXT }}>
-                <div>PV before: {fmtInt(toBp(row.left?.pointsBefore))} PV</div>
-                <div>Remaining PV: {fmtInt(toBp(row.left?.remainingAfter))} PV</div>
-                <div>Type: {row.left?.eventType || '-'}</div>
-                <div>{row.left?.fullyConsumed ? 'Fully consumed' : 'Still pairable'}</div>
-              </div>
-            </div>
-            <div className="rounded-xl p-3" style={{ background: 'color-mix(in srgb, var(--portal-soft-bg) 74%, rgba(15,23,42,0.06))' }}>
-              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#D4AF37' }}>Right Source</p>
-              <p className="font-semibold mt-2" style={{ color: PORTAL_TITLE }}>{row.right?.fullName || '-'}</p>
-              <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>@{row.right?.username || '-'}</p>
-              <SourceMetaLine source={row.right} />
-              <div className="grid grid-cols-2 gap-2 mt-3 text-xs" style={{ color: PORTAL_TEXT }}>
-                <div>PV before: {fmtInt(toBp(row.right?.pointsBefore))} PV</div>
-                <div>Remaining PV: {fmtInt(toBp(row.right?.remainingAfter))} PV</div>
-                <div>Type: {row.right?.eventType || '-'}</div>
-                <div>{row.right?.fullyConsumed ? 'Fully consumed' : 'Still pairable'}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: PORTAL_TEXT }}>
+        <div>Matched: <strong style={{ color: PORTAL_TITLE }}>&minus;{fmtInt(toBp(row.pairPoints))} PV</strong></div>
+        <div>Strong leg remaining: {fmtInt(toBp(row[strongSide]?.remainingAfter))} PV</div>
+        <div className="col-span-2">Credited: <strong style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</strong></div>
+      </div>
     </div>
   );
 }
 
 export default function PairingReports() {
-  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [historyPage, setHistoryPage] = useState(1);
   const [tracePage, setTracePage] = useState(1);
@@ -216,7 +175,14 @@ export default function PairingReports() {
   const [debouncedHistorySearch, setDebouncedHistorySearch] = useState('');
   const [historySort, setHistorySort] = useState('date');
   const [historyDir, setHistoryDir] = useState('desc');
+  const [historyMonth, setHistoryMonth] = useState(''); // '' = backend defaults to latest month
+  const [historyFrom, setHistoryFrom] = useState(''); // YYYY-MM-DD range (overrides month)
+  const [historyTo, setHistoryTo] = useState('');
+  const [traceSearch, setTraceSearch] = useState('');
+  const [debouncedTraceSearch, setDebouncedTraceSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [tableBusy, setTableBusy] = useState(false); // silent background refetch (search/page)
+  const hasLoadedRef = useRef(false);
   const [exportingXlsx, setExportingXlsx] = useState(false);
 
   async function handleExportXlsx() {
@@ -233,14 +199,14 @@ export default function PairingReports() {
       }
       for (let i = 1, hp = 1; i <= hp && i <= 100; i += 1) {
         // eslint-disable-next-line no-await-in-loop
-        const res = await api.get(`/pairing?historyPage=${i}&historyPerPage=200&tracePerPage=1`);
+        const res = await api.get(`/pairing?historyPage=${i}&historyPerPage=200&tracePerPage=1&historyMonth=all`);
         allHistory.push(...(res.data.history?.rows || []));
         hp = Number(res.data.history?.pagination?.totalPages || 1);
       }
       // Chronological + running cumulative across the WHOLE trace (not per page).
       let cum = 0;
       const orderedAll = [...allTrace]
-        .sort((a, b) => new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
+        .sort((a, b) => (Number(a.matchSeq || 0) - Number(b.matchSeq || 0)) || new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
         .map((row) => { cum += Math.round(Number(row.pairPoints || 0) / BP_PESO_VALUE); return { ...row, cumulativeMatchedPv: cum }; });
 
       const lifetime = Number(data.walletPairingTotal || 0);
@@ -261,12 +227,20 @@ export default function PairingReports() {
     const id = setTimeout(() => setDebouncedHistorySearch(historySearch.trim()), 350);
     return () => clearTimeout(id);
   }, [historySearch]);
-  useEffect(() => { setHistoryPage(1); }, [debouncedHistorySearch, historySort, historyDir]);
+  useEffect(() => { setHistoryPage(1); }, [debouncedHistorySearch, historySort, historyDir, historyMonth, historyFrom, historyTo]);
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedTraceSearch(traceSearch.trim()), 350);
+    return () => clearTimeout(id);
+  }, [traceSearch]);
+  useEffect(() => { setTracePage(1); }, [debouncedTraceSearch]);
 
   useEffect(() => {
     let cancelled = false;
     async function loadData() {
-      setLoading(true);
+      // Only blank the page on the FIRST load. Search / page / sort changes fetch
+      // silently in the background and swap the table in when ready (no full reload).
+      if (!hasLoadedRef.current) setLoading(true);
+      else setTableBusy(true);
       try {
         const hp = new URLSearchParams({
           historyPage: String(historyPage), historyPerPage: '50',
@@ -274,19 +248,24 @@ export default function PairingReports() {
           historySort, historyDir,
         });
         if (debouncedHistorySearch) hp.set('historySearch', debouncedHistorySearch);
+        if (debouncedTraceSearch) hp.set('traceSearch', debouncedTraceSearch);
+        if (historyMonth) hp.set('historyMonth', historyMonth);
+        if (historyFrom) hp.set('historyFrom', historyFrom);
+        if (historyTo) hp.set('historyTo', historyTo);
         const res = await api.get(`/pairing?${hp.toString()}`);
         if (cancelled) return;
         setData(res.data);
+        hasLoadedRef.current = true;
       } catch {
-        if (!cancelled) setData(null);
+        if (!cancelled && !hasLoadedRef.current) setData(null);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) { setLoading(false); setTableBusy(false); }
       }
     }
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => { cancelled = true; };
-  }, [historyPage, tracePage, debouncedHistorySearch, historySort, historyDir]);
+  }, [historyPage, tracePage, debouncedHistorySearch, debouncedTraceSearch, historySort, historyDir, historyMonth, historyFrom, historyTo]);
 
   const traceRows = data?.trace?.rows || [];
   // ③ Chronological running ledger: oldest → newest so the remaining balance reads
@@ -294,7 +273,7 @@ export default function PairingReports() {
   const orderedTraceRows = useMemo(() => {
     let cumulative = 0;
     return [...traceRows]
-      .sort((a, b) => new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
+      .sort((a, b) => (Number(a.matchSeq || 0) - Number(b.matchSeq || 0)) || new Date(a.pairedAt) - new Date(b.pairedAt) || String(a.ledgerUid).localeCompare(String(b.ledgerUid)))
       .map((row) => {
         const matchedPv = Math.round(Number(row.pairPoints || 0) / BP_PESO_VALUE);
         cumulative += matchedPv;
@@ -308,6 +287,24 @@ export default function PairingReports() {
     }
   }, [expandedTraceUid, traceRows]);
 
+  // Encode-based ledger (Minutes refinement): ONE row per binary encode (newest first) — the new
+  // member, their package PV, whether it grew the strong leg (+PV) or matched the weak leg (−PV),
+  // and the running strong-leg remaining. Replaces the per-matched-pair rows (which split one
+  // encode into many). Backend returns the full encode ledger; we filter + paginate client-side.
+  const ENCODE_PER_PAGE = 50;
+  const ENCODE_PKG = { 10: 'Bronze', 20: 'Silver', 30: 'Gold', 40: 'Platinum', 50: 'Garnet', 60: 'Diamond' };
+  const encodeAll = useMemo(() => {
+    const all = data?.trace?.encodeTrace || [];
+    const q = debouncedTraceSearch.trim().toLowerCase();
+    const filtered = q
+      ? all.filter((r) => `${r.pairedAt || ''} ${r.username || ''} ${r.fullName || ''}`.toLowerCase().includes(q))
+      : all;
+    return [...filtered].reverse(); // newest first
+  }, [data, debouncedTraceSearch]);
+  const encodeTotalPages = Math.max(1, Math.ceil(encodeAll.length / ENCODE_PER_PAGE));
+  const encodePage = Math.min(tracePage, encodeTotalPages);
+  const encodeRows = encodeAll.slice((encodePage - 1) * ENCODE_PER_PAGE, encodePage * ENCODE_PER_PAGE);
+
   const summaryCards = useMemo(() => {
     const leftPV = Math.round((data?.counts?.totalPointsLeft || 0) / 250);
     const rightPV = Math.round((data?.counts?.totalPointsRight || 0) / 250);
@@ -318,8 +315,7 @@ export default function PairingReports() {
         label: 'Left Accounts',
         value: data?.counts?.totalLeft || 0,
         icon: HiOutlineArrowLeft,
-        helper: 'Open left-leg account list',
-        onClick: () => navigate('/pairing/leg/left'),
+        helper: 'Total accounts on your left leg',
       },
       {
         label: 'Left Remaining',
@@ -332,8 +328,7 @@ export default function PairingReports() {
         label: 'Right Accounts',
         value: data?.counts?.totalRight || 0,
         icon: HiOutlineArrowRight,
-        helper: 'Open right-leg account list',
-        onClick: () => navigate('/pairing/leg/right'),
+        helper: 'Total accounts on your right leg',
       },
       {
         label: 'Right Remaining',
@@ -343,12 +338,19 @@ export default function PairingReports() {
         helper: rightPV > leftPV ? 'Strong leg — unmatched surplus' : 'Weak leg — fully consumed',
       },
     ];
-  }, [data, navigate]);
+  }, [data]);
 
   if (loading) return <Spinner />;
   if (!data) return <p style={{ color: PORTAL_MUTED }}>Failed to load pairing data.</p>;
 
   const traceSummary = data.trace?.summary || {};
+
+  // Member-side simplified pairing view (Minutes 06-20 #3/#8): each match shows ONLY the newly-
+  // encoded WEAK-leg member that triggered it + the matched (minus) PV + the STRONG source's
+  // remaining PV after the subtraction. No strong-leg names/columns — the admin report keeps the
+  // full per-match detail. Weak leg = the leg with fewer total points (the one being consumed).
+  const weakSide = Number(data?.counts?.totalPointsLeft || 0) <= Number(data?.counts?.totalPointsRight || 0) ? 'left' : 'right';
+  const strongSide = weakSide === 'left' ? 'right' : 'left';
   const packagePolicy = data.packagePolicy || null;
   const eligibility = data.eligibility || { canEarnPairing: true, sourceEligible: true, reason: null };
   const historyRows = data.history?.rows || [];
@@ -484,258 +486,93 @@ export default function PairingReports() {
       )}
 
       <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 px-5 py-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
-          <div>
-            <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing History</h3>
-            <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
-              Each row is one successful matched-points event that actually credited pairing income.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              value={historySearch}
-              onChange={(e) => setHistorySearch(e.target.value)}
-              placeholder="Search date or @username"
-              className="glass-input text-xs rounded-lg py-1.5 px-2.5 w-44"
-            />
-            <select value={`${historySort}:${historyDir}`} onChange={(e) => { const [s, d] = e.target.value.split(':'); setHistorySort(s); setHistoryDir(d); }}
-              className="glass-input text-xs rounded-lg py-1.5 px-2">
-              <option value="date:desc">Newest first</option>
-              <option value="date:asc">Oldest first</option>
-              <option value="amount:desc">Amount: high → low</option>
-              <option value="amount:asc">Amount: low → high</option>
-            </select>
-            <Pager
-              page={data.history?.page || 1}
-              totalPages={data.history?.totalPages || 1}
-              onPrev={() => setHistoryPage((p) => Math.max(1, p - 1))}
-              onNext={() => setHistoryPage((p) => Math.min(Number(data.history?.totalPages || 1), p + 1))}
-            />
-          </div>
-        </div>
-        <div className="overflow-x-auto hidden lg:block">
-          <table className="w-full text-sm min-w-[960px]">
-            <thead>
-              <tr>
-                <th className="table-header py-3 px-4">Date</th>
-                <th className="table-header py-3 px-4">Left Source</th>
-                <th className="table-header py-3 px-4">Right Source</th>
-                <th className="table-header py-3 px-4">Matched PV</th>
-                <th className="table-header py-3 px-4">Left Source Remaining</th>
-                <th className="table-header py-3 px-4">Right Source Remaining</th>
-                <th className="table-header py-3 px-4">Credited Payout</th>
-              </tr>
-            </thead>
-            <tbody>
-              {historyRows.map((row, i) => (
-                <tr
-                  key={row.historyUid || i}
-                  style={{
-                    background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent',
-                    borderBottom: `1px solid ${PORTAL_ROW}`,
-                  }}
-                  className="portal-table-row-hover transition-colors"
-                >
-                  <td className="py-3 px-4 text-xs" style={{ color: PORTAL_MUTED }}>{formatDateTimeManila(row.pairedAt)}</td>
-                  <td className="py-3 px-4">
-                    {row.isLegacy ? <span className="text-[11px]" style={{ color: PORTAL_MUTED }}>Legacy record</span> : (
-                      <>
-                        <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</div>
-                        <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.left?.username || ''}</div>
-                        <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'}</div>
-                      </>
-                    )}
-                  </td>
-                  <td className="py-3 px-4">
-                    {row.isLegacy ? <span className="text-[11px]" style={{ color: PORTAL_MUTED }}>Legacy record</span> : (
-                      <>
-                        <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.right?.fullName || '-'}</div>
-                        <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.right?.username || ''}</div>
-                        <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
-                      </>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{row.matchedPoints != null ? `${fmtInt(toBp(row.matchedPoints))} PV` : '-'}</td>
-                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{row.leftRemainingAfter != null ? `${fmtInt(toBp(row.leftRemainingAfter))} PV` : '-'}</td>
-                  <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{row.rightRemainingAfter != null ? `${fmtInt(toBp(row.rightRemainingAfter))} PV` : '-'}</td>
-                  <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
-                </tr>
-              ))}
-              {historyRows.length === 0 && (
-                <tr>
-                  <td colSpan="7" className="py-14 text-center">
-                    <HiOutlineChartBar className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
-                    <p style={{ color: PORTAL_MUTED }}>No successful pairing records found yet.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="lg:hidden p-4 space-y-3">
-          {historyRows.map((row, i) => (
-            <div key={row.historyUid || i} className="glass-card rounded-2xl p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold" style={{ color: PORTAL_TITLE }}>{formatDateTimeManila(row.pairedAt)}</span>
-                <span className="text-xs font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</span>
-              </div>
-              <div className="grid grid-cols-1 gap-2 text-xs" style={{ color: PORTAL_TEXT }}>
-                {row.isLegacy ? (
-                  <div style={{ color: PORTAL_MUTED }}>Legacy record — source detail not available</div>
-                ) : (
-                  <>
-                    <div>Left: {row.left?.username || '-'} ({row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'})</div>
-                    <div>Right: {row.right?.username || '-'} ({row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'})</div>
-                    <div>Matched: {row.matchedPoints != null ? `${fmtInt(toBp(row.matchedPoints))} PV` : '-'}</div>
-                    <div>Left remaining after: {row.leftRemainingAfter != null ? `${fmtInt(toBp(row.leftRemainingAfter))} PV` : '-'}</div>
-                    <div>Right remaining after: {row.rightRemainingAfter != null ? `${fmtInt(toBp(row.rightRemainingAfter))} PV` : '-'}</div>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="px-4 sm:px-5 pb-4">
-          <Pager
-            page={data.history?.page || 1}
-            totalPages={data.history?.totalPages || 1}
-            onPrev={() => setHistoryPage((p) => Math.max(1, p - 1))}
-            onNext={() => setHistoryPage((p) => Math.min(Number(data.history?.totalPages || 1), p + 1))}
-          />
-        </div>
-      </div>
-
-      <div className="glass-card rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 gap-4" style={{ borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
           <div>
-            <h3 className="font-display text-base font-semibold" style={{ color: PORTAL_TITLE }}>Pairing Event Trace</h3>
+            <h3 className="font-display text-base font-semibold flex items-center gap-2" style={{ color: PORTAL_TITLE }}>
+              Pairing Event Trace
+              {tableBusy && <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: '#D4AF37' }} />}
+            </h3>
             <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>
-              This page&apos;s matches in chronological order (oldest first): each left–right match, the PV matched, the running total <em>within this page</em>, the payout, and each source&apos;s remaining points — so it reads as a running ledger.
+              One record per encode (newest first): each new member added to a leg — their package PV, whether it
+              grew the strong leg (<span style={{ color: '#34d399' }}>+PV</span>) or matched the weak leg
+              (<span style={{ color: '#f2d06b' }}>−PV</span>), and the running strong-leg remaining.
             </p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+            <div className="relative">
+              <input
+                value={traceSearch}
+                onChange={(e) => setTraceSearch(e.target.value)}
+                placeholder="Search: date or @username"
+                className="glass-input text-xs rounded-lg py-1.5 pl-2.5 pr-7 w-48"
+              />
+              {traceSearch && (
+                <button type="button" onClick={() => setTraceSearch('')} title="Clear search"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-sm leading-none" style={{ color: PORTAL_MUTED }}>×</button>
+              )}
+            </div>
             <button
               type="button"
               onClick={handleExportXlsx}
               disabled={exportingXlsx}
               className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
               style={{ background: 'rgba(34,197,94,0.12)', color: '#34d399', border: '1px solid rgba(34,197,94,0.3)' }}
-              title="Export full pairing history + event trace (with chart) to Excel"
+              title="Export to Excel"
             >
               <HiOutlineDownload className="size-4" /> {exportingXlsx ? 'Exporting…' : 'Export XLSX'}
             </button>
-            <button
-              type="button"
-              onClick={() => setGroupTrace((v) => !v)}
-              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors"
-              style={groupTrace
-                ? { background: 'rgba(212,175,55,0.18)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.4)' }
-                : { background: 'rgba(212,175,55,0.06)', color: PORTAL_MUTED, border: '1px solid rgba(212,175,55,0.18)' }}
-            >
-              {groupTrace ? 'Grouped by tier' : 'Group by tier'}
-            </button>
             <Pager
-              page={data.trace?.pagination?.page || 1}
-              totalPages={data.trace?.pagination?.totalPages || 1}
+              page={encodePage}
+              totalPages={encodeTotalPages}
               onPrev={() => setTracePage((p) => Math.max(1, p - 1))}
-              onNext={() => setTracePage((p) => Math.min(Number(data.trace?.pagination?.totalPages || 1), p + 1))}
+              onNext={() => setTracePage((p) => Math.min(encodeTotalPages, p + 1))}
             />
           </div>
         </div>
 
-        {groupTrace && (
-          <div className="p-4">
-            <p className="text-xs mb-3" style={{ color: PORTAL_MUTED }}>
-              This page&apos;s {traceRows.length} matched event{traceRows.length === 1 ? '' : 's'} grouped by the matched source&apos;s package tier.
-            </p>
-            <div className="overflow-x-auto rounded-xl" style={{ border: `1px solid ${PORTAL_BORDER}` }}>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr>
-                    <th className="table-header py-2.5 px-4 text-left">Package Tier</th>
-                    <th className="table-header py-2.5 px-4 text-left">Matches</th>
-                    <th className="table-header py-2.5 px-4 text-left">Total Matched PV</th>
-                    <th className="table-header py-2.5 px-4 text-left">Total Credited</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {groupTraceByTier(traceRows).map((b, i) => (
-                    <tr key={b.label} style={{ background: i % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent', borderTop: `1px solid ${PORTAL_ROW}` }}>
-                      <td className="py-2.5 px-4 font-semibold" style={{ color: PORTAL_TITLE }}>{b.label}</td>
-                      <td className="py-2.5 px-4" style={{ color: PORTAL_TEXT }}>{fmtInt(b.count)}</td>
-                      <td className="py-2.5 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(b.totalPv)} PV</td>
-                      <td className="py-2.5 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(b.credited)}</td>
-                    </tr>
-                  ))}
-                  {traceRows.length === 0 && (
-                    <tr><td colSpan="4" className="py-8 text-center text-xs" style={{ color: PORTAL_MUTED }}>No events on this page.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <div className={`overflow-x-auto hidden ${groupTrace ? '' : 'lg:block'}`} style={groupTrace ? { display: 'none' } : undefined}>
-          <table className="w-full text-sm min-w-[1240px]">
+        <div className="overflow-x-auto hidden lg:block">
+          <table className="w-full text-sm min-w-[860px]">
             <thead>
               <tr>
                 <th className="table-header py-3 px-4">#</th>
                 <th className="table-header py-3 px-4">Date</th>
-                <th className="table-header py-3 px-4">Left Source</th>
-                <th className="table-header py-3 px-4">Right Source</th>
-                <th className="table-header py-3 px-4">Matched PV</th>
-                <th className="table-header py-3 px-4">Running (this page)</th>
-                <th className="table-header py-3 px-4">Gross Pairing</th>
-                <th className="table-header py-3 px-4">Credited</th>
-                <th className="table-header py-3 px-4">Blocked</th>
-                <th className="table-header py-3 px-4">Left Source Remaining</th>
-                <th className="table-header py-3 px-4">Right Source Remaining</th>
-                <th className="table-header py-3 px-4">Status</th>
+                <th className="table-header py-3 px-4">Encoded member</th>
+                <th className="table-header py-3 px-4">Leg effect</th>
+                <th className="table-header py-3 px-4">Strong leg remaining</th>
               </tr>
             </thead>
             <tbody>
-              {orderedTraceRows.map((row, index) => {
-                const styles = statusStyles(row);
+              {encodeRows.map((row, index) => {
+                const pv = toBp(row.pointValue);
+                const num = (encodePage - 1) * ENCODE_PER_PAGE + index + 1;
                 return (
                   <tr
-                    key={row.ledgerUid || index}
+                    key={row.encodeUid || index}
                     style={{
                       background: index % 2 === 0 ? 'var(--portal-zebra-bg)' : 'transparent',
                       borderBottom: `1px solid ${PORTAL_ROW}`,
                     }}
                     className="portal-table-row-hover transition-colors"
                   >
-                    <td className="py-3 px-4 text-xs font-mono" style={{ color: PORTAL_MUTED }}>{index + 1}</td>
+                    <td className="py-3 px-4 text-xs font-mono" style={{ color: PORTAL_MUTED }}>{num}</td>
                     <td className="py-3 px-4 text-xs" style={{ color: PORTAL_MUTED }}>{formatDateTimeManila(row.pairedAt)}</td>
                     <td className="py-3 px-4">
-                      <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.left?.fullName || '-'}</div>
-                      <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.left?.username || ''}</div>
-                      <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.left?.packageLabel || 'Unknown'} - {row.left?.accountStateLabel || 'Unknown'}</div>
+                      <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.fullName || row.username || '-'}</div>
+                      <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.username || ''}</div>
+                      <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{ENCODE_PKG[row.packageType] || 'Unknown'} · {row.eventType === 'upgrade' ? 'Upgrade' : 'New'} · {row.leg === 'left' ? 'Left' : 'Right'} leg</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="text-xs" style={{ color: PORTAL_TITLE }}>{row.right?.fullName || '-'}</div>
-                      <div className="text-[11px] font-mono" style={{ color: PORTAL_MUTED }}>{row.right?.username || ''}</div>
-                      <div className="text-[11px]" style={{ color: PORTAL_TEXT }}>{row.right?.packageLabel || 'Unknown'} - {row.right?.accountStateLabel || 'Unknown'}</div>
+                    <td className="py-3 px-4 font-semibold" style={{ color: row.addsToStrong ? '#34d399' : '#f2d06b' }}>
+                      {row.addsToStrong ? '+' : '−'}{fmtInt(pv)} PV
                     </td>
-                    <td className="py-3 px-4 font-medium" style={{ color: PORTAL_TITLE }}>{fmtInt(row.matchedPv)} PV</td>
-                    <td className="py-3 px-4 font-semibold" style={{ color: 'rgba(212,175,55,0.92)' }}>{fmtInt(row.cumulativeMatchedPv)} PV</td>
-                    <td className="py-3 px-4" style={{ color: PORTAL_TEXT }}>PHP {fmt(row.grossIncome)}</td>
-                    <td className="py-3 px-4 font-semibold" style={{ color: '#D4AF37' }}>PHP {fmt(row.creditedIncome)}</td>
-                    <td className="py-3 px-4" style={{ color: row.blockedIncome > 0 ? '#f87171' : PORTAL_MUTED }}>PHP {fmt(row.blockedIncome)}</td>
-                    <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.left?.remainingAfter))} PV</td>
-                    <td className="py-3 px-4" style={{ color: 'rgba(212,175,55,0.78)' }}>{fmtInt(toBp(row.right?.remainingAfter))} PV</td>
-                    <td className="py-3 px-4">
-                      <span className="text-[11px] px-2 py-1 rounded-full font-semibold" style={styles}>{traceStatus(row)}</span>
-                    </td>
+                    <td className="py-3 px-4 font-semibold" style={{ color: 'rgba(212,175,55,0.82)' }}>{fmtInt(toBp(row.strongRemainingAfter))} PV</td>
                   </tr>
                 );
               })}
-              {traceRows.length === 0 && (
+              {encodeAll.length === 0 && (
                 <tr>
-                  <td colSpan="12" className="py-14 text-center">
+                  <td colSpan="5" className="py-14 text-center">
                     <HiOutlineChartBar className="size-8 mx-auto mb-2" style={{ color: 'rgba(212,175,55,0.2)' }} />
-                    <p style={{ color: PORTAL_MUTED }}>No pairing event trace yet.</p>
+                    <p style={{ color: PORTAL_MUTED }}>No pairing encodes yet.</p>
                   </td>
                 </tr>
               )}
@@ -743,27 +580,34 @@ export default function PairingReports() {
           </table>
         </div>
 
-        <div className={`${groupTrace ? 'hidden' : 'lg:hidden'} p-4 space-y-3`}>
-          {orderedTraceRows.map((row, index) => (
-            <TraceEventCard
-              key={row.ledgerUid || index}
-              row={row}
-              expanded={expandedTraceUid === row.ledgerUid}
-              onToggle={() => setExpandedTraceUid((current) => current === row.ledgerUid ? null : row.ledgerUid)}
-            />
-          ))}
-          {traceRows.length === 0 && (
+        <div className="lg:hidden p-4 space-y-3">
+          {encodeRows.map((row, index) => {
+            const pv = toBp(row.pointValue);
+            return (
+              <div key={row.encodeUid || index} className="glass-card rounded-2xl p-4 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold truncate" style={{ color: PORTAL_TITLE }}>{row.fullName || row.username || '-'}</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: PORTAL_MUTED }}>{ENCODE_PKG[row.packageType] || 'Unknown'} · {row.leg === 'left' ? 'Left' : 'Right'} leg · {formatDateTimeManila(row.pairedAt)}</div>
+                  </div>
+                  <span className="text-sm font-bold flex-shrink-0" style={{ color: row.addsToStrong ? '#34d399' : '#f2d06b' }}>{row.addsToStrong ? '+' : '−'}{fmtInt(pv)} PV</span>
+                </div>
+                <div className="text-xs" style={{ color: PORTAL_TEXT }}>Strong leg remaining: <strong style={{ color: 'rgba(212,175,55,0.82)' }}>{fmtInt(toBp(row.strongRemainingAfter))} PV</strong></div>
+              </div>
+            );
+          })}
+          {encodeAll.length === 0 && (
             <div className="rounded-2xl border p-4 text-center" style={{ borderColor: PORTAL_BORDER, color: PORTAL_MUTED, background: PORTAL_SURFACE }}>
-              No pairing event trace yet.
+              No pairing encodes yet.
             </div>
           )}
         </div>
         <div className="px-4 sm:px-5 pb-4">
           <Pager
-            page={data.trace?.pagination?.page || 1}
-            totalPages={data.trace?.pagination?.totalPages || 1}
+            page={encodePage}
+            totalPages={encodeTotalPages}
             onPrev={() => setTracePage((p) => Math.max(1, p - 1))}
-            onNext={() => setTracePage((p) => Math.min(Number(data.trace?.pagination?.totalPages || 1), p + 1))}
+            onNext={() => setTracePage((p) => Math.min(encodeTotalPages, p + 1))}
           />
         </div>
       </div>

@@ -31,9 +31,12 @@ export function MemberNode({ data }) {
     statusDot,
     style,
     tone,
-    isPrimaryLong,
   } = getMemberNodeViewModel(data);
 
+  // No LOD ghost shells: every node always renders fully populated (management ask
+  // — on mobile the tree auto-fits to a low zoom, and skeleton/ghost nodes must never
+  // be shown). Safe for perf because the canvas only renders visible nodes
+  // (onlyRenderVisibleElements) and only the perfect-15 trail is laid out at a time.
   return (
     <button
       type="button"
@@ -87,15 +90,14 @@ export function MemberNode({ data }) {
       <div className="absolute right-4 top-4 size-2.5 rounded-full" style={{ background: statusDot, boxShadow: `0 0 0 4px ${tone.sectionBg}` }} />
 
       <div className="flex items-start justify-between gap-3 pr-5">
-        <div className="min-w-0">
-          <div className={`ggenealogy-name-marquee ${isPrimaryLong ? 'is-animated' : ''}`} style={{ color: tone.text }}>
-            <div className={`ggenealogy-name-track ${isPrimaryLong ? 'is-animated' : ''}`}>
-              <span className="text-[15px] font-bold whitespace-nowrap leading-tight">{primaryLabel}</span>
-              {isPrimaryLong ? <span className="text-[15px] font-bold whitespace-nowrap genealogy-name-ghost">{primaryLabel}</span> : null}
-            </div>
+        <div className="min-w-0 flex-1">
+          {/* Full name ALWAYS fits: wrap long names onto multiple lines (break long
+              words too) instead of truncating — the node grows in height to fit. */}
+          <div className="text-[15px] font-bold leading-snug break-words" style={{ color: tone.text }} title={primaryLabel}>
+            {primaryLabel}
           </div>
           {secondaryLabel ? (
-            <p className="mt-1 truncate text-[11px] font-medium" style={{ color: tone.subtext }}>
+            <p className="mt-1 break-words text-[11px] font-medium" style={{ color: tone.subtext }}>
               @{secondaryLabel}
             </p>
           ) : null}
@@ -109,24 +111,17 @@ export function MemberNode({ data }) {
         <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold" style={{ background: tone.sectionBg, color: style.strong, border: `1px solid ${style.strong}36` }}>
           {packageName}
         </span>
-        <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold" style={placementChip}>
-          {data.positionLabel}
-        </span>
-        <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold" style={stateChip}>
-          {data.accountStateLabel || 'PD'}
-        </span>
       </div>
 
-      <div className="mt-4">
-        <div className="rounded-xl px-3 py-2.5" style={{ background: tone.sectionBg, border: `1px solid ${tone.sectionBorder}` }}>
-          <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: tone.muted }}>{data.metricLabel || 'Binary PV'}</p>
-          <p className="mt-1 text-sm font-semibold" style={{ color: tone.text }}>
-            {data.metricLabel
-              ? `${Number(data.metricValue || 0).toLocaleString('en-US')} pts`
-              : formatBinaryPackagePoints(data.binaryPoints)}
-          </p>
+      {/* No PV box. Keep only the "open N more" affordance on collapsed nodes so the
+          Whole-Tree expand still works. */}
+      {data.isCollapsed ? (
+        <div className="mt-3">
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold" style={{ background: tone.sectionBg, color: style.strong, border: `1px solid ${style.strong}36` }}>
+            ▸ open {Number(data.hiddenDescendants || 0).toLocaleString('en-US')} more
+          </span>
         </div>
-      </div>
+      ) : null}
     </button>
   );
 }

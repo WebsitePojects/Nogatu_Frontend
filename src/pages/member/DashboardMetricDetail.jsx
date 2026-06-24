@@ -187,8 +187,19 @@ function IncomeEntryCard({ row, accent, metric }) {
           {row.rowType === 'downline_product_points' ? (
             <>
               <div>
-                <p style={{ color: PORTAL_MUTED }}>Unilevel Level</p>
-                <p style={{ color: PORTAL_TITLE }}>Level {row.level || '-'}</p>
+                <p style={{ color: PORTAL_MUTED }}>Unilevel Level (effective)</p>
+                <p style={{ color: PORTAL_TITLE }}>
+                  Level {row.level || '-'}
+                  {row.actualLevel && Number(row.actualLevel) !== Number(row.level)
+                    ? <span style={{ color: PORTAL_MUTED }}> · actual tree depth {row.actualLevel}</span>
+                    : null}
+                </p>
+                {row.actualLevel && Number(row.actualLevel) !== Number(row.level) ? (
+                  <p className="mt-1 text-[11px] leading-4" style={{ color: PORTAL_MUTED }}>
+                    Rolled up: shallower levels had no product points this month, so this member counts at
+                    effective Level {row.level} (their actual tree depth is {row.actualLevel}).
+                  </p>
+                ) : null}
               </div>
               <div>
                 <p style={{ color: PORTAL_MUTED }}>Product Points</p>

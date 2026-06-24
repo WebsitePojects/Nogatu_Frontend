@@ -22,7 +22,17 @@ export default function UpdateAccounts() {
 
   useEffect(() => {
     api.get(`/admin/accounts/${uid}`)
-      .then(res => setData(res.data))
+      .then(res => {
+        const acct = res.data || {};
+        // payoutid may be stored as the option LABEL ("PSBank") but the Payout Option
+        // <select> matches numeric ids -> it rendered blank "Select...". Coerce to the
+        // resolved numeric id (payoutOption from backend, else label/numeric fallback).
+        const labelMatch = PAYOUT_OPTIONS.find(
+          (o) => o.label.toLowerCase() === String(acct.payoutid || '').trim().toLowerCase()
+        );
+        const resolvedPayoutId = Number(acct.payoutOption?.id) || labelMatch?.id || Number(acct.payoutid) || '';
+        setData({ ...acct, payoutid: resolvedPayoutId });
+      })
       .catch(() => toast.error('Account not found'))
       .finally(() => setLoading(false));
   }, [uid]);

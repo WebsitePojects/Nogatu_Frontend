@@ -166,7 +166,7 @@ export default function About() {
         <div className="section-container">
           <div ref={ref3} className="reveal mx-auto grid max-w-3xl grid-cols-2 gap-8 text-center sm:gap-12">
             <StatBlock value={10} suffix="" label="Product Lines" />
-            <StatBlock value={5} suffix="+" label="Years of Trust" />
+            <StatBlock value={1} suffix="+" label="Years of Trust" />
           </div>
         </div>
       </section>

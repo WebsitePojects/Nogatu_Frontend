@@ -385,7 +385,10 @@ export default function TransactionDetails() {
             emptyMessage="No unilevel contributors are tied to this record."
             renderRow={(row, index) => (
               <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
-                {index + 1}. {row.fullName || row.username}
+                {index + 1}. {row.fullname || row.fullName || row.username}
+                <span className={supportMutedTone}>
+                  {' '}· L{row.level} · {Number(row.ratePercent || 0)}% · {Number(row.productPoints || 0).toLocaleString('en-US')} pts → ₱{Number(row.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </span>
               </div>
             )}
           />
@@ -397,6 +400,9 @@ export default function TransactionDetails() {
             renderRow={(row, index) => (
               <div key={`${row.uid}-${index}`} className={`ttext-sm ${supportTextTone}`}>
                 {index + 1}. {row.fullName || row.username}
+                <span className={supportMutedTone}>
+                  {row.rankName ? ` · ${row.rankName}` : ''} · {Number(row.pointsConsumed || 0).toLocaleString('en-US')} pts consumed
+                </span>
               </div>
             )}
           />

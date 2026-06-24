@@ -11,7 +11,7 @@ const INCOME_ITEMS = [
   { key: 'directReferral', label: 'Direct Referral',  icon: HiOutlineUsers,        color: '#D4AF37' },
   { key: 'pairing',        label: 'Binary Pairing',   icon: HiOutlineChartBar,     color: '#F2D06B' },
   { key: 'leadership',     label: 'Leadership Bonus', icon: HiOutlineStar,         color: '#B8960C' },
-  { key: 'unilevel',       label: 'Uni-Level',        icon: HiOutlineTrendingUp,   color: '#D4AF37' },
+  { key: 'unilevel',       label: 'Uni-Level',        icon: HiOutlineTrendingUp,   color: '#D4AF37', note: 'Released on the 5th of the month' },
   { key: 'hifive',         label: 'Hi-Five Bonus',    icon: HiOutlineGift,         color: '#F2D06B' },
   { key: 'rankingBonus',   label: 'Ranking Bonus',    icon: HiOutlineShieldCheck,  color: '#D4AF37' },
   { key: 'globalBonus',   label: 'Global Bonus',     icon: HiOutlineSparkles,     color: '#B8960C' },
@@ -386,13 +386,16 @@ export default function EWallet() {
                   >
                     <item.icon className="size-3.5" style={{ color: item.color }} />
                   </div>
-                  <div className="min-w-0">
+                  <div className="flex flex-col gap-1">
                     <span className="portal-card-text text-sm">{item.label}</span>
-                    {item.key === 'unilevel' ? (
-                      <div className="portal-release-highlight mt-1">
-                        Monthly release every 5th of next month
-                      </div>
-                    ) : null}
+                    {item.note && (
+                      <span
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold leading-tight px-1.5 py-0.5 rounded-full w-fit"
+                        style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37' }}
+                      >
+                        {item.note}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <span className="portal-warning-text text-sm font-semibold">

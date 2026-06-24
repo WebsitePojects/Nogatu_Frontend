@@ -5,6 +5,14 @@ import toast from 'react-hot-toast';
 import { PaginationButton } from '../../components/PaginationButton';
 import { useTheme } from '../../contexts/ThemeContext';
 import { formatDateTimeManila } from '../../utils/dateTime';
+import { setViewAs } from '../../lib/viewAs';
+
+// Start a read-only "view as member" session: stash the target, then full-reload into
+// the member portal so AuthContext bootstraps the member via the X-View-As-Member header.
+function startViewAs(account) {
+  setViewAs({ uid: Number(account.uid), username: account.username, fullName: account.fullname || account.username });
+  window.location.href = '/portal/dashboard';
+}
 
 function statusStyle(status) {
   if (status === 'suspended') {
@@ -232,6 +240,14 @@ export default function AccountMasterlist() {
                           Tree
                         </button>
                         <button
+                          onClick={() => startViewAs(a)}
+                          className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
+                          style={{ background: 'rgba(139,92,246,0.14)', color: '#c4b5fd', border: '1px solid rgba(139,92,246,0.28)' }}
+                          title="Open this member's portal (read-only)"
+                          type="button">
+                          View as
+                        </button>
+                        <button
                           onClick={() => navigate(`/admin/accounts/${a.uid}/income`)}
                           className="text-xs px-2.5 py-1 rounded-lg font-medium motion-safe:transition-colors cursor-pointer"
                           style={{ background: 'rgba(59,130,246,0.1)', color: blueText, border: '1px solid rgba(59,130,246,0.25)' }}
@@ -301,6 +317,7 @@ export default function AccountMasterlist() {
                 <div className="mt-3 grid grid-cols-3 gap-1.5">
                   <button onClick={() => navigate(`/admin/accounts/${a.uid}`)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(212,175,55,0.12)', color: goldText, border: '1px solid rgba(212,175,55,0.2)' }} type="button">Edit</button>
                   <button onClick={() => navigate(`/admin/genealogy?id=${a.uid}`)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(16,185,129,0.1)', color: greenText, border: '1px solid rgba(16,185,129,0.2)' }} type="button">Tree</button>
+                  <button onClick={() => startViewAs(a)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(139,92,246,0.14)', color: '#c4b5fd', border: '1px solid rgba(139,92,246,0.28)' }} type="button">View as</button>
                   <button onClick={() => navigate(`/admin/accounts/${a.uid}/income`)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(59,130,246,0.1)', color: blueText, border: '1px solid rgba(59,130,246,0.25)' }} type="button">Income</button>
                   <button onClick={() => navigate(`/admin/accounts/${a.uid}/cd`)} className="text-xs py-2.5 rounded-lg font-medium" style={{ background: 'rgba(239,68,68,0.1)', color: redText, border: '1px solid rgba(239,68,68,0.25)' }} type="button">CD</button>
                   {a.accountStatus === 'active' ? (

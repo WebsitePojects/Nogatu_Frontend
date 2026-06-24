@@ -180,7 +180,7 @@ export default function RankingProgress() {
             </div>
             <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {!data.rankingEligible
-                ? 'upgrade required before ranking can begin'
+                ? 'Ranking unlocks at Gold — upgrade to begin ranking'
                 : data.nextRank
                   ? `${nextRankPct.toFixed(2)}% to ${data.nextRankLabel} (${fmtInt(data.nextRankMinPoints)} fresh repurchase pts)`
                   : (data.blockedByPackageGate ? 'upgrade required to unlock the next rank tier' : 'Maximum rank achieved')}
@@ -194,44 +194,28 @@ export default function RankingProgress() {
           <div className="flex items-start gap-3">
             <HiOutlineShieldCheck className="size-5 mt-0.5" style={{ color: '#D4AF37' }} />
             <div>
-              <p className="text-sm font-semibold text-white">Package Gate</p>
+              <p className="text-sm font-semibold text-white">
+                {data.rankingEligible ? 'Ranking Ceiling' : 'Ranking Locked'}
+              </p>
               <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                {data.rankingEligibilityReason || 'Your current package has reached its ranking ceiling.'}
+                {!data.rankingEligible
+                  ? 'Ranking unlocks at Gold. Bronze and Silver do not rank yet — upgrade your package to start ranking.'
+                  : (data.rankingEligibilityReason || 'You have reached the top rank for your current package. Upgrade to rank higher.')}
               </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      {/* Simplified summary: just the two figures members actually need —
+          remaining points toward the next rank, and the current rank. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="glass-card rounded-2xl p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Gross Rankable Points</p>
-              <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.grossRankablePoints)}</p>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>self + full downline repurchases</p>
-            </div>
-            <HiOutlineChartBar className="size-6" style={{ color: '#D4AF37' }} />
-          </div>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Consumed Points</p>
-              <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.consumedPoints)}</p>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>already used by awarded ranks</p>
-            </div>
-            <HiOutlineCubeTransparent className="size-6" style={{ color: '#D4AF37' }} />
-          </div>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Remaining Race Points</p>
-              <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.remainingRankablePoints)}</p>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>fresh points left for the next rank</p>
+              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Remaining Points</p>
+              <p className="mt-2 text-3xl font-bold text-white">{fmtInt(data.remainingRankablePoints)}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>fresh repurchase points left toward your next rank</p>
             </div>
             <HiOutlineTrendingUp className="size-6" style={{ color: '#D4AF37' }} />
           </div>
@@ -240,11 +224,15 @@ export default function RankingProgress() {
         <div className="glass-card rounded-2xl p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Pending Claims</p>
-              <p className="mt-2 text-2xl font-bold text-white">{fmtInt(data.pendingAchievementCount)}</p>
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>cash release stays manual</p>
+              <p className="text-xs uppercase tracking-wide" style={{ color: 'rgba(212,175,55,0.58)' }}>Current Rank</p>
+              <p className="mt-2 text-3xl font-bold text-white">{data.currentRankLabel || 'Unranked'}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.46)' }}>
+                {Number(data.pendingAchievementCount || 0) > 0
+                  ? `${fmtInt(data.pendingAchievementCount)} pending cash claim(s)`
+                  : 'rank cash release stays manual'}
+              </p>
             </div>
-            <HiOutlineClock className="size-6" style={{ color: '#D4AF37' }} />
+            <HiOutlineShieldCheck className="size-6" style={{ color: '#D4AF37' }} />
           </div>
         </div>
       </div>
