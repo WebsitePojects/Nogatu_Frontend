@@ -11,6 +11,15 @@ export function useLightbox() {
   return { src, type, open, close, isOpen: !!src };
 }
 
+// Force-download Cloudinary assets via fl_attachment; other URLs fall back to raw.
+function toDownloadUrl(url) {
+  if (!url) return url;
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', '/upload/fl_attachment/');
+  }
+  return url;
+}
+
 export default function Lightbox({ src, type = 'image', onClose }) {
   useEffect(() => {
     if (!src) return;
@@ -33,29 +42,45 @@ export default function Lightbox({ src, type = 'image', onClose }) {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" />
 
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 z-10 size-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
-        aria-label="Close"
-       type="button">
-        <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+      {/* Top action bar: download + close */}
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <a
+          href={toDownloadUrl(src)}
+          download
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors cursor-pointer"
+          aria-label="Download media"
+          title="Download"
+        >
+          <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 11l5 5 5-5M12 4v12" />
+          </svg>
+          Download
+        </a>
+        <button
+          onClick={onClose}
+          className="size-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+          aria-label="Close"
+          type="button"
+        >
+          <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-5xl max-h-[90vh] w-full" onClick={(e) => e.stopPropagation()}>
         {type === 'video' ? (
-          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-            <iframe
-              src={src}
-              className="absolute inset-0 size-full rounded-xl"
-              allow="autoplay; fullscreen"
-              allowFullScreen
-              title="Video"
-            />
-          </div>
+          <video
+            src={src}
+            className="w-full max-h-[85vh] object-contain rounded-xl bg-black"
+            controls
+            autoPlay
+            playsInline
+            controlsList="nodownload"
+          />
         ) : (
           <img
             src={src}

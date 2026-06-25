@@ -4,6 +4,45 @@ import Lightbox, { useLightbox } from '../components/Lightbox';
 import { apiUrl } from '../../utils/apiBase';
 
 const TYPE_LABELS = { news: 'News', announcement: 'Announcement', promo: 'Promo', memo: 'Memo' };
+
+// Detect a video from the (Cloudinary) media URL so the landing renders <video> not <img>.
+function isVideoUrl(url) {
+  if (!url) return false;
+  if (url.includes('/video/')) return true;
+  const ext = url.split('?')[0].split('.').pop()?.toLowerCase();
+  return ['mp4', 'mov', 'webm', 'avi', 'mkv', 'ogg', 'm4v'].includes(ext);
+}
+
+// Force a download (Content-Disposition: attachment) for Cloudinary assets via the
+// fl_attachment delivery flag; non-Cloudinary URLs fall back to the raw link.
+function toDownloadUrl(url) {
+  if (!url) return url;
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', '/upload/fl_attachment/');
+  }
+  return url;
+}
+
+function DownloadButton({ url, className = '' }) {
+  if (!url) return null;
+  return (
+    <a
+      href={toDownloadUrl(url)}
+      download
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      aria-label="Download media"
+      title="Download"
+      className={`inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${className}`}
+    >
+      <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 11l5 5 5-5M12 4v12" />
+      </svg>
+      Download
+    </a>
+  );
+}
 const TYPE_COLORS = {
   news: { bg: 'rgba(184,134,11,0.1)', color: '#B8860B' },
   announcement: { bg: 'rgba(212,165,40,0.1)', color: '#D4A528' },
@@ -38,8 +77,29 @@ function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
   return (
     <article ref={ref} className="reveal group rounded-2xl border overflow-hidden motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300" style={{ backgroundColor: '#FFFDF5', borderColor: 'rgba(184,134,11,0.15)' }}>
       {post.image_url && (
-        <div className="h-48 overflow-hidden cursor-pointer" style={{ backgroundColor: '#FFF8E1' }} onClick={() => onLightbox(post.image_url)}>
-          <img src={post.image_url} alt={post.title} className="size-full object-cover motion-safe:group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-500" loading="lazy" />
+        <div className="relative h-48 overflow-hidden" style={{ backgroundColor: '#FFF8E1' }}>
+          {isVideoUrl(post.image_url) ? (
+            <div className="size-full cursor-pointer" onClick={() => onLightbox(post.image_url, 'video')}>
+              <video
+                src={post.image_url}
+                className="size-full object-cover"
+                muted
+                playsInline
+                preload="metadata"
+              />
+              {/* Play affordance */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span className="size-12 rounded-full bg-black/45 backdrop-blur-sm flex items-center justify-center">
+                  <svg className="size-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="size-full cursor-pointer" onClick={() => onLightbox(post.image_url, 'image')}>
+              <img src={post.image_url} alt={post.title} className="size-full object-cover motion-safe:group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-500" loading="lazy" />
+            </div>
+          )}
+          <DownloadButton url={post.image_url} className="absolute top-2 right-2 px-2.5 py-1.5 bg-black/55 hover:bg-black/70 text-white backdrop-blur-sm" />
         </div>
       )}
       <div className="p-6">
