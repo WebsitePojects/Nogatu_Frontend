@@ -21,22 +21,33 @@ function isDocumentUrl(url) {
   return ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext);
 }
 
+// Turn an original upload name into a Cloudinary-safe fl_attachment token (no path/ext).
+function sanitizeAttachmentName(name) {
+  if (!name) return '';
+  const base = String(name).split('/').pop().split('\\').pop();
+  const noExt = base.replace(/\.[^.]+$/, '');
+  return noExt.replace(/[^A-Za-z0-9._-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 100);
+}
+
 // Force a download (Content-Disposition: attachment) for Cloudinary assets via the
-// fl_attachment delivery flag; non-Cloudinary URLs fall back to the raw link.
-function toDownloadUrl(url) {
+// fl_attachment delivery flag, keeping the original filename when known; non-Cloudinary
+// URLs fall back to the raw link.
+function toDownloadUrl(url, filename) {
   if (!url) return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
-    return url.replace('/upload/', '/upload/fl_attachment/');
+    const safe = sanitizeAttachmentName(filename);
+    const flag = safe ? `fl_attachment:${safe}` : 'fl_attachment';
+    return url.replace('/upload/', `/upload/${flag}/`);
   }
   return url;
 }
 
-function DownloadButton({ url, className = '', style }) {
+function DownloadButton({ url, filename, className = '', style }) {
   if (!url) return null;
   return (
     <a
-      href={toDownloadUrl(url)}
-      download
+      href={toDownloadUrl(url, filename)}
+      download={filename || true}
       target="_blank"
       rel="noopener noreferrer"
       onClick={(e) => e.stopPropagation()}
@@ -101,7 +112,7 @@ function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
               <span className="text-sm font-semibold" style={{ color: '#3A1000' }}>View document</span>
             </a>
           ) : isVideoUrl(post.image_url) ? (
-            <div className="size-full cursor-pointer" onClick={() => onLightbox(post.image_url, 'video')}>
+            <div className="size-full cursor-pointer" onClick={() => onLightbox(post.image_url, 'video', post.media_filename)}>
               <video
                 src={post.image_url}
                 className="size-full object-cover"
@@ -117,11 +128,11 @@ function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
               </div>
             </div>
           ) : (
-            <div className="size-full cursor-pointer" onClick={() => onLightbox(post.image_url, 'image')}>
+            <div className="size-full cursor-pointer" onClick={() => onLightbox(post.image_url, 'image', post.media_filename)}>
               <img src={post.image_url} alt={post.title} className="size-full object-cover motion-safe:group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-500" loading="lazy" />
             </div>
           )}
-          <DownloadButton url={post.image_url} className="absolute top-2 right-2 px-2.5 py-1.5 bg-black/55 hover:bg-black/70 text-white backdrop-blur-sm" />
+          <DownloadButton url={post.image_url} filename={post.media_filename} className="absolute top-2 right-2 px-2.5 py-1.5 bg-black/55 hover:bg-black/70 text-white backdrop-blur-sm" />
         </div>
       )}
       <div className="p-6">
@@ -143,7 +154,7 @@ function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
           </p>
         ) : (
           isDocumentUrl(post.image_url) && (
-            <DownloadButton url={post.image_url} className="px-3 py-1.5" style={{ background: 'rgba(184,134,11,0.1)', color: '#B8860B', border: '1px solid rgba(184,134,11,0.2)' }} />
+            <DownloadButton url={post.image_url} filename={post.media_filename} className="px-3 py-1.5" style={{ background: 'rgba(184,134,11,0.1)', color: '#B8860B', border: '1px solid rgba(184,134,11,0.2)' }} />
           )
         )}
       </div>
@@ -222,7 +233,7 @@ export default function News() {
         </div>
       </section>
 
-      <Lightbox src={lightbox.src} type={lightbox.type} onClose={lightbox.close} />
+      <Lightbox src={lightbox.src} type={lightbox.type} filename={lightbox.filename} onClose={lightbox.close} />
     </>
   );
 }

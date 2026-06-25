@@ -3,24 +3,35 @@ import { useState, useEffect, useCallback } from 'react';
 export function useLightbox() {
   const [src, setSrc] = useState(null);
   const [type, setType] = useState('image'); // 'image' or 'video'
-  const open = useCallback((url, mediaType = 'image') => {
+  const [filename, setFilename] = useState(null);
+  const open = useCallback((url, mediaType = 'image', name = null) => {
     setSrc(url);
     setType(mediaType);
+    setFilename(name);
   }, []);
   const close = useCallback(() => setSrc(null), []);
-  return { src, type, open, close, isOpen: !!src };
+  return { src, type, filename, open, close, isOpen: !!src };
 }
 
-// Force-download Cloudinary assets via fl_attachment; other URLs fall back to raw.
-function toDownloadUrl(url) {
+function sanitizeAttachmentName(name) {
+  if (!name) return '';
+  const base = String(name).split('/').pop().split('\\').pop();
+  const noExt = base.replace(/\.[^.]+$/, '');
+  return noExt.replace(/[^A-Za-z0-9._-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 100);
+}
+
+// Force-download Cloudinary assets via fl_attachment (keeping the original name when
+// known); other URLs fall back to raw.
+function toDownloadUrl(url, filename) {
   if (!url) return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
-    return url.replace('/upload/', '/upload/fl_attachment/');
+    const safe = sanitizeAttachmentName(filename);
+    return url.replace('/upload/', `/upload/${safe ? `fl_attachment:${safe}` : 'fl_attachment'}/`);
   }
   return url;
 }
 
-export default function Lightbox({ src, type = 'image', onClose }) {
+export default function Lightbox({ src, type = 'image', filename, onClose }) {
   useEffect(() => {
     if (!src) return;
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -45,8 +56,8 @@ export default function Lightbox({ src, type = 'image', onClose }) {
       {/* Top action bar: download + close */}
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
         <a
-          href={toDownloadUrl(src)}
-          download
+          href={toDownloadUrl(src, filename)}
+          download={filename || true}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors cursor-pointer"
