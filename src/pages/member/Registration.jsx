@@ -486,10 +486,15 @@ export default function Registration() {
             ) : null}
           </div>
 
-          {/* Sponsor (read-only) */}
+          {/* Sponsor (read-only) — show full name + username so the encoder confirms the account */}
           <div>
             <label className="label">Sponsor</label>
-            <input type="text" value={user?.username || ''} className="glass-input opacity-50 cursor-not-allowed" disabled />
+            <input
+              type="text"
+              value={user?.accountname ? `${user.accountname} (${user?.username || ''})` : (user?.username || '')}
+              className="glass-input opacity-50 cursor-not-allowed"
+              disabled
+            />
           </div>
 
           {/* Placement UID */}
