@@ -12,7 +12,10 @@ import {
   HiOutlineFilm,
   HiOutlineUpload,
   HiOutlineExternalLink,
+  HiOutlineDocumentText,
 } from 'react-icons/hi';
+
+const DOC_EXTS = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
 
 const TYPE_OPTS = [
   { value: 'news', label: 'News', style: { background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' } },
@@ -28,9 +31,16 @@ const INPUT_CLASS =
 
 function detectMediaType(url) {
   if (!url) return 'image';
-  if (url.includes('/video/')) return 'video';
   const ext = url.split('?')[0].split('.').pop()?.toLowerCase();
-  if (['mp4', 'mov', 'webm', 'avi', 'mkv', 'ogg'].includes(ext)) return 'video';
+  if (url.includes('/video/') || ['mp4', 'mov', 'webm', 'avi', 'mkv', 'ogg'].includes(ext)) return 'video';
+  if (url.includes('/raw/') || DOC_EXTS.includes(ext)) return 'document';
+  return 'image';
+}
+
+function fileMediaType(file) {
+  if (!file) return 'image';
+  if (file.type?.startsWith('video/')) return 'video';
+  if (file.type === 'application/pdf' || DOC_EXTS.includes((file.name?.split('.').pop() || '').toLowerCase())) return 'document';
   return 'image';
 }
 
@@ -51,6 +61,7 @@ export default function NewsManagement() {
   const [clearMedia, setClearMedia] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => { loadPosts(); }, []);
@@ -59,7 +70,7 @@ export default function NewsManagement() {
     if (mediaFile) {
       const objectUrl = URL.createObjectURL(mediaFile);
       setMediaPreview(objectUrl);
-      setMediaType(mediaFile.type.startsWith('video/') ? 'video' : 'image');
+      setMediaType(fileMediaType(mediaFile));
       return () => URL.revokeObjectURL(objectUrl);
     }
     if (!clearMedia && form.image_url) {
@@ -110,18 +121,49 @@ export default function NewsManagement() {
     setClearMedia(false);
   }
 
-  function handleFileChange(e) {
-    const file = e.target.files?.[0] || null;
+  function applyFile(file) {
     if (!file) return;
-    const isVideo = file.type.startsWith('video/');
-    const maxBytes = isVideo ? 100 * 1024 * 1024 : 5 * 1024 * 1024;
+    const kind = fileMediaType(file); // image | video | document
+    const isImage = file.type?.startsWith('image/');
+    const isVideo = file.type?.startsWith('video/');
+    const isDoc = kind === 'document';
+    if (!isImage && !isVideo && !isDoc) {
+      toast.error('Only images, videos, or PDF documents are allowed');
+      return;
+    }
+    const maxBytes = isVideo ? 100 * 1024 * 1024 : isDoc ? 15 * 1024 * 1024 : 5 * 1024 * 1024;
     if (file.size > maxBytes) {
-      toast.error(isVideo ? 'Video must be under 100 MB' : 'Image must be under 5 MB');
-      e.target.value = '';
+      toast.error(isVideo ? 'Video must be under 100 MB' : isDoc ? 'Document must be under 15 MB' : 'Image must be under 5 MB');
       return;
     }
     setMediaFile(file);
     setClearMedia(false);
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0] || null;
+    applyFile(file);
+    if (e.target) e.target.value = '';
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const file = e.dataTransfer?.files?.[0] || null;
+    if (file) applyFile(file);
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!dragActive) setDragActive(true);
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
   }
 
   function removeMedia() {
@@ -205,6 +247,8 @@ export default function NewsManagement() {
 
   const hasExistingMedia = !clearMedia && !mediaFile && form.image_url;
   const showingMedia = !!mediaPreview;
+  // Memos can be a document/announcement with no body text.
+  const contentRequired = form.type !== 'memo';
 
   return (
     <div>
@@ -301,8 +345,8 @@ export default function NewsManagement() {
                             className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg"
                             style={{ color: 'rgba(212,175,55,0.8)', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.15)' }}
                           >
-                            {postMediaType === 'video' ? <HiOutlineFilm className="size-3.5" /> : <HiOutlinePhotograph className="size-3.5" />}
-                            {postMediaType === 'video' ? 'Video' : 'Image'}
+                            {postMediaType === 'video' ? <HiOutlineFilm className="size-3.5" /> : postMediaType === 'document' ? <HiOutlineDocumentText className="size-3.5" /> : <HiOutlinePhotograph className="size-3.5" />}
+                            {postMediaType === 'video' ? 'Video' : postMediaType === 'document' ? 'Document' : 'Image'}
                             <HiOutlineExternalLink className="size-3" />
                           </a>
                         ) : (
@@ -423,14 +467,14 @@ export default function NewsManagement() {
               {/* Media upload */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--portal-modal-muted)' }}>
-                  Media <span className="normal-case font-normal" style={{ color: 'var(--portal-modal-muted)' }}>(image or video, optional)</span>
+                  Media <span className="normal-case font-normal" style={{ color: 'var(--portal-modal-muted)' }}>(image, video, or PDF — optional)</span>
                 </label>
 
                 {/* Hidden real file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*,video/*"
+                  accept="image/*,video/*,application/pdf,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
                   className="hidden"
                   onChange={handleFileChange}
                 />
@@ -449,6 +493,16 @@ export default function NewsManagement() {
                         className="w-full max-h-48 object-contain"
                         style={{ background: 'rgba(0,0,0,0.4)' }}
                       />
+                    ) : mediaType === 'document' ? (
+                      <div className="w-full h-44 flex flex-col items-center justify-center gap-2 px-4 text-center" style={{ background: 'rgba(212,175,55,0.05)' }}>
+                        <div className="size-14 rounded-xl flex items-center justify-center" style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.25)' }}>
+                          <HiOutlineDocumentText className="size-7" style={{ color: '#D4AF37' }} />
+                        </div>
+                        <p className="text-sm font-medium break-all" style={{ color: 'var(--portal-modal-title)' }}>
+                          {mediaFile ? mediaFile.name : 'Document attached'}
+                        </p>
+                        <p className="text-[11px]" style={{ color: 'var(--portal-modal-muted)' }}>Document preview not available — it will be downloadable on the site.</p>
+                      </div>
                     ) : (
                       <img
                         src={mediaPreview}
@@ -460,7 +514,7 @@ export default function NewsManagement() {
                     {/* Info bar with Replace / Remove */}
                     <div className="flex items-center justify-between px-3 py-2" style={{ background: 'var(--portal-soft-bg)', borderTop: '1px solid var(--portal-modal-border)' }}>
                       <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--portal-modal-muted)' }}>
-                        {mediaType === 'video' ? <HiOutlineFilm className="size-3.5" /> : <HiOutlinePhotograph className="size-3.5" />}
+                        {mediaType === 'video' ? <HiOutlineFilm className="size-3.5" /> : mediaType === 'document' ? <HiOutlineDocumentText className="size-3.5" /> : <HiOutlinePhotograph className="size-3.5" />}
                         <span>{mediaFile ? `${mediaFile.name} — ${formatBytes(mediaFile.size)}` : `Current ${mediaType} (will be kept)`}</span>
                       </div>
                       <div className="flex gap-1.5">
@@ -488,13 +542,17 @@ export default function NewsManagement() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
                     className="w-full rounded-xl py-8 flex flex-col items-center gap-2 transition-colors cursor-pointer"
                     style={{
-                      background: 'var(--portal-soft-bg)',
-                      border: '2px dashed var(--portal-soft-border)',
+                      background: dragActive ? 'rgba(212,175,55,0.08)' : 'var(--portal-soft-bg)',
+                      border: dragActive ? '2px dashed rgba(212,175,55,0.7)' : '2px dashed var(--portal-soft-border)',
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--portal-soft-border)'; }}
+                    onMouseEnter={(e) => { if (!dragActive) e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)'; }}
+                    onMouseLeave={(e) => { if (!dragActive) e.currentTarget.style.borderColor = 'var(--portal-soft-border)'; }}
                   >
                     <div
                       className="size-12 rounded-xl flex items-center justify-center"
@@ -504,13 +562,13 @@ export default function NewsManagement() {
                     </div>
                     <div className="text-center">
                       <p className="text-sm font-medium" style={{ color: 'var(--portal-modal-title)' }}>
-                        Click to upload image or video
+                        {dragActive ? 'Drop the file to upload' : 'Click to upload, or drag & drop a file'}
                       </p>
                       <p className="text-xs mt-1" style={{ color: 'var(--portal-modal-muted)' }}>
-                        Images up to 5 MB · Videos up to 100 MB
+                        Images up to 5 MB · Videos up to 100 MB · PDF/Docs up to 15 MB
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: 'var(--portal-modal-muted)' }}>
-                        JPG, PNG, GIF, WebP, MP4, MOV, WebM
+                        JPG, PNG, GIF, WebP, MP4, MOV, WebM, PDF
                       </p>
                     </div>
                   </button>
@@ -539,17 +597,19 @@ export default function NewsManagement() {
               {/* Content */}
               <div>
                 <label htmlFor="post-content" className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--portal-modal-muted)' }}>
-                  Content <span style={{ color: 'var(--portal-danger-text)' }}>*</span>
+                  Content {contentRequired
+                    ? <span style={{ color: 'var(--portal-danger-text)' }}>*</span>
+                    : <span className="normal-case font-normal" style={{ color: 'var(--portal-modal-muted)' }}>(optional for memos)</span>}
                 </label>
                 <textarea
                   id="post-content"
                   value={form.content}
                   onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  required
+                  required={contentRequired}
                   maxLength={8000}
                   rows={5}
                   className={`${INPUT_CLASS} resize-none`}
-                  placeholder="Write your post content..."
+                  placeholder={contentRequired ? 'Write your post content...' : 'Optional — add details, or leave blank for a document-only memo'}
                 />
                 <p className="text-right text-[11px] mt-1" style={{ color: 'var(--portal-modal-muted)' }}>
                   {form.content.length} / 8000

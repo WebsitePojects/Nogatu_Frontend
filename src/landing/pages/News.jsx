@@ -13,6 +13,14 @@ function isVideoUrl(url) {
   return ['mp4', 'mov', 'webm', 'avi', 'mkv', 'ogg', 'm4v'].includes(ext);
 }
 
+// Detect a document (PDF/office) so it renders as a downloadable card, not an <img>.
+function isDocumentUrl(url) {
+  if (!url) return false;
+  if (url.includes('/raw/')) return true;
+  const ext = url.split('?')[0].split('.').pop()?.toLowerCase();
+  return ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext);
+}
+
 // Force a download (Content-Disposition: attachment) for Cloudinary assets via the
 // fl_attachment delivery flag; non-Cloudinary URLs fall back to the raw link.
 function toDownloadUrl(url) {
@@ -23,7 +31,7 @@ function toDownloadUrl(url) {
   return url;
 }
 
-function DownloadButton({ url, className = '' }) {
+function DownloadButton({ url, className = '', style }) {
   if (!url) return null;
   return (
     <a
@@ -34,6 +42,7 @@ function DownloadButton({ url, className = '' }) {
       onClick={(e) => e.stopPropagation()}
       aria-label="Download media"
       title="Download"
+      style={style}
       className={`inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${className}`}
     >
       <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +87,20 @@ function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
     <article ref={ref} className="reveal group rounded-2xl border overflow-hidden motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-1 motion-safe:transition-all motion-safe:duration-300" style={{ backgroundColor: '#FFFDF5', borderColor: 'rgba(184,134,11,0.15)' }}>
       {post.image_url && (
         <div className="relative h-48 overflow-hidden" style={{ backgroundColor: '#FFF8E1' }}>
-          {isVideoUrl(post.image_url) ? (
+          {isDocumentUrl(post.image_url) ? (
+            <a
+              href={post.image_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="size-full flex flex-col items-center justify-center gap-2 px-4 text-center cursor-pointer"
+              style={{ backgroundColor: '#FFF8E1' }}
+            >
+              <span className="size-14 rounded-xl flex items-center justify-center" style={{ background: 'rgba(184,134,11,0.12)', border: '1px solid rgba(184,134,11,0.25)' }}>
+                <svg className="size-7" style={{ color: '#B8860B' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z" /></svg>
+              </span>
+              <span className="text-sm font-semibold" style={{ color: '#3A1000' }}>View document</span>
+            </a>
+          ) : isVideoUrl(post.image_url) ? (
             <div className="size-full cursor-pointer" onClick={() => onLightbox(post.image_url, 'video')}>
               <video
                 src={post.image_url}
@@ -110,14 +132,20 @@ function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
           <span className="text-xs" style={{ color: '#B8860B' }}>{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
         </div>
         <h3 className="text-lg font-bold mb-2" style={{ color: '#3A1000' }}>{post.title}</h3>
-        <p className="text-sm leading-relaxed" style={{ color: '#6d3028' }}>
-          {isExpanded ? post.content : post.content?.slice(0, 150)}
-          {post.content?.length > 150 && (
-            <button onClick={() => onExpand(isExpanded ? null : post.id)} className="font-medium ml-1 hover:underline cursor-pointer" style={{ color: '#B8860B' }} type="button">
-              {isExpanded ? 'Show less' : '...Read more'}
-            </button>
-          )}
-        </p>
+        {post.content?.trim() ? (
+          <p className="text-sm leading-relaxed" style={{ color: '#6d3028' }}>
+            {isExpanded ? post.content : post.content?.slice(0, 150)}
+            {post.content?.length > 150 && (
+              <button onClick={() => onExpand(isExpanded ? null : post.id)} className="font-medium ml-1 hover:underline cursor-pointer" style={{ color: '#B8860B' }} type="button">
+                {isExpanded ? 'Show less' : '...Read more'}
+              </button>
+            )}
+          </p>
+        ) : (
+          isDocumentUrl(post.image_url) && (
+            <DownloadButton url={post.image_url} className="px-3 py-1.5" style={{ background: 'rgba(184,134,11,0.1)', color: '#B8860B', border: '1px solid rgba(184,134,11,0.2)' }} />
+          )
+        )}
       </div>
     </article>
   );
