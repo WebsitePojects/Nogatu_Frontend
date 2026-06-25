@@ -73,7 +73,7 @@ function makeDefaultAvailmentForm() {
     availmentDate: toLocalDateTimeInput(new Date()),
     erNumber: '',
     note: '',
-    paymentMethod: 'wallet', // 'wallet' = deduct e-wallet | 'cash' = paid at office (no deduction)
+    paymentMethod: 'cash', // default to office walk-in (no e-wallet deduction); 'wallet' deducts balance
     items: [emptyAvailmentItem()],
   };
 }
