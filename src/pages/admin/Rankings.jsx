@@ -213,7 +213,17 @@ export default function Rankings() {
                           Top {Number(row.position || index + 1)}
                         </span>
                       </td>
-                      <td className="p-3 font-medium text-white/85">{row.firstname} {row.lastname}</td>
+                      <td className="p-3">
+                        <button
+                          type="button"
+                          onClick={() => setHistoryTarget(row)}
+                          className="text-left font-medium text-white/85 hover:text-[#D4AF37] hover:underline transition-colors cursor-pointer"
+                          title="View ranking transaction history"
+                        >
+                          {row.firstname} {row.lastname}
+                        </button>
+                        <span className="block text-[10px] mt-0.5" style={{ color: 'rgba(212,175,55,0.6)' }}>View history →</span>
+                      </td>
                       <td className="p-3 text-white/60">{row.username}</td>
                       <td className="p-3">
                         <span
