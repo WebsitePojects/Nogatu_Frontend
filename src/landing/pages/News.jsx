@@ -5,6 +5,17 @@ import { apiUrl } from '../../utils/apiBase';
 
 const TYPE_LABELS = { news: 'News', announcement: 'Announcement', promo: 'Promo', memo: 'Memo' };
 
+// Show the admin-set memo date when present (a plain YYYY-MM-DD string parsed as a
+// local calendar date so it never shifts a day), otherwise the upload date.
+function formatPostDate(post) {
+  const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+  if (post.display_date) {
+    const [y, m, d] = String(post.display_date).split('-').map(Number);
+    if (y && m && d) return new Date(y, m - 1, d).toLocaleDateString('en-US', opts);
+  }
+  return new Date(post.created_at).toLocaleDateString('en-US', opts);
+}
+
 // Detect a video from the (Cloudinary) media URL so the landing renders <video> not <img>.
 function isVideoUrl(url) {
   if (!url) return false;
@@ -140,7 +151,7 @@ function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
           <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: tc.bg, color: tc.color }}>
             {TYPE_LABELS[post.type] || 'News'}
           </span>
-          <span className="text-xs" style={{ color: '#B8860B' }}>{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span className="text-xs" style={{ color: '#B8860B' }}>{formatPostDate(post)}</span>
         </div>
         <h3 className="text-lg font-bold mb-2" style={{ color: '#3A1000' }}>{post.title}</h3>
         {post.content?.trim() ? (

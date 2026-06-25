@@ -24,7 +24,26 @@ const TYPE_OPTS = [
   { value: 'memo', label: 'Memo', style: { background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' } },
 ];
 
-const EMPTY = { title: '', content: '', type: 'news', image_url: '', is_published: true };
+const EMPTY = { title: '', content: '', type: 'news', image_url: '', is_published: true, display_date: '' };
+
+// Today as YYYY-MM-DD in the admin's local time (for the date input default/max).
+function todayLocalISO() {
+  const now = new Date();
+  const tzOffset = now.getTimezoneOffset() * 60000;
+  return new Date(now - tzOffset).toISOString().slice(0, 10);
+}
+
+// Format a post's effective date (memo display_date when set, else upload date).
+// display_date is a plain YYYY-MM-DD string → parse as a local calendar date so it
+// never rolls back a day across timezones.
+function formatPostDate(post) {
+  const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+  if (post.display_date) {
+    const [y, m, d] = String(post.display_date).split('-').map(Number);
+    if (y && m && d) return new Date(y, m - 1, d).toLocaleDateString('en-US', opts);
+  }
+  return new Date(post.created_at).toLocaleDateString('en-US', opts);
+}
 
 const INPUT_CLASS =
   'w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-colors bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)] text-[color:var(--portal-modal-title)] placeholder:text-[color:var(--portal-modal-muted)]';
@@ -109,6 +128,7 @@ export default function NewsManagement() {
       type: post.type,
       image_url: post.image_url || '',
       is_published: !!post.is_published,
+      display_date: post.display_date || '',
     });
     setMediaFile(null);
     setClearMedia(false);
@@ -181,6 +201,7 @@ export default function NewsManagement() {
       payload.append('content', form.content || '');
       payload.append('type', form.type || 'news');
       payload.append('is_published', form.is_published ? '1' : '0');
+      payload.append('display_date', form.display_date || '');
 
       if (mediaFile) {
         payload.append('media', mediaFile);
@@ -354,7 +375,12 @@ export default function NewsManagement() {
                         )}
                       </td>
                       <td className="px-5 py-4 text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                        {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {formatPostDate(post)}
+                        {post.display_date && (
+                          <span className="block text-[10px] mt-0.5" style={{ color: 'rgba(212,175,55,0.65)' }}>
+                            Memo date
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1">
@@ -449,19 +475,51 @@ export default function NewsManagement() {
                 />
               </div>
 
-              {/* Type */}
-              <div>
-                <label htmlFor="post-type" className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--portal-modal-muted)' }}>
-                  Type
-                </label>
-                <select
-                  id="post-type"
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className={INPUT_CLASS}
-                >
-                  {TYPE_OPTS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
+              {/* Type + Memo date */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="post-type" className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--portal-modal-muted)' }}>
+                    Type
+                  </label>
+                  <select
+                    id="post-type"
+                    value={form.type}
+                    onChange={(e) => setForm({ ...form, type: e.target.value })}
+                    className={INPUT_CLASS}
+                  >
+                    {TYPE_OPTS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="post-display-date" className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--portal-modal-muted)' }}>
+                    Memo Date <span className="normal-case font-normal" style={{ color: 'var(--portal-modal-muted)' }}>(optional)</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="post-display-date"
+                      type="date"
+                      value={form.display_date}
+                      max={todayLocalISO()}
+                      onChange={(e) => setForm({ ...form, display_date: e.target.value })}
+                      className={INPUT_CLASS}
+                    />
+                    {form.display_date && (
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, display_date: '' })}
+                        className="shrink-0 p-2 rounded-lg motion-safe:transition-colors"
+                        style={{ color: 'var(--portal-modal-muted)' }}
+                        title="Clear memo date"
+                        aria-label="Clear memo date"
+                      >
+                        <HiOutlineX className="size-4" />
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[11px] mt-1" style={{ color: 'var(--portal-modal-muted)' }}>
+                    Shown on the public site. Defaults to the upload date when left blank.
+                  </p>
+                </div>
               </div>
 
               {/* Media upload */}
