@@ -100,19 +100,34 @@ export default function ActivationCodes() {
     }
   }
 
-  function handleTransfer() {
+  async function handleTransfer() {
     if (!targetUsername) return toast.error('Enter a target username');
     if (selected.length === 0) return toast.error('Select at least one code');
+
+    // Resolve the target's full name first so the confirmation shows WHO the codes go to.
+    // Also blocks the transfer if the username doesn't exist (avoids activating for the wrong person).
+    let targetFullName = null;
+    try {
+      const { data } = await api.get(`/codes/resolve-member?username=${encodeURIComponent(targetUsername)}`);
+      targetFullName = data?.fullName || null;
+    } catch (err) {
+      return toast.error(
+        err.response?.status === 404
+          ? `No member found with username "${targetUsername}". Double-check the username.`
+          : 'Could not verify the target username. Please try again.'
+      );
+    }
 
     const selectedRows = selected.map((code) => findCodeRecord(code)).filter(Boolean);
     setConfirmModal({
       tone: 'gold',
       title: 'Transfer selected codes?',
-      message: 'This will move the selected activation codes to another member account and the transfer will be recorded in the activation history.',
+      message: 'This will move the selected activation codes to the member below. Confirm the name matches the person you intend to activate for — this is recorded in the activation history.',
       confirmLabel: 'Transfer Codes',
       onConfirm: performTransfer,
       details: [
         { label: 'Target username', value: targetUsername },
+        { label: 'Target name', value: targetFullName || '—' },
         { label: 'Codes selected', value: String(selected.length) },
         { label: 'Code types', value: selectedRows.map((row) => row.accountLabel || row.producttypeName).join(', ') || 'Selected codes' },
       ],

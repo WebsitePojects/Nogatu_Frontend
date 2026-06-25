@@ -91,6 +91,15 @@ function PageHero({ title, subtitle }) {
   );
 }
 
+// tz-safe date format (a bare YYYY-MM-DD stays that calendar day).
+function fmtPostDate(value) {
+  if (!value) return '';
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
   const ref = useScrollReveal({ delay });
   const tc = TYPE_COLORS[post.type] || TYPE_COLORS.news;
@@ -140,7 +149,7 @@ function PostCard({ post, delay, onExpand, isExpanded, onLightbox }) {
           <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: tc.bg, color: tc.color }}>
             {TYPE_LABELS[post.type] || 'News'}
           </span>
-          <span className="text-xs" style={{ color: '#B8860B' }}>{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span className="text-xs" style={{ color: '#B8860B' }}>{fmtPostDate(post.display_date || post.post_date || post.created_at)}</span>
         </div>
         <h3 className="text-lg font-bold mb-2" style={{ color: '#3A1000' }}>{post.title}</h3>
         {post.content?.trim() ? (

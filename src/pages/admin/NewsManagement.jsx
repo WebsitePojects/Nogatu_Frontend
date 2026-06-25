@@ -24,7 +24,34 @@ const TYPE_OPTS = [
   { value: 'memo', label: 'Memo', style: { background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' } },
 ];
 
-const EMPTY = { title: '', content: '', type: 'news', image_url: '', is_published: true };
+const EMPTY = { title: '', content: '', type: 'news', image_url: '', is_published: true, post_date: '' };
+
+// Coerce a stored value (Date | 'YYYY-MM-DD' | ISO | null) to a YYYY-MM-DD input value.
+function toDateInput(value) {
+  if (!value) return '';
+  const s = String(value);
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (m) return m[1];
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  const off = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - off).toISOString().slice(0, 10);
+}
+
+function todayInput() {
+  const d = new Date();
+  const off = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - off).toISOString().slice(0, 10);
+}
+
+// Format a date for display without timezone drift (a bare YYYY-MM-DD stays that day).
+function fmtDate(value) {
+  if (!value) return '';
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
 const INPUT_CLASS =
   'w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-colors bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)] text-[color:var(--portal-modal-title)] placeholder:text-[color:var(--portal-modal-muted)]';
@@ -95,7 +122,7 @@ export default function NewsManagement() {
 
   function openCreate() {
     setEditing(null);
-    setForm(EMPTY);
+    setForm({ ...EMPTY, post_date: todayInput() });
     setMediaFile(null);
     setClearMedia(false);
     setShowModal(true);
@@ -109,6 +136,7 @@ export default function NewsManagement() {
       type: post.type,
       image_url: post.image_url || '',
       is_published: !!post.is_published,
+      post_date: toDateInput(post.post_date),
     });
     setMediaFile(null);
     setClearMedia(false);
@@ -180,6 +208,7 @@ export default function NewsManagement() {
       payload.append('title', form.title || '');
       payload.append('content', form.content || '');
       payload.append('type', form.type || 'news');
+      payload.append('post_date', form.post_date || '');
       payload.append('is_published', form.is_published ? '1' : '0');
 
       if (mediaFile) {
@@ -354,7 +383,7 @@ export default function NewsManagement() {
                         )}
                       </td>
                       <td className="px-5 py-4 text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                        {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {fmtDate(post.post_date || post.created_at)}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1">
@@ -462,6 +491,23 @@ export default function NewsManagement() {
                 >
                   {TYPE_OPTS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
+              </div>
+
+              {/* Post date */}
+              <div>
+                <label htmlFor="post-date" className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--portal-modal-muted)' }}>
+                  Date <span className="normal-case font-normal" style={{ color: 'var(--portal-modal-muted)' }}>(the date this post is for)</span>
+                </label>
+                <input
+                  id="post-date"
+                  type="date"
+                  value={form.post_date}
+                  onChange={(e) => setForm({ ...form, post_date: e.target.value })}
+                  className={INPUT_CLASS}
+                />
+                <p className="text-[11px] mt-1" style={{ color: 'var(--portal-modal-muted)' }}>
+                  Posts show and sort by this date, not the upload time. Leave blank to use the upload date.
+                </p>
               </div>
 
               {/* Media upload */}

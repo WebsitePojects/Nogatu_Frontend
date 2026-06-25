@@ -73,6 +73,7 @@ function makeDefaultAvailmentForm() {
     availmentDate: toLocalDateTimeInput(new Date()),
     erNumber: '',
     note: '',
+    paymentMethod: 'wallet', // 'wallet' = deduct e-wallet | 'cash' = paid at office (no deduction)
     items: [emptyAvailmentItem()],
   };
 }
@@ -315,6 +316,7 @@ export default function VoucherManagement() {
         availmentDate: toLocalDateTimeInput(fullAvailment.availmentDate),
         erNumber: fullAvailment.erNumber || '',
         note: fullAvailment.note || '',
+        paymentMethod: fullAvailment.paymentMethod || 'wallet',
         items: (fullAvailment.items || []).length > 0
           ? fullAvailment.items.map((item) => ({
               productCode: item.productCode ? String(item.productCode) : '',
@@ -387,6 +389,7 @@ export default function VoucherManagement() {
         availmentDate: availmentForm.availmentDate,
         erNumber: availmentForm.erNumber,
         note: availmentForm.note || '',
+        paymentMethod: availmentForm.paymentMethod || 'wallet',
         items: availmentForm.items.map((item) => ({
           description: item.description,
           // `amount` is the per-unit price; backend multiplies by quantity for the line total.
@@ -860,6 +863,11 @@ export default function VoucherManagement() {
                               >
                                 {availment.claimStatus || 'requested'}
                               </span>
+                              {(availment.paymentMethod || 'wallet') === 'cash' && (
+                                <span className="text-xs px-2.5 py-1 rounded-full" style={{ color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                                  Cash · no wallet deduction
+                                </span>
+                              )}
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                               <div>
@@ -1052,6 +1060,12 @@ export default function VoucherManagement() {
                 <div>
                   <p className="portal-modal-muted text-xs">Total Voucher Used</p>
                   <p className="portal-modal-title text-lg font-semibold font-mono">PHP {fmt(viewingAvailment.totalAmount)}</p>
+                  <p className="portal-modal-muted text-xs mt-1">
+                    Paid via:{' '}
+                    <span style={{ color: (viewingAvailment.paymentMethod || 'wallet') === 'cash' ? '#34d399' : '#D4AF37' }}>
+                      {(viewingAvailment.paymentMethod || 'wallet') === 'cash' ? 'Cash at office (no e-wallet deduction)' : 'Member e-wallet'}
+                    </span>
+                  </p>
                   {viewingAvailment.claimedAt && (
                     <p className="portal-modal-muted text-xs mt-1">Claimed {viewingAvailment.claimedAt} by {viewingAvailment.claimedBy || 'cashier'}</p>
                   )}
@@ -1201,6 +1215,43 @@ export default function VoucherManagement() {
                   placeholder="Add a note for this transaction (e.g. cashier remarks, claim details)…"
                   className="w-full px-3 py-2.5 rounded-2xl text-sm portal-modal-title outline-none resize-none bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)] placeholder:text-[color:var(--portal-modal-muted)]"
                 />
+              </div>
+
+              {/* Payment method — does this availment deduct the member e-wallet, or did they pay cash at the office? */}
+              <div>
+                <label className="portal-modal-muted block text-xs font-medium mb-1.5">Payment method</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[
+                    { value: 'wallet', title: 'From e-wallet', sub: "Deducts the member's e-wallet balance" },
+                    { value: 'cash', title: 'Cash at office', sub: 'No e-wallet deduction — paid in person' },
+                  ].map((opt) => {
+                    const active = (availmentForm.paymentMethod || 'wallet') === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setAvailmentForm((current) => ({ ...current, paymentMethod: opt.value }))}
+                        className="text-left rounded-2xl px-3.5 py-3 transition-colors"
+                        style={{
+                          background: active ? 'rgba(212,175,55,0.12)' : 'var(--portal-soft-bg)',
+                          border: active ? '1px solid rgba(212,175,55,0.5)' : '1px solid var(--portal-soft-border)',
+                        }}
+                        aria-pressed={active}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="size-4 rounded-full flex items-center justify-center flex-shrink-0" style={{ border: active ? '5px solid #D4AF37' : '2px solid rgba(255,255,255,0.3)' }} />
+                          <span className="portal-modal-title text-sm font-semibold">{opt.title}</span>
+                        </div>
+                        <p className="portal-modal-muted text-[11px] mt-1 ml-6">{opt.sub}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+                {(availmentForm.paymentMethod || 'wallet') === 'cash' && (
+                  <p className="text-[11px] mt-1.5" style={{ color: '#34d399' }}>
+                    Walk-in: the member pays cash at the office. Their e-wallet balance is NOT touched (no balance needed); the voucher is still consumed.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
