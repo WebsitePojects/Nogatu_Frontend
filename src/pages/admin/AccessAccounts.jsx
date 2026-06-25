@@ -23,7 +23,7 @@ const ROLE_BADGE = {
 const ROLE_HINTS = {
   administrator: 'Full back-office access.',
   bod:           'Full access (Board of Directors).',
-  cashier:       'Code release + voucher transactions only. No admin pages.',
+  cashier:       'Voucher transactions only. No admin pages.',
   readonly:      'Can view every page but cannot make any changes.',
 };
 
@@ -191,7 +191,7 @@ export default function AccessAccounts() {
           </div>
           <div className="text-sm leading-6" style={{ color: 'rgba(255,255,255,0.72)' }}>
             New <span className="font-semibold text-white">Administrator</span> and <span className="font-semibold text-white">BOD</span> accounts get the same full access you have.
-            A <span className="font-semibold text-white">Cashier</span> only sees code release + voucher transactions, and never this page.
+            A <span className="font-semibold text-white">Cashier</span> only sees voucher transactions, and never this page.
             A <span className="font-semibold text-white">Read Only</span> account can open every page but cannot make changes.
           </div>
         </div>

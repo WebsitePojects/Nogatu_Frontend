@@ -30,8 +30,8 @@ const NAV_GROUPS = [
       { to: '/admin/accounts',         label: 'Account Masterlist',     icon: HiOutlineUsers,         roles: [1, 3] },
       { to: '/admin/genealogy',        label: 'Account Genealogy',      icon: FaSitemap,              roles: [1, 3] },
       { to: '/admin/unilevel-tree',    label: 'Unilevel Tree',          icon: FaProjectDiagram,       roles: [1, 3] },
-      { to: '/admin/generate-codes',   label: 'Generate Codes',         icon: HiOutlineKey,           roles: [1, 2, 3] },
-      { to: '/admin/manage-codes',     label: 'Manage Codes',           icon: HiOutlineCog },
+      { to: '/admin/generate-codes',   label: 'Generate Codes',         icon: HiOutlineKey,           roles: [1, 3] },
+      { to: '/admin/manage-codes',     label: 'Manage Codes',           icon: HiOutlineCog,           roles: [1, 3] },
     ],
   },
   {
@@ -126,12 +126,6 @@ export default function AdminLayout() {
     [rights]
   );
 
-  /* Role-filter bottom nav */
-  const visibleBottomNav = useMemo(() =>
-    ADMIN_BOTTOM_NAV.filter(item => !item.roles || item.roles.includes(rights)),
-    [rights]
-  );
-
   /* Drawer item pools (filtered) */
   const manageItems  = useMemo(() => NAV_GROUPS.find(g => g.label === 'Management')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [], [rights]);
   const financeItems = useMemo(() => NAV_GROUPS.find(g => g.label === 'Finance')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [], [rights]);
@@ -139,6 +133,19 @@ export default function AdminLayout() {
     ...( NAV_GROUPS.find(g => g.label === 'Content')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [] ),
     ...( NAV_GROUPS.find(g => g.label === 'Settings')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [] ),
   ], [rights]);
+
+  /* Role-filter bottom nav. Drawer tabs (manage/finance/more) are also hidden when
+     their item pool is empty for this role — e.g. a Cashier only keeps Vouchers. */
+  const drawerPools = { manage: manageItems, finance: financeItems, more: moreItems };
+  const visibleBottomNav = useMemo(() =>
+    ADMIN_BOTTOM_NAV.filter(item => {
+      if (item.roles && !item.roles.includes(rights)) return false;
+      if (item.drawer && (drawerPools[item.drawer]?.length || 0) === 0) return false;
+      return true;
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rights, manageItems, financeItems, moreItems]
+  );
 
   const handleLogout = async () => {
     await logoutAdmin();
