@@ -75,12 +75,13 @@ function RankingHistory() {
   const [meta, setMeta] = useState({ total: 0, totalPoints: 0, page: 1, totalPages: 1, basisLabel: 'Rankable repurchase points' });
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [scope, setScope] = useState('remaining'); // 'remaining' | 'full'
 
   useEffect(() => {
     let active = true;
     const load = (silent) => {
       if (!silent) setLoading(true);
-      api.get(`/ranking/events?page=${page}&perPage=20`)
+      api.get(`/ranking/events?page=${page}&perPage=20&scope=${scope}`)
         .then((res) => {
           if (!active) return;
           setRows(res.data.events || []);
@@ -105,7 +106,7 @@ function RankingHistory() {
       clearInterval(interval);
       window.removeEventListener('focus', onFocus);
     };
-  }, [page]);
+  }, [page, scope]);
 
   const fmtTs = (ts) => {
     if (!ts) return '—';
@@ -115,15 +116,26 @@ function RankingHistory() {
 
   return (
     <div className="glass-card rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
           <HiOutlineClock className="size-5" style={{ color: '#D4AF37' }} />
           <h2 className="font-display text-lg text-white">Ranking Transaction History</h2>
         </div>
-        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{fmtInt(meta.total)} event(s) · {fmtInt(meta.totalPoints)} pts</span>
+        <div className="inline-flex rounded-lg overflow-hidden" style={{ border: '1px solid rgba(212,175,55,0.25)' }}>
+          {[['remaining', 'Remaining'], ['full', 'Full ledger']].map(([val, label]) => (
+            <button key={val} type="button" onClick={() => { setScope(val); setPage(1); }}
+              className="text-xs px-3 py-1.5 font-medium transition-colors"
+              style={scope === val ? { background: 'rgba(212,175,55,0.18)', color: '#D4AF37' } : { background: 'transparent', color: 'rgba(255,255,255,0.5)' }}>
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
+      <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>{fmtInt(meta.total)} event(s) · {fmtInt(meta.totalPoints)} pts</p>
       <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
-        Repurchase transactions from your team that build your {String(meta.basisLabel).toLowerCase()}. Newest first.
+        {scope === 'full'
+          ? 'Every repurchase that built your ranking — including points already spent achieving a rank (Earned / Used / Left). Newest first.'
+          : `Repurchase points still available toward your next rank (${String(meta.basisLabel).toLowerCase()}). Newest first.`}
       </p>
 
       {loading ? (
@@ -134,7 +146,7 @@ function RankingHistory() {
         <>
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr>{['Date', 'Source', 'Level', 'Points'].map((h) => <th key={h} className="table-header py-2.5 px-2 text-left">{h}</th>)}</tr></thead>
+              <thead><tr>{(scope === 'full' ? ['Date', 'Source', 'Level', 'Earned', 'Used', 'Left'] : ['Date', 'Source', 'Level', 'Points']).map((h) => <th key={h} className="table-header py-2.5 px-2 text-left">{h}</th>)}</tr></thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.repurchaseId} className="border-t" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
@@ -142,6 +154,8 @@ function RankingHistory() {
                     <td className="py-2.5 px-2 text-white/80">{r.sourceName}{r.sourceUsername && <span className="text-white/40 text-xs ml-1">@{r.sourceUsername}</span>}</td>
                     <td className="py-2.5 px-2 text-white/60">L{r.depth}</td>
                     <td className="py-2.5 px-2 font-semibold" style={{ color: '#D4AF37' }}>{fmtInt(r.points)}</td>
+                    {scope === 'full' && <td className="py-2.5 px-2 text-white/55">{fmtInt(r.consumed)}</td>}
+                    {scope === 'full' && <td className="py-2.5 px-2" style={{ color: Number(r.remaining) > 0 ? '#34d399' : 'rgba(255,255,255,0.35)' }}>{fmtInt(r.remaining)}</td>}
                   </tr>
                 ))}
               </tbody>
@@ -154,7 +168,7 @@ function RankingHistory() {
                   <p className="text-white/80 text-sm font-medium truncate">{r.sourceName}</p>
                   <span className="font-semibold text-sm flex-shrink-0" style={{ color: '#D4AF37' }}>{fmtInt(r.points)} pts</span>
                 </div>
-                <p className="text-white/45 text-xs mt-1">{r.sourceUsername ? `@${r.sourceUsername} · ` : ''}Level {r.depth} · {fmtTs(r.eventTs)}</p>
+                <p className="text-white/45 text-xs mt-1">{r.sourceUsername ? `@${r.sourceUsername} · ` : ''}Level {r.depth} · {fmtTs(r.eventTs)}{scope === 'full' ? ` · used ${fmtInt(r.consumed)} · left ${fmtInt(r.remaining)}` : ''}</p>
               </div>
             ))}
           </div>

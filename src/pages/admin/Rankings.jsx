@@ -25,12 +25,13 @@ function RankingHistoryModal({ member, onClose }) {
   const [meta, setMeta] = useState({ total: 0, totalPoints: 0, page: 1, totalPages: 1 });
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [scope, setScope] = useState('remaining'); // 'remaining' | 'full'
 
   useEffect(() => {
     let active = true;
     const load = (silent) => {
       if (!silent) setLoading(true);
-      api.get(`/admin/rankings/${member.uid}/events?page=${page}&perPage=20`)
+      api.get(`/admin/rankings/${member.uid}/events?page=${page}&perPage=20&scope=${scope}`)
         .then((res) => {
           if (!active) return;
           setRows(res.data.events || []);
@@ -47,7 +48,7 @@ function RankingHistoryModal({ member, onClose }) {
     load(false);
     const interval = setInterval(() => load(true), 25000);
     return () => { active = false; clearInterval(interval); };
-  }, [member.uid, page]);
+  }, [member.uid, page, scope]);
 
   const fmtTs = (ts) => {
     if (!ts) return '—';
@@ -68,6 +69,15 @@ function RankingHistoryModal({ member, onClose }) {
             <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
               {member.firstname} {member.lastname} <span className="text-white/40">@{member.username}</span> · {fmtInt(meta.total)} event(s) · {fmtInt(meta.totalPoints)} pts · <span style={{ color: '#34d399' }}>live</span>
             </p>
+            <div className="inline-flex rounded-lg overflow-hidden mt-2" style={{ border: '1px solid rgba(212,175,55,0.25)' }}>
+              {[['remaining', 'Remaining'], ['full', 'Full ledger']].map(([val, label]) => (
+                <button key={val} type="button" onClick={() => { setScope(val); setPage(1); }}
+                  className="text-xs px-3 py-1 font-medium transition-colors"
+                  style={scope === val ? { background: 'rgba(212,175,55,0.18)', color: '#D4AF37' } : { background: 'transparent', color: 'rgba(255,255,255,0.5)' }}>
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
           <button type="button" onClick={onClose} className="text-white/60 hover:text-white text-2xl leading-none px-2" aria-label="Close">×</button>
         </div>
@@ -78,7 +88,7 @@ function RankingHistoryModal({ member, onClose }) {
         ) : (
           <div className="overflow-y-auto">
             <table className="w-full text-sm">
-              <thead><tr>{['Date', 'Source', 'Level', 'Points'].map((h) => <th key={h} className="table-header py-2 px-2 text-left text-xs uppercase tracking-wide">{h}</th>)}</tr></thead>
+              <thead><tr>{(scope === 'full' ? ['Date', 'Source', 'Level', 'Earned', 'Used', 'Left'] : ['Date', 'Source', 'Level', 'Points']).map((h) => <th key={h} className="table-header py-2 px-2 text-left text-xs uppercase tracking-wide">{h}</th>)}</tr></thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.repurchaseId} className="border-t" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
@@ -86,6 +96,8 @@ function RankingHistoryModal({ member, onClose }) {
                     <td className="py-2 px-2 text-white/80">{r.sourceName}{r.sourceUsername && <span className="text-white/40 text-xs ml-1">@{r.sourceUsername}</span>}</td>
                     <td className="py-2 px-2 text-white/60">L{r.depth}</td>
                     <td className="py-2 px-2 font-semibold" style={{ color: '#D4AF37' }}>{fmtInt(r.points)}</td>
+                    {scope === 'full' && <td className="py-2 px-2 text-white/55">{fmtInt(r.consumed)}</td>}
+                    {scope === 'full' && <td className="py-2 px-2" style={{ color: Number(r.remaining) > 0 ? '#34d399' : 'rgba(255,255,255,0.35)' }}>{fmtInt(r.remaining)}</td>}
                   </tr>
                 ))}
               </tbody>
