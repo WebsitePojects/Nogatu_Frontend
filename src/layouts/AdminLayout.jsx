@@ -11,7 +11,7 @@ import {
   HiOutlineSun, HiOutlineMoon, HiOutlineShieldCheck,
   HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket,
   HiOutlineChat, HiOutlineClipboardList, HiOutlineX, HiOutlineViewBoards,
-  HiOutlineDotsHorizontal,
+  HiOutlineDotsHorizontal, HiOutlineUserAdd,
 } from 'react-icons/hi';
 import { FaSitemap, FaProjectDiagram } from 'react-icons/fa';
 
@@ -64,6 +64,7 @@ const NAV_GROUPS = [
   {
     label: 'Settings',
     items: [
+      { to: '/admin/access-accounts', label: 'Access Accounts', icon: HiOutlineUserAdd,    roles: [1, 3] },
       { to: '/admin/change-password', label: 'Change Password', icon: HiOutlineLockClosed, roles: [1, 3] },
     ],
   },
@@ -153,7 +154,7 @@ export default function AdminLayout() {
   /* Active bottom tabs */
   const MANAGE_PATHS  = ['/admin/accounts', '/admin/genealogy', '/admin/unilevel-tree', '/admin/generate-codes', '/admin/manage-codes'];
   const FINANCE_PATHS = ['/admin/encashment', '/admin/finance', '/admin/redeem', '/admin/hifive-package-claims', '/admin/rankings', '/admin/global-bonus', '/admin/cd-accounts'];
-  const MORE_PATHS    = ['/admin/messages', '/admin/support', '/admin/applications', '/admin/news', '/admin/change-password'];
+  const MORE_PATHS    = ['/admin/messages', '/admin/support', '/admin/applications', '/admin/news', '/admin/access-accounts', '/admin/change-password'];
 
   const getBottomTabActive = (item) => {
     if (item.id === 'home')    return location.pathname === '/admin/dashboard';

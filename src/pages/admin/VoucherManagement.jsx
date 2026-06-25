@@ -51,7 +51,14 @@ const CLAIM_STATUS_STYLES = {
   claimed: { color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' },
 };
 
-const emptyAvailmentItem = () => ({ productCode: '', productKey: '', description: '', amount: '' });
+// `amount` here is the per-UNIT price; the line total is amount × quantity.
+const emptyAvailmentItem = () => ({ productCode: '', productKey: '', description: '', quantity: '1', amount: '' });
+
+function itemLineTotal(item) {
+  const unit = Math.round(Number(item?.amount || 0) * 100) / 100;
+  const qty = Math.max(1, Math.floor(Number(item?.quantity || 1)));
+  return Number.isFinite(unit) && unit > 0 ? Math.round(unit * qty * 100) / 100 : 0;
+}
 
 function toLocalDateTimeInput(value) {
   if (!value) return '';
@@ -65,16 +72,14 @@ function makeDefaultAvailmentForm() {
   return {
     availmentDate: toLocalDateTimeInput(new Date()),
     erNumber: '',
+    note: '',
     items: [emptyAvailmentItem()],
   };
 }
 
 function sumAvailmentItems(items = []) {
   return Math.round(
-    (Array.isArray(items) ? items : []).reduce((sum, item) => {
-      const amount = Math.round(Number(item?.amount || 0) * 100) / 100;
-      return Number.isFinite(amount) && amount > 0 ? sum + amount : sum;
-    }, 0) * 100
+    (Array.isArray(items) ? items : []).reduce((sum, item) => sum + itemLineTotal(item), 0) * 100
   ) / 100;
 }
 
@@ -309,12 +314,15 @@ export default function VoucherManagement() {
       setAvailmentForm({
         availmentDate: toLocalDateTimeInput(fullAvailment.availmentDate),
         erNumber: fullAvailment.erNumber || '',
+        note: fullAvailment.note || '',
         items: (fullAvailment.items || []).length > 0
           ? fullAvailment.items.map((item) => ({
               productCode: item.productCode ? String(item.productCode) : '',
               productKey: item.productKey || '',
               description: item.description || '',
-              amount: String(item.amount ?? ''),
+              quantity: String(item.quantity ?? 1),
+              // form amount field is the per-UNIT price
+              amount: String(item.unitAmount ?? item.amount ?? ''),
             }))
           : [emptyAvailmentItem()],
       });
@@ -378,9 +386,12 @@ export default function VoucherManagement() {
       const payload = {
         availmentDate: availmentForm.availmentDate,
         erNumber: availmentForm.erNumber,
+        note: availmentForm.note || '',
         items: availmentForm.items.map((item) => ({
           description: item.description,
+          // `amount` is the per-unit price; backend multiplies by quantity for the line total.
           amount: item.amount,
+          quantity: item.quantity,
           productCode: item.productCode,
           productKey: item.productKey,
         })),
@@ -917,7 +928,7 @@ export default function VoucherManagement() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr>
-                          {['Date', 'Type', 'Amount', 'Reference'].map((header) => (
+                          {['Date', 'Type', 'Amount', 'Reference', 'Note'].map((header) => (
                             <th key={header} className="table-header py-2 px-3 text-left text-xs uppercase tracking-wide">{header}</th>
                           ))}
                         </tr>
@@ -929,6 +940,7 @@ export default function VoucherManagement() {
                             <td className="portal-modal-text py-2 px-3">{transaction.type || '-'}</td>
                             <td className="portal-modal-title py-2 px-3 font-mono">{fmt(transaction.amount)}</td>
                             <td className="portal-modal-muted py-2 px-3 text-xs font-mono">{transaction.reference || '-'}</td>
+                            <td className="portal-modal-muted py-2 px-3 text-xs max-w-[160px] truncate" title={transaction.note || ''}>{transaction.note || '—'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1008,7 +1020,7 @@ export default function VoucherManagement() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr>
-                      {['Product Code', 'Product', 'Amount Used'].map((header) => (
+                      {['Product Code', 'Product', 'Unit Price', 'Qty', 'Amount Used'].map((header) => (
                         <th key={header} className="table-header py-2.5 px-3 text-left text-xs uppercase tracking-wide">{header}</th>
                       ))}
                     </tr>
@@ -1020,12 +1032,21 @@ export default function VoucherManagement() {
                         <td className="portal-modal-title py-2.5 px-3">
                           <div>{item.description || '-'}</div>
                         </td>
+                        <td className="portal-modal-muted py-2.5 px-3 font-mono">PHP {fmt(item.unitAmount ?? item.amount)}</td>
+                        <td className="portal-modal-title py-2.5 px-3 font-mono">{item.quantity ?? 1}</td>
                         <td className="portal-modal-title py-2.5 px-3 font-mono">PHP {fmt(item.amount)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
+              {viewingAvailment.note && (
+                <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <p className="portal-modal-muted text-xs">Note</p>
+                  <p className="portal-modal-title text-sm mt-1 whitespace-pre-wrap break-words">{viewingAvailment.note}</p>
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div>
@@ -1109,7 +1130,7 @@ export default function VoucherManagement() {
                   {availmentForm.items.map((item, index) => {
                     return (
                       <div key={`${index}-${editorMode}`} className="space-y-2 rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_0.7fr_auto] gap-3 items-end">
+                        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_0.7fr_0.55fr_auto] gap-3 items-end">
                           <div>
                             <label className="portal-modal-muted block text-[11px] font-medium mb-1.5">Product / Availment</label>
                             <select
@@ -1127,14 +1148,28 @@ export default function VoucherManagement() {
                             </select>
                           </div>
                           <div>
-                            <label className="portal-modal-muted block text-[11px] font-medium mb-1.5">Amount</label>
+                            <label htmlFor={`avail-unit-${index}`} className="portal-modal-muted block text-[11px] font-medium mb-1.5">Unit Price</label>
                             <input
+                              id={`avail-unit-${index}`}
                               type="number"
                               min="0"
                               step="0.01"
                               value={item.amount}
                               placeholder="0.00"
                               onChange={(event) => updateAvailmentItem(index, 'amount', event.target.value)}
+                              className="w-full px-3 py-2.5 rounded-2xl text-sm portal-modal-title outline-none bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)]"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor={`avail-qty-${index}`} className="portal-modal-muted block text-[11px] font-medium mb-1.5">Qty</label>
+                            <input
+                              id={`avail-qty-${index}`}
+                              type="number"
+                              min="1"
+                              step="1"
+                              value={item.quantity}
+                              placeholder="1"
+                              onChange={(event) => updateAvailmentItem(index, 'quantity', event.target.value)}
                               className="w-full px-3 py-2.5 rounded-2xl text-sm portal-modal-title outline-none bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)]"
                             />
                           </div>
@@ -1146,10 +1181,26 @@ export default function VoucherManagement() {
                             Remove
                           </button>
                         </div>
+                        <p className="portal-modal-muted text-[11px] text-right">
+                          Line total: <span className="portal-modal-title font-mono">PHP {fmt(itemLineTotal(item))}</span>
+                        </p>
                       </div>
                     );
                   })}
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="avail-note" className="portal-modal-muted block text-xs font-medium mb-1.5">Note <span className="font-normal">(optional)</span></label>
+                <textarea
+                  id="avail-note"
+                  value={availmentForm.note}
+                  onChange={(event) => setAvailmentForm((current) => ({ ...current, note: event.target.value }))}
+                  rows={2}
+                  maxLength={500}
+                  placeholder="Add a note for this transaction (e.g. cashier remarks, claim details)…"
+                  className="w-full px-3 py-2.5 rounded-2xl text-sm portal-modal-title outline-none resize-none bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)] placeholder:text-[color:var(--portal-modal-muted)]"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

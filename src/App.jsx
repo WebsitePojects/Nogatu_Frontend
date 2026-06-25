@@ -55,6 +55,7 @@ const Finance = lazy(() => import('./pages/admin/Finance'));
 const VoucherManagement = lazy(() => import('./pages/admin/VoucherManagement'));
 const VoucherGrant = lazy(() => import('./pages/admin/VoucherGrant'));
 const Applications = lazy(() => import('./pages/admin/Applications'));
+const AccessAccounts = lazy(() => import('./pages/admin/AccessAccounts'));
 
 function RouteFallback() {
   return (
@@ -249,6 +250,10 @@ export default function App() {
             <Route
               path="applications"
               element={<ProtectedAdminRoles allowed={[1, 3]}><Applications /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="access-accounts"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><AccessAccounts /></ProtectedAdminRoles>}
             />
             <Route
               path="change-password"

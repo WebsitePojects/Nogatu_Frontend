@@ -64,6 +64,8 @@ export default function Vouchers() {
   const [walletBalance, setWalletBalance] = useState(0);
   const [processingProduct, setProcessingProduct] = useState('');
   const [checkoutModal, setCheckoutModal] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [note, setNote] = useState('');
 
   useEffect(() => {
     refreshAllContent();
@@ -150,6 +152,23 @@ export default function Vouchers() {
     return activeVouchers.find((v) => Number(v.remaining_balance || 0) >= requiredAmount) || null;
   }
 
+  // Pick the active voucher with the LARGEST remaining balance so the member can buy
+  // as many units of one product as possible (sorted by remaining desc, then expiry).
+  function pickBestVoucher(unitPrice) {
+    const price = Number(unitPrice || 0);
+    if (!Number.isFinite(price) || price <= 0) return null;
+    return rows
+      .filter((v) => Number(v.status) === 1 && Number(v.remaining_balance || 0) >= price)
+      .sort((a, b) => {
+        const remDiff = Number(b.remaining_balance || 0) - Number(a.remaining_balance || 0);
+        if (remDiff !== 0) return remDiff;
+        const aTime = new Date(a.expiry_date).getTime();
+        const bTime = new Date(b.expiry_date).getTime();
+        if (Number.isFinite(aTime) && Number.isFinite(bTime) && aTime !== bTime) return aTime - bTime;
+        return Number(a.id || 0) - Number(b.id || 0);
+      })[0] || null;
+  }
+
   function handleProductCheckout(product) {
     const price = Number(product?.price || 0);
     if (!Number.isFinite(price) || price <= 0) {
@@ -162,25 +181,19 @@ export default function Vouchers() {
       return;
     }
 
-    const voucher = pickVoucherForCheckout(price);
+    const voucher = pickBestVoucher(price);
     if (!voucher) {
       toast.error('No active voucher available for checkout');
       return;
     }
 
-    const voucherMatch = Math.min(price, Number(voucher.remaining_balance || 0));
-    if (voucherMatch <= 0) {
-      toast.error('No usable voucher balance for this checkout');
-      return;
-    }
+    // Max units = how many whole units both the wallet AND this voucher can cover.
+    const budget = Math.min(Number(walletBalance || 0), Number(voucher.remaining_balance || 0));
+    const maxQty = Math.max(1, Math.floor(budget / price));
 
-    setCheckoutModal({
-      product,
-      voucher,
-      price,
-      voucherMatch,
-      totalValue: price + voucherMatch,
-    });
+    setQuantity(1);
+    setNote('');
+    setCheckoutModal({ product, voucher, unitPrice: price, maxQty });
   }
 
   function closeCheckoutModal() {
@@ -192,20 +205,24 @@ export default function Vouchers() {
   async function confirmCheckout() {
     if (!checkoutModal) return;
 
-    const { product, voucher, price } = checkoutModal;
+    const { product, voucher, unitPrice, maxQty } = checkoutModal;
+    const qty = Math.min(Math.max(1, Number(quantity) || 1), maxQty);
+    const lineTotal = unitPrice * qty;
 
     setProcessingProduct(product.name);
     try {
       const { data } = await api.post('/vouchers/redeem', {
         voucherId: voucher.id,
-        cashAmount: price,
+        cashAmount: lineTotal,
         productKey: product.key,
         productCode: product.code,
         productName: product.name,
+        quantity: qty,
+        note: note.trim() || undefined,
       });
 
       toast.success(
-        `${product.name} request submitted. Claim 2x ${product.name} during your branch visit. Wallet -P${fmt(data?.cashPaid)} | Voucher -P${fmt(data?.voucherDeducted)}`
+        `${qty}x ${product.name} request submitted. Claim ${qty * 2}x during your branch visit. Wallet -P${fmt(data?.cashPaid)} | Voucher -P${fmt(data?.voucherDeducted)}`
       );
 
       setCheckoutModal(null);
@@ -227,6 +244,10 @@ export default function Vouchers() {
 
   // Voucher match is limited by cash wallet spend and remaining voucher balance.
   const matchedVoucherBudget = Math.min(totalBalance, walletBalance);
+
+  // Derived checkout amounts (recomputed live from the quantity stepper).
+  const modalQty = checkoutModal ? Math.min(Math.max(1, Number(quantity) || 1), checkoutModal.maxQty) : 1;
+  const modalLineTotal = checkoutModal ? checkoutModal.unitPrice * modalQty : 0;
 
   return (
     <div className="space-y-6">
@@ -507,6 +528,12 @@ export default function Vouchers() {
                     <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Total Value</p>
                     <p className="font-semibold mt-1" style={{ color: '#D4AF37' }}>P{fmt(t.total_value)}</p>
                   </div>
+                  {t.note && (
+                    <div className="col-span-2">
+                      <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>Note</p>
+                      <p className="mt-1 text-white/70 break-words">{t.note}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -515,7 +542,7 @@ export default function Vouchers() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Date', 'Voucher', 'Cash Paid', 'Voucher Used', 'Total Value', 'Type'].map((h) => (
+                  {['Date', 'Voucher', 'Cash Paid', 'Voucher Used', 'Total Value', 'Note', 'Type'].map((h) => (
                     <th key={h} className="table-header py-2.5 px-2 text-left">{h}</th>
                   ))}
                 </tr>
@@ -528,6 +555,7 @@ export default function Vouchers() {
                     <td className="py-2.5 px-2 text-white/80">P{fmt(t.cash_paid)}</td>
                     <td className="py-2.5 px-2" style={{ color: '#f87171' }}>-P{fmt(t.voucher_used)}</td>
                     <td className="py-2.5 px-2 font-semibold" style={{ color: '#D4AF37' }}>P{fmt(t.total_value)}</td>
+                    <td className="py-2.5 px-2 text-white/60 text-xs max-w-[180px] truncate" title={t.note || ''}>{t.note || '—'}</td>
                     <td className="py-2.5 px-2">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)' }}>
                         Voucher
@@ -589,32 +617,89 @@ export default function Vouchers() {
               </button>
             </div>
 
+            {/* Quantity stepper */}
+            <div className="mt-4">
+              <label htmlFor="checkout-qty" className="block text-xs font-semibold mb-1.5" style={{ color: modalStyles.muted }}>
+                Quantity <span className="font-normal">(up to {checkoutModal.maxQty} with your balance)</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Decrease quantity"
+                  onClick={() => setQuantity((q) => Math.max(1, (Number(q) || 1) - 1))}
+                  disabled={modalQty <= 1 || Boolean(processingProduct)}
+                  className="size-10 rounded-lg text-lg font-bold inline-flex items-center justify-center disabled:opacity-40"
+                  style={{ background: modalStyles.cancelBg, color: modalStyles.cancelColor, border: modalStyles.cancelBorder }}
+                >−</button>
+                <input
+                  id="checkout-qty"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={checkoutModal.maxQty}
+                  value={quantity}
+                  onChange={(e) => {
+                    const raw = Math.floor(Number(e.target.value) || 1);
+                    setQuantity(Math.min(Math.max(1, raw), checkoutModal.maxQty));
+                  }}
+                  className="w-20 text-center rounded-lg px-2 py-2 text-sm font-semibold outline-none"
+                  style={{ background: modalStyles.cardBg, color: modalStyles.title, border: modalStyles.cardBorder }}
+                />
+                <button
+                  type="button"
+                  aria-label="Increase quantity"
+                  onClick={() => setQuantity((q) => Math.min(checkoutModal.maxQty, (Number(q) || 1) + 1))}
+                  disabled={modalQty >= checkoutModal.maxQty || Boolean(processingProduct)}
+                  className="size-10 rounded-lg text-lg font-bold inline-flex items-center justify-center disabled:opacity-40"
+                  style={{ background: modalStyles.cancelBg, color: modalStyles.cancelColor, border: modalStyles.cancelBorder }}
+                >+</button>
+                <span className="text-xs ml-1" style={{ color: modalStyles.muted }}>× P{fmt(checkoutModal.unitPrice)}</span>
+              </div>
+            </div>
+
+            {/* Note */}
+            <div className="mt-3">
+              <label htmlFor="checkout-note" className="block text-xs font-semibold mb-1.5" style={{ color: modalStyles.muted }}>
+                Note <span className="font-normal">(optional)</span>
+              </label>
+              <textarea
+                id="checkout-note"
+                rows={2}
+                maxLength={500}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Add a note for this request (e.g. preferred flavor, pickup details)…"
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
+                style={{ background: modalStyles.cardBg, color: modalStyles.title, border: modalStyles.cardBorder }}
+              />
+            </div>
+
             <div className="mt-4 rounded-xl p-4 space-y-2" style={{ background: modalStyles.cardBg, border: modalStyles.cardBorder }}>
               <div className="flex items-center justify-between text-sm">
                 <span style={{ color: modalStyles.body }}>Product</span>
-                <span className="font-semibold" style={{ color: modalStyles.title }}>{checkoutModal.product.name}</span>
+                <span className="font-semibold" style={{ color: modalStyles.title }}>{modalQty}× {checkoutModal.product.name}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span style={{ color: modalStyles.body }}>Request Amount</span>
-                <span className="font-semibold" style={{ color: modalStyles.total }}>P{fmt(checkoutModal.price)}</span>
+                <span className="font-semibold" style={{ color: modalStyles.total }}>P{fmt(modalLineTotal)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span style={{ color: modalStyles.body }}>You Will Receive</span>
-                <span className="font-bold" style={{ color: '#22c55e' }}>2 x {checkoutModal.product.name} on claim</span>
+                <span className="font-bold" style={{ color: '#22c55e' }}>{modalQty * 2} x {checkoutModal.product.name} on claim</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span style={{ color: modalStyles.body }}>Wallet Deduction</span>
-                <span className="font-semibold" style={{ color: modalStyles.deduct }}>-P{fmt(checkoutModal.price)}</span>
+                <span className="font-semibold" style={{ color: modalStyles.deduct }}>-P{fmt(modalLineTotal)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span style={{ color: modalStyles.body }}>Voucher Deduction</span>
                 <span className="font-semibold" style={{ color: modalStyles.deduct }}>
-                  -P{fmt(checkoutModal.voucherMatch)} ({voucherCode(checkoutModal.voucher.id)})
+                  -P{fmt(modalLineTotal)} ({voucherCode(checkoutModal.voucher.id)})
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm pt-2 border-t" style={{ borderColor: isDarkMode ? 'rgba(148,163,184,0.25)' : 'rgba(148,163,184,0.4)' }}>
                 <span style={{ color: modalStyles.body }}>Total Product Value</span>
-                <span className="font-bold" style={{ color: modalStyles.total }}>P{fmt(checkoutModal.totalValue)}</span>
+                <span className="font-bold" style={{ color: modalStyles.total }}>P{fmt(modalLineTotal * 2)}</span>
               </div>
             </div>
 
@@ -645,7 +730,7 @@ export default function Vouchers() {
                   opacity: processingProduct ? 0.7 : 1,
                 }}
               >
-                {processingProduct ? 'Processing...' : 'Confirm & Get 2x'}
+                {processingProduct ? 'Processing...' : `Confirm & Get ${modalQty * 2}x`}
               </button>
             </div>
           </div>
