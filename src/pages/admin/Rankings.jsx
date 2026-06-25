@@ -19,26 +19,118 @@ function formatQualifiedDate(value) {
   });
 }
 
+// Per-member rankable-event ledger, live (polls /admin/rankings/:uid/events every 25s).
+function RankingHistoryModal({ member, onClose }) {
+  const [rows, setRows] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, totalPoints: 0, page: 1, totalPages: 1 });
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const load = (silent) => {
+      if (!silent) setLoading(true);
+      api.get(`/admin/rankings/${member.uid}/events?page=${page}&perPage=20`)
+        .then((res) => {
+          if (!active) return;
+          setRows(res.data.events || []);
+          setMeta({
+            total: Number(res.data.total || 0),
+            totalPoints: Number(res.data.totalPoints || 0),
+            page: Number(res.data.page || 1),
+            totalPages: Number(res.data.totalPages || 1),
+          });
+        })
+        .catch(() => { if (active && !silent) setRows([]); })
+        .finally(() => { if (active && !silent) setLoading(false); });
+    };
+    load(false);
+    const interval = setInterval(() => load(true), 25000);
+    return () => { active = false; clearInterval(interval); };
+  }, [member.uid, page]);
+
+  const fmtTs = (ts) => {
+    if (!ts) return '—';
+    const d = new Date(String(ts).replace(' ', 'T'));
+    return Number.isNaN(d.getTime()) ? String(ts) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  return (
+    <div className="portal-overlay fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="glass-card rounded-2xl w-full max-w-2xl max-h-[88vh] flex flex-col p-5"
+        onClick={(e) => e.stopPropagation()}
+        style={{ background: 'var(--portal-modal-bg, rgba(18,16,12,0.98))', border: '1px solid rgba(212,175,55,0.2)' }}
+      >
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="font-display text-lg text-white">Ranking Transaction History</h3>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              {member.firstname} {member.lastname} <span className="text-white/40">@{member.username}</span> · {fmtInt(meta.total)} event(s) · {fmtInt(meta.totalPoints)} pts · <span style={{ color: '#34d399' }}>live</span>
+            </p>
+          </div>
+          <button type="button" onClick={onClose} className="text-white/60 hover:text-white text-2xl leading-none px-2" aria-label="Close">×</button>
+        </div>
+        {loading ? (
+          <div className="flex justify-center py-10"><div className="size-8 border-4 rounded-full animate-spin" style={{ borderColor: 'rgba(212,175,55,0.2)', borderTopColor: '#D4AF37' }} /></div>
+        ) : rows.length === 0 ? (
+          <div className="py-10 text-center text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No rankable transactions for this member yet.</div>
+        ) : (
+          <div className="overflow-y-auto">
+            <table className="w-full text-sm">
+              <thead><tr>{['Date', 'Source', 'Level', 'Points'].map((h) => <th key={h} className="table-header py-2 px-2 text-left text-xs uppercase tracking-wide">{h}</th>)}</tr></thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.repurchaseId} className="border-t" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
+                    <td className="py-2 px-2 text-white/60 text-xs">{fmtTs(r.eventTs)}</td>
+                    <td className="py-2 px-2 text-white/80">{r.sourceName}{r.sourceUsername && <span className="text-white/40 text-xs ml-1">@{r.sourceUsername}</span>}</td>
+                    <td className="py-2 px-2 text-white/60">L{r.depth}</td>
+                    <td className="py-2 px-2 font-semibold" style={{ color: '#D4AF37' }}>{fmtInt(r.points)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {meta.totalPages > 1 && (
+          <div className="flex items-center justify-between mt-3">
+            <button type="button" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-40" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>Prev</button>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Page {meta.page} / {meta.totalPages}</span>
+            <button type="button" disabled={page >= meta.totalPages} onClick={() => setPage((p) => p + 1)} className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-40" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>Next</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Rankings() {
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [historyTarget, setHistoryTarget] = useState(null);
 
   useEffect(() => {
     loadData();
+    // Live: silently re-fetch the ranking list every 25s + on focus (no refresh needed).
+    const interval = setInterval(() => loadData({ silent: true }), 25000);
+    const onFocus = () => loadData({ silent: true });
+    window.addEventListener('focus', onFocus);
+    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  async function loadData() {
-    setLoading(true);
+  async function loadData({ silent = false } = {}) {
+    if (!silent) setLoading(true);
     try {
       const res = await api.get(`/admin/rankings?page=${page}`);
       setRows(res.data.rankings || []);
       setTotalPages(res.data.totalPages || 1);
     } catch {
-      setRows([]);
+      if (!silent) setRows([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 
@@ -214,20 +306,29 @@ export default function Rankings() {
                         </span>
                       </td>
                       <td className="p-3">
-                        {Number(row.pendingAchievementCount || 0) > 0 && !row.blockedByPackageGate && (
+                        <div className="flex items-center gap-1.5">
                           <button
-                            onClick={() => processIncentive(row.uid)}
-                            className="text-xs px-3 py-1 rounded-lg font-medium"
-                            style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
-                           type="button">
-                            Release Next Claim
+                            onClick={() => setHistoryTarget(row)}
+                            className="text-xs px-2.5 py-1 rounded-lg font-medium"
+                            style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.22)' }}
+                            type="button">
+                            History
                           </button>
-                        )}
-                        {row.blockedByPackageGate && (
-                          <span className="text-xs" style={{ color: 'rgba(245,158,11,0.85)' }}>
-                            Gate blocked
-                          </span>
-                        )}
+                          {Number(row.pendingAchievementCount || 0) > 0 && !row.blockedByPackageGate && (
+                            <button
+                              onClick={() => processIncentive(row.uid)}
+                              className="text-xs px-3 py-1 rounded-lg font-medium"
+                              style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
+                             type="button">
+                              Release Next Claim
+                            </button>
+                          )}
+                          {row.blockedByPackageGate && (
+                            <span className="text-xs" style={{ color: 'rgba(245,158,11,0.85)' }}>
+                              Gate blocked
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -245,6 +346,10 @@ export default function Rankings() {
           </div>
         )}
       </div>
+
+      {historyTarget && (
+        <RankingHistoryModal member={historyTarget} onClose={() => setHistoryTarget(null)} />
+      )}
     </div>
   );
 }
