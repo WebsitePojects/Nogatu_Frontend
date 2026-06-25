@@ -21,6 +21,99 @@ function RequiredMark() {
   return <span className="portal-required">*</span>;
 }
 
+const DOB_MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+// Number of days in a given (1-based) month/year; defaults to 31 until both are set.
+function daysInMonth(year, month) {
+  if (!year || !month) return 31;
+  return new Date(Number(year), Number(month), 0).getDate();
+}
+
+function parseDob(value) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+  return m
+    ? { year: m[1], month: String(Number(m[2])), day: String(Number(m[3])) }
+    : { year: '', month: '', day: '' };
+}
+
+/**
+ * Date-of-birth picker built from Month / Day / Year dropdowns instead of a single
+ * native calendar. Seniors can jump straight to a birth year/month (the native phone
+ * select wheel makes this fast) and every field is keyboard-typeable via type-ahead —
+ * no scrolling back through decades of a calendar grid. Emits a 'YYYY-MM-DD' string
+ * (or '' while incomplete) so the surrounding validation is unchanged.
+ */
+function DobField({ value, onChange, error, ariaInvalid }) {
+  const [parts, setParts] = useState(() => parseDob(value));
+
+  // Re-sync when the parent value changes externally (e.g. the form resets after a
+  // successful registration). Skipped while the user is mid-selection so a partial
+  // pick (value still '') is never wiped.
+  useEffect(() => {
+    setParts((prev) => {
+      const composed = prev.year && prev.month && prev.day
+        ? `${prev.year}-${String(prev.month).padStart(2, '0')}-${String(prev.day).padStart(2, '0')}`
+        : '';
+      return (value || '') === composed ? prev : parseDob(value);
+    });
+  }, [value]);
+
+  const update = (next) => {
+    setParts(next);
+    if (next.year && next.month && next.day) {
+      const clampedDay = Math.min(Number(next.day), daysInMonth(next.year, next.month));
+      onChange(`${next.year}-${String(next.month).padStart(2, '0')}-${String(clampedDay).padStart(2, '0')}`);
+    } else {
+      onChange('');
+    }
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let y = currentYear; y >= currentYear - 120; y -= 1) years.push(y);
+  const maxDay = daysInMonth(parts.year, parts.month);
+  const days = Array.from({ length: maxDay }, (_, i) => i + 1);
+  const selectClass = `glass-input ${error ? 'portal-input-error' : ''}`.trim();
+
+  return (
+    <div className="grid grid-cols-3 gap-2" aria-invalid={ariaInvalid}>
+      <select
+        value={parts.month}
+        onChange={(e) => update({ ...parts, month: e.target.value })}
+        className={selectClass}
+        aria-label="Birth month"
+        required
+      >
+        <option value="">Month</option>
+        {DOB_MONTHS.map((name, i) => <option key={name} value={i + 1}>{name}</option>)}
+      </select>
+      <select
+        value={parts.day}
+        onChange={(e) => update({ ...parts, day: e.target.value })}
+        className={selectClass}
+        aria-label="Birth day"
+        required
+      >
+        <option value="">Day</option>
+        {days.map((d) => <option key={d} value={d}>{d}</option>)}
+      </select>
+      <select
+        value={parts.year}
+        onChange={(e) => update({ ...parts, year: e.target.value })}
+        className={selectClass}
+        aria-label="Birth year"
+        required
+      >
+        <option value="">Year</option>
+        {years.map((y) => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+  );
+}
+
 function PlacementPolicyModal({ open, placementMeta, onClose }) {
   if (!open) return null;
 
@@ -604,14 +697,15 @@ export default function Registration() {
             </div>
             <div>
               <label className="label">Date of Birth <RequiredMark /></label>
-              <input
-                type="date"
+              <DobField
                 value={form.dob}
-                onChange={(e) => handleChange('dob', e.target.value)}
-                className={inputClassName('dob')}
-                aria-invalid={fieldErrors.dob ? 'true' : 'false'}
-                required
+                onChange={(val) => handleChange('dob', val)}
+                error={!!fieldErrors.dob}
+                ariaInvalid={fieldErrors.dob ? 'true' : 'false'}
               />
+              <p className="portal-field-hint" style={{ color: 'var(--portal-modal-muted)' }}>
+                Tip: tap a box and type the month, day, or year to jump quickly.
+              </p>
               {fieldErrors.dob ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.dob}</p> : null}
             </div>
           </div>
