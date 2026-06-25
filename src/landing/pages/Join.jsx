@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
+import DobPicker from '../../components/DobPicker';
 import { formatTin, isValidTin, isZeroTin } from '../../utils/tin';
 import { apiUrl } from '../../utils/apiBase';
 
@@ -247,6 +248,17 @@ export default function Join() {
                           {showPassword ? 'Hide' : 'Show'}
                         </button>
                       </div>
+                    ) : field.key === 'dob' ? (
+                      <>
+                        <DobPicker
+                          value={form.dob}
+                          onChange={(v) => updateField('dob', v)}
+                          id="join-dob"
+                          required={!field.optional}
+                          selectClassName="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-3 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+                        />
+                        <span className="mt-1 block text-xs text-brand-brown/70">Pick month, day, year — type to jump to a year.</span>
+                      </>
                     ) : (
                       <input
                         type={field.type}
