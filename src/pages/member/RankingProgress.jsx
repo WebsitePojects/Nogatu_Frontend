@@ -78,22 +78,33 @@ function RankingHistory() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    api.get(`/ranking/events?page=${page}&perPage=20`)
-      .then((res) => {
-        if (!active) return;
-        setRows(res.data.events || []);
-        setMeta({
-          total: Number(res.data.total || 0),
-          totalPoints: Number(res.data.totalPoints || 0),
-          page: Number(res.data.page || 1),
-          totalPages: Number(res.data.totalPages || 1),
-          basisLabel: res.data.basisLabel || 'Rankable repurchase points',
-        });
-      })
-      .catch(() => { if (active) setRows([]); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    const load = (silent) => {
+      if (!silent) setLoading(true);
+      api.get(`/ranking/events?page=${page}&perPage=20`)
+        .then((res) => {
+          if (!active) return;
+          setRows(res.data.events || []);
+          setMeta({
+            total: Number(res.data.total || 0),
+            totalPoints: Number(res.data.totalPoints || 0),
+            page: Number(res.data.page || 1),
+            totalPages: Number(res.data.totalPages || 1),
+            basisLabel: res.data.basisLabel || 'Rankable repurchase points',
+          });
+        })
+        .catch(() => { if (active && !silent) setRows([]); })
+        .finally(() => { if (active && !silent) setLoading(false); });
+    };
+    load(false);
+    // Live: silent re-fetch on interval + focus so new repurchase events appear without refresh.
+    const interval = setInterval(() => load(true), 25000);
+    const onFocus = () => load(true);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      active = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
   }, [page]);
 
   const fmtTs = (ts) => {
@@ -167,24 +178,40 @@ export default function RankingProgress() {
 
   useEffect(() => {
     loadData();
+    // Live ranking: silently re-fetch on an interval + when the tab regains focus, so a
+    // downline's product-code use is reflected without the member manually refreshing.
+    const POLL_MS = 25000;
+    const interval = setInterval(() => loadData({ silent: true }), POLL_MS);
+    const onFocus = () => loadData({ silent: true });
+    const onVisible = () => { if (document.visibilityState === 'visible') loadData({ silent: true }); };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
-  async function loadData() {
-    const cached = getMemberCache(user?.uid, 'ranking');
-    if (cached) {
-      setData(cached);
-      setLoading(false);
-    } else {
-      setLoading(true);
+  async function loadData({ silent = false } = {}) {
+    if (!silent) {
+      const cached = getMemberCache(user?.uid, 'ranking');
+      if (cached) {
+        setData(cached);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
     }
     try {
       const res = await api.get('/ranking');
       setData(res.data);
       setMemberCache(user?.uid, 'ranking', res.data);
     } catch {
-      setData(null);
+      if (!silent) setData(null); // keep last-good data on a silent poll error
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 

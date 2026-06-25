@@ -162,7 +162,7 @@ export default function Join() {
       details: [
         { label: 'Code', value: preview.code || form.activationCode },
         { label: 'Account type', value: preview.accountLabel || 'Package entry code' },
-        { label: 'Sponsor', value: invite?.sponsor_username || 'Sponsor account' },
+        { label: 'Sponsor', value: invite?.sponsor_fullname ? `${invite.sponsor_fullname} (${invite.sponsor_username})` : (invite?.sponsor_username || 'Sponsor account') },
       ],
     });
   }
@@ -209,7 +209,7 @@ export default function Join() {
           ) : invite ? (
             <>
               <div className="rounded-xl bg-[#FFF8E1] border border-brand-gold/25 p-4 mb-6 text-sm text-brand-brown">
-                Sponsor: <strong>{invite.sponsor_username}</strong>{invite.reusable ? ' | Reusable sponsor referral' : ` | Placement UID: ${invite.placement_uid} | Position: ${Number(invite.position) === 1 ? 'Left' : 'Right'}`}
+                Sponsor: <strong>{invite.sponsor_fullname ? `${invite.sponsor_fullname} (${invite.sponsor_username})` : invite.sponsor_username}</strong>{invite.reusable ? ' | Reusable sponsor referral' : ` | Placement UID: ${invite.placement_uid} | Position: ${Number(invite.position) === 1 ? 'Left' : 'Right'}`}
               </div>
               <form onSubmit={submit} className="space-y-4">
                 {[
