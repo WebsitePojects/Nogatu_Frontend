@@ -30,8 +30,8 @@ const NAV_GROUPS = [
       { to: '/admin/accounts',         label: 'Account Masterlist',     icon: HiOutlineUsers,         roles: [1, 3] },
       { to: '/admin/genealogy',        label: 'Account Genealogy',      icon: FaSitemap,              roles: [1, 3] },
       { to: '/admin/unilevel-tree',    label: 'Unilevel Tree',          icon: FaProjectDiagram,       roles: [1, 3] },
-      { to: '/admin/generate-codes',   label: 'Generate Codes',         icon: HiOutlineKey,           roles: [1, 2, 3] },
-      { to: '/admin/manage-codes',     label: 'Manage Codes',           icon: HiOutlineCog },
+      { to: '/admin/generate-codes',   label: 'Generate Codes',         icon: HiOutlineKey,           roles: [1, 3] },
+      { to: '/admin/manage-codes',     label: 'Manage Codes',           icon: HiOutlineCog,           roles: [1, 3] },
     ],
   },
   {
@@ -74,10 +74,10 @@ const NAV_GROUPS = [
 
 const ADMIN_BOTTOM_NAV = [
   { id: 'home',    label: 'Home',    icon: HiOutlineHome,            to: '/admin/dashboard', roles: [1, 3] },
-  { id: 'manage',  label: 'Manage',  icon: HiOutlineViewBoards,      drawer: 'manage' },
+  { id: 'manage',  label: 'Manage',  icon: HiOutlineViewBoards,      drawer: 'manage',       roles: [1, 3] },
   { id: 'finance', label: 'Finance', icon: HiOutlineCash,            drawer: 'finance',      roles: [1, 3] },
   { id: 'vouchers',label: 'Vouchers',icon: HiOutlineTicket,          to: '/admin/voucher-management' },
-  { id: 'more',    label: 'More',    icon: HiOutlineDotsHorizontal,  drawer: 'more' },
+  { id: 'more',    label: 'More',    icon: HiOutlineDotsHorizontal,  drawer: 'more',         roles: [1, 3] },
 ];
 
 /* ─── Layout ────────────────────────────────────────────────── */

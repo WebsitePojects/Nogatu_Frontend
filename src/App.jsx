@@ -177,11 +177,11 @@ export default function App() {
             />
             <Route
               path="generate-codes"
-              element={<ProtectedAdminRoles allowed={[1, 2, 3]}><GenerateCodes /></ProtectedAdminRoles>}
+              element={<ProtectedAdminRoles allowed={[1, 3]}><GenerateCodes /></ProtectedAdminRoles>}
             />
             <Route
               path="manage-codes"
-              element={<ProtectedAdminRoles allowed={[1, 2, 3]}><ManageCodes /></ProtectedAdminRoles>}
+              element={<ProtectedAdminRoles allowed={[1, 3]}><ManageCodes /></ProtectedAdminRoles>}
             />
             <Route
               path="voucher-management"

@@ -68,6 +68,98 @@ function buildRequirementStatusText(data) {
   return `${leftText}, ${rightText}`;
 }
 
+// Transaction-history view for ranking — mirrors Pairing Reports. Reads the same
+// authoritative rankable-event ledger the rank engine uses (/api/ranking/events).
+function RankingHistory() {
+  const [rows, setRows] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, totalPoints: 0, page: 1, totalPages: 1, basisLabel: 'Rankable repurchase points' });
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    api.get(`/ranking/events?page=${page}&perPage=20`)
+      .then((res) => {
+        if (!active) return;
+        setRows(res.data.events || []);
+        setMeta({
+          total: Number(res.data.total || 0),
+          totalPoints: Number(res.data.totalPoints || 0),
+          page: Number(res.data.page || 1),
+          totalPages: Number(res.data.totalPages || 1),
+          basisLabel: res.data.basisLabel || 'Rankable repurchase points',
+        });
+      })
+      .catch(() => { if (active) setRows([]); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [page]);
+
+  const fmtTs = (ts) => {
+    if (!ts) return '—';
+    const d = new Date(String(ts).replace(' ', 'T'));
+    return Number.isNaN(d.getTime()) ? String(ts) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  return (
+    <div className="glass-card rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <HiOutlineClock className="size-5" style={{ color: '#D4AF37' }} />
+          <h2 className="font-display text-lg text-white">Ranking Transaction History</h2>
+        </div>
+        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{fmtInt(meta.total)} event(s) · {fmtInt(meta.totalPoints)} pts</span>
+      </div>
+      <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
+        Repurchase transactions from your team that build your {String(meta.basisLabel).toLowerCase()}. Newest first.
+      </p>
+
+      {loading ? (
+        <div className="flex justify-center py-10"><div className="size-8 border-4 rounded-full animate-spin" style={{ borderColor: 'rgba(212,175,55,0.2)', borderTopColor: '#D4AF37' }} /></div>
+      ) : rows.length === 0 ? (
+        <div className="py-10 text-center text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No rankable transactions yet.</div>
+      ) : (
+        <>
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr>{['Date', 'Source', 'Level', 'Points'].map((h) => <th key={h} className="table-header py-2.5 px-2 text-left">{h}</th>)}</tr></thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.repurchaseId} className="border-t" style={{ borderColor: 'rgba(212,175,55,0.08)' }}>
+                    <td className="py-2.5 px-2 text-white/60 text-xs">{fmtTs(r.eventTs)}</td>
+                    <td className="py-2.5 px-2 text-white/80">{r.sourceName}{r.sourceUsername && <span className="text-white/40 text-xs ml-1">@{r.sourceUsername}</span>}</td>
+                    <td className="py-2.5 px-2 text-white/60">L{r.depth}</td>
+                    <td className="py-2.5 px-2 font-semibold" style={{ color: '#D4AF37' }}>{fmtInt(r.points)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="md:hidden space-y-3">
+            {rows.map((r) => (
+              <div key={r.repurchaseId} className="rounded-xl p-3" style={{ border: '1px solid rgba(212,175,55,0.12)', background: 'rgba(255,255,255,0.02)' }}>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-white/80 text-sm font-medium truncate">{r.sourceName}</p>
+                  <span className="font-semibold text-sm flex-shrink-0" style={{ color: '#D4AF37' }}>{fmtInt(r.points)} pts</span>
+                </div>
+                <p className="text-white/45 text-xs mt-1">{r.sourceUsername ? `@${r.sourceUsername} · ` : ''}Level {r.depth} · {fmtTs(r.eventTs)}</p>
+              </div>
+            ))}
+          </div>
+          {meta.totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <button type="button" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-40" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>Prev</button>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Page {meta.page} / {meta.totalPages}</span>
+              <button type="button" disabled={page >= meta.totalPages} onClick={() => setPage((p) => p + 1)} className="text-xs px-3 py-1.5 rounded-lg disabled:opacity-40" style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>Next</button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function RankingProgress() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
@@ -339,6 +431,8 @@ export default function RankingProgress() {
           </p>
         </div>
       </div>
+
+      <RankingHistory />
     </div>
   );
 }
