@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
+import DobPicker from '../../components/DobPicker';
 import { formatTin, isValidTin, isZeroTin } from '../../utils/tin';
 
 function Spinner() {
@@ -609,14 +610,14 @@ export default function Registration() {
             </div>
             <div>
               <label className="label">Date of Birth <RequiredMark /></label>
-              <input
-                type="date"
+              <DobPicker
                 value={form.dob}
-                onChange={(e) => handleChange('dob', e.target.value)}
-                className={inputClassName('dob')}
-                aria-invalid={fieldErrors.dob ? 'true' : 'false'}
+                onChange={(v) => handleChange('dob', v)}
+                selectClassName={inputClassName('dob')}
+                id="reg-dob"
                 required
               />
+              <p className="portal-field-hint" style={{ color: 'var(--portal-card-muted)' }}>Pick the month, day, and year — type to jump (e.g. type "19" in Year).</p>
               {fieldErrors.dob ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.dob}</p> : null}
             </div>
           </div>
