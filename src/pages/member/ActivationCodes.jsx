@@ -33,8 +33,23 @@ export default function ActivationCodes() {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [selected, setSelected]     = useState([]);
   const [targetUsername, setTargetUsername] = useState('');
+  const [resolvedTarget, setResolvedTarget] = useState(null); // {status,fullName,username}
   const [confirmModal, setConfirmModal] = useState(null);
   const [maintenancePoints, setMaintenancePoints] = useState(null);
+
+  // Live name lookup: as the encoder types the target username, resolve + show the full
+  // name so they're sure they're transferring to the right person (debounced).
+  useEffect(() => {
+    const u = targetUsername.trim();
+    if (!u) { setResolvedTarget(null); return undefined; }
+    setResolvedTarget({ status: 'loading' });
+    const t = setTimeout(() => {
+      api.get(`/codes/resolve-member?username=${encodeURIComponent(u)}`)
+        .then((res) => setResolvedTarget({ status: 'ok', fullName: res.data?.fullName, username: res.data?.username }))
+        .catch((err) => setResolvedTarget({ status: err.response?.status === 404 ? 'notfound' : 'error' }));
+    }, 350);
+    return () => clearTimeout(t);
+  }, [targetUsername]);
 
   useEffect(() => { loadCodes(); }, [page]);
   useEffect(() => { loadHistory(); }, [historyPage]);
@@ -220,17 +235,31 @@ export default function ActivationCodes() {
       {/* Transfer panel */}
       <div className="glass-card rounded-2xl p-6">
         <h3 className="font-display text-sm font-semibold text-white mb-4">Transfer Codes</h3>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            value={targetUsername}
-            onChange={(e) => setTargetUsername(e.target.value)}
-            className="glass-input flex-1"
-            placeholder="Enter target username"
-          />
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-start">
+          <div className="flex-1">
+            <input
+              type="text"
+              value={targetUsername}
+              onChange={(e) => setTargetUsername(e.target.value)}
+              className="glass-input w-full"
+              placeholder="Enter target username"
+            />
+            {resolvedTarget?.status === 'ok' && (
+              <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: '#34d399' }}>
+                ✓ <span className="font-semibold">{resolvedTarget.fullName}</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)' }}>@{resolvedTarget.username}</span>
+              </p>
+            )}
+            {resolvedTarget?.status === 'loading' && (
+              <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Checking…</p>
+            )}
+            {resolvedTarget?.status === 'notfound' && (
+              <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>No member with username “{targetUsername.trim()}”.</p>
+            )}
+          </div>
           <button
             onClick={handleTransfer}
-            disabled={!targetUsername || selected.length === 0}
+            disabled={!targetUsername || selected.length === 0 || resolvedTarget?.status !== 'ok'}
             className="gold-btn py-2.5 px-5 rounded-xl text-sm whitespace-nowrap disabled:opacity-40"
            type="button">
             Transfer ({selected.length})
