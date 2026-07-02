@@ -25,6 +25,7 @@ export default function ManageCodes() {
   const [taggedAccount, setTaggedAccount] = useState(null);
   const [confirm, setConfirm] = useState(null); // { kind, target, count }
   const [confirmBusy, setConfirmBusy] = useState(false);
+  const [detailRecord, setDetailRecord] = useState(null); // code row shown in the tap-to-view details modal
   const canRelease = [1, 2, 3].includes(Number(admin?.rights));
 
   const headingColor = isDarkMode ? '#ffffff' : '#111827';
@@ -432,7 +433,7 @@ export default function ManageCodes() {
           <p className="text-sm font-medium" style={{ color: textMuted }}>
             {selected.length > 0
               ? <span style={{ color: goldText }}>{selected.length} selected</span>
-              : 'Select codes below'}
+              : <>Tap the checkbox to select • tap a row for full details</>}
           </p>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <button
@@ -490,8 +491,20 @@ export default function ManageCodes() {
                       style={{ accentColor: '#D4AF37' }}
                     />
                   </th>
-                  {['ID', 'Code', 'Product', 'Current Owner', 'Transfer Trail', 'Status', 'Generated'].map(h => (
-                    <th key={h} className="table-header py-3 px-4 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
+                  {[
+                    { label: 'ID', hideMobile: true },
+                    { label: 'Code', hideMobile: false },
+                    { label: 'Product', hideMobile: true },
+                    { label: 'Current Owner', hideMobile: false },
+                    { label: 'Status', hideMobile: false },
+                    { label: 'Generated', hideMobile: true },
+                  ].map(col => (
+                    <th
+                      key={col.label}
+                      className={`table-header py-3 px-4 text-left font-semibold text-xs uppercase tracking-wide ${col.hideMobile ? 'hidden sm:table-cell' : ''}`}
+                    >
+                      {col.label}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -501,7 +514,7 @@ export default function ManageCodes() {
                     key={c.code}
                     className="motion-safe:transition-colors"
                     style={{ background: selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent', cursor: 'pointer' }}
-                    onClick={() => toggleSelect(c.code)}
+                    onClick={() => setDetailRecord(c)}
                     onMouseEnter={e => { if (!selected.includes(c.code)) e.currentTarget.style.background = rowHover; }}
                     onMouseLeave={e => { e.currentTarget.style.background = selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent'; }}
                   >
@@ -514,53 +527,15 @@ export default function ManageCodes() {
                         style={{ accentColor: '#D4AF37' }}
                       />
                     </td>
-                    <td className="py-3 px-4 text-xs font-mono" style={{ color: textMuted }}>{c.id}</td>
+                    <td className="py-3 px-4 text-xs font-mono hidden sm:table-cell" style={{ color: textMuted }}>{c.id}</td>
                     <td className="py-3 px-4 font-mono text-xs" style={{ color: goldText }}>{c.code}</td>
-                    <td className="py-3 px-4" style={{ color: textSubtle }}>{c.producttypeName}</td>
+                    <td className="py-3 px-4 hidden sm:table-cell" style={{ color: textSubtle }}>{c.producttypeName}</td>
                     <td className="py-3 px-4">
                       {c.currentOwnerUsername || c.ownerUsername ? (
                         <div>
                           <span className="font-semibold text-xs" style={{ color: blueText }}>{c.currentOwnerUsername || c.ownerUsername}</span>
                           {(c.currentOwnerFullname || c.ownerFullname) && (
                             <div className="text-xs mt-0.5" style={{ color: textMuted }}>{c.currentOwnerFullname || c.ownerFullname}</div>
-                          )}
-                          {c.currentOwnerLabel && (
-                            <div className="text-[11px] mt-1" style={{ color: goldText }}>{c.currentOwnerLabel}</div>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-xs" style={{ color: textMuted }}>—</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 max-w-xs">
-                      {c.transferHistory || c.generatedByUsername || c.releasedByUsername || c.transferredByUsername ? (
-                        <div>
-                          {c.transferHistory && (
-                            <div className="text-xs font-mono break-all leading-relaxed" style={{ color: textSubtle }}>{c.transferHistory}</div>
-                          )}
-                          {c.generatedByUsername && (
-                            <div className="text-[11px] mt-1" style={{ color: textMuted }}>
-                              Generated by <span style={{ color: blueText }}>{c.generatedByUsername}</span>
-                            </div>
-                          )}
-                          {c.releasedByUsername && (
-                            <div className="text-[11px] mt-1" style={{ color: textMuted }}>
-                              Released by <span style={{ color: greenText }}>{c.releasedByUsername}</span>
-                              {c.lastReleaseDate ? <span style={{ color: dateColor }}> • {c.lastReleaseDate}</span> : null}
-                            </div>
-                          )}
-                          {c.transferredByUsername && (
-                            <div className="text-[11px] mt-1" style={{ color: textMuted }}>
-                              Transferred by <span style={{ color: goldText }}>{c.transferredByUsername}</span>
-                              {c.transferredToUsername ? (
-                                <>
-                                  {' '}to <span style={{ color: blueText }}>{c.transferredToUsername}</span>
-                                </>
-                              ) : null}
-                            </div>
-                          )}
-                          {c.lastTransferDate && (
-                            <div className="text-xs mt-0.5" style={{ color: dateColor }}>{c.lastTransferDate}</div>
                           )}
                         </div>
                       ) : (
@@ -575,12 +550,12 @@ export default function ManageCodes() {
                         {c.statusLabel}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-xs" style={{ color: dateColor }}>{c.dategen}</td>
+                    <td className="py-3 px-4 text-xs hidden sm:table-cell" style={{ color: dateColor }}>{c.dategen}</td>
                   </tr>
                 ))}
                 {codes.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="py-12 text-center" style={{ color: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(71,85,105,0.7)' }}>
+                    <td colSpan="7" className="py-12 text-center" style={{ color: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(71,85,105,0.7)' }}>
                       No codes found.
                     </td>
                   </tr>
@@ -666,6 +641,102 @@ export default function ManageCodes() {
           </div>
         )}
       </div>
+
+      {/* Tap-to-view details — full record info incl. Transfer Trail, kept out of the table for mobile */}
+      {detailRecord && (
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4" style={{ background: 'rgba(0,0,0,0.6)' }}
+          onMouseDown={() => setDetailRecord(null)}>
+          <div onMouseDown={(e) => e.stopPropagation()} className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 max-h-[85vh] overflow-y-auto"
+            style={{ background: isDarkMode ? '#15161a' : '#ffffff', border: `1px solid ${subtleBorder}` }}>
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="min-w-0">
+                <p className="font-mono text-sm font-semibold break-all" style={{ color: goldText }}>{detailRecord.code}</p>
+                <p className="text-xs mt-0.5" style={{ color: textMuted }}>Code ID #{detailRecord.id}</p>
+              </div>
+              <span
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0"
+                style={statusStyle(detailRecord.codestatus)}
+              >
+                {detailRecord.statusLabel}
+              </span>
+            </div>
+
+            <div className="space-y-4 text-sm">
+              <div>
+                <p className="text-[11px] uppercase tracking-wide font-semibold mb-1" style={{ color: textMuted }}>Product</p>
+                <p style={{ color: textSubtle }}>{detailRecord.producttypeName}</p>
+              </div>
+
+              <div>
+                <p className="text-[11px] uppercase tracking-wide font-semibold mb-1" style={{ color: textMuted }}>Current Owner</p>
+                {(detailRecord.currentOwnerUsername || detailRecord.ownerUsername) ? (
+                  <div>
+                    <span className="font-semibold" style={{ color: blueText }}>{detailRecord.currentOwnerUsername || detailRecord.ownerUsername}</span>
+                    {(detailRecord.currentOwnerFullname || detailRecord.ownerFullname) && (
+                      <div className="text-xs mt-0.5" style={{ color: textMuted }}>{detailRecord.currentOwnerFullname || detailRecord.ownerFullname}</div>
+                    )}
+                    {detailRecord.currentOwnerLabel && (
+                      <div className="text-[11px] mt-1" style={{ color: goldText }}>{detailRecord.currentOwnerLabel}</div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-xs" style={{ color: textMuted }}>—</span>
+                )}
+              </div>
+
+              <div>
+                <p className="text-[11px] uppercase tracking-wide font-semibold mb-1" style={{ color: textMuted }}>Date Generated</p>
+                <p style={{ color: dateColor }}>{detailRecord.dategen}</p>
+              </div>
+
+              <div>
+                <p className="text-[11px] uppercase tracking-wide font-semibold mb-1" style={{ color: textMuted }}>Transfer Trail</p>
+                {(detailRecord.transferHistory || detailRecord.generatedByUsername || detailRecord.releasedByUsername || detailRecord.transferredByUsername) ? (
+                  <div className="rounded-xl p-3" style={{ background: rowAlt, border: `1px solid ${subtleBorder}` }}>
+                    {detailRecord.transferHistory && (
+                      <div className="text-xs font-mono break-all leading-relaxed mb-1" style={{ color: textSubtle }}>{detailRecord.transferHistory}</div>
+                    )}
+                    {detailRecord.generatedByUsername && (
+                      <div className="text-xs mt-1" style={{ color: textMuted }}>
+                        Generated by <span style={{ color: blueText }}>{detailRecord.generatedByUsername}</span>
+                      </div>
+                    )}
+                    {detailRecord.releasedByUsername && (
+                      <div className="text-xs mt-1" style={{ color: textMuted }}>
+                        Released by <span style={{ color: greenText }}>{detailRecord.releasedByUsername}</span>
+                        {detailRecord.lastReleaseDate ? <span style={{ color: dateColor }}> • {detailRecord.lastReleaseDate}</span> : null}
+                      </div>
+                    )}
+                    {detailRecord.transferredByUsername && (
+                      <div className="text-xs mt-1" style={{ color: textMuted }}>
+                        Transferred by <span style={{ color: goldText }}>{detailRecord.transferredByUsername}</span>
+                        {detailRecord.transferredToUsername ? (
+                          <>
+                            {' '}to <span style={{ color: blueText }}>{detailRecord.transferredToUsername}</span>
+                          </>
+                        ) : null}
+                      </div>
+                    )}
+                    {detailRecord.lastTransferDate && (
+                      <div className="text-xs mt-1" style={{ color: dateColor }}>{detailRecord.lastTransferDate}</div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-xs" style={{ color: textMuted }}>No transfer trail recorded.</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-5">
+              <button type="button" onClick={() => setDetailRecord(null)}
+                className="rounded-xl py-2 px-5 text-sm font-medium border"
+                style={{ borderColor: subtleBorder, color: textSubtle, background: subtleButtonBg }}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirmation gate for release / transfer — prevents accidental actions */}
       {confirm && (
