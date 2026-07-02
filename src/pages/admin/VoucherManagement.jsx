@@ -533,7 +533,7 @@ export default function VoucherManagement() {
               type="text"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Search by activation code (the code you distributed) or username..."
+              placeholder="Search by activation code, Code ID, or username..."
               className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm portal-card-title outline-none bg-[var(--portal-soft-bg)] border border-[var(--portal-soft-border)] placeholder:text-[color:var(--portal-card-muted)]"
             />
           </div>
@@ -581,7 +581,7 @@ export default function VoucherManagement() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Code', 'Username', 'Full Name', 'Package', 'Amount', 'Remaining', 'Status', 'Issued', 'Expiry', 'Actions'].map((header) => (
+                  {['Code', 'Code ID', 'Username', 'Full Name', 'Package', 'Amount', 'Remaining', 'Status', 'Issued', 'Expiry', 'Actions'].map((header) => (
                     <th key={header} className="table-header p-3 text-left text-xs uppercase tracking-wide">{header}</th>
                   ))}
                 </tr>
@@ -593,6 +593,11 @@ export default function VoucherManagement() {
                       {row.code
                         ? <span style={{ color: 'rgba(212,175,55,0.9)' }}>{row.code}</span>
                         : <span className="text-white/30" title="No used activation code for this package">—</span>}
+                    </td>
+                    <td className="p-3 font-mono text-xs">
+                      {row.codeId != null
+                        ? <span className="text-white/70">{row.codeId}</span>
+                        : <span className="text-white/30" title="No matching codestab record for this code">—</span>}
                     </td>
                     <td className="p-3 text-white/80">{row.username}</td>
                     <td className="p-3 text-white/60">{row.fullName || 'N/A'}</td>
@@ -734,6 +739,14 @@ export default function VoucherManagement() {
                     <div>
                       <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Voucher Code</p>
                       <p className="portal-modal-title font-mono">{voucherCode(detailVoucher)}</p>
+                    </div>
+                    <div>
+                      <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Activation Code</p>
+                      <p className="portal-modal-title font-mono">{detailVoucher.code || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Code ID</p>
+                      <p className="portal-modal-title font-mono">{detailVoucher.codeId != null ? detailVoucher.codeId : '—'}</p>
                     </div>
                     <div>
                       <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Username</p>
