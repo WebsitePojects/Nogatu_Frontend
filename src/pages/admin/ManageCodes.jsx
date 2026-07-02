@@ -492,7 +492,7 @@ export default function ManageCodes() {
                     />
                   </th>
                   {[
-                    { label: 'ID', hideMobile: true },
+                    { label: 'ID', hideMobile: false },
                     { label: 'Code', hideMobile: false },
                     { label: 'Product', hideMobile: true },
                     { label: 'Current Owner', hideMobile: false },
@@ -527,7 +527,7 @@ export default function ManageCodes() {
                         style={{ accentColor: '#D4AF37' }}
                       />
                     </td>
-                    <td className="py-3 px-4 text-xs font-mono hidden sm:table-cell" style={{ color: textMuted }}>{c.id}</td>
+                    <td className="py-3 px-4 text-xs font-mono" style={{ color: textMuted }}>{c.id}</td>
                     <td className="py-3 px-4 font-mono text-xs" style={{ color: goldText }}>{c.code}</td>
                     <td className="py-3 px-4 hidden sm:table-cell" style={{ color: textSubtle }}>{c.producttypeName}</td>
                     <td className="py-3 px-4">
