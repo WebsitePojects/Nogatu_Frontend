@@ -433,7 +433,7 @@ export default function ManageCodes() {
           <p className="text-sm font-medium" style={{ color: textMuted }}>
             {selected.length > 0
               ? <span style={{ color: goldText }}>{selected.length} selected</span>
-              : <>Tap the checkbox to select • tap a row for full details</>}
+              : <>Tap a row to select • tap “View details” for the transfer trail</>}
           </p>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <button
@@ -514,7 +514,7 @@ export default function ManageCodes() {
                     key={c.code}
                     className="motion-safe:transition-colors"
                     style={{ background: selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent', cursor: 'pointer' }}
-                    onClick={() => setDetailRecord(c)}
+                    onClick={() => toggleSelect(c.code)}
                     onMouseEnter={e => { if (!selected.includes(c.code)) e.currentTarget.style.background = rowHover; }}
                     onMouseLeave={e => { e.currentTarget.style.background = selected.includes(c.code) ? rowSelected : idx % 2 === 0 ? rowAlt : 'transparent'; }}
                   >
@@ -528,7 +528,17 @@ export default function ManageCodes() {
                       />
                     </td>
                     <td className="py-3 px-4 text-xs font-mono" style={{ color: textMuted }}>{c.id}</td>
-                    <td className="py-3 px-4 font-mono text-xs" style={{ color: goldText }}>{c.code}</td>
+                    <td className="py-3 px-4 font-mono text-xs" style={{ color: goldText }}>
+                      <div className="break-all">{c.code}</div>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setDetailRecord(c); }}
+                        className="mt-1 font-sans text-[11px] font-medium underline decoration-dotted underline-offset-2"
+                        style={{ color: blueText }}
+                      >
+                        View details
+                      </button>
+                    </td>
                     <td className="py-3 px-4 hidden sm:table-cell" style={{ color: textSubtle }}>{c.producttypeName}</td>
                     <td className="py-3 px-4">
                       {c.currentOwnerUsername || c.ownerUsername ? (
