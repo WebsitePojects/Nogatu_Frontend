@@ -91,7 +91,23 @@ export default function Transactions() {
 
   const txDeductions = (t) => {
     if (t.transactionType === 11) return Number(t.voucherUsed || 0);
-    return Number(t.tax || 0) + Number(t.fee || 0) + Number(t.cdDeduction || 0);
+    const tax = Number(t.tax || 0);
+    const fee = Number(t.fee || 0);
+    const cdDeduction = Number(t.cdDeduction || 0);
+    const sum = tax + fee + cdDeduction;
+    if (t.transactionType !== 10) return sum;
+    // Encashment rows: payouthistorytab's tax+fee+cdDeduction omits the ₱20
+    // maintenance fee (only recorded in encashmentstab), so the wallet debit
+    // (beginningBalance - endingBalance) is larger than the stored sum by that
+    // fee. Derive the true total deduction from the balance delta, but only
+    // trust it when it's a sane superset of the stored components — never
+    // less than the stored sum, and never wildly larger (legacy/imported rows
+    // can have inconsistent balance columns).
+    const beginningBalance = Number(t.beginningBalance || 0);
+    const endingBalance = Number(t.endingBalance || 0);
+    const encashment = Number(t.encashment || 0);
+    const derived = beginningBalance - endingBalance - encashment;
+    return (Number.isFinite(derived) && derived >= 0 && derived >= sum && derived - sum <= 100) ? derived : sum;
   };
 
   const rowHoverClass = 'portal-table-row-hover';

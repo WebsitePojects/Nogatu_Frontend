@@ -12,28 +12,47 @@ function normalizeTransaction(data) {
     return null;
   }
 
+  const transactionType = Number(candidate.transactionType ?? candidate.transactiontype ?? 0);
+  const beginningBalance = Number(candidate.beginningBalance ?? candidate.beginningbalance ?? 0);
+  const endingBalance = Number(candidate.endingBalance ?? candidate.endingbalance ?? 0);
+  const encashment = Number(candidate.encashment ?? candidate.encashment1 ?? 0);
+  const tax = Number(candidate.tax ?? 0);
+  const fee = Number(candidate.fee ?? 0);
+  const cdDeduction = Number(candidate.cdDeduction ?? candidate.cddeduction ?? 0);
+
+  // Same guarded derivation as Transactions.jsx's txDeductions: payouthistorytab's
+  // tax+fee+cdDeduction (candidate.deductions) omits the ₱20 maintenance fee, which
+  // only lives in encashmentstab. Derive the true total from the balance delta, but
+  // only trust it when it's a sane superset of the stored components.
+  let deductions = candidate.deductions ?? 0;
+  if (transactionType === 10) {
+    const sum = tax + fee + cdDeduction;
+    const derived = beginningBalance - endingBalance - encashment;
+    deductions = (Number.isFinite(derived) && derived >= 0 && derived >= sum && derived - sum <= 100) ? derived : sum;
+  }
+
   return {
     pid: candidate.pid ?? candidate.id ?? null,
     transactionTypeName: candidate.transactionTypeName || candidate.transaction_type_name || (
-      Number(candidate.transactionType ?? candidate.transactiontype ?? 0) === 1
+      transactionType === 1
         ? 'Income'
-        : Number(candidate.transactionType ?? candidate.transactiontype ?? 0) === 10
+        : transactionType === 10
           ? 'Encashment'
-          : Number(candidate.transactionType ?? candidate.transactiontype ?? 0) === 11
+          : transactionType === 11
             ? 'Voucher'
             : 'Other'
     ),
     transdate: candidate.transdate || candidate.transactionDate || candidate.cashtransdate || null,
-    beginningBalance: candidate.beginningBalance ?? candidate.beginningbalance ?? 0,
-    endingBalance: candidate.endingBalance ?? candidate.endingbalance ?? 0,
+    beginningBalance,
+    endingBalance,
     directReferral: candidate.directReferral ?? candidate.income1 ?? 0,
     pairing: candidate.pairing ?? candidate.income2 ?? 0,
     leadership: candidate.leadership ?? candidate.income3 ?? 0,
     unilevel: candidate.unilevel ?? candidate.income4 ?? 0,
     hifive: candidate.hifive ?? candidate.income5 ?? 0,
     rankingBonus: candidate.rankingBonus ?? candidate.income6 ?? 0,
-    encashment: candidate.encashment ?? candidate.encashment1 ?? 0,
-    deductions: candidate.deductions ?? 0,
+    encashment,
+    deductions,
     cashPaid: candidate.cashPaid ?? candidate.cash_paid ?? 0,
     voucherUsed: candidate.voucherUsed ?? candidate.voucher_used ?? 0,
     totalProductValue: candidate.totalProductValue ?? candidate.total_value ?? 0,
