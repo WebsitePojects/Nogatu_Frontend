@@ -8,6 +8,7 @@ import MemberLayout from './layouts/MemberLayout';
 import AdminLayout from './layouts/AdminLayout';
 
 const Login = lazy(() => import('./pages/member/Login'));
+const ResetPassword = lazy(() => import('./pages/member/ResetPassword'));
 const Dashboard = lazy(() => import('./pages/member/Dashboard'));
 const DashboardMetricDetail = lazy(() => import('./pages/member/DashboardMetricDetail'));
 const EWallet = lazy(() => import('./pages/member/EWallet'));
@@ -121,6 +122,7 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin/login" element={<AdminLogin />} />
 
           {/* Member Portal */}
