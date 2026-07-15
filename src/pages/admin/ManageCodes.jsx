@@ -21,6 +21,9 @@ export default function ManageCodes() {
   const [codesExpanded, setCodesExpanded] = useState(false);
   const [selected, setSelected] = useState([]);
   const [codeSearch, setCodeSearch] = useState('');
+  const [ownerSearch, setOwnerSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [targetUsername, setTargetUsername] = useState('');
   const [taggedAccount, setTaggedAccount] = useState(null);
   const [confirm, setConfirm] = useState(null); // { kind, target, count }
@@ -45,18 +48,39 @@ export default function ManageCodes() {
   useEffect(() => { loadCodes(); }, [page, codesExpanded]);
   useEffect(() => { loadHistory(); }, [historyPage]);
 
+  // Shared filter params for the code list + CSV export: code, owner/holder
+  // username, and the date-generated window.
+  function codeFilterParams() {
+    const p = new URLSearchParams();
+    const q = codeSearch.trim(); if (q) p.set('q', q);
+    const owner = ownerSearch.trim(); if (owner) p.set('owner', owner);
+    if (dateFrom) p.set('dateFrom', dateFrom);
+    if (dateTo) p.set('dateTo', dateTo);
+    return p;
+  }
+
   async function loadCodes() {
     setLoading(true);
     try {
-      const q = codeSearch.trim();
       const perPage = codesExpanded ? 100 : 40;
-      const url = q
-        ? `/admin/codes?page=${page}&perPage=${perPage}&q=${encodeURIComponent(q)}`
-        : `/admin/codes?page=${page}&perPage=${perPage}`;
-      const res = await api.get(url);
+      const p = codeFilterParams();
+      p.set('page', page);
+      p.set('perPage', perPage);
+      const res = await api.get(`/admin/codes?${p.toString()}`);
       setCodes(res.data.codes);
       setTotalPages(res.data.totalPages);
     } catch { } finally { setLoading(false); }
+  }
+
+  // Export ALL codes matching the current filters (not just this page) to CSV.
+  function exportCodes() {
+    const p = codeFilterParams();
+    const url = apiUrl(`/admin/codes/export?${p.toString()}`);
+    const link = document.createElement('a');
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 
   async function exportHistory(format = 'csv') {
@@ -339,6 +363,9 @@ export default function ManageCodes() {
             <button
               onClick={() => {
                 setCodeSearch('');
+                setOwnerSearch('');
+                setDateFrom('');
+                setDateTo('');
                 setPage(1);
                 setHistoryPage(1);
                 setTimeout(() => { loadCodes(); loadHistory(); }, 0);
@@ -349,6 +376,45 @@ export default function ManageCodes() {
               Clear
             </button>
           </div>
+        </div>
+
+        {/* Owner + date-generated filters, plus CSV export of the full result set */}
+        <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-end">
+          <div className="flex-1 w-full">
+            <label className="label">Owner / Holder Username</label>
+            <input
+              type="text"
+              value={ownerSearch}
+              onChange={(e) => setOwnerSearch(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+              placeholder="e.g. tabsqui"
+            />
+          </div>
+          <div className="w-full sm:w-44">
+            <label className="label">Generated From</label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+            />
+          </div>
+          <div className="w-full sm:w-44">
+            <label className="label">Generated To</label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+            />
+          </div>
+          <button
+            onClick={exportCodes}
+            className="rounded-xl py-2.5 px-5 text-sm font-medium border w-full sm:w-auto text-center justify-center items-center"
+            style={{ borderColor: 'rgba(34,197,94,0.35)', color: greenText, background: 'rgba(34,197,94,0.1)' }}
+            type="button">
+            Export CSV
+          </button>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
