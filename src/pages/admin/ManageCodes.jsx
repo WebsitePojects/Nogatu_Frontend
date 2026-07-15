@@ -413,7 +413,7 @@ export default function ManageCodes() {
             className="rounded-xl py-2.5 px-5 text-sm font-medium border w-full sm:w-auto text-center justify-center items-center"
             style={{ borderColor: 'rgba(34,197,94,0.35)', color: greenText, background: 'rgba(34,197,94,0.1)' }}
             type="button">
-            Export CSV
+            Export Excel
           </button>
         </div>
 
