@@ -132,9 +132,31 @@ export function buildFlatTreeGraph(flatNodes, opts = {}) {
     }
   }
 
+  // d3.stratify() takes each parent's child order straight from the input array,
+  // and the placeholder pass above appends open slots AFTER every member. That
+  // put a left-leg open slot to the RIGHT of an existing right-leg member, so the
+  // drawing contradicted the actual binary placement. Re-group siblings and order
+  // them left-then-right (unknown last) so the rendered side always matches the leg.
+  const legRank = (it) => {
+    const side = it.kind === 'placeholder' ? it.side : it.node?.position;
+    return side === 'left' ? 0 : side === 'right' ? 1 : 2;
+  };
+  const siblingsByParent = new Map();
+  for (const it of items) {
+    const key = it.parentId == null ? '\u0000root' : String(it.parentId);
+    if (!siblingsByParent.has(key)) siblingsByParent.set(key, []);
+    siblingsByParent.get(key).push(it);
+  }
+  const orderedItems = [];
+  for (const group of siblingsByParent.values()) {
+    // Stable within a leg: preserves the existing uid tiebreak from ORDER_BINARY.
+    group.sort((a, b) => legRank(a) - legRank(b));
+    orderedItems.push(...group);
+  }
+
   let hierarchy;
   try {
-    hierarchy = stratify().id((d) => d.id).parentId((d) => d.parentId)(items);
+    hierarchy = stratify().id((d) => d.id).parentId((d) => d.parentId)(orderedItems);
   } catch {
     return { ...empty, total: flatNodes.length };
   }
