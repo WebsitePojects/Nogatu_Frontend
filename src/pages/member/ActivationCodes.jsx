@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../api';
+import api, { postIdempotent } from '../../api';
 import toast from 'react-hot-toast';
 import { HiOutlineKey, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineLockClosed } from 'react-icons/hi';
 import { useAuth } from '../../contexts/AuthContext';
@@ -103,7 +103,7 @@ export default function ActivationCodes() {
     if (!targetUsername) return toast.error('Enter a target username');
     if (selected.length === 0) return toast.error('Select at least one code');
     try {
-      const res = await api.post('/codes/transfer', { targetUsername, codes: selected });
+      const res = await postIdempotent('/codes/transfer', { targetUsername, codes: selected });
       toast.success(`${res.data.transferred} code(s) transferred to ${res.data.targetName}`);
       setSelected([]);
       setTargetUsername('');
@@ -151,7 +151,7 @@ export default function ActivationCodes() {
 
   async function performMaintenance(code, transType) {
     try {
-      await api.post('/codes/maintenance', { code, transType });
+      await postIdempotent('/codes/maintenance', { code, transType });
       toast.success(transType === 2 ? 'Set as Hi-Five purchase' : 'Set as maintenance');
       setConfirmModal(null);
       loadCodes();
@@ -185,7 +185,7 @@ export default function ActivationCodes() {
 
   async function performUpgrade(code) {
     try {
-      const res = await api.post('/codes/upgrade', { code });
+      const res = await postIdempotent('/codes/upgrade', { code });
       toast.success(`Account upgraded to ${res.data.newAccountTypeName}!`);
       setConfirmModal(null);
       loadCodes();

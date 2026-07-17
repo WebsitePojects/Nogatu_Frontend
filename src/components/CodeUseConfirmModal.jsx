@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 export default function CodeUseConfirmModal({
   open,
   tone = 'gold',
@@ -12,7 +14,25 @@ export default function CodeUseConfirmModal({
   busy = false,
   confirmDisabled = false,
 }) {
+  // Self-guarding confirm: while onConfirm's promise is in flight, further taps are
+  // ignored and the button is disabled. A slow connection + repeated tapping once
+  // fired the same money action 4x (ELENA54 incident) — the guard lives HERE so
+  // every consumer of this modal is protected without wiring `busy` themselves.
+  const [pending, setPending] = useState(false);
+  useEffect(() => {
+    if (open) setPending(false);
+  }, [open]);
   if (!open) return null;
+
+  const handleConfirm = async () => {
+    if (pending) return;
+    setPending(true);
+    try {
+      await onConfirm?.();
+    } finally {
+      setPending(false);
+    }
+  };
   const isDarkTheme = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const panelBackground = isDarkTheme ? '#141008' : '#ffffff';
 
@@ -98,8 +118,8 @@ export default function CodeUseConfirmModal({
           ) : null}
           <button
             type="button"
-            onClick={onConfirm}
-            disabled={busy || confirmDisabled}
+            onClick={handleConfirm}
+            disabled={busy || pending || confirmDisabled}
             className="rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
             style={{
               background: currentTone.confirmBg,
@@ -107,7 +127,7 @@ export default function CodeUseConfirmModal({
               border: `1px solid ${currentTone.confirmBorder}`,
             }}
           >
-            {busy ? 'Processing...' : confirmLabel}
+            {busy || pending ? 'Processing...' : confirmLabel}
           </button>
         </div>
       </div>

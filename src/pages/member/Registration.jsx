@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import api from '../../api';
+import api, { postIdempotent } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
@@ -247,7 +247,7 @@ export default function Registration() {
   async function submitRegistration() {
     setSubmitting(true);
     try {
-      await api.post('/registration/register', {
+      await postIdempotent('/registration/register', {
         ...form,
         tin: formatTin(form.tin),
       });

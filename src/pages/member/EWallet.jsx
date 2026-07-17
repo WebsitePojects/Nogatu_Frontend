@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../api';
+import api, { postIdempotent } from '../../api';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { HiOutlineCash, HiOutlineTrendingUp, HiOutlineUsers, HiOutlineChartBar, HiOutlineStar, HiOutlineGift, HiOutlineSparkles, HiOutlineShieldCheck } from 'react-icons/hi';
@@ -217,7 +217,7 @@ export default function EWallet() {
     if (previewError) return toast.error(previewError);
     setProcessing(true);
     try {
-      const res = await api.post('/wallet/encash', { amount });
+      const res = await postIdempotent('/wallet/encash', { amount });
       toast.success(`Encashment of PHP ${fmt(amount)} processed successfully`);
       setReceiptData({
         refNumber: res.data.pid || 'N/A',

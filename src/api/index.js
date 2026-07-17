@@ -53,4 +53,25 @@ api.interceptors.response.use(
   }
 );
 
+/**
+ * POST with an Idempotency-Key — use for every money / state-changing action
+ * (code activation, upgrade, transfer, encashment, registration).
+ *
+ * One key is generated per CALL, i.e. per user action. The server records it
+ * (UNIQUE per scope+actor) so a duplicate submission of the same action — a
+ * double-tap that slips past the UI guard, or a network retry — can never run
+ * the handler twice: in-flight duplicates get 409, completed ones get the
+ * original response replayed. Server side: middleware/idempotency.js (backend).
+ */
+export function postIdempotent(url, data, config = {}) {
+  const key =
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}-${Math.random().toString(36).slice(2, 12)}`;
+  return api.post(url, data, {
+    ...config,
+    headers: { ...(config.headers || {}), 'Idempotency-Key': key },
+  });
+}
+
 export default api;
