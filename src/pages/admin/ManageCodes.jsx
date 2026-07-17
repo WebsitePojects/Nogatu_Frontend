@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../api';
+import api, { postIdempotent } from '../../api';
 import toast from 'react-hot-toast';
 import { PaginationButton } from '../../components/PaginationButton';
 import { useAuth } from '../../contexts/AuthContext';
@@ -170,7 +170,7 @@ export default function ManageCodes() {
     const transferTo = taggedAccount?.username || targetUsername.trim();
     if (!transferTo || selected.length === 0) return toast.error('Tag an account and select codes');
     try {
-      const res = await api.post('/admin/codes/transfer', { targetUsername: transferTo, codes: selected });
+      const res = await postIdempotent('/admin/codes/transfer', { targetUsername: transferTo, codes: selected });
       toast.success(`${res.data.transferred} code(s) transferred`);
       setSelected([]);
       setTargetUsername('');

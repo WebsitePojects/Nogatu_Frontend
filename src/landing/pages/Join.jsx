@@ -76,10 +76,14 @@ export default function Join() {
   async function performSubmit() {
     setSubmitting(true);
     try {
+      const idempotencyKey =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
       const res = await fetch(apiUrl('/registration/public-register'), {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
         body: JSON.stringify({ ...form, token, slug: invite?.reusable ? token : undefined }),
       });
       const data = await res.json();

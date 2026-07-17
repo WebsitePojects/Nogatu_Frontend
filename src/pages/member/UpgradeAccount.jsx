@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import api from '../../api';
+import api, { postIdempotent } from '../../api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -91,7 +91,7 @@ export default function UpgradeAccount() {
   async function performTransfer() {
     if (!targetInfo || selected.length === 0) return;
     try {
-      const res = await api.post('/codes/transfer', { targetUsername: targetInfo.username, codes: selected });
+      const res = await postIdempotent('/codes/transfer', { targetUsername: targetInfo.username, codes: selected });
       toast.success(`${res.data.transferred} code(s) transferred`);
       setSelected([]);
       setTargetInfo(null);
@@ -122,7 +122,7 @@ export default function UpgradeAccount() {
 
   async function performUpgrade(code) {
     try {
-      const res = await api.post('/codes/upgrade', { code });
+      const res = await postIdempotent('/codes/upgrade', { code });
       toast.success(`Upgraded to ${res.data.newAccountTypeName}!`);
       await refreshUser();
       setConfirmModal(null);
