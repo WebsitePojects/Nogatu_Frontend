@@ -49,9 +49,13 @@ export default function AdminGenealogy() {
   const reconcileUrl = rootId
     ? `/admin/genealogy/pairing-reconcile?id=${encodeURIComponent(rootId)}`
     : (rootUsername ? `/admin/genealogy/pairing-reconcile?username=${encodeURIComponent(rootUsername)}` : '');
-  const { nodes: flatNodes, status, loading, refreshing, count } = useInfiniteTree({
+  const { nodes: flatNodes, payload, status, loading, refreshing, count } = useInfiniteTree({
     treeType: 'binary', cacheKey, url, enabled: hasTarget,
   });
+  // The searched account's OWN sponsor — served by the backend alongside the binary
+  // flat payload (subtree nodes can't carry it; the root's parentUid is nulled).
+  // Null until the backend ships the field or when the account has no sponsor.
+  const rootSponsor = payload?.rootSponsor || null;
   // Sponsor (drefid) lookup: the binary flat payload carries no sponsor data, so we
   // separately pull the unilevel tree (where parentUid IS the sponsor) rooted at the
   // same account and derive a uid → sponsor map from it. treeStore.js namespaces its
@@ -73,8 +77,15 @@ export default function AdminGenealogy() {
       const s = names.get(Number(n.parentUid));
       map.set(Number(n.uid), { uid: Number(n.parentUid), username: s?.username || null, fullname: s?.fullname || null });
     }
+    // The searched root itself: its sponsor lives outside every payload's subtree,
+    // so inject the backend-provided rootSponsor — BinaryDrill rows and the side
+    // list then resolve the root like any other member.
+    if (rootSponsor) {
+      const rn = flatNodes.find((n) => n.parentUid == null);
+      if (rn) map.set(Number(rn.uid), { uid: rootSponsor.uid, username: rootSponsor.username || null, fullname: rootSponsor.fullname || null });
+    }
     return map;
-  }, [flatNodes, unilevelNodes]);
+  }, [flatNodes, unilevelNodes, rootSponsor]);
 
   const chrome = getGenealogyTheme(isDarkMode);
   const panelStyle = { background: chrome.surfaceStrong, border: `1px solid ${chrome.surfaceBorder}`, backdropFilter: 'blur(18px)' };
@@ -248,7 +259,7 @@ export default function AdminGenealogy() {
             )}
 
             {viewMode === 'sponsor' && (
-              <SponsorLevels nodes={unilevelNodes} sponsorByUid={sponsorByUid} chrome={chrome} panelStyle={panelStyle} loading={loading} rootLabel={rootName} />
+              <SponsorLevels nodes={unilevelNodes} sponsorByUid={sponsorByUid} chrome={chrome} panelStyle={panelStyle} loading={loading} rootLabel={rootName} rootSponsor={rootSponsor} />
             )}
 
             {viewMode === 'tree' && (
@@ -256,7 +267,10 @@ export default function AdminGenealogy() {
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
               <div>
                 <h2 className="font-display text-lg font-semibold" style={{ color: chrome.heading }}>{rootName}</h2>
-                <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>{refreshing ? 'Syncing live data…' : `${fmtInt(count)} accounts`}</p>
+                <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>
+                  {refreshing ? 'Syncing live data…' : `${fmtInt(count)} accounts`}
+                  {rootSponsor ? <> · Sponsored by <span style={{ color: 'var(--brand-gold)' }}>@{rootSponsor.username || rootSponsor.fullname || rootSponsor.uid}</span></> : null}
+                </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={() => setCanvasRootUid(null)} disabled={canvasRootUid == null} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5 disabled:opacity-40" style={neutralButtonStyle}>
@@ -339,11 +353,9 @@ export default function AdminGenealogy() {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold" style={{ color: chrome.heading }}>{node.fullname || node.username || `Member ${node.uid}`}</p>
                         <p className="mt-0.5 truncate text-[11px]" style={{ color: chrome.tertiary }}>{node.username || `uid ${node.uid}`} • <span style={{ color: packageStyle.strong }}>{node.accttypeName}</span> • L{node.depth} • {legLabel(node.position === 'right' ? 2 : 1)}</p>
-                        {!isBinaryRoot && (
-                          <p className="mt-0.5 truncate text-[11px]" style={{ color: chrome.tertiary }}>
-                            Sponsor: {sponsor ? `@${sponsor.username || sponsor.fullname || sponsor.uid}` : '— (outside this root’s sponsor network)'}
-                          </p>
-                        )}
+                        <p className="mt-0.5 truncate text-[11px]" style={{ color: chrome.tertiary }}>
+                          Sponsor: {sponsor ? `@${sponsor.username || sponsor.fullname || sponsor.uid}` : (isBinaryRoot ? '—' : '— (outside this root’s sponsor network)')}
+                        </p>
                       </div>
                       <span className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold" style={statusStyle}>{node.accountStateLabel || 'PD'}</span>
                     </div>
@@ -411,7 +423,7 @@ function PairingReconcile({ url, chrome }) {
       adapted from the member UnilevelTree page's UnilevelAllLevels, using admin
       chrome tokens instead of portal-* classes. Each card also shows who sponsored
       that member (resolved via sponsorByUid, keyed by the MEMBER's own uid). ─── */
-function SponsorLevels({ nodes, sponsorByUid, chrome, panelStyle, loading, rootLabel }) {
+function SponsorLevels({ nodes, sponsorByUid, chrome, panelStyle, loading, rootLabel, rootSponsor }) {
   const [q, setQ] = useState('');
   const [openLevels, setOpenLevels] = useState(() => new Set([1])); // only Level 1 expanded by default
 
@@ -447,7 +459,7 @@ function SponsorLevels({ nodes, sponsorByUid, chrome, panelStyle, loading, rootL
   return (
     <div className="rounded-2xl p-4 sm:p-5 space-y-5" style={panelStyle}>
       <p className="text-xs" style={{ color: chrome.tertiary }}>
-        Sponsor (unilevel) network of {rootLabel} — each level lists who was sponsored by the level above.
+        Sponsor (unilevel) network of {rootLabel}{rootSponsor ? <> (sponsored by <span style={{ color: 'var(--brand-gold)' }}>@{rootSponsor.username || rootSponsor.fullname || rootSponsor.uid}</span>)</> : null} — each level lists who was sponsored by the level above.
       </p>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="relative">
