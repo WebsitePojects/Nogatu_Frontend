@@ -15,7 +15,7 @@ import {
   fmtInt, getAccountStateChipStyle, getGenealogyTheme, legLabel,
   NODE_HEIGHT, NODE_WIDTH, PACKAGE_STYLES,
 } from '../../components/genealogyTreeUiUtils';
-import { buildFlatTreeGraph, ORDER_BINARY, rootSubtreeAt } from '../../lib/buildFlatTreeGraph';
+import { buildFlatTreeGraph, ORDER_BINARY, expandPathTo } from '../../lib/buildFlatTreeGraph';
 import BinaryDrill from '../../components/BinaryDrill';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -32,7 +32,7 @@ export default function AdminGenealogy() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canvasActive, setCanvasActive] = useState(false);
-  const [canvasRootUid, setCanvasRootUid] = useState(null); // re-root target for Tree View; null = the searched account
+  const [expanded, setExpanded] = useState(() => new Set());
   const [searchUsername, setSearchUsername] = useState(searchParams.get('username') || '');
   const [treeSearch, setTreeSearch] = useState('');
   const [exportingFormat, setExportingFormat] = useState(null);
@@ -52,10 +52,12 @@ export default function AdminGenealogy() {
   const { nodes: flatNodes, payload, status, loading, refreshing, count } = useInfiniteTree({
     treeType: 'binary', cacheKey, url, enabled: hasTarget,
   });
-  // The searched account's OWN sponsor — served by the backend alongside the binary
-  // flat payload (subtree nodes can't carry it; the root's parentUid is nulled).
-  // Null until the backend ships the field or when the account has no sponsor.
+  // The searched account's OWN sponsor and BINARY upline — served by the backend
+  // alongside the binary flat payload (subtree nodes can't carry them; the root's
+  // parentUid is nulled). Null until the backend field is deployed, when the
+  // account has none, or while a stale cache is showing.
   const rootSponsor = payload?.rootSponsor || null;
+  const rootUpline = payload?.rootUpline || null;
   // Sponsor (drefid) lookup: the binary flat payload carries no sponsor data, so we
   // separately pull the unilevel tree (where parentUid IS the sponsor) rooted at the
   // same account and derive a uid → sponsor map from it. treeStore.js namespaces its
@@ -109,7 +111,7 @@ export default function AdminGenealogy() {
       document.removeEventListener('keydown', onEsc);
     };
   }, []);
-  useEffect(() => { setCanvasRootUid(null); setTreeSearch(''); }, [cacheKey]);
+  useEffect(() => { setExpanded(new Set()); setTreeSearch(''); }, [cacheKey]);
 
   function activateCanvas() { setCanvasActive(true); }
   async function toggleFullscreen() {
@@ -121,25 +123,39 @@ export default function AdminGenealogy() {
   }
   function resetView() { reactFlowRef.current?.fitView({ padding: 0.08, duration: 350, maxZoom: 1.32, minZoom: 0.06 }); }
   function handleSearchSubmit(e) { e.preventDefault(); const t = searchUsername.trim(); if (t) setSearchParams({ username: t }); }
+  function toggleExpand(uid) {
+    setExpanded((prev) => { const next = new Set(prev); if (next.has(uid)) next.delete(uid); else next.add(uid); return next; });
+  }
   function jumpTo(node) {
-    setCanvasRootUid(Number(node.uid) === Number(rootNode?.uid) ? null : Number(node.uid));
-    setViewMode('tree');
+    const path = expandPathTo(flatNodes, node.uid);
+    setExpanded((prev) => { const next = new Set(prev); path.forEach((u) => next.add(u)); return next; });
     setCanvasActive(true);
+    const id = String(node.publicUid || node.uid);
+    setTimeout(() => {
+      const rf = reactFlowRef.current; const target = rf?.getNode?.(id);
+      if (target) rf.setCenter(target.position.x + NODE_WIDTH / 2, target.position.y + NODE_HEIGHT / 2, { zoom: 0.95, duration: 460 });
+    }, 160);
+  }
+  // Navigate the whole view to the searched account's binary UPLINE — repeatable
+  // tree-by-tree until the top of the structure (rootUpline null = nothing above).
+  function openUplineTree() {
+    if (!rootUpline) return;
+    if (rootUpline.username) {
+      setSearchUsername(rootUpline.username);
+      setSearchParams({ username: rootUpline.username });
+    } else {
+      setSearchParams({ id: String(rootUpline.uid) });
+    }
   }
 
-  // byUidMap indexes the FULL binary flat list (not the re-rooted window) so the
-  // "walk up 3 levels" click handler below can always resolve real ancestors even
-  // when the canvas is currently re-rooted deep in the tree.
-  const byUidMap = useMemo(() => new Map(flatNodes.map((n) => [Number(n.uid), n])), [flatNodes]);
   const rootNode = flatNodes.find((n) => n.parentUid == null) || null;
 
-  // Tree View: a 15-node window (root + 3 levels) re-rooted at canvasRootUid (null =
-  // the searched account) — same re-root pattern as the member page's "Binary Tree"
-  // tab. Clicking the window root walks 3 levels up; clicking any other member
-  // re-roots down to them.
+  // Show the "perfect 15" (root + 3 levels) by default; deeper generations stay
+  // collapsed behind a "+N below" card and load one level on click. `expanded`
+  // drives the progressive reveal, so it must be passed in AND be a dep.
   const built = useMemo(
-    () => buildFlatTreeGraph(rootSubtreeAt(flatNodes, canvasRootUid), { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, withPlaceholders: true, metricAsPv: true }),
-    [flatNodes, canvasRootUid],
+    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, expanded, withPlaceholders: true, metricAsPv: true }),
+    [flatNodes, expanded],
   );
   function registerIntoSlot(d) {
     const params = new URLSearchParams({
@@ -157,25 +173,19 @@ export default function AdminGenealogy() {
     let positionLabel = n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel;
     let onOpen;
     if (n.data.level === 0) {
-      // Window root: walk UP to 3 real ancestors (via the full-tree byUidMap, since
-      // rootSubtreeAt nulled this copy's parentUid), re-rooting there. 0 ancestors
-      // found (already at the searched account) → no-op.
-      let cur = byUidMap.get(Number(n.data.uid));
-      let steps = 0;
-      while (steps < 3 && cur && cur.parentUid != null) { cur = byUidMap.get(Number(cur.parentUid)); steps += 1; }
-      if (steps === 0) {
-        onOpen = () => {};
-      } else {
-        const targetUid = cur && Number(cur.uid) !== Number(rootNode?.uid) ? Number(cur.uid) : null;
-        onOpen = () => setCanvasRootUid(targetUid);
-        positionLabel = 'Root · tap to go up';
-      }
+      // The searched account itself: clicking it loads its binary UPLINE's tree
+      // (rootUpline comes from the backend payload — the subtree can't carry it).
+      // Repeatable up to the top of the whole structure; no-op when nothing above.
+      onOpen = rootUpline ? openUplineTree : () => {};
+      if (rootUpline) positionLabel = 'Root · tap to view upline';
     } else {
-      onOpen = () => setCanvasRootUid(Number(n.data.uid));
+      // Downward traversal is the original expand-in-place: open one more level
+      // under the clicked node.
+      onOpen = () => toggleExpand(n.data.uid);
     }
     return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel, onOpen, onActivateCanvas: activateCanvas } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [built, isDarkMode, canvasActive, byUidMap, rootNode]);
+  }), [built, isDarkMode, canvasActive, rootUpline]);
   const edges = built.edges;
 
   useEffect(() => {
@@ -183,7 +193,7 @@ export default function AdminGenealogy() {
     const timer = setTimeout(resetView, 80);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, canvasRootUid]);
+  }, [count]);
 
   const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode, placeholderNode: PlaceholderNode }), []);
   const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
@@ -273,8 +283,8 @@ export default function AdminGenealogy() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => setCanvasRootUid(null)} disabled={canvasRootUid == null} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5 disabled:opacity-40" style={neutralButtonStyle}>
-                  <HiOutlineHome className="size-4" /> Top
+                <button type="button" onClick={() => setExpanded(new Set())} disabled={expanded.size === 0} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5 disabled:opacity-40" style={neutralButtonStyle}>
+                  <HiOutlineHome className="size-4" /> Collapse
                 </button>
                 <button type="button" onClick={resetView} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5" style={neutralButtonStyle}>
                   <HiOutlineRefresh className="size-4" /> Fit
