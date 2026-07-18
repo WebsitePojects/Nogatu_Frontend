@@ -220,8 +220,8 @@ export default function Join() {
                 {[
                   { key: 'activationCode', label: 'Activation Code', type: 'text' },
                   { key: 'firstname', label: 'First Name', type: 'text' },
-                  { key: 'lastname', label: 'Last Name', type: 'text' },
                   { key: 'middlename', label: 'Middle Name', type: 'text', optional: true },
+                  { key: 'lastname', label: 'Last Name', type: 'text' },
                   { key: 'email', label: 'Email', type: 'email' },
                   { key: 'address', label: 'Address', type: 'text' },
                   { key: 'contactno', label: 'Contact Number', type: 'text' },

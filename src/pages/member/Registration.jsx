@@ -550,14 +550,14 @@ export default function Registration() {
               {fieldErrors.firstname ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.firstname}</p> : null}
             </div>
             <div>
-              <label className="label">Last Name <RequiredMark /></label>
-              <input type="text" value={form.lastname} onChange={(e) => handleChange('lastname', e.target.value)} className={inputClassName('lastname')} aria-invalid={fieldErrors.lastname ? 'true' : 'false'} required />
-              {fieldErrors.lastname ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.lastname}</p> : null}
-            </div>
-            <div>
               <label className="label">Middle Name</label>
               <input type="text" value={form.middlename} onChange={(e) => handleChange('middlename', e.target.value)} className={inputClassName('middlename')} aria-invalid={fieldErrors.middlename ? 'true' : 'false'} />
               {fieldErrors.middlename ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.middlename}</p> : null}
+            </div>
+            <div>
+              <label className="label">Last Name <RequiredMark /></label>
+              <input type="text" value={form.lastname} onChange={(e) => handleChange('lastname', e.target.value)} className={inputClassName('lastname')} aria-invalid={fieldErrors.lastname ? 'true' : 'false'} required />
+              {fieldErrors.lastname ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.lastname}</p> : null}
             </div>
             {codePreview?.accountLabel && codeValid === true && (
               <p className="mt-2 text-xs portal-card-muted">
