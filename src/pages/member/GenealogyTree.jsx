@@ -128,7 +128,15 @@ export default function GenealogyTree() {
     let positionLabel = n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel;
     if (viewMode === 'binaryTree' && n.data.level === 0) {
       const orig = byUidMap.get(Number(n.data.uid));
-      onOpen = () => setBinaryRootUid(orig && orig.parentUid != null ? Number(orig.parentUid) : null);
+      // Reverse paging: walk up to 3 levels (clamped at the member's own root) so the
+      // clicked window-root reappears at the bottom (level 3) of the new window.
+      onOpen = () => {
+        let cur = byUidMap.get(Number(n.data.uid));
+        let steps = 0;
+        while (steps < 3 && cur && cur.parentUid != null) { cur = byUidMap.get(Number(cur.parentUid)); steps += 1; }
+        if (steps === 0 || !cur || cur.parentUid == null) setBinaryRootUid(null);
+        else setBinaryRootUid(Number(cur.uid));
+      };
       if (orig && orig.parentUid != null) positionLabel = 'Root · tap to go up';
     } else if (viewMode === 'binaryTree') {
       onOpen = () => setBinaryRootUid(Number(n.data.uid));

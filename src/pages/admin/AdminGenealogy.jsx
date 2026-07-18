@@ -15,7 +15,7 @@ import {
   fmtInt, getAccountStateChipStyle, getGenealogyTheme, legLabel,
   NODE_HEIGHT, NODE_WIDTH, PACKAGE_STYLES,
 } from '../../components/genealogyTreeUiUtils';
-import { buildFlatTreeGraph, ORDER_BINARY, expandPathTo } from '../../lib/buildFlatTreeGraph';
+import { buildFlatTreeGraph, ORDER_BINARY, rootSubtreeAt } from '../../lib/buildFlatTreeGraph';
 import BinaryDrill from '../../components/BinaryDrill';
 import useInfiniteTree from '../../hooks/useInfiniteTree';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -32,12 +32,12 @@ export default function AdminGenealogy() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canvasActive, setCanvasActive] = useState(false);
-  const [expanded, setExpanded] = useState(() => new Set());
+  const [canvasRootUid, setCanvasRootUid] = useState(null); // re-root target for Tree View; null = the searched account
   const [searchUsername, setSearchUsername] = useState(searchParams.get('username') || '');
   const [treeSearch, setTreeSearch] = useState('');
   const [exportingFormat, setExportingFormat] = useState(null);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('list'); // 'list' (15-node drill) | 'tree' (canvas)
+  const [viewMode, setViewMode] = useState('list'); // 'list' (15-node drill) | 'sponsor' (unilevel levels) | 'tree' (canvas)
 
   const rootId = searchParams.get('id') || '';
   const rootUsername = searchParams.get('username') || '';
@@ -98,7 +98,7 @@ export default function AdminGenealogy() {
       document.removeEventListener('keydown', onEsc);
     };
   }, []);
-  useEffect(() => { setExpanded(new Set()); setTreeSearch(''); }, [cacheKey]);
+  useEffect(() => { setCanvasRootUid(null); setTreeSearch(''); }, [cacheKey]);
 
   function activateCanvas() { setCanvasActive(true); }
   async function toggleFullscreen() {
@@ -110,26 +110,25 @@ export default function AdminGenealogy() {
   }
   function resetView() { reactFlowRef.current?.fitView({ padding: 0.08, duration: 350, maxZoom: 1.32, minZoom: 0.06 }); }
   function handleSearchSubmit(e) { e.preventDefault(); const t = searchUsername.trim(); if (t) setSearchParams({ username: t }); }
-  function toggleExpand(uid) {
-    setExpanded((prev) => { const next = new Set(prev); if (next.has(uid)) next.delete(uid); else next.add(uid); return next; });
-  }
   function jumpTo(node) {
-    const path = expandPathTo(flatNodes, node.uid);
-    setExpanded((prev) => { const next = new Set(prev); path.forEach((u) => next.add(u)); return next; });
+    setCanvasRootUid(Number(node.uid) === Number(rootNode?.uid) ? null : Number(node.uid));
+    setViewMode('tree');
     setCanvasActive(true);
-    const id = String(node.publicUid || node.uid);
-    setTimeout(() => {
-      const rf = reactFlowRef.current; const target = rf?.getNode?.(id);
-      if (target) rf.setCenter(target.position.x + NODE_WIDTH / 2, target.position.y + NODE_HEIGHT / 2, { zoom: 0.95, duration: 460 });
-    }, 160);
   }
 
-  // Show the "perfect 15" (root + 3 levels) by default; deeper generations stay
-  // collapsed behind a "+N below" card and load one level on click. `expanded`
-  // drives the progressive reveal, so it must be passed in AND be a dep.
+  // byUidMap indexes the FULL binary flat list (not the re-rooted window) so the
+  // "walk up 3 levels" click handler below can always resolve real ancestors even
+  // when the canvas is currently re-rooted deep in the tree.
+  const byUidMap = useMemo(() => new Map(flatNodes.map((n) => [Number(n.uid), n])), [flatNodes]);
+  const rootNode = flatNodes.find((n) => n.parentUid == null) || null;
+
+  // Tree View: a 15-node window (root + 3 levels) re-rooted at canvasRootUid (null =
+  // the searched account) — same re-root pattern as the member page's "Binary Tree"
+  // tab. Clicking the window root walks 3 levels up; clicking any other member
+  // re-roots down to them.
   const built = useMemo(
-    () => buildFlatTreeGraph(flatNodes, { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, expanded, withPlaceholders: true, metricAsPv: true }),
-    [flatNodes, expanded],
+    () => buildFlatTreeGraph(rootSubtreeAt(flatNodes, canvasRootUid), { renderBudget: 60000, orderBy: ORDER_BINARY, expandAll: false, initialDepth: 3, withPlaceholders: true, metricAsPv: true }),
+    [flatNodes, canvasRootUid],
   );
   function registerIntoSlot(d) {
     const params = new URLSearchParams({
@@ -144,9 +143,28 @@ export default function AdminGenealogy() {
     if (n.type === 'placeholderNode') {
       return { ...n, data: { ...n.data, isDarkMode, canvasActive, onActivateCanvas: activateCanvas, placeholderCta: 'Register here', placeholderHint: 'Manually encode a new member into this open binary slot.', onRegister: () => registerIntoSlot(n.data) } };
     }
-    return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel: n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel, onOpen: () => toggleExpand(n.data.uid), onActivateCanvas: activateCanvas } };
+    let positionLabel = n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel;
+    let onOpen;
+    if (n.data.level === 0) {
+      // Window root: walk UP to 3 real ancestors (via the full-tree byUidMap, since
+      // rootSubtreeAt nulled this copy's parentUid), re-rooting there. 0 ancestors
+      // found (already at the searched account) → no-op.
+      let cur = byUidMap.get(Number(n.data.uid));
+      let steps = 0;
+      while (steps < 3 && cur && cur.parentUid != null) { cur = byUidMap.get(Number(cur.parentUid)); steps += 1; }
+      if (steps === 0) {
+        onOpen = () => {};
+      } else {
+        const targetUid = cur && Number(cur.uid) !== Number(rootNode?.uid) ? Number(cur.uid) : null;
+        onOpen = () => setCanvasRootUid(targetUid);
+        positionLabel = 'Root · tap to go up';
+      }
+    } else {
+      onOpen = () => setCanvasRootUid(Number(n.data.uid));
+    }
+    return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel, onOpen, onActivateCanvas: activateCanvas } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [built, isDarkMode, canvasActive]);
+  }), [built, isDarkMode, canvasActive, byUidMap, rootNode]);
   const edges = built.edges;
 
   useEffect(() => {
@@ -154,7 +172,7 @@ export default function AdminGenealogy() {
     const timer = setTimeout(resetView, 80);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count]);
+  }, [count, canvasRootUid]);
 
   const nodeTypes = useMemo(() => ({ memberNode: MemberNode, junctionNode: JunctionNode, placeholderNode: PlaceholderNode }), []);
   const edgeTypes = useMemo(() => ({ treeEdge: TreeEdge }), []);
@@ -168,7 +186,6 @@ export default function AdminGenealogy() {
     const base = q ? flatNodes.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(q)) : flatNodes;
     return base.slice(0, 120);
   }, [flatNodes, treeSearch]);
-  const rootNode = flatNodes.find((n) => n.parentUid == null) || null;
   const rootName = rootNode?.fullname || rootNode?.username || rootUsername || 'Account';
 
   async function runExport(format, fn) {
@@ -217,7 +234,7 @@ export default function AdminGenealogy() {
           {/* Canvas column: List (drill) / Tree (canvas) */}
           <div className="min-w-0 space-y-3">
             <div className="inline-flex overflow-hidden rounded-xl" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
-              {[['list', 'List View'], ['tree', 'Tree View']].map(([mode, label]) => (
+              {[['list', 'List View'], ['sponsor', 'Sponsor View'], ['tree', 'Tree View']].map(([mode, label]) => (
                 <button key={mode} type="button" onClick={() => setViewMode(mode)}
                   className="px-3.5 py-2 text-sm font-semibold transition-colors"
                   style={viewMode === mode ? { background: 'rgba(212,175,55,0.18)', color: 'var(--brand-gold)' } : { background: 'transparent', color: chrome.panelButtonText }}>
@@ -230,6 +247,10 @@ export default function AdminGenealogy() {
               <BinaryDrill nodes={flatNodes} selfUid={rootNode?.uid} chrome={chrome} panelStyle={panelStyle} loading={loading} sponsorByUid={sponsorByUid} />
             )}
 
+            {viewMode === 'sponsor' && (
+              <SponsorLevels nodes={unilevelNodes} sponsorByUid={sponsorByUid} chrome={chrome} panelStyle={panelStyle} loading={loading} rootLabel={rootName} />
+            )}
+
             {viewMode === 'tree' && (
             <div ref={flowShellRef} className={`relative overflow-hidden ${isFullscreen ? 'rounded-none' : 'rounded-[1.75rem]'}`} style={{ ...panelStyle, zIndex: 0 }}>
             <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4" style={{ borderBottom: `1px solid ${chrome.surfaceBorder}` }}>
@@ -238,8 +259,8 @@ export default function AdminGenealogy() {
                 <p className="mt-1 text-xs" style={{ color: chrome.tertiary }}>{refreshing ? 'Syncing live data…' : `${fmtInt(count)} accounts`}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => setExpanded(new Set())} disabled={expanded.size === 0} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5 disabled:opacity-40" style={neutralButtonStyle}>
-                  <HiOutlineHome className="size-4" /> Collapse
+                <button type="button" onClick={() => setCanvasRootUid(null)} disabled={canvasRootUid == null} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5 disabled:opacity-40" style={neutralButtonStyle}>
+                  <HiOutlineHome className="size-4" /> Top
                 </button>
                 <button type="button" onClick={resetView} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold hover:-translate-y-0.5" style={neutralButtonStyle}>
                   <HiOutlineRefresh className="size-4" /> Fit
@@ -384,4 +405,156 @@ function PairingReconcile({ url, chrome }) {
       )}
     </div>
   );
+}
+
+/* ── Sponsor View: the account's unilevel (sponsor) network, grouped by level —
+      adapted from the member UnilevelTree page's UnilevelAllLevels, using admin
+      chrome tokens instead of portal-* classes. Each card also shows who sponsored
+      that member (resolved via sponsorByUid, keyed by the MEMBER's own uid). ─── */
+function SponsorLevels({ nodes, sponsorByUid, chrome, panelStyle, loading, rootLabel }) {
+  const [q, setQ] = useState('');
+  const [openLevels, setOpenLevels] = useState(() => new Set([1])); // only Level 1 expanded by default
+
+  const levels = useMemo(() => {
+    const byLevel = new Map();
+    for (const n of nodes) {
+      const d = Number(n.depth || 0);
+      if (d < 1) continue;
+      if (!byLevel.has(d)) byLevel.set(d, []);
+      byLevel.get(d).push(n);
+    }
+    const sorted = [...byLevel.entries()].sort((a, b) => a[0] - b[0]);
+    for (const [, arr] of sorted) arr.sort((a, b) => String(a.username || '').localeCompare(String(b.username || '')));
+    return sorted; // [ [level, members[]], … ]
+  }, [nodes]);
+
+  const term = q.trim().toLowerCase();
+  const visible = useMemo(() => {
+    if (!term) return levels;
+    return levels
+      .map(([lvl, arr]) => [lvl, arr.filter((n) => `${n.username || ''} ${n.fullname || ''}`.toLowerCase().includes(term))])
+      .filter(([, arr]) => arr.length > 0);
+  }, [levels, term]);
+
+  if (loading) return <div className="rounded-2xl p-10" style={panelStyle}><Spinner /></div>;
+  if (!nodes.length || levels.length === 0) {
+    return <div className="rounded-2xl p-8 text-center text-sm" style={{ ...panelStyle, color: chrome.tertiary }}>No sponsor-network downline loaded for this account.</div>;
+  }
+
+  const totalMembers = levels.reduce((s, [, arr]) => s + arr.length, 0);
+  const deepest = levels[levels.length - 1][0];
+
+  return (
+    <div className="rounded-2xl p-4 sm:p-5 space-y-5" style={panelStyle}>
+      <p className="text-xs" style={{ color: chrome.tertiary }}>
+        Sponsor (unilevel) network of {rootLabel} — each level lists who was sponsored by the level above.
+      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative">
+          <HiOutlineSearch className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2" style={{ color: chrome.tertiary }} />
+          <input type="text" value={q} onChange={(e) => setQ(e.target.value)}
+            placeholder="Filter members by name…"
+            className="w-full sm:w-72 rounded-xl py-2 pl-8 pr-3 text-sm outline-none"
+            style={{ background: chrome.searchBg, color: chrome.searchText, border: `1px solid ${chrome.searchBorder}` }} />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => exportSponsorDocx(levels, sponsorByUid, rootLabel)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(34,197,94,0.12)', color: '#34d399', border: '1px solid rgba(34,197,94,0.3)' }}
+            title="Export all levels + sponsor names to Word (.doc)">
+            <HiOutlineDownload className="size-4" /> Export DOCX
+          </button>
+          <button type="button" onClick={() => setOpenLevels(new Set(levels.map(([lvl]) => lvl)))}
+            className="text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(212,175,55,0.08)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
+            Expand all
+          </button>
+          <button type="button" onClick={() => setOpenLevels(new Set())}
+            className="text-xs font-semibold rounded-lg px-2.5 py-1.5"
+            style={{ background: 'rgba(148,163,184,0.10)', color: chrome.panelButtonText, border: '1px solid rgba(148,163,184,0.2)' }}>
+            Collapse all
+          </button>
+          <span className="text-xs" style={{ color: chrome.tertiary }}>
+            <span className="font-semibold" style={{ color: chrome.heading }}>{fmtInt(totalMembers)}</span> members ·{' '}
+            <span className="font-semibold" style={{ color: chrome.heading }}>{fmtInt(deepest)}</span> level{deepest === 1 ? '' : 's'}
+          </span>
+        </div>
+      </div>
+
+      {visible.length === 0 && (
+        <p className="px-1 py-6 text-center text-xs" style={{ color: chrome.tertiary }}>No members match “{q}”.</p>
+      )}
+
+      {visible.map(([level, members]) => {
+        const open = Boolean(term) || openLevels.has(level);
+        return (
+          <section key={level} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${chrome.surfaceBorder}` }}>
+            <button type="button"
+              onClick={() => setOpenLevels((prev) => {
+                const next = new Set(prev);
+                if (next.has(level)) next.delete(level); else next.add(level);
+                return next;
+              })}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors"
+              style={{ background: 'rgba(212,175,55,0.06)' }}>
+              <HiOutlineChevronDown className="size-4 transition-transform" aria-hidden
+                style={{ color: 'var(--brand-gold)', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+              <span className="rounded-lg px-2.5 py-0.5 text-xs font-bold"
+                style={{ background: 'rgba(212,175,55,0.16)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.3)' }}>
+                Level {level}
+              </span>
+              <span className="text-xs" style={{ color: chrome.tertiary }}>{fmtInt(members.length)} member{members.length === 1 ? '' : 's'}</span>
+            </button>
+            {open && (
+              <div className="grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3">
+                {members.map((m) => {
+                  const sponsor = sponsorByUid.get(Number(m.uid));
+                  const sponsorLabel = sponsor ? (sponsor.username || sponsor.fullname || sponsor.uid) : null;
+                  return (
+                    <div key={m.uid} className="rounded-xl px-3.5 py-2.5" style={{ border: `1px solid ${chrome.surfaceBorder}`, background: chrome.surface }}>
+                      <p className="truncate text-sm font-medium" style={{ color: chrome.heading }}>{m.fullname || m.username || `Member ${m.uid}`}</p>
+                      <p className="truncate text-[11px]" style={{ color: chrome.tertiary }}>@{m.username || m.uid} · {m.accttypeName || '—'}</p>
+                      <p className="truncate text-[11px]" style={{ color: chrome.tertiary }}>Sponsor: {sponsorLabel ? `@${sponsorLabel}` : '—'}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+// Export the per-level sponsor network to a Word document (HTML→.doc — opens in
+// Word, no extra dependency). Columns intentionally omit ranking points — the admin
+// unilevel payload isn't verified to carry that field.
+function exportSponsorDocx(levels, sponsorByUid, label) {
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const sections = levels.map(([lvl, members]) => {
+    const rows = members.map((m, i) => {
+      const sponsor = sponsorByUid.get(Number(m.uid));
+      const sponsorLabel = sponsor ? (sponsor.username || sponsor.fullname || sponsor.uid) : '—';
+      return `<tr><td>${i + 1}</td><td>${esc(m.fullname || m.username)}</td><td>${esc(m.username || m.uid)}</td>`
+        + `<td>${esc(m.accttypeName || '—')}</td><td>${esc(sponsorLabel)}</td></tr>`;
+    }).join('');
+    return `<h2 style="color:#9a7b1f">Level ${lvl} — ${members.length} member${members.length === 1 ? '' : 's'}</h2>`
+      + `<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:11pt">`
+      + `<tr style="background:#f3e9c9"><th>#</th><th>Member</th><th>Username</th><th>Package</th><th>Sponsor</th></tr>${rows}</table><br/>`;
+  }).join('');
+  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>`
+    + `<head><meta charset='utf-8'></head><body style="font-family:Calibri,Arial,sans-serif">`
+    + `<h1>Sponsor Network — ${esc(label)}</h1>`
+    + `<p style="color:#666">Per-level members and who sponsored them. Generated ${new Date().toLocaleString('en-US')}.</p>`
+    + `${sections}</body></html>`;
+  const blob = new Blob(['﻿', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sponsor-network-${String(label || 'export').replace(/[^a-z0-9]/gi, '_')}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
