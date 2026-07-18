@@ -116,19 +116,29 @@ export default function GenealogyTree() {
     });
     navigate(`/register?${params.toString()}`);
   }
+  const byUidMap = useMemo(() => new Map(flatNodes.map((n) => [Number(n.uid), n])), [flatNodes]);
   const nodes = useMemo(() => built.nodes.map((n) => {
     if (n.type === 'placeholderNode') {
       return { ...n, data: { ...n.data, isDarkMode, canvasActive, onActivateCanvas: activateCanvas, onRegister: () => registerIntoSlot(n.data) } };
     }
-    // Binary Tree tab → clicking a node re-roots to it; Whole Tree tab → expand inline.
-    const onOpen = viewMode === 'binaryTree'
-      ? () => setBinaryRootUid(Number(n.data.uid))
-      : () => toggleExpand(n.data.uid);
-    return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel: n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel, onOpen, onActivateCanvas: activateCanvas } };
+    // Binary Tree tab: clicking the window ROOT re-roots UP to its real parent (uses
+    // byUidMap — n.data.parentUid is nulled on the window copy by rootSubtreeAt);
+    // clicking any other node re-roots DOWN into it. Whole Tree tab → expand inline.
+    let onOpen;
+    let positionLabel = n.data.position ? legLabel(n.data.position === 'right' ? 2 : 1) : n.data.positionLabel;
+    if (viewMode === 'binaryTree' && n.data.level === 0) {
+      const orig = byUidMap.get(Number(n.data.uid));
+      onOpen = () => setBinaryRootUid(orig && orig.parentUid != null ? Number(orig.parentUid) : null);
+      if (orig && orig.parentUid != null) positionLabel = 'Root · tap to go up';
+    } else if (viewMode === 'binaryTree') {
+      onOpen = () => setBinaryRootUid(Number(n.data.uid));
+    } else {
+      onOpen = () => toggleExpand(n.data.uid);
+    }
+    return { ...n, data: { ...n.data, isDarkMode, canvasActive, positionLabel, onOpen, onActivateCanvas: activateCanvas } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [built, isDarkMode, canvasActive, viewMode]);
+  }), [built, isDarkMode, canvasActive, viewMode, byUidMap]);
   const edges = built.edges;
-  const byUidMap = useMemo(() => new Map(flatNodes.map((n) => [Number(n.uid), n])), [flatNodes]);
 
   useEffect(() => {
     if (!built.nodes.length) return undefined;

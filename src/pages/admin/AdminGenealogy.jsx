@@ -52,6 +52,29 @@ export default function AdminGenealogy() {
   const { nodes: flatNodes, status, loading, refreshing, count } = useInfiniteTree({
     treeType: 'binary', cacheKey, url, enabled: hasTarget,
   });
+  // Sponsor (drefid) lookup: the binary flat payload carries no sponsor data, so we
+  // separately pull the unilevel tree (where parentUid IS the sponsor) rooted at the
+  // same account and derive a uid → sponsor map from it. treeStore.js namespaces its
+  // IndexedDB cache by treeType, so reusing cacheKey here is safe (no collision with
+  // the binary cache above).
+  const unilevelUrl = rootId
+    ? `/admin/genealogy/unilevel/flat?id=${encodeURIComponent(rootId)}`
+    : (rootUsername ? `/admin/genealogy/unilevel/flat?username=${encodeURIComponent(rootUsername)}` : '');
+  const { nodes: unilevelNodes } = useInfiniteTree({
+    treeType: 'unilevel', cacheKey, url: unilevelUrl, enabled: hasTarget,
+  });
+  const sponsorByUid = useMemo(() => {
+    const names = new Map();
+    for (const n of flatNodes) names.set(Number(n.uid), n);
+    for (const n of unilevelNodes) if (!names.has(Number(n.uid))) names.set(Number(n.uid), n);
+    const map = new Map();
+    for (const n of unilevelNodes) {
+      if (n.parentUid == null) continue;
+      const s = names.get(Number(n.parentUid));
+      map.set(Number(n.uid), { uid: Number(n.parentUid), username: s?.username || null, fullname: s?.fullname || null });
+    }
+    return map;
+  }, [flatNodes, unilevelNodes]);
 
   const chrome = getGenealogyTheme(isDarkMode);
   const panelStyle = { background: chrome.surfaceStrong, border: `1px solid ${chrome.surfaceBorder}`, backdropFilter: 'blur(18px)' };
@@ -204,7 +227,7 @@ export default function AdminGenealogy() {
             </div>
 
             {viewMode === 'list' && (
-              <BinaryDrill nodes={flatNodes} selfUid={rootNode?.uid} chrome={chrome} panelStyle={panelStyle} loading={loading} />
+              <BinaryDrill nodes={flatNodes} selfUid={rootNode?.uid} chrome={chrome} panelStyle={panelStyle} loading={loading} sponsorByUid={sponsorByUid} />
             )}
 
             {viewMode === 'tree' && (
@@ -286,6 +309,8 @@ export default function AdminGenealogy() {
               {listResults.map((node) => {
                 const packageStyle = PACKAGE_STYLES[node.accttypeName] || PACKAGE_STYLES.Bronze;
                 const statusStyle = getAccountStateChipStyle(node.accountStateLabel || 'PD', isDarkMode);
+                const isBinaryRoot = node.parentUid == null;
+                const sponsor = sponsorByUid.get(Number(node.uid));
                 return (
                   <button key={`${node.uid}-${node.depth}`} type="button" onClick={() => jumpTo(node)}
                     className="w-full rounded-xl p-3 text-left transition-all duration-200 hover:-translate-y-0.5" style={insetCardStyle}>
@@ -293,6 +318,11 @@ export default function AdminGenealogy() {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold" style={{ color: chrome.heading }}>{node.fullname || node.username || `Member ${node.uid}`}</p>
                         <p className="mt-0.5 truncate text-[11px]" style={{ color: chrome.tertiary }}>{node.username || `uid ${node.uid}`} • <span style={{ color: packageStyle.strong }}>{node.accttypeName}</span> • L{node.depth} • {legLabel(node.position === 'right' ? 2 : 1)}</p>
+                        {!isBinaryRoot && (
+                          <p className="mt-0.5 truncate text-[11px]" style={{ color: chrome.tertiary }}>
+                            Sponsor: {sponsor ? `@${sponsor.username || sponsor.fullname || sponsor.uid}` : '— (outside this root’s sponsor network)'}
+                          </p>
+                        )}
                       </div>
                       <span className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold" style={statusStyle}>{node.accountStateLabel || 'PD'}</span>
                     </div>

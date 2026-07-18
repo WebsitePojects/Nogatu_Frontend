@@ -12,9 +12,11 @@ import { fmtInt } from './genealogyTreeUiUtils';
  * current window is built, so it stays light.
  *
  * Props: nodes (flat list with uid/parentUid/position/username/fullname/accttypeName),
- *        selfUid (the account the tree is rooted at), chrome, panelStyle, loading.
+ *        selfUid (the account the tree is rooted at), chrome, panelStyle, loading,
+ *        sponsorByUid (optional Map<uid, {uid,username,fullname}> — admin-only sponsor
+ *        lookup derived from the unilevel tree; when absent no sponsor line is rendered).
  */
-export default function BinaryDrill({ nodes, selfUid, chrome, panelStyle, loading }) {
+export default function BinaryDrill({ nodes, selfUid, chrome, panelStyle, loading, sponsorByUid }) {
   const selfRoot = nodes.find((n) => n.parentUid == null);
   const rootDefault = Number(selfRoot?.uid) || Number(selfUid) || null;
   const [rootUid, setRootUid] = useState(rootDefault);
@@ -145,27 +147,42 @@ export default function BinaryDrill({ nodes, selfUid, chrome, panelStyle, loadin
       )}
 
       <div className="space-y-1.5">
-        {rows.map(({ node, depth, side, more }) => (
-          <button key={`${node.uid}-${depth}`} type="button" onClick={() => setRootUid(Number(node.uid))}
-            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-all hover:-translate-y-0.5"
-            style={{ marginLeft: depth * 18, border: `1px solid ${chrome.surfaceBorder}`, background: depth === 0 ? 'rgba(212,175,55,0.06)' : chrome.surface }}>
-            <div className="flex min-w-0 items-center gap-2">
-              {depth > 0 && sideBadge(side)}
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium" style={{ color: chrome.heading }}>{node.fullname || node.username || `UID ${node.uid}`}</p>
-                <p className="truncate text-[11px]" style={{ color: chrome.tertiary }}>@{node.username || node.uid} · {node.accttypeName || '—'}</p>
+        {rows.map(({ node, depth, side, more }) => {
+          const canGoUp = depth === 0 && node.parentUid != null;
+          const sponsor = sponsorByUid ? sponsorByUid.get(Number(node.uid)) : null;
+          return (
+            <button key={`${node.uid}-${depth}`} type="button"
+              onClick={() => setRootUid(canGoUp ? Number(node.parentUid) : Number(node.uid))}
+              className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-all hover:-translate-y-0.5"
+              style={{ marginLeft: depth * 18, border: `1px solid ${chrome.surfaceBorder}`, background: depth === 0 ? 'rgba(212,175,55,0.06)' : chrome.surface }}>
+              <div className="flex min-w-0 items-center gap-2">
+                {depth > 0 && sideBadge(side)}
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium" style={{ color: chrome.heading }}>{node.fullname || node.username || `UID ${node.uid}`}</p>
+                  <p className="truncate text-[11px]" style={{ color: chrome.tertiary }}>@{node.username || node.uid} · {node.accttypeName || '—'}</p>
+                  {sponsorByUid && (
+                    <p className="truncate text-[11px]" style={{ color: chrome.tertiary }}>
+                      Sponsor: {sponsor ? `@${sponsor.username || sponsor.fullname || sponsor.uid}` : '—'}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-            {more > 0 && (
-              <span className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold" style={{ background: 'rgba(212,175,55,0.10)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
-                open {fmtInt(more)} more
-              </span>
-            )}
-          </button>
-        ))}
+              {canGoUp && (
+                <span className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold" style={{ background: 'rgba(212,175,55,0.10)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                  ↑ up one level
+                </span>
+              )}
+              {!canGoUp && more > 0 && (
+                <span className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold" style={{ background: 'rgba(212,175,55,0.10)', color: 'var(--brand-gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                  open {fmtInt(more)} more
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
       <p className="text-[11px]" style={{ color: chrome.tertiary }}>
-        Root + 3 levels (up to 15). Tap any member to make them the root and open their 15-node view; tap “open N more” on a deepest row to drill further.
+        Root + 3 levels (up to 15). Tap any member to make them the root and open their 15-node view; tap the top row to go back up one level; tap “open N more” on a deepest row to drill further.
       </p>
     </div>
   );
