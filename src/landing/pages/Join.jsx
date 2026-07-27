@@ -1,19 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
 import DobPicker from '../../components/DobPicker';
 import { formatTin, isValidTin, isZeroTin } from '../../utils/tin';
 import { apiUrl } from '../../utils/apiBase';
+import { getRegistrationErrorPresentation, FIELD_LABELS } from '../../utils/registrationErrors';
 
 export default function Join() {
   const { token } = useParams();
   const [invite, setInvite] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const inFlightRef = useRef(false);
   const [showPassword, setShowPassword] = useState(false);
   const [codePreview, setCodePreview] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
   const [feedbackModal, setFeedbackModal] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [form, setForm] = useState({
     activationCode: '',
     username: '',
@@ -52,6 +55,13 @@ export default function Join() {
   const updateField = (field, value) => {
     const sanitized = NAME_FIELDS.has(field) ? value.replace(/[0-9]/g, '') : value;
     setForm((current) => ({ ...current, [field]: sanitized }));
+    setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: '' } : prev));
+  };
+  const joinInputClassName = (field, extra = '') => {
+    const borderClass = fieldErrors[field]
+      ? 'border-red-400 focus:border-red-400'
+      : 'border-primary-200/70 focus:border-brand-gold-dark';
+    return `w-full rounded-xl border ${borderClass} bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-brand-gold/20 ${extra}`.trim();
   };
 
   async function validateCode(showFeedback = true) {
@@ -74,6 +84,11 @@ export default function Join() {
   }
 
   async function performSubmit() {
+    // Third double-submit wall (alongside the disabled button and the
+    // `submitting` pending state): a ref, not state, because a second
+    // invocation in the same tick would read a stale `submitting === false`.
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     setSubmitting(true);
     try {
       const idempotencyKey =
@@ -86,20 +101,52 @@ export default function Join() {
         headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
         body: JSON.stringify({ ...form, token, slug: invite?.reusable ? token : undefined }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registration failed.');
+      // Parse defensively — a 500 from a proxy/crash can return an empty or
+      // non-JSON (HTML) body; res.json() would throw and must not crash here.
+      let data = null;
+      try { data = await res.json(); } catch { data = null; }
+
+      if (!res.ok) {
+        // Robust to an older backend (no errorCode/field yet) or a body that
+        // failed to parse: falls back to this exact literal, matching prior
+        // behavior for that case.
+        const presentation = getRegistrationErrorPresentation(data, 'Registration failed.');
+        setFeedbackModal({
+          tone: 'red',
+          title: presentation.title,
+          message: presentation.message,
+          hint: presentation.hint,
+          details: presentation.details,
+        });
+        setFieldErrors((prev) => {
+          const next = { ...prev };
+          Object.keys(FIELD_LABELS).forEach((key) => { delete next[key]; });
+          if (presentation.field) next[presentation.field] = presentation.message;
+          return next;
+        });
+        return;
+      }
+
+      // Clear any field highlight left over from a prior failed attempt —
+      // this form (unlike Registration.jsx) doesn't navigate away on
+      // success, so a stale red-bordered field could otherwise linger
+      // behind the success modal.
+      setFieldErrors({});
       setFeedbackModal({
         tone: 'gold',
         title: 'Registration successful',
         message: 'Account registered successfully. You may now sign in through the member portal.',
       });
     } catch (err) {
+      // Genuine network failure (fetch itself rejected) — no response body
+      // ever existed, so there is nothing to map an errorCode from.
       setFeedbackModal({
         tone: 'red',
         title: 'Registration failed',
         message: err.message || 'Registration failed.',
       });
     } finally {
+      inFlightRef.current = false;
       setSubmitting(false);
     }
   }
@@ -190,6 +237,8 @@ export default function Join() {
         tone={feedbackModal?.tone || 'gold'}
         title={feedbackModal?.title}
         message={feedbackModal?.message}
+        hint={feedbackModal?.hint || null}
+        details={feedbackModal?.details || []}
         confirmLabel="Close"
         showCancel={false}
         onConfirm={() => setFeedbackModal(null)}
@@ -242,7 +291,8 @@ export default function Join() {
                           value={form[field.key]}
                           onChange={(e) => updateField(field.key, e.target.value)}
                           required={!field.optional}
-                          className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 pr-20 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+                          aria-invalid={fieldErrors[field.key] ? 'true' : 'false'}
+                          className={joinInputClassName(field.key, 'pr-20')}
                         />
                         <button
                           type="button"
@@ -270,9 +320,13 @@ export default function Join() {
                         onChange={(e) => updateField(field.key, field.key === 'tin' ? formatTin(e.target.value) : e.target.value)}
                         onBlur={field.key === 'activationCode' ? () => validateCode(true) : undefined}
                         required={!field.optional}
-                        className="w-full rounded-xl border border-primary-200/70 bg-[#FFFDF5] px-4 py-3 text-sm text-gray-800 outline-none focus:border-brand-gold-dark focus:ring-2 focus:ring-brand-gold/20"
+                        aria-invalid={fieldErrors[field.key] ? 'true' : 'false'}
+                        className={joinInputClassName(field.key)}
                       />
                     )}
+                    {fieldErrors[field.key] ? (
+                      <span className="mt-1 block text-xs font-medium text-red-600">{fieldErrors[field.key]}</span>
+                    ) : null}
                   </label>
                 ))}
                 {codePreview?.accountLabel && codePreview?.valid && codePreview?.canRegister ? (

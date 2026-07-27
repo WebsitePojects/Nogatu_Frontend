@@ -5,6 +5,7 @@ export default function CodeUseConfirmModal({
   tone = 'gold',
   title,
   message,
+  hint = null,
   details = [],
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
@@ -94,6 +95,20 @@ export default function CodeUseConfirmModal({
         </div>
         <h2 className="portal-modal-title relative mt-3 text-xl font-display font-bold">{title}</h2>
         <p className="portal-modal-text relative mt-3 text-sm leading-6">{message}</p>
+
+        {hint ? (
+          <div
+            className="relative mt-3 rounded-xl px-3 py-2 text-xs font-medium leading-relaxed"
+            style={{
+              background: currentTone.badgeBg,
+              color: currentTone.badgeColor,
+              border: `1px solid ${currentTone.badgeBorder}`,
+            }}
+          >
+            <span className="font-semibold uppercase tracking-wide">What to do: </span>
+            {hint}
+          </div>
+        ) : null}
 
         {details.length > 0 && (
           <div className="portal-soft-panel relative mt-4 rounded-2xl p-4 space-y-2">

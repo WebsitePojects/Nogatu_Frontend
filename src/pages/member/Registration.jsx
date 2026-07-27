@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api, { postIdempotent } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,6 +7,7 @@ import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineEye,
 import CodeUseConfirmModal from '../../components/CodeUseConfirmModal';
 import DobPicker from '../../components/DobPicker';
 import { formatTin, isValidTin, isZeroTin } from '../../utils/tin';
+import { getRegistrationErrorPresentation, FIELD_LABELS } from '../../utils/registrationErrors';
 
 function Spinner() {
   return <svg className="animate-spin size-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>;
@@ -80,6 +81,7 @@ export default function Registration() {
   const [codePreview, setCodePreview]     = useState(null);
   const [usernameValid, setUsernameValid] = useState(null);
   const [submitting, setSubmitting]       = useState(false);
+  const inFlightRef                       = useRef(false);
   const [placementLoading, setPlacementLoading] = useState(true);
   const [placementMeta, setPlacementMeta] = useState(null);
   const [showPlacementPolicyModal, setShowPlacementPolicyModal] = useState(false);
@@ -245,6 +247,11 @@ export default function Registration() {
   }
 
   async function submitRegistration() {
+    // Third double-submit wall (alongside the disabled button and the
+    // `submitting` pending state): a ref, not state, because a second
+    // invocation in the same tick would read a stale `submitting === false`.
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     setSubmitting(true);
     try {
       await postIdempotent('/registration/register', {
@@ -262,16 +269,33 @@ export default function Registration() {
         },
       });
     } catch (err) {
+      // Robust to an older backend (no errorCode/field yet) or a network/5xx
+      // failure with no usable JSON body: getRegistrationErrorPresentation
+      // falls back to exactly this literal, matching prior behavior.
+      const presentation = getRegistrationErrorPresentation(
+        err.response?.data,
+        err.response?.data?.error || 'Registration failed',
+      );
       setFeedbackModal({
         tone: 'red',
-        title: err.response?.data?.errorCode === 'USERNAME_TAKEN'
-          ? 'Username already exists'
-          : 'Registration failed',
-        message: err.response?.data?.error || 'Registration failed',
+        title: presentation.title,
+        message: presentation.message,
+        hint: presentation.hint,
+        details: presentation.details,
         confirmLabel: 'Close',
         onConfirm: () => setFeedbackModal(null),
       });
-    } finally { setSubmitting(false); }
+      // Highlight the offending input using the existing fieldErrors
+      // mechanism. Always resolve server-recognized field keys fresh each
+      // attempt so a stale highlight from a prior failed submit never lingers
+      // once a different (or no) field is implicated this time.
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        Object.keys(FIELD_LABELS).forEach((key) => { delete next[key]; });
+        if (presentation.field) next[presentation.field] = presentation.message;
+        return next;
+      });
+    } finally { inFlightRef.current = false; setSubmitting(false); }
   }
 
   async function handleSubmit(e) {
@@ -431,6 +455,7 @@ export default function Registration() {
         tone={feedbackModal?.tone || 'gold'}
         title={feedbackModal?.title}
         message={feedbackModal?.message}
+        hint={feedbackModal?.hint || null}
         details={feedbackModal?.details || []}
         confirmLabel={feedbackModal?.confirmLabel || 'Close'}
         showCancel={false}
@@ -629,10 +654,12 @@ export default function Registration() {
               type="text"
               value={form.tin}
               onChange={(e) => handleChange('tin', formatTin(e.target.value))}
-              className="glass-input"
+              className={inputClassName('tin')}
               placeholder="e.g. 123-456-789-000"
+              aria-invalid={fieldErrors.tin ? 'true' : 'false'}
             />
             <p className="portal-field-hint">Optional. If you do not have a TIN yet, type `000-000-000-000`.</p>
+            {fieldErrors.tin ? <p className="portal-field-hint" style={{ color: 'var(--portal-danger-text)' }}>{fieldErrors.tin}</p> : null}
           </div>
 
           {/* Username */}
