@@ -14,6 +14,27 @@ function toDate(value) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+/**
+ * Date-only Manila rendering ("March 15, 2026") for values where the time of
+ * day carries no meaning to the reader — e.g. a registration date.
+ *
+ * Shares toDate() with formatDateTimeManila so both agree on how a naive
+ * 'YYYY-MM-DD HH:MM:SS' (no offset) is interpreted, and both reject the MySQL
+ * zero-date. Pinning timeZone means the calendar day shown is the Manila day,
+ * not the viewing browser's local day.
+ */
+export function formatDateManila(value, fallback = '-') {
+  const date = toDate(value);
+  if (!date) return fallback;
+
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: MANILA_TIME_ZONE,
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
+}
+
 export function formatDateTimeManila(value) {
   const date = toDate(value);
   if (!date) return '-';

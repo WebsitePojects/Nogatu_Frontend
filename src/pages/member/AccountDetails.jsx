@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
-import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLocationMarker, HiOutlinePhone, HiOutlineCreditCard, HiOutlineMail } from 'react-icons/hi';
+import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLocationMarker, HiOutlinePhone, HiOutlineCreditCard, HiOutlineMail, HiOutlineCalendar } from 'react-icons/hi';
 import { formatTin, isValidTin } from '../../utils/tin';
+import { formatDateManila } from '../../utils/dateTime';
 
 const PAYOUT_OPTIONS = [
   { id: 1, label: 'Pickup' },
@@ -116,6 +117,16 @@ export default function AccountDetails() {
               value={data.username || ''}
               className="glass-input opacity-50 cursor-not-allowed"
               disabled
+            />
+          </FieldRow>
+
+          <FieldRow icon={HiOutlineCalendar} label="Registered">
+            <input
+              type="text"
+              value={formatDateManila(data.datereg, 'Not available')}
+              className="glass-input opacity-50 cursor-not-allowed"
+              disabled
+              readOnly
             />
           </FieldRow>
 
