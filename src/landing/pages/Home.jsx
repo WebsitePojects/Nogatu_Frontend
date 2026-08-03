@@ -13,6 +13,12 @@ import { apiUrl } from '../../utils/apiBase';
 import { LANDING_PRODUCT_GROUPS } from '../data/productCatalog';
 
 const CERTIFICATIONS_PDF_PATH = '/docs/NOGATU-PRODUCTS-CPR-AND-HALAL-CERTS.-POWDERED-CAPSULES.pdf';
+const HERO_CERTIFICATIONS = [
+  { label: 'ISO', image: '/landing/img/ISO_LOGO_transparent.png' },
+  { label: 'GMP', image: '/landing/img/GMP_LOGO_transparent.png' },
+  { label: 'FDA', image: '/landing/img/FDA_LOGO_transparent.png' },
+  { label: 'HALAL', image: '/landing/img/HALAL_LOGO_transparent.png' },
+];
 
 function formatProductPrice(price) {
   if (price === 'TBA') return price;
@@ -125,8 +131,8 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 sm:pt-24 pb-6 sm:pb-10">
-        <div className="landing-home-hero-inner flex flex-col lg:flex-row gap-5 lg:gap-8 items-center justify-between">
-          <div className="order-1 w-full lg:w-[38%] pb-1 lg:pb-0 lg:mt-auto motion-safe:animate-fade-up text-left z-20 flex flex-col items-start">
+        <div className="landing-home-hero-inner flex flex-col md:flex-row gap-5 md:gap-8 items-center justify-between">
+          <div className="order-1 w-full md:w-[38%] pb-1 md:pb-0 md:mt-auto motion-safe:animate-fade-up text-left z-20 flex flex-col items-start">
             <h1 className="landing-home-title font-extrabold leading-[1.08] tracking-tight text-white mb-3 sm:mb-5 drop-shadow-2xl">
               Enjoy Our Healthy<br />
               <span className="text-brand-gold-light drop-shadow-lg">&amp; Wealthy Lifestyle</span>
@@ -167,8 +173,8 @@ function Hero() {
             </div>
           </div>
 
-          <div className="order-2 w-full lg:w-[62%] flex justify-center lg:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 lg:mt-0 flex-1 lg:flex-none items-center">
-            <div className="hero-carousel-shell relative w-full max-w-[600px] sm:max-w-[760px] lg:max-w-[1080px] xl:max-w-[1240px] mx-auto lg:mx-0">
+          <div className="order-2 w-full md:w-[62%] flex justify-center md:justify-end motion-safe:animate-fade-up z-10 mt-0 sm:mt-8 md:mt-0 flex-1 md:flex-none items-center">
+            <div className="hero-carousel-shell relative w-full max-w-[600px] sm:max-w-[760px] md:max-w-[1080px] xl:max-w-[1240px] mx-auto md:mx-0">
               <div className="hero-carousel-card">
                 <div className="hero-carousel-stage">
                   <span className={`hero-carousel-eyebrow ${activeSlide === 1 ? 'is-lower' : 'is-upper'}`}>
@@ -198,6 +204,22 @@ function Hero() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+        <div className="hero-certifications-bar" aria-label="Trusted standards">
+          <span className="hero-certifications-title">Trusted Standards</span>
+          <div className="hero-certifications-line" />
+          <div className="hero-certifications-list">
+            {HERO_CERTIFICATIONS.map((cert, index) => (
+              <div
+                key={cert.label}
+                className="hero-certification-item"
+                style={{ '--cert-delay': `${index * 140}ms` }}
+              >
+                <img src={cert.image} alt={`${cert.label} certification`} />
+                <span>{cert.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -663,6 +685,7 @@ function ApplicationForm() {
               <div className="flex gap-3"><span className="text-brand-gold-light font-bold">01</span><span>Submit your full name, contact number, and email address.</span></div>
               <div className="flex gap-3"><span className="text-brand-gold-light font-bold">02</span><span>Download the printable distributor application form from the confirmation popup.</span></div>
               <div className="flex gap-3"><span className="text-brand-gold-light font-bold">03</span><span>Print the form and submit it to the nearest NOGATU branch office if you want to proceed.</span></div>
+              <div className="flex gap-3"><span className="text-brand-gold-light font-bold">04</span><span>This is not a new membership registration. This downloadable form is provided for auditing purposes only.</span></div>
             </div>
           </div>
           <form onSubmit={submitApplication} noValidate className="rounded-2xl border border-primary-200/40 bg-white p-6 shadow-lg space-y-4 sm:p-8">

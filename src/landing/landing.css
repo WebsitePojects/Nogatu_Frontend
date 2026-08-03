@@ -285,6 +285,9 @@
   isolation: isolate;
   overflow: visible;
 }
+.landing-home-hero-inner > .order-2 {
+  z-index: 1;
+}
 .hero-carousel-card {
   display: block;
   padding: 0;
@@ -308,7 +311,7 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   box-shadow: 0 10px 24px rgba(89, 34, 25, 0.1);
-  transition: top 300ms ease, bottom 300ms ease, transform 300ms ease, padding 300ms ease, font-size 300ms ease;
+  transition: top 300ms ease, bottom 300ms ease, transform 300ms ease;
 }
 .hero-carousel-eyebrow.is-upper {
   top: 1.35rem;
@@ -324,9 +327,9 @@
 }
 .hero-carousel-stage {
   position: relative;
-  min-height: 660px;
+  min-height: clamp(410px, 68svh, 660px);
   border-radius: 0;
-  overflow: hidden;
+  overflow: visible;
   background: transparent;
   box-shadow: none;
 }
@@ -334,7 +337,7 @@
     min-height: 100svh;
   }
   .landing-home-hero-inner {
-    min-height: calc(100svh - 120px);
+    min-height: max(360px, calc(100svh - 270px));
   }
   .landing-home-title {
     font-size: clamp(1.9rem, 4.2vw, 3.8rem);
@@ -365,29 +368,42 @@
 }
 .hero-carousel-image {
   position: absolute;
-  inset: 2rem 0 0.85rem 0;
+  inset: 2rem 0 6.1rem 0;
   width: 100%;
-  height: calc(100% - 2.85rem);
+  height: calc(100% - 8.1rem);
   object-fit: contain;
   object-position: center;
   transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1), transform 900ms cubic-bezier(0.22, 1, 0.36, 1), filter 900ms cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: center bottom;
+  z-index: 2;
   pointer-events: none;
   filter: drop-shadow(0 24px 42px rgba(38, 22, 9, 0.22));
 }
 .hero-carousel-image.is-collection {
   transform-origin: center center;
+  --collection-y: 2rem;
+  --collection-scale: 1.62;
 }
 .hero-carousel-image.is-single-product {
-  inset: 4.5rem 16% 2.8rem 16%;
+  inset: 4.5rem 16% 6.6rem 16%;
   width: 68%;
-  height: calc(100% - 7.3rem);
+  height: calc(100% - 11.1rem);
   margin: 0 auto;
+  --single-y: 4.25rem;
+  --single-scale: 1.4;
 }
 .hero-carousel-image.is-active {
   opacity: 1;
   transform: translateY(0) scale(1.02);
   animation: heroProductFloat 5.2s ease-in-out infinite;
+}
+.hero-carousel-image.is-collection.is-active {
+  transform: translateY(var(--collection-y)) scale(var(--collection-scale));
+  animation: heroCollectionFloat 5.2s ease-in-out infinite;
+}
+.hero-carousel-image.is-single-product.is-active {
+  transform: translateY(var(--single-y)) scale(var(--single-scale));
+  animation: heroSingleProductFloat 5.2s ease-in-out infinite;
 }
 .hero-carousel-image.is-hidden {
   opacity: 0;
@@ -398,7 +414,7 @@
 .hero-carousel-indicators {
   position: absolute;
   left: 50%;
-  bottom: 1rem;
+  bottom: 5rem;
   transform: translateX(-50%);
   z-index: 3;
   display: inline-flex;
@@ -419,6 +435,60 @@
 .hero-carousel-dot.is-active {
   transform: scale(1.2);
   background: #b8860b;
+}
+.hero-certifications-bar {
+  position: relative;
+  margin: clamp(0.5rem, 1.2vh, 1rem) clamp(1.5rem, 4vw, 3.5rem) 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.9fr) minmax(2rem, 1fr) minmax(20rem, 1.15fr);
+  align-items: center;
+  gap: clamp(1rem, 2.2vw, 2.25rem);
+  pointer-events: none;
+}
+.hero-certifications-title {
+  color: rgba(255, 255, 255, 0.94);
+  font-size: clamp(0.65rem, 1vw, 0.82rem);
+  font-weight: 900;
+  letter-spacing: 0.32em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(38, 22, 9, 0.42);
+  animation: certTitleReveal 850ms ease-out both;
+}
+.hero-certifications-line {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(253, 230, 138, 0.75), rgba(255, 255, 255, 0.12));
+  box-shadow: 0 0 18px rgba(253, 230, 138, 0.35);
+  transform-origin: left center;
+  animation: certLineGrow 1000ms ease-out 150ms both;
+}
+.hero-certifications-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(3.6rem, 1fr));
+  gap: clamp(0.75rem, 2.2vw, 2rem);
+  align-items: end;
+}
+.hero-certification-item {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  animation: certLogoRise 800ms ease-out var(--cert-delay, 0ms) both, certLogoFloat 4.8s ease-in-out calc(var(--cert-delay, 0ms) + 800ms) infinite;
+}
+.hero-certification-item img {
+  width: clamp(2rem, 3vw, 2.65rem);
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(38, 22, 9, 0.14));
+}
+.hero-certification-item span {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(38, 22, 9, 0.35);
 }
   .feature-story-card {
     position: relative;
@@ -849,19 +919,35 @@
     display: block;
   }
   .hero-carousel-stage {
-    min-height: 540px;
+    min-height: clamp(460px, 75svh, 540px);
   }
   .hero-carousel-image {
-    inset: 2.45rem 0 0.9rem 0;
-    height: calc(100% - 3.35rem);
+    inset: 2.45rem 0 4.7rem 0;
+    height: calc(100% - 7.15rem);
   }
   .hero-carousel-image.is-single-product {
-    inset: 3.9rem 14% 1.9rem 14%;
+    inset: 3.9rem 14% 5rem 14%;
     width: 72%;
-    height: calc(100% - 5.8rem);
+    height: calc(100% - 8.9rem);
+    --single-y: 0px;
+    --single-scale: 1.3;
+  }
+  .hero-carousel-image.is-collection {
+    --collection-y: 0px;
+    --collection-scale: 1.44;
   }
   .hero-carousel-eyebrow.is-lower {
     bottom: 3.7rem;
+  }
+  .hero-carousel-indicators {
+    bottom: 3.45rem;
+  }
+  .hero-certifications-bar {
+    grid-template-columns: minmax(7rem, 0.8fr) minmax(1.5rem, 0.7fr) minmax(18rem, 1.4fr);
+    gap: 1rem;
+  }
+  .hero-certification-item img {
+    width: clamp(3rem, 6vw, 3.75rem);
   }
 }
 
@@ -918,21 +1004,55 @@
     border-radius: 0;
   }
   .hero-carousel-image {
-    inset: 2rem 0.25rem 0.75rem 0.25rem;
+    inset: 1.7rem 0.25rem 2.7rem 0.25rem;
     width: calc(100% - 0.4rem);
-    height: calc(100% - 2.75rem);
+    height: calc(100% - 4.4rem);
   }
   .hero-carousel-image.is-active {
     transform: translateY(0) scale(1.015);
   }
+  .hero-carousel-image.is-collection {
+    --collection-y: 0px;
+    --collection-scale: 1.08;
+  }
   .hero-carousel-image.is-single-product {
-    inset: 1.9rem 5% 1.2rem 5%;
+    inset: 1.7rem 5% 2.85rem 5%;
     width: 90%;
-    height: calc(100% - 3.1rem);
+    height: calc(100% - 4.55rem);
+    --single-y: 0px;
+    --single-scale: 1.08;
   }
   .hero-carousel-indicators {
-    bottom: 0.75rem;
+    bottom: 2rem;
     padding: 0.5rem 0.8rem;
+  }
+  .hero-certifications-bar {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin: 1.5rem 0.25rem 0;
+    padding: 0 0.25rem;
+  }
+  .hero-certifications-title {
+    justify-self: center;
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+  }
+  .hero-certifications-line {
+    width: min(100%, 19rem);
+    justify-self: center;
+  }
+  .hero-certifications-list {
+    grid-template-columns: repeat(4, minmax(2.6rem, 1fr));
+    gap: 0.55rem;
+    width: min(100%, 20rem);
+    justify-self: center;
+  }
+  .hero-certification-item img {
+    width: clamp(2.6rem, 13vw, 3.35rem);
+  }
+  .hero-certification-item span {
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
   }
   .product-card-media {
     min-height: 11.5rem;
@@ -1054,6 +1174,43 @@
 @keyframes heroProductFloat {
   0%, 100% { transform: translateY(0px) scale(1.02); }
   50% { transform: translateY(-8px) scale(1.02); }
+}
+
+@keyframes heroCollectionFloat {
+  0%, 100% { transform: translateY(var(--collection-y)) scale(var(--collection-scale)); }
+  50% { transform: translateY(calc(var(--collection-y) - 8px)) scale(var(--collection-scale)); }
+}
+
+@keyframes heroSingleProductFloat {
+  0%, 100% { transform: translateY(var(--single-y)) scale(var(--single-scale)); }
+  50% { transform: translateY(calc(var(--single-y) - 8px)) scale(var(--single-scale)); }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  .landing-home-hero > .relative {
+    padding-top: 4rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+}
+
+@keyframes certTitleReveal {
+  0% { opacity: 0; transform: translateX(-12px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes certLineGrow {
+  0% { opacity: 0; transform: scaleX(0); }
+  100% { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes certLogoRise {
+  0% { opacity: 0; transform: translateY(12px) scale(0.94); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes certLogoFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.02); }
 }
 
 @keyframes ambientBlob {
