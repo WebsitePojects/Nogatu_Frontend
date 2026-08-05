@@ -122,6 +122,8 @@ export default function Rankings() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [historyTarget, setHistoryTarget] = useState(null);
+  // Guards the fulfillment action against double-submit while a request is in flight.
+  const [processingUid, setProcessingUid] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -146,13 +148,29 @@ export default function Rankings() {
     }
   }
 
-  async function processIncentive(uid) {
+  // Records that the rank incentive was handed over as physical cash. This does NOT
+  // credit the member's e-wallet — crediting on top of the cash handover would pay
+  // the member twice. Marking is not reversible from this screen, so it is confirmed.
+  async function markIncentiveHandedOver(row) {
+    if (processingUid) return; // in-flight guard: never fire twice for one intent
+    const name = [row.firstname, row.lastname].filter(Boolean).join(' ').trim()
+      || row.username || `UID ${row.uid}`;
+    const confirmed = window.confirm(
+      `Mark the next pending rank incentive for ${name} as HANDED OVER?\n\n`
+      + 'This records that the reward was given physically. It does NOT add anything '
+      + "to the member's e-wallet.\n\nThis cannot be undone from this screen."
+    );
+    if (!confirmed) return;
+
+    setProcessingUid(row.uid);
     try {
-      const res = await api.put(`/admin/rankings/${uid}/process`);
-      toast.success(res.data?.message || 'Ranking bonus claim released');
+      const res = await api.put(`/admin/rankings/${row.uid}/process`);
+      toast.success(res.data?.message || 'Rank achievement marked as fulfilled');
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to process incentive');
+      toast.error(err.response?.data?.error || 'Failed to mark the incentive as handed over');
+    } finally {
+      setProcessingUid(null);
     }
   }
 
@@ -161,6 +179,11 @@ export default function Rankings() {
       <div className="mb-7">
         <h1 className="font-display text-2xl font-bold text-white">Ranking Incentives</h1>
         <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
+        <p className="mt-3 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          Rank rewards are handed over physically. Marking one here records the handover for audit —
+          it does <span style={{ color: '#fbbf24', fontWeight: 600 }}>not</span> add anything to the
+          member&apos;s e-wallet.
+        </p>
       </div>
 
       <div className="glass-card rounded-2xl p-4 sm:p-6 overflow-hidden">
@@ -324,7 +347,7 @@ export default function Rankings() {
                         >
                           {Number(row.pendingAchievementCount || 0) > 0
                             ? `${fmtInt(row.pendingAchievementCount)} pending`
-                            : (Number(row.current_rank || 0) > 0 ? 'Released' : 'Not ranked')}
+                            : (Number(row.current_rank || 0) > 0 ? 'Handed over' : 'Not ranked')}
                         </span>
                       </td>
                       <td className="p-3">
@@ -338,11 +361,19 @@ export default function Rankings() {
                           </button>
                           {Number(row.pendingAchievementCount || 0) > 0 && !row.blockedByPackageGate && (
                             <button
-                              onClick={() => processIncentive(row.uid)}
-                              className="text-xs px-3 py-1 rounded-lg font-medium"
-                              style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
+                              onClick={() => markIncentiveHandedOver(row)}
+                              disabled={processingUid !== null}
+                              aria-label={`Mark rank incentive for ${row.username} as handed over`}
+                              title="Records the physical cash handover. Does not credit the e-wallet."
+                              className="text-xs px-3 py-1 rounded-lg font-medium disabled:cursor-not-allowed"
+                              style={{
+                                background: 'rgba(16,185,129,0.12)',
+                                color: '#34d399',
+                                border: '1px solid rgba(16,185,129,0.25)',
+                                opacity: processingUid !== null ? 0.45 : 1,
+                              }}
                              type="button">
-                              Release Next Claim
+                              {processingUid === row.uid ? 'Marking…' : 'Mark Cash Handed Over'}
                             </button>
                           )}
                           {row.blockedByPackageGate && (
