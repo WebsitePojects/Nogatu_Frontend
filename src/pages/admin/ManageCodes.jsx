@@ -488,7 +488,23 @@ export default function ManageCodes() {
             className="mt-4 rounded-xl px-4 py-3 text-sm"
             style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', color: greenSoft }}
           >
-            Tagged account: <strong>{taggedAccount.username}</strong> ({taggedAccount.fullname})
+            <div>Tagged account: <strong>{taggedAccount.username}</strong> ({taggedAccount.fullname})</div>
+            {/* Nearest named leader above this member. The two trees are different —
+                a member can sit under a different leader in each — so both are labelled. */}
+            <div className="mt-1 leading-relaxed">
+              <div>
+                Leader (Uni-Level):{' '}
+                {taggedAccount.unilevelLeader
+                  ? <strong>{taggedAccount.unilevelLeader.name}</strong>
+                  : <span style={{ opacity: 0.6 }}>None</span>}
+              </div>
+              <div>
+                Leader (Binary):{' '}
+                {taggedAccount.binaryLeader
+                  ? <strong>{taggedAccount.binaryLeader.name}</strong>
+                  : <span style={{ opacity: 0.6 }}>None</span>}
+              </div>
+            </div>
           </div>
         )}
       </div>
