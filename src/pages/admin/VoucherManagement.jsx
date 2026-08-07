@@ -27,6 +27,36 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigit
 // the UI still renders a proper code even before the backend `code` field deploys.
 const voucherCode = (voucher) => voucher?.code || `VCH-${String(Number(voucher?.id) || 0).padStart(6, '0')}`;
 
+// A voucher with no activation code is not missing data — usually no code was ever
+// consumed (an admin issued it directly). Rendering a bare dash made "no code exists"
+// and "we could not find the code" look identical, which is what made this read as a bug.
+const VOUCHER_SOURCE_STYLES = {
+  admin_grant: { color: '#93c5fd', background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)' },
+  registration: { color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' },
+  upgrade: { color: '#D4AF37', background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.25)' },
+  unknown: { color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' },
+};
+
+const VOUCHER_SOURCE_HINTS = {
+  admin_grant: 'Issued directly by an admin — no activation code was consumed',
+  registration: "From the member's registration package code",
+  upgrade: 'From the package upgrade code the member used',
+  unknown: 'No activation code could be traced for this voucher',
+};
+
+function VoucherSourceBadge({ source, label }) {
+  const key = source && VOUCHER_SOURCE_STYLES[source] ? source : 'unknown';
+  return (
+    <span
+      className="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"
+      style={VOUCHER_SOURCE_STYLES[key]}
+      title={VOUCHER_SOURCE_HINTS[key]}
+    >
+      {label || 'No record'}
+    </span>
+  );
+}
+
 const STATUS_MAP = { 1: 'Active', 2: 'Expired', 3: 'Fully Used', 4: 'Suspended' };
 
 const STATUS_STYLES = {
@@ -592,12 +622,12 @@ export default function VoucherManagement() {
                     <td className="p-3 font-mono text-xs">
                       {row.code
                         ? <span style={{ color: 'rgba(212,175,55,0.9)' }}>{row.code}</span>
-                        : <span className="text-white/30" title="No used activation code for this package">—</span>}
+                        : <VoucherSourceBadge source={row.source} label={row.sourceLabel} />}
                     </td>
                     <td className="p-3 font-mono text-xs">
                       {row.codeId != null
                         ? <span className="text-white/70">{row.codeId}</span>
-                        : <span className="text-white/30" title="No matching codestab record for this code">—</span>}
+                        : <span className="text-white/30" title={VOUCHER_SOURCE_HINTS[row.source] || 'No activation code is linked to this voucher'}>—</span>}
                     </td>
                     <td className="p-3 text-white/80">{row.username}</td>
                     <td className="p-3 text-white/60">{row.fullName || 'N/A'}</td>
@@ -741,12 +771,28 @@ export default function VoucherManagement() {
                       <p className="portal-modal-title font-mono">{voucherCode(detailVoucher)}</p>
                     </div>
                     <div>
+                      <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Issued Via</p>
+                      <p className="portal-modal-title">
+                        <VoucherSourceBadge source={detailVoucher.source} label={detailVoucher.sourceLabel} />
+                      </p>
+                    </div>
+                    <div>
                       <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Activation Code</p>
-                      <p className="portal-modal-title font-mono">{detailVoucher.code || '—'}</p>
+                      <p className="portal-modal-title font-mono">
+                        {detailVoucher.code || (
+                          <span className="portal-modal-muted text-xs font-sans">
+                            {VOUCHER_SOURCE_HINTS[detailVoucher.source] || VOUCHER_SOURCE_HINTS.unknown}
+                          </span>
+                        )}
+                      </p>
                     </div>
                     <div>
                       <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Code ID</p>
-                      <p className="portal-modal-title font-mono">{detailVoucher.codeId != null ? detailVoucher.codeId : '—'}</p>
+                      <p className="portal-modal-title font-mono">
+                        {detailVoucher.codeId != null ? detailVoucher.codeId : (
+                          <span className="portal-modal-muted text-xs font-sans">Not applicable</span>
+                        )}
+                      </p>
                     </div>
                     <div>
                       <p className="portal-modal-muted text-xs uppercase tracking-wide mb-1">Username</p>
