@@ -36,6 +36,31 @@ const NOT_GRANTABLE_LABELS = {
 // disabling every checkbox.
 const isRowGrantable = (row) => (row?.grantable === undefined ? !row?.hasVoucher : row.grantable === true);
 
+const packageLabel = (tier) => PACKAGE_LABELS[tier] || tier || '—';
+
+/**
+ * Shows the member's current package, and only for a member who actually upgraded,
+ * the path they took ("Bronze -> Gold"). Most listed members never upgraded, so a
+ * fixed "Joined -> Now" rendering would show a bare single value on nearly every row.
+ */
+function PackageCell({ row, showUpgradePath }) {
+  const current = packageLabel(row.accttype);
+  const upgraded = Boolean(showUpgradePath && row.joinedAccttype && row.joinedAccttype !== row.accttype);
+
+  if (!upgraded) return <span>{current}</span>;
+
+  return (
+    <span
+      className="inline-flex items-center gap-1.5"
+      aria-label={`Joined as ${packageLabel(row.joinedAccttype)}, upgraded to ${current}`}
+    >
+      <span style={{ color: 'rgba(255,255,255,0.45)' }}>{packageLabel(row.joinedAccttype)}</span>
+      <span aria-hidden="true" style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
+      <span style={{ color: '#D4AF37', fontWeight: 600 }}>{current}</span>
+    </span>
+  );
+}
+
 const VOUCHER_STATUS_MAP = { 1: 'Active', 2: 'Expired', 3: 'Fully Used', 4: 'Suspended' };
 const VOUCHER_STATUS_STYLES = {
   1: { color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' },
@@ -392,7 +417,10 @@ export default function VoucherGrant() {
                 <tr>
                   {[
                     '',
-                    'UID', 'Username', 'Full Name', isCashier ? 'Package' : 'Package (Joined → Now)',
+                    // Just "Package". Most rows are members who never upgraded, so a
+                    // "Joined → Now" header would promise an arrow that only the
+                    // upgraded minority actually shows.
+                    'UID', 'Username', 'Full Name', 'Package',
                     isCashier ? 'Voucher Status' : 'Voucher Amount',
                     isCashier ? 'Remaining' : 'Date Registered',
                     isCashier ? '' : null,
@@ -434,22 +462,7 @@ export default function VoucherGrant() {
                       <td className="p-3 text-white/85 font-semibold">{row.username}</td>
                       <td className="p-3 text-white/70">{row.fullname || 'N/A'}</td>
                       <td className="p-3 text-white/70">
-                        {!isCashier && row.joinedAccttype && row.joinedAccttype !== row.accttype ? (
-                          <span
-                            className="inline-flex items-center gap-1.5"
-                            aria-label={`Joined as ${PACKAGE_LABELS[row.joinedAccttype] || row.joinedAccttype}, now ${PACKAGE_LABELS[row.accttype] || row.accttype}`}
-                          >
-                            <span style={{ color: 'rgba(255,255,255,0.45)' }}>
-                              {PACKAGE_LABELS[row.joinedAccttype] || row.joinedAccttype}
-                            </span>
-                            <span aria-hidden="true" style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
-                            <span style={{ color: '#D4AF37', fontWeight: 600 }}>
-                              {PACKAGE_LABELS[row.accttype] || row.accttype}
-                            </span>
-                          </span>
-                        ) : (
-                          PACKAGE_LABELS[row.accttype] || row.accttype
-                        )}
+                        <PackageCell row={row} showUpgradePath={!isCashier} />
                       </td>
                       {isCashier ? (
                         <>
@@ -605,7 +618,7 @@ export default function VoucherGrant() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr>
-                      {['UID', 'Username', 'Full Name', 'Package (Joined → Now)', 'Voucher Amount'].map((h) => (
+                      {['UID', 'Username', 'Full Name', 'Package', 'Voucher Amount'].map((h) => (
                         <th key={h} className="table-header py-2.5 px-3 text-left text-xs uppercase tracking-wide">{h}</th>
                       ))}
                     </tr>
@@ -617,22 +630,7 @@ export default function VoucherGrant() {
                         <td className="py-2.5 px-3 text-white/85 font-semibold">{row.username}</td>
                         <td className="py-2.5 px-3 text-white/70">{row.fullname || 'N/A'}</td>
                         <td className="py-2.5 px-3 text-white/70">
-                          {row.joinedAccttype && row.joinedAccttype !== row.accttype ? (
-                            <span
-                              className="inline-flex items-center gap-1.5"
-                              aria-label={`Joined as ${PACKAGE_LABELS[row.joinedAccttype] || row.joinedAccttype}, now ${PACKAGE_LABELS[row.accttype] || row.accttype}`}
-                            >
-                              <span style={{ color: 'rgba(255,255,255,0.45)' }}>
-                                {PACKAGE_LABELS[row.joinedAccttype] || row.joinedAccttype}
-                              </span>
-                              <span aria-hidden="true" style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
-                              <span style={{ color: '#D4AF37', fontWeight: 600 }}>
-                                {PACKAGE_LABELS[row.accttype] || row.accttype}
-                              </span>
-                            </span>
-                          ) : (
-                            PACKAGE_LABELS[row.accttype] || row.accttype
-                          )}
+                          <PackageCell row={row} showUpgradePath />
                         </td>
                         <td className="py-2.5 px-3 font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(row.voucherAmount)}</td>
                       </tr>
