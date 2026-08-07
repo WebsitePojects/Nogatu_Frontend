@@ -16,6 +16,26 @@ const PACKAGE_LABELS = {
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+// Visibility only — the server decides who may actually be granted (every row carries
+// `grantable`, and POST /grant re-checks it under a row lock). Switching view can never
+// make an extra member grantable.
+const VIEW_OPTIONS = [
+  { value: 'needs_voucher', label: 'Needs voucher (upgraded)', hint: 'Upgraded members with no voucher for their current package. These are the only accounts that can be granted.' },
+  { value: 'no_voucher', label: 'No voucher yet', hint: 'Members holding no voucher at all — mostly accounts that predate the voucher feature. Shown for lookup; they cannot be granted unless they also upgraded.' },
+  { value: 'has_voucher', label: 'Already has a voucher', hint: 'Members holding at least one voucher.' },
+  { value: 'all', label: 'All members', hint: 'Every member, grantable or not.' },
+];
+
+const NOT_GRANTABLE_LABELS = {
+  not_upgraded: 'Not upgraded',
+  already_has_voucher_for_current_tier: 'Already has this package voucher',
+};
+
+// Prefer the server's flag. Fall back to the old rule when the backend has not yet
+// shipped `grantable`, so the page degrades gracefully mid-deploy instead of
+// disabling every checkbox.
+const isRowGrantable = (row) => (row?.grantable === undefined ? !row?.hasVoucher : row.grantable === true);
+
 const VOUCHER_STATUS_MAP = { 1: 'Active', 2: 'Expired', 3: 'Fully Used', 4: 'Suspended' };
 const VOUCHER_STATUS_STYLES = {
   1: { color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' },
@@ -37,22 +57,28 @@ export default function VoucherGrant() {
   const [rows, setRows] = useState([]);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const [view, setView] = useState('needs_voucher');
   const [multiSelect, setMultiSelect] = useState(false);
   const [selected, setSelected] = useState([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     loadCandidates();
-  }, [page, search]);
+  }, [page, search, view]);
 
   const selectedOnPage = useMemo(
-    () => rows.filter((r) => !r.hasVoucher && selected.includes(r.uid)).length,
+    () => rows.filter((r) => isRowGrantable(r) && selected.includes(r.uid)).length,
     [rows, selected]
   );
 
   const selectedRows = useMemo(
-    () => rows.filter((r) => !r.hasVoucher && selected.includes(r.uid)),
+    () => rows.filter((r) => isRowGrantable(r) && selected.includes(r.uid)),
     [rows, selected]
+  );
+
+  const currentView = useMemo(
+    () => VIEW_OPTIONS.find((o) => o.value === view) || VIEW_OPTIONS[0],
+    [view]
   );
 
   const selectedVoucherTotal = useMemo(
@@ -66,13 +92,16 @@ export default function VoucherGrant() {
       const params = new URLSearchParams({ page: String(page) });
       if (search.trim()) params.set('search', search.trim());
       if (isCashier) params.set('includeAll', '1');
+      else params.set('view', view);
 
       const res = await api.get(`/admin/voucher-management/grant-candidates?${params.toString()}`);
       setRows(res.data.users || []);
       setTotalPages(Number(res.data.totalPages || 1));
       setTotal(Number(res.data.total || 0));
 
-      setSelected((prev) => prev.filter((uid) => (res.data.users || []).some((r) => r.uid === uid && !r.hasVoucher)));
+      // Drop any selection that is no longer grantable after the reload, so a view
+      // switch can never carry a non-grantable uid into the grant request.
+      setSelected((prev) => prev.filter((uid) => (res.data.users || []).some((r) => r.uid === uid && isRowGrantable(r))));
     } catch {
       setRows([]);
       setTotalPages(1);
@@ -90,7 +119,7 @@ export default function VoucherGrant() {
   }
 
   function handleRowClick(row) {
-    if (row.hasVoucher) return;
+    if (!isRowGrantable(row)) return;
     const uid = row.uid;
 
     setSelected((prev) => {
@@ -198,10 +227,16 @@ export default function VoucherGrant() {
         </div>
       ) : (
         <div className="glass-card rounded-2xl p-4 text-sm" style={{ border: '1px solid rgba(212,175,55,0.2)', color: 'rgba(255,255,255,0.75)', background: 'rgba(212,175,55,0.06)' }}>
-          <span style={{ color: '#D4AF37', fontWeight: 600 }}>Showing upgraded accounts only.</span>{' '}
-          This list is limited to members whose package changed and who have no voucher for their
-          current package. Accounts still on their original package are not listed, and members who
-          already hold a voucher for their current package drop off automatically once granted.
+          <span style={{ color: '#D4AF37', fontWeight: 600 }}>{currentView.label}.</span>{' '}
+          {currentView.hint}
+          {view !== 'needs_voucher' && (
+            <>
+              {' '}
+              <span style={{ color: 'rgba(255,255,255,0.55)' }}>
+                Rows that cannot be granted are shown with the reason and cannot be selected.
+              </span>
+            </>
+          )}
         </div>
       )}
 
@@ -232,6 +267,27 @@ export default function VoucherGrant() {
       </div>
 
       <div className="glass-card rounded-2xl p-4 space-y-3">
+        {!isCashier && (
+          <div className="flex flex-wrap items-center gap-2">
+            <label htmlFor="voucher-grant-view" className="text-xs uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Show
+            </label>
+            <select
+              id="voucher-grant-view"
+              value={view}
+              onChange={(e) => { setView(e.target.value); setPage(1); setSelected([]); }}
+              className="px-3 py-2 rounded-lg text-sm text-white outline-none"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', minHeight: '44px' }}
+            >
+              {VIEW_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} style={{ background: '#1a1a1a', color: '#fff' }}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
             <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4" style={{ color: 'rgba(255,255,255,0.35)' }} />
@@ -320,7 +376,7 @@ export default function VoucherGrant() {
                 {rows.map((row, index) => {
                   const active = selected.includes(row.uid);
                   const vsStyle = row.hasVoucher ? (VOUCHER_STATUS_STYLES[row.voucherStatus] || VOUCHER_STATUS_STYLES[1]) : null;
-                  const selectable = !row.hasVoucher;
+                  const selectable = isRowGrantable(row);
                   return (
                     <tr
                       key={row.uid}
@@ -400,7 +456,19 @@ export default function VoucherGrant() {
                         </>
                       ) : (
                         <>
-                          <td className="p-3 font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(row.voucherAmount)}</td>
+                          <td className="p-3 font-semibold" style={{ color: selectable ? '#D4AF37' : 'rgba(255,255,255,0.35)' }}>
+                            ₱{fmt(row.voucherAmount)}
+                            {!selectable && row.notGrantableReason && (
+                              // Name the blocker on the row. Without this a non-grantable
+                              // member just has a dead checkbox and no explanation.
+                              <span
+                                className="ml-2 inline-block text-[11px] font-medium px-2 py-0.5 rounded-full align-middle"
+                                style={{ color: '#fbbf24', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}
+                              >
+                                {NOT_GRANTABLE_LABELS[row.notGrantableReason] || 'Not grantable'}
+                              </span>
+                            )}
+                          </td>
                           <td className="p-3 text-white/50 text-xs">{row.datereg || '—'}</td>
                         </>
                       )}
@@ -418,22 +486,25 @@ export default function VoucherGrant() {
                         <div className="mx-auto max-w-md space-y-2">
                           <p className="font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>
                             {search.trim()
-                              ? `No upgraded account matches "${search.trim()}".`
-                              : 'No accounts are currently awaiting a voucher.'}
+                              ? `No member matches "${search.trim()}" in "${currentView.label}".`
+                              : `No members in "${currentView.label}".`}
                           </p>
+                          {view !== 'all' && (
+                            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                              Try switching <strong style={{ color: 'rgba(255,255,255,0.7)' }}>Show</strong> to
+                              “All members” to look this person up.
+                            </p>
+                          )}
                           {/* An admin searching a specific member needs to know WHY they are absent.
                               Without this, "no results" reads as a broken search rather than the
-                              member simply not qualifying. */}
-                          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                            A member appears here only if <strong style={{ color: 'rgba(255,255,255,0.7)' }}>both</strong> are true:
-                            their package changed from the one they joined with, and they have no
-                            voucher for that new package yet.
-                          </p>
-                          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                            A member who never upgraded, or who already received the voucher for
-                            their current package, will not be listed. Check their vouchers in the
-                            Voucher List tab.
-                          </p>
+                              member simply not qualifying for the CURRENT view. */}
+                          {view === 'needs_voucher' && (
+                            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                              A member appears in this view only if <strong style={{ color: 'rgba(255,255,255,0.7)' }}>both</strong> are
+                              true: their package changed from the one they joined with, and they
+                              have no voucher for that new package yet.
+                            </p>
+                          )}
                         </div>
                       )}
                     </td>
