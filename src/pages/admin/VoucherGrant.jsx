@@ -16,18 +16,18 @@ const PACKAGE_LABELS = {
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-// Visibility only — the server decides who may actually be granted (every row carries
-// `grantable`, and POST /grant re-checks it under a row lock). Switching view can never
-// make an extra member grantable.
+// Visibility only. A member in ANY view can be granted — the single exception is a
+// member who already holds a voucher for their current package, which would be a
+// duplicate rather than a grant (vouchers are additive per package tier).
 const VIEW_OPTIONS = [
-  { value: 'needs_voucher', label: 'Needs voucher (upgraded)', hint: 'Upgraded members with no voucher for their current package. These are the only accounts that can be granted.' },
-  { value: 'no_voucher', label: 'No voucher yet', hint: 'Members holding no voucher at all — mostly accounts that predate the voucher feature. Shown for lookup; they cannot be granted unless they also upgraded.' },
+  { value: 'needs_voucher', label: 'Needs voucher', hint: 'Members with no voucher for their current package.' },
+  { value: 'upgraded_needs_voucher', label: 'Upgraded, needs voucher', hint: 'Narrowed to members whose package changed and who never received a voucher for the new one.' },
+  { value: 'no_voucher', label: 'No voucher yet', hint: 'Members holding no voucher at all, including accounts that predate the voucher feature.' },
   { value: 'has_voucher', label: 'Already has a voucher', hint: 'Members holding at least one voucher.' },
-  { value: 'all', label: 'All members', hint: 'Every member, grantable or not.' },
+  { value: 'all', label: 'All members', hint: 'Every member.' },
 ];
 
 const NOT_GRANTABLE_LABELS = {
-  not_upgraded: 'Not upgraded',
   already_has_voucher_for_current_tier: 'Already has this package voucher',
 };
 
@@ -116,6 +116,26 @@ export default function VoucherGrant() {
     e.preventDefault();
     setPage(1);
     setSearch(searchInput.trim());
+  }
+
+  // Emptying the box auto-refreshes back to the full list. Without this, deleting the
+  // text leaves the previous filtered results on screen with an empty search box,
+  // which reads as "these are all the members".
+  function handleSearchInputChange(e) {
+    const value = e.target.value;
+    setSearchInput(value);
+    if (value.trim() === '' && search !== '') {
+      setPage(1);
+      setSearch('');
+    }
+  }
+
+  function clearSearch() {
+    setSearchInput('');
+    if (search !== '') {
+      setPage(1);
+      setSearch('');
+    }
   }
 
   function handleRowClick(row) {
@@ -228,15 +248,12 @@ export default function VoucherGrant() {
       ) : (
         <div className="glass-card rounded-2xl p-4 text-sm" style={{ border: '1px solid rgba(212,175,55,0.2)', color: 'rgba(255,255,255,0.75)', background: 'rgba(212,175,55,0.06)' }}>
           <span style={{ color: '#D4AF37', fontWeight: 600 }}>{currentView.label}.</span>{' '}
-          {currentView.hint}
-          {view !== 'needs_voucher' && (
-            <>
-              {' '}
-              <span style={{ color: 'rgba(255,255,255,0.55)' }}>
-                Rows that cannot be granted are shown with the reason and cannot be selected.
-              </span>
-            </>
-          )}
+          {currentView.hint}{' '}
+          <span style={{ color: 'rgba(255,255,255,0.55)' }}>
+            Any member listed can be granted. The only exception is a member who already
+            holds a voucher for their current package — that row is marked and cannot be
+            selected, because it would be a duplicate rather than a new voucher.
+          </span>
         </div>
       )}
 
@@ -294,11 +311,23 @@ export default function VoucherGrant() {
             <input
               type="text"
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={handleSearchInputChange}
               placeholder="Search username, name, or uid..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg text-sm text-white placeholder-white/30 outline-none"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+              className="w-full pl-9 pr-11 py-2 rounded-lg text-sm text-white placeholder-white/30 outline-none"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', minHeight: '44px' }}
             />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                aria-label="Clear search"
+                title="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center rounded-full"
+                style={{ width: '28px', height: '28px', color: 'rgba(255,255,255,0.55)', background: 'rgba(255,255,255,0.08)' }}
+              >
+                <HiOutlineX className="size-4" />
+              </button>
+            )}
           </div>
           <button
             type="submit"
@@ -497,12 +526,18 @@ export default function VoucherGrant() {
                           )}
                           {/* An admin searching a specific member needs to know WHY they are absent.
                               Without this, "no results" reads as a broken search rather than the
-                              member simply not qualifying for the CURRENT view. */}
+                              member simply not matching the CURRENT view. */}
                           {view === 'needs_voucher' && (
                             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                              A member appears in this view only if <strong style={{ color: 'rgba(255,255,255,0.7)' }}>both</strong> are
-                              true: their package changed from the one they joined with, and they
-                              have no voucher for that new package yet.
+                              This view lists members with no voucher for their current package. A
+                              member who already received it will not appear here.
+                            </p>
+                          )}
+                          {view === 'upgraded_needs_voucher' && (
+                            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                              This view is narrowed to members whose package changed. Someone still
+                              on their original package will not appear here — switch to
+                              “Needs voucher” to include them.
                             </p>
                           )}
                         </div>
