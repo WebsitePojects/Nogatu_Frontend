@@ -192,9 +192,16 @@ export default function VoucherGrant() {
         </button>
       </div>
 
-      {isCashier && (
+      {isCashier ? (
         <div className="glass-card rounded-2xl p-4 text-sm" style={{ border: '1px solid rgba(212,175,55,0.2)', color: 'rgba(255,255,255,0.75)', background: 'rgba(212,175,55,0.06)' }}>
           <span style={{ color: '#D4AF37', fontWeight: 600 }}>Cashier view:</span> Select members without vouchers to grant one, or click Transact for existing voucher balances to record ER-traced availments.
+        </div>
+      ) : (
+        <div className="glass-card rounded-2xl p-4 text-sm" style={{ border: '1px solid rgba(212,175,55,0.2)', color: 'rgba(255,255,255,0.75)', background: 'rgba(212,175,55,0.06)' }}>
+          <span style={{ color: '#D4AF37', fontWeight: 600 }}>Showing upgraded accounts only.</span>{' '}
+          This list is limited to members whose package changed and who have no voucher for their
+          current package. Accounts still on their original package are not listed, and members who
+          already hold a voucher for their current package drop off automatically once granted.
         </div>
       )}
 
@@ -300,7 +307,7 @@ export default function VoucherGrant() {
                 <tr>
                   {[
                     '',
-                    'UID', 'Username', 'Full Name', 'Package',
+                    'UID', 'Username', 'Full Name', isCashier ? 'Package' : 'Package (Joined → Now)',
                     isCashier ? 'Voucher Status' : 'Voucher Amount',
                     isCashier ? 'Remaining' : 'Date Registered',
                     isCashier ? '' : null,
@@ -341,7 +348,24 @@ export default function VoucherGrant() {
                       <td className="p-3 text-white/70 font-mono text-xs">{row.uid}</td>
                       <td className="p-3 text-white/85 font-semibold">{row.username}</td>
                       <td className="p-3 text-white/70">{row.fullname || 'N/A'}</td>
-                      <td className="p-3 text-white/70">{PACKAGE_LABELS[row.accttype] || row.accttype}</td>
+                      <td className="p-3 text-white/70">
+                        {!isCashier && row.joinedAccttype && row.joinedAccttype !== row.accttype ? (
+                          <span
+                            className="inline-flex items-center gap-1.5"
+                            aria-label={`Joined as ${PACKAGE_LABELS[row.joinedAccttype] || row.joinedAccttype}, now ${PACKAGE_LABELS[row.accttype] || row.accttype}`}
+                          >
+                            <span style={{ color: 'rgba(255,255,255,0.45)' }}>
+                              {PACKAGE_LABELS[row.joinedAccttype] || row.joinedAccttype}
+                            </span>
+                            <span aria-hidden="true" style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
+                            <span style={{ color: '#D4AF37', fontWeight: 600 }}>
+                              {PACKAGE_LABELS[row.accttype] || row.accttype}
+                            </span>
+                          </span>
+                        ) : (
+                          PACKAGE_LABELS[row.accttype] || row.accttype
+                        )}
+                      </td>
                       {isCashier ? (
                         <>
                           <td className="p-3">
@@ -385,8 +409,33 @@ export default function VoucherGrant() {
                 })}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={isCashier ? 7 : 7} className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                      {isCashier ? 'No members found.' : 'No eligible accounts found.'}
+                    <td colSpan={7} className="py-12 px-4 text-center">
+                      {isCashier ? (
+                        <p style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          {search.trim() ? `No members match "${search.trim()}".` : 'No members found.'}
+                        </p>
+                      ) : (
+                        <div className="mx-auto max-w-md space-y-2">
+                          <p className="font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                            {search.trim()
+                              ? `No upgraded account matches "${search.trim()}".`
+                              : 'No accounts are currently awaiting a voucher.'}
+                          </p>
+                          {/* An admin searching a specific member needs to know WHY they are absent.
+                              Without this, "no results" reads as a broken search rather than the
+                              member simply not qualifying. */}
+                          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                            A member appears here only if <strong style={{ color: 'rgba(255,255,255,0.7)' }}>both</strong> are true:
+                            their package changed from the one they joined with, and they have no
+                            voucher for that new package yet.
+                          </p>
+                          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                            A member who never upgraded, or who already received the voucher for
+                            their current package, will not be listed. Check their vouchers in the
+                            Voucher List tab.
+                          </p>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 )}
@@ -450,7 +499,7 @@ export default function VoucherGrant() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr>
-                      {['UID', 'Username', 'Full Name', 'Package', 'Voucher Amount'].map((h) => (
+                      {['UID', 'Username', 'Full Name', 'Package (Joined → Now)', 'Voucher Amount'].map((h) => (
                         <th key={h} className="table-header py-2.5 px-3 text-left text-xs uppercase tracking-wide">{h}</th>
                       ))}
                     </tr>
@@ -461,7 +510,24 @@ export default function VoucherGrant() {
                         <td className="py-2.5 px-3 text-white/70 font-mono text-xs">{row.uid}</td>
                         <td className="py-2.5 px-3 text-white/85 font-semibold">{row.username}</td>
                         <td className="py-2.5 px-3 text-white/70">{row.fullname || 'N/A'}</td>
-                        <td className="py-2.5 px-3 text-white/70">{PACKAGE_LABELS[row.accttype] || row.accttype}</td>
+                        <td className="py-2.5 px-3 text-white/70">
+                          {row.joinedAccttype && row.joinedAccttype !== row.accttype ? (
+                            <span
+                              className="inline-flex items-center gap-1.5"
+                              aria-label={`Joined as ${PACKAGE_LABELS[row.joinedAccttype] || row.joinedAccttype}, now ${PACKAGE_LABELS[row.accttype] || row.accttype}`}
+                            >
+                              <span style={{ color: 'rgba(255,255,255,0.45)' }}>
+                                {PACKAGE_LABELS[row.joinedAccttype] || row.joinedAccttype}
+                              </span>
+                              <span aria-hidden="true" style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
+                              <span style={{ color: '#D4AF37', fontWeight: 600 }}>
+                                {PACKAGE_LABELS[row.accttype] || row.accttype}
+                              </span>
+                            </span>
+                          ) : (
+                            PACKAGE_LABELS[row.accttype] || row.accttype
+                          )}
+                        </td>
                         <td className="py-2.5 px-3 font-semibold" style={{ color: '#D4AF37' }}>₱{fmt(row.voucherAmount)}</td>
                       </tr>
                     ))}
