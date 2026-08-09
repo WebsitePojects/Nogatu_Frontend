@@ -13,23 +13,51 @@ const PRODUCT_OPTIONS = [
   ...MAINTENANCE_PRODUCT_OPTIONS,
 ];
 
+const CODE_TYPE_CD = 3;
+const CODE_TYPE_PAID = 1;
+
 const CODE_TYPES = [
-  { value: 1, label: 'Paid (PD)', desc: 'Full income eligibility including SMB and sponsor BP', color: '#D4AF37' },
+  { value: CODE_TYPE_PAID, label: 'Paid (PD)', desc: 'Full income eligibility including SMB and sponsor BP', color: '#D4AF37' },
   { value: 2, label: 'Free Slot (FS)', desc: 'Can earn non-pairing incomes, but no SMB or sponsor BP', color: '#94a3b8' },
-  { value: 3, label: 'CD Slot (CD)', desc: '25% encashment deduction until fully paid; no SMB or sponsor BP while unpaid', color: '#f87171' },
+  { value: CODE_TYPE_CD, label: 'CD Slot (CD)', desc: '25% encashment deduction until fully paid; no SMB or sponsor BP while unpaid', color: '#f87171' },
 ];
+
+// CD Slot is restricted to Gold and Platinum (management, 2026-08-08). Mirrored
+// from CD_ELIGIBLE_PRODUCT_TYPES in services/codeGeneration.js — the server rejects
+// a disallowed combination with 400 regardless of what this form shows, so this is
+// an affordance, not the rule.
+const CD_ELIGIBLE_PRODUCT_TYPES = [30, 40];
+const isCdEligible = (productType) => CD_ELIGIBLE_PRODUCT_TYPES.includes(Number(productType));
 
 export default function GenerateCodes() {
   const [noOfCodes, setNoOfCodes] = useState('');
   const [productType, setProductType] = useState(10);
-  const [codeType, setCodeType] = useState(1);
+  const [codeType, setCodeType] = useState(CODE_TYPE_PAID);
   const [generating, setGenerating] = useState(false);
   const [generatedCodes, setGeneratedCodes] = useState([]);
+
+  const cdAllowed = isCdEligible(productType);
+
+  // Switching to a product that cannot take CD must also clear a CD selection.
+  // Leaving codeType at CD would submit a combination the server rejects with a
+  // 400, so the admin would see a failure for a choice the form still showed as
+  // selected.
+  function handleProductTypeChange(nextProductType) {
+    setProductType(nextProductType);
+    if (codeType === CODE_TYPE_CD && !isCdEligible(nextProductType)) {
+      setCodeType(CODE_TYPE_PAID);
+    }
+  }
 
   async function handleGenerate(e) {
     e.preventDefault();
     const n = Number(noOfCodes);
     if (!Number.isFinite(n) || n < 1) { toast.error('Enter how many codes to generate'); return; }
+    // Last line of defence in the form; the server is the authority.
+    if (codeType === CODE_TYPE_CD && !cdAllowed) {
+      toast.error('CD Slot is only available for Gold and Platinum');
+      return;
+    }
     setGenerating(true);
     try {
       const res = await api.post('/admin/codes/generate', { noOfCodes: n, productType, codeType });
@@ -85,7 +113,7 @@ export default function GenerateCodes() {
               <label className="label">Product Type</label>
               <select
                 value={productType}
-                onChange={(e) => setProductType(Number(e.target.value))}
+                onChange={(e) => handleProductTypeChange(Number(e.target.value))}
                 className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
               >
                 {PRODUCT_OPTIONS.map((opt) => (
@@ -97,30 +125,48 @@ export default function GenerateCodes() {
             <div>
               <label className="label mb-2">Code Type</label>
               <div className="flex gap-3 mt-1.5 flex-wrap">
-                {CODE_TYPES.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex-1 min-w-[90px] flex flex-col items-center gap-1 p-3 rounded-xl cursor-pointer motion-safe:transition-all"
-                    style={{
-                      background: codeType === opt.value ? 'rgba(212,175,55,0.12)' : 'rgba(255,255,255,0.03)',
-                      border: codeType === opt.value ? '1.5px solid rgba(212,175,55,0.35)' : '1.5px solid rgba(255,255,255,0.06)',
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="codeType"
-                      value={opt.value}
-                      checked={codeType === opt.value}
-                      onChange={() => setCodeType(opt.value)}
-                      className="sr-only"
-                    />
-                    <span className="text-[11px] font-bold tracking-wide" style={{ color: opt.color }}>
-                      {opt.label}
-                    </span>
-                    <span className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>{opt.desc}</span>
-                  </label>
-                ))}
+                {CODE_TYPES.map((opt) => {
+                  const disabled = opt.value === CODE_TYPE_CD && !cdAllowed;
+                  const selected = codeType === opt.value;
+                  return (
+                    <label
+                      key={opt.value}
+                      className={`flex-1 min-w-[90px] flex flex-col items-center gap-1 p-3 rounded-xl motion-safe:transition-all ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                      title={disabled ? 'CD Slot is only available for Gold and Platinum' : undefined}
+                      style={{
+                        background: selected ? 'rgba(212,175,55,0.12)' : 'rgba(255,255,255,0.03)',
+                        border: selected ? '1.5px solid rgba(212,175,55,0.35)' : '1.5px solid rgba(255,255,255,0.06)',
+                        opacity: disabled ? 0.4 : 1,
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="codeType"
+                        value={opt.value}
+                        checked={selected}
+                        disabled={disabled}
+                        onChange={() => { if (!disabled) setCodeType(opt.value); }}
+                        className="sr-only"
+                      />
+                      <span className="text-[11px] font-bold tracking-wide" style={{ color: opt.color }}>
+                        {opt.label}
+                      </span>
+                      <span className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>{opt.desc}</span>
+                      {/* Text, not just dimming — the reason must not depend on colour alone. */}
+                      {disabled && (
+                        <span className="text-[10px] text-center font-semibold" style={{ color: '#fbbf24' }}>
+                          Gold / Platinum only
+                        </span>
+                      )}
+                    </label>
+                  );
+                })}
               </div>
+              {!cdAllowed && (
+                <p className="text-[11px] mt-2 leading-relaxed" style={{ color: '#fbbf24' }}>
+                  CD Slot is disabled for this product. It can only be issued for Gold and Platinum packages.
+                </p>
+              )}
               <p className="text-[11px] mt-2 leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 FS and unpaid CD accounts can still earn the other published wealth streams. The restriction is on SMB or binary pairing credits and on passing sponsor BP upstream until the slot becomes eligible.
               </p>
