@@ -7,6 +7,21 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { formatDateTimeManila } from '../../utils/dateTime';
 import { apiUrl } from '../../utils/apiBase';
 
+// Mirrors the server's accepted `status` values (routes/admin/codes.js). "Transferred"
+// is derived from transfer history and OVERLAPS the others -- a code can be Released or
+// Used and also transferred -- so it is a filter option, never a replacement label.
+const CODE_STATUS_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'not_released', label: 'Not Released' },
+  { value: 'released', label: 'Released' },
+  { value: 'used', label: 'Used' },
+  { value: 'transferred', label: 'Transferred' },
+];
+
+const MIN_ROWS_PER_PAGE = 1;
+const MAX_ROWS_PER_PAGE = 500; // must match MAX_CODES_PER_PAGE on the server
+const DEFAULT_ROWS_PER_PAGE = 40;
+
 export default function ManageCodes() {
   const { admin } = useAuth();
   const { isDarkMode } = useTheme();
@@ -18,7 +33,11 @@ export default function ManageCodes() {
   const [historyTotalPages, setHistoryTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [codesExpanded, setCodesExpanded] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
+  // Kept as text so the field can be cleared while typing; committed on blur/Enter so
+  // one request fires per intent instead of one per keystroke.
+  const [rowsInput, setRowsInput] = useState(String(DEFAULT_ROWS_PER_PAGE));
   const [selected, setSelected] = useState([]);
   const [codeSearch, setCodeSearch] = useState('');
   const [ownerSearch, setOwnerSearch] = useState('');
@@ -45,7 +64,7 @@ export default function ManageCodes() {
   const greenText = isDarkMode ? '#34d399' : '#047857';
   const greenSoft = isDarkMode ? '#a7f3d0' : '#065f46';
 
-  useEffect(() => { loadCodes(); }, [page, codesExpanded]);
+  useEffect(() => { loadCodes(); }, [page, rowsPerPage, statusFilter]);
   useEffect(() => { loadHistory(); }, [historyPage]);
 
   // Shared filter params for the code list + CSV export: code, owner/holder
@@ -56,13 +75,14 @@ export default function ManageCodes() {
     const owner = ownerSearch.trim(); if (owner) p.set('owner', owner);
     if (dateFrom) p.set('dateFrom', dateFrom);
     if (dateTo) p.set('dateTo', dateTo);
+    if (statusFilter && statusFilter !== 'all') p.set('status', statusFilter);
     return p;
   }
 
   async function loadCodes() {
     setLoading(true);
     try {
-      const perPage = codesExpanded ? 100 : 40;
+      const perPage = rowsPerPage;
       const p = codeFilterParams();
       p.set('page', page);
       p.set('perPage', perPage);
@@ -240,7 +260,7 @@ export default function ManageCodes() {
       c.code,
       c.dategen || '',
       c.producttypeName || '',
-      c.statusLabel || '',
+      c.statusLabel + (c.transferred ? ' (Transferred)' : ''),
     ]));
 
     let html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
@@ -298,6 +318,25 @@ export default function ManageCodes() {
     win.document.close();
     win.focus();
   }
+
+  // Commit the typed row count on blur/Enter (not per keystroke) and clamp it to the
+  // same bounds the server enforces, so the field can never ask for a page the API
+  // will silently trim.
+  function commitRowsPerPage() {
+    const parsed = Number(rowsInput);
+    const next = Number.isFinite(parsed) && parsed > 0
+      ? Math.min(MAX_ROWS_PER_PAGE, Math.max(MIN_ROWS_PER_PAGE, Math.trunc(parsed)))
+      : DEFAULT_ROWS_PER_PAGE;
+    setRowsInput(String(next));
+    if (next !== rowsPerPage) {
+      setPage(1);
+      setRowsPerPage(next);
+    }
+  }
+
+  const transferredStyle = isDarkMode
+    ? { background: 'rgba(212,175,55,0.12)', color: '#e3c766', border: '1px solid rgba(212,175,55,0.28)' }
+    : { background: 'rgba(180,133,20,0.12)', color: '#8a6410', border: '1px solid rgba(180,133,20,0.32)' };
 
   const statusStyle = (status) => {
     if (status === 0) {
@@ -366,6 +405,9 @@ export default function ManageCodes() {
                 setOwnerSearch('');
                 setDateFrom('');
                 setDateTo('');
+                setStatusFilter('all');
+                setRowsPerPage(DEFAULT_ROWS_PER_PAGE);
+                setRowsInput(String(DEFAULT_ROWS_PER_PAGE));
                 setPage(1);
                 setHistoryPage(1);
                 setTimeout(() => { loadCodes(); loadHistory(); }, 0);
@@ -389,6 +431,19 @@ export default function ManageCodes() {
               className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
               placeholder="e.g. tabsqui"
             />
+          </div>
+          <div className="w-full sm:w-48">
+            <label className="label" htmlFor="code-status-filter">Status</label>
+            <select
+              id="code-status-filter"
+              value={statusFilter}
+              onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
+              className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+            >
+              {CODE_STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
           </div>
           <div className="w-full sm:w-44">
             <label className="label">Generated From</label>
@@ -518,21 +573,32 @@ export default function ManageCodes() {
               : <>Tap a row to select • tap “View details” for the transfer trail</>}
           </p>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => {
-                setCodesExpanded((current) => !current);
-                setPage(1);
-              }}
-              className="text-xs sm:text-sm py-1.5 px-3 rounded-lg font-medium flex-1 sm:flex-initial text-center"
-              style={{
-                background: isDarkMode ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.12)',
-                color: blueText,
-                border: '1px solid rgba(59,130,246,0.22)',
-              }}
-            >
-              {codesExpanded ? 'Retract to 40 Rows' : 'Expand to 100 Rows'}
-            </button>
+            <div className="flex items-center gap-2">
+              <label className="text-xs sm:text-sm whitespace-nowrap" htmlFor="rows-per-page" style={{ color: textSubtle }}>
+                Rows
+              </label>
+              <input
+                id="rows-per-page"
+                type="number"
+                inputMode="numeric"
+                min={MIN_ROWS_PER_PAGE}
+                max={MAX_ROWS_PER_PAGE}
+                value={rowsInput}
+                onChange={(e) => setRowsInput(e.target.value)}
+                onBlur={commitRowsPerPage}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+                aria-describedby="rows-per-page-hint"
+                className="rounded-lg py-1.5 px-2 text-xs sm:text-sm w-20 text-center"
+                style={{
+                  background: isDarkMode ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.12)',
+                  color: blueText,
+                  border: '1px solid rgba(59,130,246,0.22)',
+                }}
+              />
+              <span id="rows-per-page-hint" className="text-xs whitespace-nowrap" style={{ color: textMuted }}>
+                per page (max {MAX_ROWS_PER_PAGE})
+              </span>
+            </div>
             <button
               type="button"
               onClick={printPageRecords}
@@ -635,12 +701,23 @@ export default function ManageCodes() {
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <span
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                        style={statusStyle(c.codestatus)}
-                      >
-                        {c.statusLabel}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                          style={statusStyle(c.codestatus)}
+                        >
+                          {c.statusLabel}
+                        </span>
+                        {c.transferred && (
+                          <span
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                            style={transferredStyle}
+                            title="This code has changed hands at least once"
+                          >
+                            Transferred
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-xs hidden sm:table-cell" style={{ color: dateColor }}>{c.dategen}</td>
                   </tr>
