@@ -123,8 +123,10 @@ export default function CodeRequests() {
                       <button
                         type="button"
                         onClick={() => setReviewingRequest(request)}
-                        className="rounded-lg py-2 px-3 text-xs font-medium border cursor-pointer text-center"
-                        style={{ borderColor: 'rgba(59,130,246,0.35)', color: '#93c5fd', background: 'rgba(59,130,246,0.1)', minHeight: 36 }}
+                        className="rounded-lg py-2 px-3 text-xs font-medium border cursor-pointer text-center
+                          border-blue-300 text-blue-700 bg-blue-50
+                          dark:border-blue-500/40 dark:text-blue-300 dark:bg-blue-500/10"
+                        style={{ minHeight: 36 }}
                       >
                         Review
                       </button>
@@ -133,16 +135,21 @@ export default function CodeRequests() {
                         onClick={() => handleApprove(request)}
                         disabled={!request.sameNetworkTree}
                         title={request.sameNetworkTree ? undefined : 'Blocked: codes can only be transferred within the same network tree.'}
-                        className="rounded-lg py-2 px-3 text-xs font-semibold cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 text-center"
-                        style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', color: '#fff', minHeight: 36 }}
+                        className={`rounded-lg py-2 px-3 text-xs font-semibold text-center text-white
+                          ${request.sameNetworkTree
+                            ? 'cursor-pointer'
+                            : 'cursor-not-allowed opacity-45 grayscale'}`}
+                        style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', minHeight: 36 }}
                       >
                         Approve
                       </button>
                       <button
                         type="button"
                         onClick={() => setRejectingRequest({ id: request.id, arNumber: request.arNumber, reason: '' })}
-                        className="rounded-lg py-2 px-3 text-xs font-medium border cursor-pointer text-center"
-                        style={{ borderColor: 'rgba(248,113,113,0.35)', color: '#f87171', background: 'rgba(248,113,113,0.08)', minHeight: 36 }}
+                        className="rounded-lg py-2 px-3 text-xs font-medium border cursor-pointer text-center
+                          border-red-300 text-red-700 bg-red-50
+                          dark:border-red-400/40 dark:text-red-300 dark:bg-red-400/10"
+                        style={{ minHeight: 36 }}
                       >
                         Reject
                       </button>
