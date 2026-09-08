@@ -19,13 +19,13 @@ import { FaSitemap, FaProjectDiagram } from 'react-icons/fa';
 /* ─── Nav data ──────────────────────────────────────────────── */
 
 const NAV_GROUPS = [
-  // Proposal 0023, not a live feature. Kept in its own group so nobody mistakes a
-  // prototype for shipped functionality while it is on the demo branch.
   {
-    label: 'Proposal 0023 · Prototype',
+    label: 'Cashiering',
     items: [
-      { to: '/admin/ar-management', label: 'AR Management',  icon: HiOutlineDocumentText,  roles: [1, 2, 3] },
-      { to: '/admin/code-requests', label: 'Code Requests',  icon: HiOutlineClipboardCheck, roles: [1, 3] },
+      // Order taking is a cashier task, so rights 2 is included here. Approving a
+      // code release is not — that is the manager step in the same workflow.
+      { to: '/admin/ar-management', label: 'Transact Order', icon: HiOutlineDocumentText,   roles: [1, 2, 3] },
+      { to: '/admin/code-requests', label: 'Code Approvals', icon: HiOutlineClipboardCheck, roles: [1, 3] },
     ],
   },
   {
