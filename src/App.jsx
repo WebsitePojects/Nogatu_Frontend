@@ -57,6 +57,9 @@ const VoucherManagement = lazy(() => import('./pages/admin/VoucherManagement'));
 const VoucherGrant = lazy(() => import('./pages/admin/VoucherGrant'));
 const Applications = lazy(() => import('./pages/admin/Applications'));
 const AccessAccounts = lazy(() => import('./pages/admin/AccessAccounts'));
+// Proposal 0023 prototype. Demo screens only, no API calls, nothing persists.
+const ARManagement = lazy(() => import('./pages/admin/ARManagement'));
+const CodeRequests = lazy(() => import('./pages/admin/CodeRequests'));
 
 function RouteFallback() {
   return (
@@ -176,6 +179,16 @@ export default function App() {
             <Route
               path="accounts/:uid/cd"
               element={<ProtectedAdminRoles allowed={[1, 3]}><CDPaymentDetails /></ProtectedAdminRoles>}
+            />
+            {/* Proposal 0023 prototype. AR entry is a cashier task, so rights 2 is
+                included; the manager approval queue deliberately is not. */}
+            <Route
+              path="ar-management"
+              element={<ProtectedAdminRoles allowed={[1, 2, 3]}><ARManagement /></ProtectedAdminRoles>}
+            />
+            <Route
+              path="code-requests"
+              element={<ProtectedAdminRoles allowed={[1, 3]}><CodeRequests /></ProtectedAdminRoles>}
             />
             <Route
               path="generate-codes"

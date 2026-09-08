@@ -12,12 +12,22 @@ import {
   HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket,
   HiOutlineChat, HiOutlineClipboardList, HiOutlineX, HiOutlineViewBoards,
   HiOutlineDotsHorizontal, HiOutlineUserAdd,
+  HiOutlineDocumentText, HiOutlineClipboardCheck,
 } from 'react-icons/hi';
 import { FaSitemap, FaProjectDiagram } from 'react-icons/fa';
 
 /* ─── Nav data ──────────────────────────────────────────────── */
 
 const NAV_GROUPS = [
+  // Proposal 0023, not a live feature. Kept in its own group so nobody mistakes a
+  // prototype for shipped functionality while it is on the demo branch.
+  {
+    label: 'Proposal 0023 · Prototype',
+    items: [
+      { to: '/admin/ar-management', label: 'AR Management',  icon: HiOutlineDocumentText,  roles: [1, 2, 3] },
+      { to: '/admin/code-requests', label: 'Code Requests',  icon: HiOutlineClipboardCheck, roles: [1, 3] },
+    ],
+  },
   {
     label: 'Overview',
     items: [
@@ -154,7 +164,7 @@ export default function AdminLayout() {
   /* Active bottom tabs */
   const MANAGE_PATHS  = ['/admin/accounts', '/admin/genealogy', '/admin/unilevel-tree', '/admin/generate-codes', '/admin/manage-codes'];
   const FINANCE_PATHS = ['/admin/encashment', '/admin/finance', '/admin/redeem', '/admin/hifive-package-claims', '/admin/rankings', '/admin/global-bonus', '/admin/cd-accounts'];
-  const MORE_PATHS    = ['/admin/messages', '/admin/support', '/admin/applications', '/admin/news', '/admin/access-accounts', '/admin/change-password'];
+  const MORE_PATHS    = ['/admin/ar-management', '/admin/code-requests', '/admin/messages', '/admin/support', '/admin/applications', '/admin/news', '/admin/access-accounts', '/admin/change-password'];
 
   const getBottomTabActive = (item) => {
     if (item.id === 'home')    return location.pathname === '/admin/dashboard';
