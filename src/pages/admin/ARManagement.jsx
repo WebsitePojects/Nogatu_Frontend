@@ -27,22 +27,37 @@ import {
 const ALL_FILTER = 'all';
 
 const CODE_STATUS_STYLES = {
-  no_codes: { label: 'No codes', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.1)' },
-  not_requested: { label: 'Not requested', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.14)' },
-  pending: { label: 'Pending approval', background: 'rgba(234,179,8,0.12)', color: '#fbbf24', border: '1px solid rgba(234,179,8,0.25)' },
-  approved: { label: 'Approved — ready to release', background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' },
-  rejected: { label: 'Rejected', background: 'rgba(248,113,113,0.12)', color: '#f87171', border: '1px solid rgba(248,113,113,0.25)' },
-  released: { label: 'Released', background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.22)' },
+  no_codes: {
+    label: 'No codes',
+    className: 'bg-slate-100 text-slate-500 border border-slate-200 dark:bg-white/5 dark:text-white/35 dark:border-white/10',
+  },
+  not_requested: {
+    label: 'Not requested',
+    className: 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-white/[0.06] dark:text-white/50 dark:border-white/[0.14]',
+  },
+  pending: {
+    label: 'Pending approval',
+    className: 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/25',
+  },
+  approved: {
+    label: 'Approved — ready to release',
+    className: 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/25',
+  },
+  rejected: {
+    label: 'Rejected',
+    className: 'bg-red-100 text-red-800 border border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/25',
+  },
+  released: {
+    label: 'Released',
+    className: 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/[0.22]',
+  },
 };
 
 function CodeStatusBadge({ receipt }) {
   const key = !receipt.canGenerateCodes ? 'no_codes' : receipt.codeStatus || 'not_requested';
   const style = CODE_STATUS_STYLES[key];
   return (
-    <span
-      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap"
-      style={{ background: style.background, color: style.color, border: style.border }}
-    >
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${style.className}`}>
       {style.label}
     </span>
   );
@@ -50,10 +65,7 @@ function CodeStatusBadge({ receipt }) {
 
 function LegacyBadge() {
   return (
-    <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ml-2"
-      style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.22)' }}
-    >
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ml-2 bg-indigo-100 text-indigo-800 border border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/[0.22]">
       LEGACY
     </span>
   );
@@ -61,13 +73,13 @@ function LegacyBadge() {
 
 function RemarksList({ remarks }) {
   if (!remarks || remarks.length === 0) {
-    return <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>No remarks yet</span>;
+    return <span className="text-xs text-slate-400 dark:text-white/30">No remarks yet</span>;
   }
   return (
     <div className="space-y-0.5">
       {remarks.map((remark) => (
-        <div key={`${remark.text}-${remark.at}`} className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          {remark.text} <span style={{ color: 'rgba(255,255,255,0.35)' }}>· {remark.at}</span>
+        <div key={`${remark.text}-${remark.at}`} className="text-xs leading-snug text-slate-600 dark:text-white/60">
+          {remark.text} <span className="text-slate-500 dark:text-white/35">· {remark.at}</span>
         </div>
       ))}
     </div>
@@ -264,8 +276,8 @@ export default function ARManagement() {
     <div>
       <div className="mb-7">
         <h1 className="font-display text-2xl font-bold text-white">Transact Order</h1>
-        <div className="w-12 h-0.5 mt-2" style={{ background: 'linear-gradient(90deg,#D4AF37,transparent)' }} />
-        <p className="mt-3 text-sm max-w-2xl" style={{ color: 'rgba(255,255,255,0.5)' }}>
+        <div className="w-12 h-0.5 mt-2 bg-gradient-to-r from-[#8f6b14] dark:from-[#D4AF37] to-transparent" />
+        <p className="mt-3 text-sm max-w-2xl text-slate-600 dark:text-white/50">
           Take a member&apos;s order, confirm payment, and print the Acknowledgement Receipt (AR). Once
           released, codes for that order are generated and delivered in the background — never
           handed over by hand.
@@ -277,26 +289,24 @@ export default function ARManagement() {
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center justify-between gap-3 mb-1">
             <h3 className="font-semibold text-white">New Order</h3>
-            <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid rgba(212,175,55,0.2)' }}>
+            <div className="flex rounded-lg overflow-hidden border border-amber-200 dark:border-[rgba(212,175,55,0.2)]">
               <button
                 type="button"
                 onClick={() => setIsLegacy(false)}
-                className="text-xs px-3 py-2 font-medium cursor-pointer"
-                style={{ background: !isLegacy ? 'rgba(212,175,55,0.16)' : 'transparent', color: !isLegacy ? '#D4AF37' : 'rgba(255,255,255,0.5)' }}
+                className={`text-xs px-3 py-2 font-medium cursor-pointer ${!isLegacy ? 'bg-amber-100 text-[#8f6b14] dark:bg-[rgba(212,175,55,0.16)] dark:text-brand-gold' : 'bg-transparent text-slate-500 dark:text-white/50'}`}
               >
                 New AR
               </button>
               <button
                 type="button"
                 onClick={() => setIsLegacy(true)}
-                className="text-xs px-3 py-2 font-medium cursor-pointer"
-                style={{ background: isLegacy ? 'rgba(212,175,55,0.16)' : 'transparent', color: isLegacy ? '#D4AF37' : 'rgba(255,255,255,0.5)' }}
+                className={`text-xs px-3 py-2 font-medium cursor-pointer ${isLegacy ? 'bg-amber-100 text-[#8f6b14] dark:bg-[rgba(212,175,55,0.16)] dark:text-brand-gold' : 'bg-transparent text-slate-500 dark:text-white/50'}`}
               >
                 Encode Legacy AR
               </button>
             </div>
           </div>
-          <p className="text-xs mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <p className="text-xs mb-5 text-slate-500 dark:text-white/35">
             {isLegacy
               ? 'Back-record an AR that was issued on paper before this system existed.'
               : 'AR numbers are assigned sequentially by the system on save.'}
@@ -357,18 +367,14 @@ export default function ARManagement() {
             <div>
               <label className="label">Member</label>
               {selectedMember ? (
-                <div
-                  className="flex items-center justify-between rounded-xl px-4 py-2.5 mt-1.5"
-                  style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)' }}
-                >
-                  <span className="text-sm" style={{ color: '#F2D06B' }}>
-                    {selectedMember.name} <span style={{ color: 'rgba(255,255,255,0.4)' }}>(@{selectedMember.username})</span>
+                <div className="flex items-center justify-between rounded-xl px-4 py-2.5 mt-1.5 bg-amber-50 border border-amber-300 dark:bg-[rgba(212,175,55,0.08)] dark:border-[rgba(212,175,55,0.25)]">
+                  <span className="text-sm text-[#8f6b14] dark:text-brand-gold-light">
+                    {selectedMember.name} <span className="text-slate-500 dark:text-white/40">(@{selectedMember.username})</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => { setSelectedMember(null); setMemberQuery(''); }}
-                    className="cursor-pointer"
-                    style={{ color: 'rgba(255,255,255,0.5)' }}
+                    className="cursor-pointer text-slate-500 dark:text-white/50"
                     aria-label="Change member"
                   >
                     <HiOutlineX className="size-4" />
@@ -384,12 +390,9 @@ export default function ARManagement() {
                     placeholder="Search member by name or username"
                   />
                   {memberQuery.trim() && (
-                    <div
-                      className="absolute z-10 w-full mt-1 rounded-xl overflow-hidden max-h-56 overflow-y-auto"
-                      style={{ background: '#15161a', border: '1px solid rgba(212,175,55,0.2)' }}
-                    >
+                    <div className="absolute z-10 w-full mt-1 rounded-xl overflow-hidden max-h-56 overflow-y-auto bg-white border border-slate-200 shadow-lg dark:bg-[#15161a] dark:border-[rgba(212,175,55,0.2)]">
                       {matchingMembers.length === 0 ? (
-                        <div className="px-4 py-3 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        <div className="px-4 py-3 text-xs text-slate-500 dark:text-white/40">
                           No members match &quot;{memberQuery}&quot;
                         </div>
                       ) : (
@@ -398,10 +401,9 @@ export default function ARManagement() {
                             key={member.id}
                             type="button"
                             onClick={() => { setSelectedMember(member); setMemberQuery(''); }}
-                            className="w-full text-left px-4 py-2.5 text-sm cursor-pointer motion-safe:transition-colors hover:bg-[rgba(212,175,55,0.08)]"
-                            style={{ color: 'rgba(255,255,255,0.8)' }}
+                            className="w-full text-left px-4 py-2.5 text-sm cursor-pointer motion-safe:transition-colors hover:bg-amber-50 dark:hover:bg-[rgba(212,175,55,0.08)] text-slate-700 dark:text-white/80"
                           >
-                            {member.name} <span style={{ color: 'rgba(255,255,255,0.35)' }}>(@{member.username})</span>
+                            {member.name} <span className="text-slate-500 dark:text-white/35">(@{member.username})</span>
                           </button>
                         ))
                       )}
@@ -421,16 +423,16 @@ export default function ARManagement() {
                       key={modeOption.id}
                       type="button"
                       onClick={() => setMode(modeOption.id)}
-                      className="text-left p-3 rounded-xl cursor-pointer motion-safe:transition-all"
-                      style={{
-                        background: selected ? 'rgba(212,175,55,0.12)' : 'rgba(255,255,255,0.03)',
-                        border: selected ? '1.5px solid rgba(212,175,55,0.35)' : '1.5px solid rgba(255,255,255,0.06)',
-                      }}
+                      className={`text-left p-3 rounded-xl cursor-pointer motion-safe:transition-all border-[1.5px] ${
+                        selected
+                          ? 'bg-amber-100 border-amber-300 dark:bg-[rgba(212,175,55,0.12)] dark:border-[rgba(212,175,55,0.35)]'
+                          : 'bg-slate-50 border-slate-200 dark:bg-white/[0.03] dark:border-white/[0.06]'
+                      }`}
                     >
-                      <div className="text-xs font-bold" style={{ color: selected ? '#D4AF37' : 'rgba(255,255,255,0.75)' }}>
+                      <div className={`text-xs font-bold ${selected ? 'text-[#8f6b14] dark:text-brand-gold' : 'text-slate-600 dark:text-white/75'}`}>
                         {modeOption.label}
                       </div>
-                      <div className="text-[10px] mt-1 font-semibold" style={{ color: modeOption.canGenerateCodes ? '#34d399' : '#fbbf24' }}>
+                      <div className={`text-[10px] mt-1 font-semibold ${modeOption.canGenerateCodes ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}`}>
                         {modeOption.canGenerateCodes ? 'Generates codes' : 'No codes issued'}
                       </div>
                     </button>
@@ -438,7 +440,7 @@ export default function ARManagement() {
                 })}
               </div>
               {!modeConfig.canGenerateCodes && (
-                <p className="text-[11px] mt-2 leading-relaxed" style={{ color: '#fbbf24' }}>
+                <p className="text-[11px] mt-2 leading-relaxed text-amber-700 dark:text-amber-300">
                   {modeConfig.noCodeReason} The AR is still saved and remains valid — it simply issues no
                   code request.
                 </p>
@@ -454,12 +456,11 @@ export default function ARManagement() {
                       key={tier}
                       type="button"
                       onClick={() => handlePriceTierChange(tier)}
-                      className="flex-1 py-2.5 rounded-lg text-xs font-semibold cursor-pointer capitalize"
-                      style={{
-                        background: priceTier === tier ? 'rgba(212,175,55,0.16)' : 'rgba(255,255,255,0.03)',
-                        color: priceTier === tier ? '#D4AF37' : 'rgba(255,255,255,0.5)',
-                        border: '1px solid rgba(212,175,55,0.15)',
-                      }}
+                      className={`flex-1 py-2.5 rounded-lg text-xs font-semibold cursor-pointer capitalize border border-amber-200 dark:border-[rgba(212,175,55,0.15)] ${
+                        priceTier === tier
+                          ? 'bg-amber-100 text-[#8f6b14] dark:bg-[rgba(212,175,55,0.16)] dark:text-brand-gold'
+                          : 'bg-slate-50 text-slate-500 dark:bg-white/[0.03] dark:text-white/50'
+                      }`}
                     >
                       {tier} price
                     </button>
@@ -468,19 +469,19 @@ export default function ARManagement() {
               </div>
             )}
 
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="rounded-2xl p-4 bg-slate-50 border border-slate-200 dark:bg-white/[0.03] dark:border-white/[0.08]">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h4 className="text-sm font-semibold text-white">Transacted Items</h4>
-                  <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  <p className="text-xs mt-1 text-slate-500 dark:text-white/40">
                     Pick a product to prefill its price, then adjust if needed.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={addItemRow}
-                  className="rounded-lg px-3 py-2 text-xs font-medium cursor-pointer inline-flex items-center gap-1.5 flex-shrink-0"
-                  style={{ background: 'rgba(212,175,55,0.14)', border: '1px solid rgba(212,175,55,0.3)', color: '#D4AF37', minHeight: 36 }}
+                  className="rounded-lg px-3 py-2 text-xs font-medium cursor-pointer inline-flex items-center gap-1.5 flex-shrink-0 bg-amber-100 border border-amber-300 text-[#8f6b14] dark:bg-[rgba(212,175,55,0.14)] dark:border-[rgba(212,175,55,0.3)] dark:text-brand-gold"
+                  style={{ minHeight: 36 }}
                 >
                   <HiOutlinePlus className="size-4" />
                   Add Line
@@ -489,17 +490,17 @@ export default function ARManagement() {
 
               <div className="mt-4 space-y-3">
                 {items.length === 0 ? (
-                  <div className="p-4 text-xs text-center rounded-xl" style={{ color: 'rgba(255,255,255,0.35)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                  <div className="p-4 text-xs text-center rounded-xl text-slate-500 dark:text-white/35 border border-dashed border-slate-200 dark:border-white/10">
                     No items yet — click Add Line to start the order.
                   </div>
                 ) : (
                   items.map((row) => {
                     const lineTotal = row.quantity * row.unitPrice;
                     return (
-                      <div key={row.key} className="rounded-xl p-3 space-y-2" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div key={row.key} className="rounded-xl p-3 space-y-2 bg-slate-50/60 border border-slate-200 dark:bg-white/[0.025] dark:border-white/[0.06]">
                         <div className="grid grid-cols-1 md:grid-cols-[1.4fr_0.7fr_0.55fr_auto] gap-2 items-end">
                           <div>
-                            <label className="text-[11px] block mb-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Product</label>
+                            <label className="text-[11px] block mb-1 text-slate-500 dark:text-white/45">Product</label>
                             <select
                               value={row.catalogId}
                               onChange={(e) => updateItemRow(row.key, 'catalogId', e.target.value)}
@@ -514,7 +515,7 @@ export default function ARManagement() {
                             </select>
                           </div>
                           <div>
-                            <label className="text-[11px] block mb-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Unit Price</label>
+                            <label className="text-[11px] block mb-1 text-slate-500 dark:text-white/45">Unit Price</label>
                             <input
                               type="number"
                               min="0"
@@ -525,7 +526,7 @@ export default function ARManagement() {
                             />
                           </div>
                           <div>
-                            <label className="text-[11px] block mb-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Qty</label>
+                            <label className="text-[11px] block mb-1 text-slate-500 dark:text-white/45">Qty</label>
                             <input
                               type="number"
                               min="1"
@@ -537,15 +538,15 @@ export default function ARManagement() {
                           <button
                             type="button"
                             onClick={() => removeItemRow(row.key)}
-                            className="rounded-lg flex items-center justify-center cursor-pointer flex-shrink-0"
-                            style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', color: '#f87171', width: 40, minHeight: 40 }}
+                            className="rounded-lg flex items-center justify-center cursor-pointer flex-shrink-0 bg-red-50 border border-red-300 text-red-700 dark:bg-red-500/10 dark:border-red-500/25 dark:text-red-300"
+                            style={{ width: 40, minHeight: 40 }}
                             aria-label="Remove line"
                           >
                             <HiOutlineTrash className="size-4" />
                           </button>
                         </div>
-                        <p className="text-[11px] text-right" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          Line total: <span className="font-semibold tabular-nums" style={{ color: '#F2D06B' }}>₱{lineTotal.toLocaleString()}</span>
+                        <p className="text-[11px] text-right text-slate-500 dark:text-white/40">
+                          Line total: <span className="font-semibold tabular-nums text-[#8f6b14] dark:text-brand-gold-light">₱{lineTotal.toLocaleString()}</span>
                         </p>
                       </div>
                     );
@@ -555,7 +556,7 @@ export default function ARManagement() {
             </div>
 
             <div>
-              <label className="label">Note <span className="font-normal" style={{ color: 'rgba(255,255,255,0.35)' }}>(optional)</span></label>
+              <label className="label">Note <span className="font-normal text-slate-500 dark:text-white/35">(optional)</span></label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -579,18 +580,18 @@ export default function ARManagement() {
                       key={option.value}
                       type="button"
                       onClick={() => setPaymentMethod(option.value)}
-                      className="text-left rounded-xl px-3.5 py-3 cursor-pointer motion-safe:transition-colors"
-                      style={{
-                        background: active ? 'rgba(212,175,55,0.12)' : 'rgba(255,255,255,0.03)',
-                        border: active ? '1px solid rgba(212,175,55,0.5)' : '1px solid rgba(255,255,255,0.08)',
-                      }}
+                      className={`text-left rounded-xl px-3.5 py-3 cursor-pointer motion-safe:transition-colors border ${
+                        active
+                          ? 'bg-amber-100 border-amber-400 dark:bg-[rgba(212,175,55,0.12)] dark:border-[rgba(212,175,55,0.5)]'
+                          : 'bg-slate-50 border-slate-200 dark:bg-white/[0.03] dark:border-white/[0.08]'
+                      }`}
                       aria-pressed={active}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="size-4 rounded-full flex items-center justify-center flex-shrink-0" style={{ border: active ? '5px solid #D4AF37' : '2px solid rgba(255,255,255,0.3)' }} />
-                        <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>{option.title}</span>
+                        <span className={`size-4 rounded-full flex items-center justify-center flex-shrink-0 ${active ? 'border-[5px] border-[#8f6b14] dark:border-brand-gold' : 'border-2 border-slate-300 dark:border-white/30'}`} />
+                        <span className="text-sm font-semibold text-slate-800 dark:text-white/85">{option.title}</span>
                       </div>
-                      <p className="text-[11px] mt-1 ml-6" style={{ color: 'rgba(255,255,255,0.4)' }}>{option.sub}</p>
+                      <p className="text-[11px] mt-1 ml-6 text-slate-500 dark:text-white/40">{option.sub}</p>
                     </button>
                   );
                 })}
@@ -598,12 +599,12 @@ export default function ARManagement() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Sub Total</p>
-                <p className="mt-1 text-base font-semibold tabular-nums" style={{ color: 'rgba(255,255,255,0.85)' }}>₱{subTotal.toLocaleString()}</p>
+              <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 dark:bg-white/[0.03] dark:border-white/[0.08]">
+                <p className="text-[11px] text-slate-600 dark:text-white/50">Sub Total</p>
+                <p className="mt-1 text-base font-semibold tabular-nums text-slate-800 dark:text-white/85">₱{subTotal.toLocaleString()}</p>
               </div>
-              <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <label className="text-[11px] block" style={{ color: 'rgba(255,255,255,0.5)' }}>Discount</label>
+              <div className="rounded-xl p-3 bg-slate-50 border border-slate-200 dark:bg-white/[0.03] dark:border-white/[0.08]">
+                <label className="text-[11px] block text-slate-600 dark:text-white/50">Discount</label>
                 <input
                   type="number"
                   min="0"
@@ -613,9 +614,9 @@ export default function ARManagement() {
                   className="glass-input w-full rounded-lg px-2 py-1.5 text-sm mt-1 tabular-nums"
                 />
               </div>
-              <div className="rounded-xl p-3" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
-                <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Total</p>
-                <p className="mt-1 text-lg font-bold tabular-nums" style={{ color: '#D4AF37' }}>₱{total.toLocaleString()}</p>
+              <div className="rounded-xl p-3 bg-amber-50 border border-amber-300 dark:bg-[rgba(212,175,55,0.08)] dark:border-[rgba(212,175,55,0.2)]">
+                <p className="text-[11px] text-slate-600 dark:text-white/50">Total</p>
+                <p className="mt-1 text-lg font-bold tabular-nums text-[#8f6b14] dark:text-brand-gold">₱{total.toLocaleString()}</p>
               </div>
             </div>
 
@@ -633,7 +634,7 @@ export default function ARManagement() {
         {/* AR List */}
         <div className="glass-card rounded-2xl p-6">
           <h3 className="font-semibold text-white mb-1">AR List</h3>
-          <p className="text-xs mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <p className="text-xs mb-5 text-slate-500 dark:text-white/35">
             {filteredReceipts.length} of {acknowledgementReceipts.length} record(s)
           </p>
 
@@ -683,19 +684,19 @@ export default function ARManagement() {
                   const canRequest = ar.canGenerateCodes && !ar.codeStatus;
                   const canRelease = ar.codeStatus === 'approved';
                   return (
-                    <tr key={ar.id} style={{ background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
-                      <td className="py-3 px-4 font-mono text-xs whitespace-nowrap" style={{ color: '#D4AF37' }}>
+                    <tr key={ar.id} className={idx % 2 === 0 ? 'bg-slate-50/60 dark:bg-white/[0.02]' : 'bg-transparent'}>
+                      <td className="py-3 px-4 font-mono text-xs whitespace-nowrap text-[#8f6b14] dark:text-brand-gold">
                         {ar.number}
                         {ar.isLegacy && <LegacyBadge />}
                       </td>
-                      <td className="py-3 px-4 text-xs whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.4)' }}>{ar.date}</td>
-                      <td className="py-3 px-4 text-xs whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.65)' }}>{ar.cashier}</td>
+                      <td className="py-3 px-4 text-xs whitespace-nowrap text-slate-500 dark:text-white/40">{ar.date}</td>
+                      <td className="py-3 px-4 text-xs whitespace-nowrap text-slate-700 dark:text-white/65">{ar.cashier}</td>
                       <td className="py-3 px-4 text-xs">
-                        <div style={{ color: 'rgba(255,255,255,0.8)' }}>{ar.memberName}</div>
-                        <div style={{ color: 'rgba(255,255,255,0.4)' }}>@{ar.memberUsername}</div>
+                        <div className="text-slate-800 dark:text-white/80">{ar.memberName}</div>
+                        <div className="text-slate-500 dark:text-white/40">@{ar.memberUsername}</div>
                       </td>
-                      <td className="py-3 px-4 text-xs whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.65)' }}>{getTransactionMode(ar.mode).label}</td>
-                      <td className="py-3 px-4 text-xs text-right tabular-nums whitespace-nowrap" style={{ color: '#F2D06B' }}>₱{ar.total.toLocaleString()}</td>
+                      <td className="py-3 px-4 text-xs whitespace-nowrap text-slate-700 dark:text-white/65">{getTransactionMode(ar.mode).label}</td>
+                      <td className="py-3 px-4 text-xs text-right tabular-nums whitespace-nowrap text-[#8f6b14] dark:text-brand-gold-light">₱{ar.total.toLocaleString()}</td>
                       <td className="py-3 px-4"><CodeStatusBadge receipt={ar} /></td>
                       <td className="py-3 px-4 min-w-[180px]"><RemarksList remarks={ar.remarks} /></td>
                       <td className="py-3 px-4">
@@ -703,8 +704,8 @@ export default function ARManagement() {
                           <button
                             type="button"
                             onClick={() => setPrintingReceipt(ar)}
-                            className="rounded-lg py-2 px-3 text-xs font-medium border cursor-pointer inline-flex items-center justify-center gap-1.5"
-                            style={{ borderColor: 'rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.04)', minHeight: 36 }}
+                            className="rounded-lg py-2 px-3 text-xs font-medium border cursor-pointer inline-flex items-center justify-center gap-1.5 border-slate-300 text-slate-700 bg-slate-50 dark:border-white/[0.14] dark:text-white/75 dark:bg-white/[0.04]"
+                            style={{ minHeight: 36 }}
                           >
                             <HiOutlinePrinter className="size-3.5" />
                             Print AR
@@ -714,8 +715,8 @@ export default function ARManagement() {
                             onClick={() => handleGenerateCodes(ar)}
                             disabled={!canRequest}
                             title={!ar.canGenerateCodes ? modeConfigNoCodeTitle(ar) : ar.codeStatus ? 'Codes have already been requested for this AR.' : undefined}
-                            className="rounded-lg py-2 px-3 text-xs font-medium border cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 inline-flex items-center justify-center gap-1.5"
-                            style={{ borderColor: 'rgba(59,130,246,0.35)', color: '#93c5fd', background: 'rgba(59,130,246,0.1)', minHeight: 36 }}
+                            className="rounded-lg py-2 px-3 text-xs font-medium border cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 inline-flex items-center justify-center gap-1.5 border-blue-300 text-blue-700 bg-blue-50 dark:border-blue-500/35 dark:text-blue-300 dark:bg-blue-500/10"
+                            style={{ minHeight: 36 }}
                           >
                             <HiOutlineKey className="size-3.5" />
                             Generate Codes
@@ -725,8 +726,8 @@ export default function ARManagement() {
                             onClick={() => openReleaseDialog(ar)}
                             disabled={!canRelease}
                             title={canRelease ? undefined : 'Codes must be approved before they can be released.'}
-                            className="rounded-lg py-2 px-3 text-xs font-semibold cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 inline-flex items-center justify-center gap-1.5"
-                            style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', color: '#fff', minHeight: 36 }}
+                            className="rounded-lg py-2 px-3 text-xs font-semibold cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-gradient-to-br dark:from-emerald-600 dark:to-emerald-700"
+                            style={{ minHeight: 36 }}
                           >
                             <HiOutlineCheckCircle className="size-3.5" />
                             Release Codes
@@ -754,8 +755,7 @@ export default function ARManagement() {
           never ends up on paper. */}
       {printingReceipt && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/60"
           onMouseDown={() => setPrintingReceipt(null)}
         >
           <style>{`
@@ -767,43 +767,42 @@ export default function ARManagement() {
           `}</style>
           <div
             onMouseDown={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-2xl overflow-hidden max-h-[88vh] flex flex-col"
-            style={{ background: '#15161a', border: '1px solid rgba(255,255,255,0.12)' }}
+            className="w-full max-w-lg rounded-2xl overflow-hidden max-h-[88vh] flex flex-col bg-white border border-slate-200 dark:bg-[#15161a] dark:border-white/[0.12]"
           >
-            <div id="ar-print-receipt" className="p-6 overflow-y-auto" style={{ background: '#ffffff', color: '#111827' }}>
-              <div className="flex items-start justify-between gap-3 pb-4" style={{ borderBottom: '1px solid #e5e7eb' }}>
+            <div id="ar-print-receipt" className="p-6 overflow-y-auto bg-white text-slate-900">
+              <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-200">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em]" style={{ color: '#9ca3af' }}>NOGATU Alliance</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">NOGATU Alliance</p>
                   <h2 className="text-lg font-bold mt-1">Acknowledgement Receipt</h2>
                 </div>
                 <div className="text-right">
                   <p className="font-mono text-sm font-semibold">{printingReceipt.number}</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{printingReceipt.date}</p>
+                  <p className="text-xs mt-0.5 text-slate-500">{printingReceipt.date}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 py-4 text-sm" style={{ borderBottom: '1px solid #e5e7eb' }}>
+              <div className="grid grid-cols-2 gap-4 py-4 text-sm border-b border-slate-200">
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide" style={{ color: '#9ca3af' }}>Cashier</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400">Cashier</p>
                   <p className="mt-0.5">{printingReceipt.cashier}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide" style={{ color: '#9ca3af' }}>Member</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400">Member</p>
                   <p className="mt-0.5">{printingReceipt.memberName} (@{printingReceipt.memberUsername})</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide" style={{ color: '#9ca3af' }}>Transaction Mode</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400">Transaction Mode</p>
                   <p className="mt-0.5">{getTransactionMode(printingReceipt.mode).label}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide" style={{ color: '#9ca3af' }}>Payment Method</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400">Payment Method</p>
                   <p className="mt-0.5">{printingReceipt.paymentMethod === 'cash' ? 'Cash at office' : 'E-wallet'}</p>
                 </div>
               </div>
 
               <table className="w-full text-sm mt-4">
                 <thead>
-                  <tr style={{ color: '#6b7280' }}>
+                  <tr className="text-slate-500">
                     <th className="text-left font-medium pb-2">Item</th>
                     <th className="text-center font-medium pb-2">Qty</th>
                     <th className="text-right font-medium pb-2">Unit Price</th>
@@ -812,7 +811,7 @@ export default function ARManagement() {
                 </thead>
                 <tbody>
                   {printingReceipt.lineItems.map((line) => (
-                    <tr key={line.name} style={{ borderTop: '1px solid #f3f4f6' }}>
+                    <tr key={line.name} className="border-t border-slate-100">
                       <td className="py-2">{line.name}</td>
                       <td className="py-2 text-center">{line.quantity}</td>
                       <td className="py-2 text-right tabular-nums">₱{line.unitPrice.toLocaleString()}</td>
@@ -823,17 +822,17 @@ export default function ARManagement() {
               </table>
 
               {printingReceipt.note && (
-                <p className="text-xs mt-4" style={{ color: '#6b7280' }}>Note: {printingReceipt.note}</p>
+                <p className="text-xs mt-4 text-slate-500">Note: {printingReceipt.note}</p>
               )}
 
-              <div className="mt-4 pt-4 space-y-1 text-sm" style={{ borderTop: '1px solid #e5e7eb' }}>
-                <div className="flex justify-between"><span style={{ color: '#6b7280' }}>Sub Total</span><span className="tabular-nums">₱{printingReceipt.subTotal.toLocaleString()}</span></div>
-                <div className="flex justify-between"><span style={{ color: '#6b7280' }}>Discount</span><span className="tabular-nums">₱{printingReceipt.discount.toLocaleString()}</span></div>
+              <div className="mt-4 pt-4 space-y-1 text-sm border-t border-slate-200">
+                <div className="flex justify-between"><span className="text-slate-500">Sub Total</span><span className="tabular-nums">₱{printingReceipt.subTotal.toLocaleString()}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Discount</span><span className="tabular-nums">₱{printingReceipt.discount.toLocaleString()}</span></div>
                 <div className="flex justify-between text-base font-bold"><span>Total</span><span className="tabular-nums">₱{printingReceipt.total.toLocaleString()}</span></div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="flex justify-end gap-2 p-4 border-t border-slate-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setPrintingReceipt(null)}
@@ -861,27 +860,22 @@ export default function ARManagement() {
       {/* Release Codes — requires the member's own username as a final check */}
       {releasingReceipt && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/60"
           onMouseDown={() => setReleasingReceipt(null)}
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-2xl p-6"
-            style={{ background: '#15161a', border: '1px solid rgba(255,255,255,0.12)' }}
+            className="w-full max-w-md rounded-2xl p-6 bg-white border border-slate-200 dark:bg-[#15161a] dark:border-white/[0.12]"
           >
             <div className="flex items-start gap-3">
-              <div
-                className="size-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(16,185,129,0.14)', border: '1px solid rgba(16,185,129,0.3)', color: '#34d399' }}
-              >
+              <div className="size-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-50 border border-emerald-300 text-emerald-700 dark:bg-emerald-500/[0.14] dark:border-emerald-500/30 dark:text-emerald-300">
                 <HiOutlineCheckCircle className="size-5" />
               </div>
               <div className="min-w-0">
                 <h3 className="font-display text-lg font-bold text-white">Release Codes</h3>
-                <p className="text-sm mt-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                  Releasing codes for <strong style={{ color: '#D4AF37' }}>{releasingReceipt.number}</strong> to{' '}
-                  <strong style={{ color: '#D4AF37' }}>{releasingReceipt.memberName}</strong>. Enter the member&apos;s
+                <p className="text-sm mt-1.5 text-slate-600 dark:text-white/60">
+                  Releasing codes for <strong className="text-[#8f6b14] dark:text-brand-gold">{releasingReceipt.number}</strong> to{' '}
+                  <strong className="text-[#8f6b14] dark:text-brand-gold">{releasingReceipt.memberName}</strong>. Enter the member&apos;s
                   username to confirm.
                 </p>
               </div>
@@ -912,8 +906,8 @@ export default function ARManagement() {
               <button
                 type="button"
                 onClick={handleConfirmRelease}
-                className="rounded-xl py-2.5 px-4 text-sm font-semibold text-white cursor-pointer"
-                style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', minHeight: 44 }}
+                className="rounded-xl py-2.5 px-4 text-sm font-semibold text-white cursor-pointer bg-emerald-600 hover:bg-emerald-700 dark:bg-gradient-to-br dark:from-emerald-600 dark:to-emerald-700"
+                style={{ minHeight: 44 }}
               >
                 Confirm Release
               </button>

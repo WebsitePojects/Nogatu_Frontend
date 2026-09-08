@@ -1,3 +1,5 @@
+import { MAINTENANCE_PRODUCTS } from '../constants/maintenanceProducts';
+
 // In-memory order desk store backing the Transact Order and Code Approvals
 // admin screens. Both pages import this module so an order transacted on one
 // screen shows up immediately in the other's queue (e.g. a saved AR appears
@@ -94,14 +96,20 @@ export const PACKAGE_CATALOG = [
   { id: 'pkg-diamond', name: 'Diamond Package', packagePrice: 150000 },
 ];
 
-// Repurchase/maintenance products — three price tiers so the CASH modes can
-// show the member/stockist vs. SRP distinction.
-export const PRODUCT_CATALOG = [
-  { id: 'prd-coffee', name: 'Nogatu Wellness Coffee (25s)', memberPrice: 450, stockistPrice: 500, srpPrice: 650 },
-  { id: 'prd-soap', name: 'Nogatu Herbal Soap', memberPrice: 120, stockistPrice: 150, srpPrice: 199 },
-  { id: 'prd-multivit', name: 'Nogatu Multivitamins', memberPrice: 380, stockistPrice: 420, srpPrice: 550 },
-  { id: 'prd-lotion', name: 'Nogatu Whitening Lotion', memberPrice: 280, stockistPrice: 320, srpPrice: 420 },
-];
+// Repurchase products come from the real maintenance catalogue so the names and
+// prices on a receipt match what the business actually sells.
+//
+// The three price tiers all resolve to the same catalogue price on purpose. This
+// system holds ONE price per product; a member/stockist/SRP price list does not
+// exist as data anywhere. Rather than invent numbers that would end up on a
+// printed receipt, the tiers read the real price until a price list is supplied.
+export const PRODUCT_CATALOG = MAINTENANCE_PRODUCTS.map((product) => ({
+  id: `prd-${product.key}`,
+  name: product.name,
+  memberPrice: product.price,
+  stockistPrice: product.price,
+  srpPrice: product.price,
+}));
 
 export function getCatalogForMode(modeId) {
   const mode = getTransactionMode(modeId);
@@ -195,7 +203,7 @@ const acknowledgementReceipts = [
     memberName: 'Jervy Latumbo',
     memberUsername: 'JervyL',
     mode: 'cash_member_stockist',
-    lineItems: [lineItem('Nogatu Wellness Coffee (25s)', 4, 450)],
+    lineItems: [lineItem('Nogatu Coffee Mix', 4, 495)],
     subTotal: 1800,
     discount: 0,
     total: 1800,
@@ -217,7 +225,7 @@ const acknowledgementReceipts = [
     memberName: 'Rowell Mahinay',
     memberUsername: 'RowellM',
     mode: 'cash_srp',
-    lineItems: [lineItem('Nogatu Herbal Soap', 10, 199)],
+    lineItems: [lineItem('Nogatu Black Coffee', 10, 250)],
     subTotal: 1990,
     discount: 0,
     total: 1990,
@@ -296,7 +304,7 @@ const acknowledgementReceipts = [
     memberName: 'Vernie Suarez',
     memberUsername: 'VernieS01',
     mode: 'cash_member_stockist',
-    lineItems: [lineItem('Nogatu Multivitamins', 6, 420)],
+    lineItems: [lineItem('Vitamin C with Zinc & Mangosteen', 6, 580)],
     subTotal: 2520,
     discount: 100,
     total: 2420,
@@ -334,7 +342,7 @@ const acknowledgementReceipts = [
     memberName: 'Eunice Topacio',
     memberUsername: 'Eunicetop01',
     mode: 'cash_member_stockist',
-    lineItems: [lineItem('Nogatu Whitening Lotion', 3, 320)],
+    lineItems: [lineItem('Nogatu Glow', 3, 580)],
     subTotal: 960,
     discount: 0,
     total: 960,
@@ -372,7 +380,7 @@ const acknowledgementReceipts = [
     memberName: 'Redheart Suarez',
     memberUsername: 'redheart',
     mode: 'cash_srp',
-    lineItems: [lineItem('Nogatu Wellness Coffee (25s)', 5, 650)],
+    lineItems: [lineItem('Nogatu Barley Juice', 5, 850)],
     subTotal: 3250,
     discount: 0,
     total: 3250,
@@ -425,7 +433,7 @@ const codeRequests = [
     cashier: 'RenatoB',
     memberName: 'Jervy Latumbo',
     memberUsername: 'JervyL',
-    requestedItems: [{ name: 'Nogatu Wellness Coffee (25s)', quantity: 4 }],
+    requestedItems: [{ name: 'Nogatu Coffee Mix', quantity: 4 }],
     sameNetworkTree: true,
     status: 'approved',
     rejectionReason: null,
@@ -449,7 +457,7 @@ const codeRequests = [
     cashier: 'MarifeO',
     memberName: 'Vernie Suarez',
     memberUsername: 'VernieS01',
-    requestedItems: [{ name: 'Nogatu Multivitamins', quantity: 6 }],
+    requestedItems: [{ name: 'Vitamin C with Zinc & Mangosteen', quantity: 6 }],
     sameNetworkTree: true,
     status: 'approved',
     rejectionReason: null,
@@ -473,7 +481,7 @@ const codeRequests = [
     cashier: 'AngelicaD',
     memberName: 'Eunice Topacio',
     memberUsername: 'Eunicetop01',
-    requestedItems: [{ name: 'Nogatu Whitening Lotion', quantity: 3 }],
+    requestedItems: [{ name: 'Nogatu Glow', quantity: 3 }],
     sameNetworkTree: true,
     status: 'pending',
     rejectionReason: null,
@@ -487,7 +495,7 @@ const codeRequests = [
     memberUsername: 'DenmarkL01',
     requestedItems: [
       { name: 'Silver Package', quantity: 1 },
-      { name: 'Nogatu Wellness Coffee (25s)', quantity: 2 },
+      { name: 'Nogatu Coffee Mix', quantity: 2 },
     ],
     sameNetworkTree: true,
     status: 'pending',
