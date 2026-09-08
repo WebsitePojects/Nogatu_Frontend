@@ -738,7 +738,7 @@ export default function ARManagement() {
                 })}
                 {filteredReceipts.length === 0 && (
                   <tr>
-                    <td colSpan="9" className="py-12 text-center text-sm" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    <td colSpan="9" className="py-12 text-center text-sm text-slate-400 dark:text-white/25">
                       No ARs match the current filters.
                     </td>
                   </tr>
@@ -837,8 +837,10 @@ export default function ARManagement() {
               <button
                 type="button"
                 onClick={() => setPrintingReceipt(null)}
-                className="rounded-xl py-2.5 px-4 text-sm font-medium border cursor-pointer"
-                style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.05)', minHeight: 44 }}
+                className="rounded-xl py-2.5 px-4 text-sm font-medium border cursor-pointer
+                  border-slate-300 text-slate-700 bg-white hover:bg-slate-50
+                  dark:border-white/15 dark:text-white/70 dark:bg-white/5 dark:hover:bg-white/10"
+                style={{ minHeight: 44 }}
               >
                 Close
               </button>
@@ -900,8 +902,10 @@ export default function ARManagement() {
               <button
                 type="button"
                 onClick={() => setReleasingReceipt(null)}
-                className="rounded-xl py-2.5 px-4 text-sm font-medium border cursor-pointer"
-                style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.05)', minHeight: 44 }}
+                className="rounded-xl py-2.5 px-4 text-sm font-medium border cursor-pointer
+                  border-slate-300 text-slate-700 bg-white hover:bg-slate-50
+                  dark:border-white/15 dark:text-white/70 dark:bg-white/5 dark:hover:bg-white/10"
+                style={{ minHeight: 44 }}
               >
                 Cancel
               </button>
