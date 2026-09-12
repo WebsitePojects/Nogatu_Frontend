@@ -622,7 +622,7 @@ export default function DashboardMetricDetail() {
             {leadershipLevels.map((level) => (
               <div key={`leadership-level-${level}`} className="space-y-3">
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold" style={{ color: PORTAL_TITLE }}>Level {level}</h3>
+                  <h3 className="text-sm font-semibold" style={{ color: PORTAL_TITLE }}>{level === 0 ? 'Legacy reconciliation' : `Level ${level}`}</h3>
                   <span className="text-xs" style={{ color: PORTAL_MUTED }}>{leadershipGroups[level].length} account(s)</span>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-2 xl:grid-cols-3 md:overflow-visible">
@@ -635,7 +635,7 @@ export default function DashboardMetricDetail() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm" style={{ color: PORTAL_TITLE }}>{row.fullname || row.username}</p>
-                          <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>{row.username || '-'} - Level {row.level}</p>
+                          <p className="text-xs mt-1" style={{ color: PORTAL_MUTED }}>{row.rowType === 'legacy_reconciliation' ? 'Retained credited income; no duplicate credit' : `${row.username || '-'} - Level ${row.level}`}</p>
                         </div>
                         <p className="text-xs" style={{ color: PORTAL_MUTED }}>#{index + 1}</p>
                       </div>
@@ -649,8 +649,8 @@ export default function DashboardMetricDetail() {
                           <p className="mt-1 font-semibold" style={{ color: config.accent }}>{fmtMoney(row.amount || 0)}</p>
                         </div>
                         <div className="rounded-xl p-3 col-span-2" style={{ background: 'color-mix(in srgb, var(--portal-soft-bg) 76%, transparent)' }}>
-                          <p className="text-[11px]" style={{ color: PORTAL_MUTED }}>Direct Referrals</p>
-                          <p className="mt-1" style={{ color: PORTAL_TEXT }}>{fmtInt(row.directReferralCount || 0)}</p>
+                          <p className="text-[11px]" style={{ color: PORTAL_MUTED }}>{row.rowType === 'legacy_reconciliation' ? 'Record note' : 'Direct Referrals'}</p>
+                          <p className="mt-1" style={{ color: PORTAL_TEXT }}>{row.rowType === 'legacy_reconciliation' ? row.note : fmtInt(row.directReferralCount || 0)}</p>
                         </div>
                       </div>
                     </div>
