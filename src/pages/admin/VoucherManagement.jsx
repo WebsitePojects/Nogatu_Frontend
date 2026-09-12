@@ -57,13 +57,14 @@ function VoucherSourceBadge({ source, label }) {
   );
 }
 
-const STATUS_MAP = { 1: 'Active', 2: 'Expired', 3: 'Fully Used', 4: 'Suspended' };
+const STATUS_MAP = { 1: 'Active', 2: 'Expired', 3: 'Fully Used', 4: 'Suspended', 5: 'Revoked' };
 
 const STATUS_STYLES = {
   1: { color: '#34d399', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' },
   2: { color: '#fbbf24', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' },
   3: { color: '#93c5fd', background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)' },
   4: { color: '#f87171', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' },
+  5: { color: '#c084fc', background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.25)' },
 };
 
 const FILTERS = [
@@ -72,6 +73,7 @@ const FILTERS = [
   { key: '2', label: 'Expired' },
   { key: '3', label: 'Fully Used' },
   { key: '4', label: 'Suspended' },
+  { key: '5', label: 'Revoked' },
 ];
 
 const PRODUCT_BY_CODE = Object.fromEntries(MAINTENANCE_PRODUCTS.map((product) => [Number(product.code), product]));
@@ -953,7 +955,7 @@ export default function VoucherManagement() {
                               <HiOutlineEye className="size-4" />
                               View
                             </button>
-                            {canManageAvailments && Number(detailVoucher.status) !== 4 && Number(detailVoucher.status) !== 2 && (
+                            {canManageAvailments && Number(detailVoucher.status) !== 4 && Number(detailVoucher.status) !== 2 && Number(detailVoucher.status) !== 5 && String(availment.claimStatus || '').toLowerCase() !== 'cancelled' && (
                               <button
                                 onClick={() => openEditAvailmentEditor(availment)}
                                 className="portal-button portal-neutral-button px-3 py-2 text-xs inline-flex items-center gap-2"
