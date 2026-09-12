@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import api from '../../api';
 import toast from 'react-hot-toast';
 import { MAINTENANCE_PRODUCT_OPTIONS } from '../../constants/maintenanceProducts';
@@ -31,10 +31,13 @@ const isCdEligible = (productType) => CD_ELIGIBLE_PRODUCT_TYPES.includes(Number(
 
 export default function GenerateCodes() {
   const [noOfCodes, setNoOfCodes] = useState('');
+  const [arNumber, setArNumber] = useState('');
   const [productType, setProductType] = useState(10);
   const [codeType, setCodeType] = useState(CODE_TYPE_PAID);
   const [generating, setGenerating] = useState(false);
   const [generatedCodes, setGeneratedCodes] = useState([]);
+  const generatingRef = useRef(false);
+  const intentRef = useRef({ signature: '', key: '' });
 
   const cdAllowed = isCdEligible(productType);
 
@@ -51,21 +54,33 @@ export default function GenerateCodes() {
 
   async function handleGenerate(e) {
     e.preventDefault();
+    if (generatingRef.current) return;
     const n = Number(noOfCodes);
-    if (!Number.isFinite(n) || n < 1) { toast.error('Enter how many codes to generate'); return; }
+    if (!Number.isInteger(n) || n < 1 || n > 500) { toast.error('Enter a whole number of codes from 1 to 500'); return; }
+    if (!arNumber.trim()) { toast.error('Enter the AR number'); return; }
     // Last line of defence in the form; the server is the authority.
     if (codeType === CODE_TYPE_CD && !cdAllowed) {
       toast.error('CD Slot is only available for Gold and Platinum');
       return;
     }
+    generatingRef.current = true;
     setGenerating(true);
+    const signature = JSON.stringify({ noOfCodes: n, productType, codeType, arNumber: arNumber.trim() });
+    if (intentRef.current.signature !== signature || !intentRef.current.key) {
+      intentRef.current = { signature, key: crypto.randomUUID() };
+    }
+    const idempotencyKey = intentRef.current.key;
     try {
-      const res = await api.post('/admin/codes/generate', { noOfCodes: n, productType, codeType });
+      const res = await api.post('/admin/codes/generate', { noOfCodes: n, productType, codeType, arNumber }, {
+        headers: { 'Idempotency-Key': idempotencyKey },
+      });
       setGeneratedCodes(res.data.codes);
+      intentRef.current = { signature: '', key: '' };
       toast.success(`${res.data.count} code(s) generated!`);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Generation failed');
     } finally {
+      generatingRef.current = false;
       setGenerating(false);
     }
   }
@@ -96,14 +111,29 @@ export default function GenerateCodes() {
 
           <form onSubmit={handleGenerate} className="space-y-5">
             <div>
+              <label className="label">AR Number</label>
+              <input
+                type="text"
+                value={arNumber}
+                onChange={(e) => setArNumber(e.target.value)}
+                disabled={generating}
+                className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
+                maxLength={120}
+                placeholder="e.g. AR-2026-001"
+                required
+              />
+            </div>
+
+            <div>
               <label className="label">Number of Codes</label>
               <input
                 type="number"
                 value={noOfCodes}
                 onChange={(e) => setNoOfCodes(e.target.value === '' ? '' : Number(e.target.value))}
+                disabled={generating}
                 className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
                 min="1"
-                max="1000"
+                max="500"
                 placeholder="e.g. 10"
                 required
               />
@@ -114,6 +144,7 @@ export default function GenerateCodes() {
               <select
                 value={productType}
                 onChange={(e) => handleProductTypeChange(Number(e.target.value))}
+                disabled={generating}
                 className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5"
               >
                 {PRODUCT_OPTIONS.map((opt) => (
@@ -144,7 +175,7 @@ export default function GenerateCodes() {
                         name="codeType"
                         value={opt.value}
                         checked={selected}
-                        disabled={disabled}
+                        disabled={disabled || generating}
                         onChange={() => { if (!disabled) setCodeType(opt.value); }}
                         className="sr-only"
                       />
