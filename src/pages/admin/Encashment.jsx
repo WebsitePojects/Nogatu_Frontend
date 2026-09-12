@@ -28,6 +28,7 @@ export default function Encashment() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
+  const [cashStatus, setCashStatus] = useState('');
   const [exporting, setExporting] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [activeDetails, setActiveDetails] = useState(null);
@@ -49,11 +50,13 @@ export default function Encashment() {
       const activeStart = nextFilters.startDate ?? startDate;
       const activeEnd = nextFilters.endDate ?? endDate;
       const activeKeyword = nextFilters.keyword ?? keyword;
+      const activeCashStatus = nextFilters.cashStatus ?? cashStatus;
 
       let url = `/admin/encashment?page=${targetPage}`;
       if (activeStart) url += `&startDate=${activeStart}`;
       if (activeEnd) url += `&endDate=${activeEnd}`;
       if (activeKeyword.trim()) url += `&q=${encodeURIComponent(activeKeyword.trim())}`;
+      if (activeCashStatus) url += `&cashStatus=${activeCashStatus}`;
       const res = await api.get(url);
       setRecords(res.data.records);
       setTotalPages(res.data.totalPages);
@@ -183,9 +186,10 @@ export default function Encashment() {
             onClick={() => {
               setKeyword('');
               setStartDate('');
-              setEndDate('');
-              setPage(1);
-              setTimeout(() => loadData(1, { keyword: '', startDate: '', endDate: '' }), 0);
+      setEndDate('');
+      setCashStatus('');
+      setPage(1);
+      setTimeout(() => loadData(1, { keyword: '', startDate: '', endDate: '', cashStatus: '' }), 0);
             }}
             className="rounded-xl py-2.5 px-5 text-sm font-medium border flex-1 sm:flex-initial text-center justify-center items-center"
             style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.05)' }}
@@ -241,6 +245,14 @@ export default function Encashment() {
               </button>
               <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{summary.daily.length} day rows</span>
             </div>
+          </div>
+          <div>
+            <label className="label">Payout Status</label>
+            <select value={cashStatus} onChange={(e) => setCashStatus(e.target.value)} className="glass-input w-full rounded-xl px-4 py-2.5 text-sm mt-1.5">
+              <option value="">All statuses</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+            </select>
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
             <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -312,7 +324,7 @@ export default function Encashment() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  {['Name', 'Username', 'Date', 'Amount', 'Deductions', 'Income Details', 'Payout Details', 'Status', 'Actions'].map(h => (
+                  {['Name', 'Username', 'Date', 'Amount', 'Tax Rate', 'Deductions', 'Income Details', 'Payout Details', 'Status', 'Actions'].map(h => (
                     <th key={h} className="table-header p-3 text-left font-semibold text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
@@ -330,6 +342,7 @@ export default function Encashment() {
                     <td className="p-3 text-white/60">{r.username}</td>
                     <td className="p-3 text-xs text-white/40">{r.cashtransdate || '-'}</td>
                     <td className="p-3 text-white/80 font-medium">&#8369;{fmt(r.encashment)}</td>
+                    <td className="p-3 text-white/60">{fmt(r.taxRatePercent)}%</td>
                     <td className="p-3 text-white/60">&#8369;{fmt(r.deductions)}</td>
                     <td className="p-3">
                       <div className="flex flex-wrap gap-1.5">
@@ -386,7 +399,7 @@ export default function Encashment() {
                 ))}
                 {records.length === 0 && (
                   <tr>
-                    <td colSpan="9" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    <td colSpan="10" className="py-12 text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
                       No records found.
                     </td>
                   </tr>
@@ -415,6 +428,7 @@ export default function Encashment() {
                 <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
                   <div><p className="text-white/40">Amount</p><p className="text-white/80 font-semibold tabular-nums">&#8369;{fmt(r.encashment)}</p></div>
                   <div><p className="text-white/40">Deductions</p><p className="text-white/70 tabular-nums">&#8369;{fmt(r.deductions)}</p></div>
+                  <div><p className="text-white/40">Tax Rate</p><p className="text-white/70 tabular-nums">{fmt(r.taxRatePercent)}%</p></div>
                   <div className="col-span-2"><p className="text-white/40">Payout</p><p className="text-white/70 break-words">{r.payoutDetails || 'N/A'}</p></div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
@@ -513,7 +527,7 @@ export default function Encashment() {
                   <div className="mt-4 text-sm space-y-1 rounded-xl p-3" style={{ color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(148,163,184,0.2)' }}>
                     <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>Encashment Deductions</p>
                     <p>Gross Encashment: ₱{fmt(activeDetails?.grossEncashment)}</p>
-                    <p>Tax (10%): -₱{fmt(activeDetails?.deductions?.tax)}</p>
+                    <p>Tax ({fmt(activeDetails?.deductions?.taxRatePercent)}%): -₱{fmt(activeDetails?.deductions?.tax)}</p>
                     <p>Fee: -₱{fmt(activeDetails?.deductions?.fee)}</p>
                     <p>CD Deduction: -₱{fmt(activeDetails?.deductions?.cdDeduction)}</p>
                     <p className="pt-1 border-t" style={{ borderColor: 'rgba(212,175,55,0.2)', color: '#D4AF37', fontWeight: 700 }}>
