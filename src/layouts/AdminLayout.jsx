@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import api from '../api';
@@ -12,6 +12,7 @@ import {
   HiOutlineSparkles, HiOutlineBadgeCheck, HiOutlineTicket,
   HiOutlineChat, HiOutlineClipboardList, HiOutlineX, HiOutlineViewBoards,
   HiOutlineDotsHorizontal, HiOutlineUserAdd,
+  HiOutlineDocumentText,
 } from 'react-icons/hi';
 import { FaSitemap, FaProjectDiagram } from 'react-icons/fa';
 
@@ -53,6 +54,16 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Receipts (AR)',
+    items: [
+      { to: '/admin/ar/new',       label: 'New AR',       icon: HiOutlineDocumentText, roles: [1, 2] },
+      { to: '/admin/ar',           label: 'All ARs',      icon: HiOutlineDocumentText, roles: [1, 2, 3] },
+      { to: '/admin/ar/approvals', label: 'AR Approvals', icon: HiOutlineDocumentText, roles: [1] },
+      { to: '/admin/ar/reports',   label: 'AR Reports',   icon: HiOutlineDocumentText, roles: [1, 3] },
+      { to: '/admin/ar/settings',  label: 'AR Settings',  icon: HiOutlineDocumentText, roles: [1] },
+    ],
+  },
+  {
     label: 'Content',
     items: [
       { to: '/admin/messages',     label: 'Contact Messages', icon: HiOutlineBell,          roles: [1, 3] },
@@ -70,6 +81,21 @@ const NAV_GROUPS = [
   },
 ];
 
+/* ─── Active-item logic ───────────────────────────────────────── */
+
+const ALL_NAV_TOS = NAV_GROUPS.flatMap((g) => g.items.map((i) => i.to));
+
+/**
+ * An item is active on its own path or any child path (/admin/ar/7 -> "All ARs"), unless a
+ * longer sibling also matches (/admin/ar/new belongs to "New AR", not "All ARs").
+ */
+function isNavItemActive(itemTo, pathname, siblingTos = ALL_NAV_TOS) {
+  if (pathname === itemTo) return true;
+  if (!pathname.startsWith(`${itemTo}/`)) return false;
+  return !siblingTos.some((other) => other.length > itemTo.length
+    && (pathname === other || pathname.startsWith(`${other}/`)));
+}
+
 /* ─── Bottom-nav tab definitions ──────────────────────────── */
 
 const ADMIN_BOTTOM_NAV = [
@@ -77,6 +103,8 @@ const ADMIN_BOTTOM_NAV = [
   { id: 'manage',  label: 'Manage',  icon: HiOutlineViewBoards,      drawer: 'manage',       roles: [1, 3] },
   { id: 'finance', label: 'Finance', icon: HiOutlineCash,            drawer: 'finance',      roles: [1, 3] },
   { id: 'vouchers',label: 'Vouchers',icon: HiOutlineTicket,          to: '/admin/voucher-management' },
+  // Cashiers get an AR tab (New AR + All ARs); admins and BOD reach AR from the More drawer, keeping their bar at five.
+  { id: 'ar',      label: 'AR',      icon: HiOutlineDocumentText,    drawer: 'ar',           roles: [2] },
   { id: 'more',    label: 'More',    icon: HiOutlineDotsHorizontal,  drawer: 'more',         roles: [1, 3] },
 ];
 
@@ -119,6 +147,43 @@ export default function AdminLayout() {
 
   const showSupportBadge = canSeeSupport && !onSupportPage && supportUnread > 0;
 
+  /* AR approvals badge (Super Admin only). Convenience only: fails silently, hidden at 0.
+     Fetched on mount, then every minute while the tab is visible, on returning to the tab, and when
+     leaving the approvals page (where the count changes). Not on every navigation. */
+  const [pendingApprovals, setPendingApprovals] = useState(0);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  const refreshApprovals = useCallback(() => {
+    if (rights !== 1) return;
+    api.get('/admin/ar/receipts', { params: { status: 'pending_approval', limit: 1 } })
+      .then((res) => { if (mountedRef.current) setPendingApprovals(Number(res.data?.total || 0)); })
+      .catch(() => { /* a badge must never raise an error toast */ });
+  }, [rights]);
+
+  useEffect(() => {
+    if (rights !== 1) return undefined;
+    refreshApprovals();
+    const timer = setInterval(() => { if (!document.hidden) refreshApprovals(); }, 60000);
+    const onVisible = () => { if (!document.hidden) refreshApprovals(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [rights, refreshApprovals]);
+
+  const prevPathRef = useRef(location.pathname);
+  useEffect(() => {
+    const prev = prevPathRef.current;
+    prevPathRef.current = location.pathname;
+    const APPROVALS = '/admin/ar/approvals';
+    if (prev.startsWith(APPROVALS) && !location.pathname.startsWith(APPROVALS)) refreshApprovals();
+  }, [location.pathname, refreshApprovals]);
+
   /* Role-filter sidebar */
   const filteredGroups = useMemo(() => NAV_GROUPS
     .map(g => ({ ...g, items: g.items.filter(i => !i.roles || i.roles.includes(rights)) }))
@@ -135,10 +200,12 @@ export default function AdminLayout() {
   /* Drawer item pools (filtered) */
   const manageItems  = useMemo(() => NAV_GROUPS.find(g => g.label === 'Management')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [], [rights]);
   const financeItems = useMemo(() => NAV_GROUPS.find(g => g.label === 'Finance')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [], [rights]);
+  const arItems      = useMemo(() => NAV_GROUPS.find(g => g.label === 'Receipts (AR)')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [], [rights]);
   const moreItems    = useMemo(() => [
+    ...arItems,
     ...( NAV_GROUPS.find(g => g.label === 'Content')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [] ),
     ...( NAV_GROUPS.find(g => g.label === 'Settings')?.items.filter(i => !i.roles || i.roles.includes(rights)) || [] ),
-  ], [rights]);
+  ], [rights, arItems]);
 
   const handleLogout = async () => {
     await logoutAdmin();
@@ -146,22 +213,25 @@ export default function AdminLayout() {
   };
 
   const currentPage = filteredGroups.flatMap(g => g.items).find(
-    i => location.pathname.startsWith(i.to)
+    i => isNavItemActive(i.to, location.pathname)
   );
 
-  const isItemActive = (path) => location.pathname.startsWith(path);
+  const isItemActive = (path) => isNavItemActive(path, location.pathname);
 
   /* Active bottom tabs */
   const MANAGE_PATHS  = ['/admin/accounts', '/admin/genealogy', '/admin/unilevel-tree', '/admin/generate-codes', '/admin/manage-codes'];
   const FINANCE_PATHS = ['/admin/encashment', '/admin/finance', '/admin/redeem', '/admin/hifive-package-claims', '/admin/rankings', '/admin/global-bonus', '/admin/cd-accounts'];
   const MORE_PATHS    = ['/admin/messages', '/admin/support', '/admin/applications', '/admin/news', '/admin/access-accounts', '/admin/change-password'];
 
+  const onArPage = location.pathname === '/admin/ar' || location.pathname.startsWith('/admin/ar/');
+
   const getBottomTabActive = (item) => {
     if (item.id === 'home')    return location.pathname === '/admin/dashboard';
     if (item.id === 'manage')  return MANAGE_PATHS.some(p => location.pathname.startsWith(p));
     if (item.id === 'finance') return FINANCE_PATHS.some(p => location.pathname.startsWith(p));
     if (item.id === 'vouchers')return location.pathname.startsWith('/admin/voucher-management');
-    if (item.id === 'more')    return MORE_PATHS.some(p => location.pathname.startsWith(p));
+    if (item.id === 'ar')      return onArPage;
+    if (item.id === 'more')    return onArPage || MORE_PATHS.some(p => location.pathname.startsWith(p));
     return false;
   };
 
@@ -217,14 +287,25 @@ export default function AdminLayout() {
                 {group.label}
               </p>
               <div className="space-y-0.5">
-                {group.items.map((item) => (
-                  <NavLink key={item.to} to={item.to}
-                    onClick={() => setSidebarOpen(false)}
-                    className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
-                    <item.icon className="size-[18px] flex-shrink-0" />
-                    {item.label}
-                  </NavLink>
-                ))}
+                {group.items.map((item) => {
+                  const active = isNavItemActive(item.to, location.pathname);
+                  const approvalBadge = item.to === '/admin/ar/approvals' && pendingApprovals > 0;
+                  return (
+                    <Link key={item.to} to={item.to}
+                      onClick={() => setSidebarOpen(false)}
+                      aria-current={active ? 'page' : undefined}
+                      className={`nav-item${active ? ' active' : ''}`}>
+                      <item.icon className="size-[18px] flex-shrink-0" />
+                      {item.label}
+                      {approvalBadge && (
+                        <span className="portal-accent-chip ml-auto min-w-[22px] rounded-full px-1.5 text-center text-[11px] font-bold leading-5 tabular-nums"
+                          aria-label={`${pendingApprovals} awaiting approval`}>
+                          {pendingApprovals > 99 ? '99+' : pendingApprovals}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -412,6 +493,36 @@ export default function AdminLayout() {
         <div className="drawer-bottom-padding" />
       </div>
 
+      {/* ══ AR DRAWER (cashier) ═══════════════════════════════ */}
+      <div className={`admin-drawer lg:hidden ${activeDrawer === 'ar' ? 'open' : ''}`}>
+        <div className="drawer-handle-bar" />
+        <div className="flex items-center justify-between px-5 pb-4">
+          <div>
+            <p className="text-[10.5px] font-bold uppercase tracking-[0.14em] mb-0.5"
+              style={{ color: 'var(--portal-gold-text)' }}>Receipts</p>
+            <h3 className="text-[15px] font-semibold" style={{ color: 'var(--portal-title)' }}>
+              Acknowledgement Receipts
+            </h3>
+          </div>
+          <button onClick={() => setActiveDrawer(null)}
+            className="p-2 rounded-xl portal-card-muted hover:bg-white/5 transition-colors"
+            type="button">
+            <HiOutlineX className="size-5" />
+          </button>
+        </div>
+        <div className="px-4 pb-2 grid grid-cols-3 gap-2.5">
+          {arItems.map(item => (
+            <button key={item.to} type="button"
+              onClick={() => { navigate(item.to); setActiveDrawer(null); }}
+              className={`drawer-nav-tile ${isItemActive(item.to) ? 'active' : ''}`}>
+              <item.icon className="size-[22px] flex-shrink-0" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="drawer-bottom-padding" />
+      </div>
+
       {/* ══ MORE DRAWER ═══════════════════════════════════════ */}
       <div className={`admin-drawer lg:hidden ${activeDrawer === 'more' ? 'open' : ''}`}>
         <div className="drawer-handle-bar" />
@@ -429,7 +540,7 @@ export default function AdminLayout() {
             <HiOutlineX className="size-5" />
           </button>
         </div>
-        <div className="px-4 grid grid-cols-3 gap-2.5 pb-3">
+        <div className="px-4 grid grid-cols-3 gap-2.5 pb-3 overflow-y-auto" style={{ maxHeight: '44vh' }}>
           {moreItems.map(item => (
             <button key={item.to} type="button"
               onClick={() => { navigate(item.to); setActiveDrawer(null); }}

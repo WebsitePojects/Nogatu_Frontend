@@ -511,7 +511,7 @@ export default function VoucherManagement() {
 
         <div className="glass-card rounded-2xl px-4 py-3 min-w-[280px]">
           <p className="text-[11px] uppercase tracking-[0.18em]" style={{ color: 'rgba(212,175,55,0.72)' }}>Cashier Access</p>
-          <p className="mt-2 text-sm text-white">Voucher management stays active, while manage codes and generate codes remain available for cashier accounts.</p>
+          <p className="portal-card-text mt-2 text-sm">Cashiers record voucher availments here and create Acknowledgement Receipts under Receipts (AR). Generate Codes and Manage Codes are for Super Admin and BOD.</p>
         </div>
       </div>
 

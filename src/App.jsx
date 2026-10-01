@@ -55,6 +55,12 @@ const CDAccounts = lazy(() => import('./pages/admin/CDAccounts'));
 const Finance = lazy(() => import('./pages/admin/Finance'));
 const VoucherManagement = lazy(() => import('./pages/admin/VoucherManagement'));
 const VoucherGrant = lazy(() => import('./pages/admin/VoucherGrant'));
+const ArNew = lazy(() => import('./pages/admin/ar/ArNew'));
+const ArList = lazy(() => import('./pages/admin/ar/ArList'));
+const ArDetail = lazy(() => import('./pages/admin/ar/ArDetail'));
+const ArApprovals = lazy(() => import('./pages/admin/ar/ArApprovals'));
+const ArReports = lazy(() => import('./pages/admin/ar/ArReports'));
+const ArSettings = lazy(() => import('./pages/admin/ar/ArSettings'));
 const Applications = lazy(() => import('./pages/admin/Applications'));
 const AccessAccounts = lazy(() => import('./pages/admin/AccessAccounts'));
 
@@ -107,7 +113,7 @@ function ProtectedAdminRoles({ allowed, children }) {
 
   const rights = Number(admin.rights || 0);
   if (!allowed.includes(rights)) {
-    const fallback = rights === 2 ? '/admin/voucher-management' : '/admin/dashboard';
+    const fallback = rights === 2 ? '/admin/ar/new' : '/admin/dashboard';
     return <Navigate to={fallback} replace />;
   }
 
@@ -189,6 +195,13 @@ export default function App() {
               path="voucher-management"
               element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherManagement /></ProtectedAdminRoles>}
             />
+            {/* AR (Acknowledgement Receipt). Guards mirror routes/admin/ar.js; the server is the authority. */}
+            <Route path="ar" element={<ProtectedAdminRoles allowed={[1, 2, 3]}><ArList /></ProtectedAdminRoles>} />
+            <Route path="ar/new" element={<ProtectedAdminRoles allowed={[1, 2]}><ArNew /></ProtectedAdminRoles>} />
+            <Route path="ar/approvals" element={<ProtectedAdminRoles allowed={[1]}><ArApprovals /></ProtectedAdminRoles>} />
+            <Route path="ar/reports" element={<ProtectedAdminRoles allowed={[1, 3]}><ArReports /></ProtectedAdminRoles>} />
+            <Route path="ar/settings" element={<ProtectedAdminRoles allowed={[1]}><ArSettings /></ProtectedAdminRoles>} />
+            <Route path="ar/:id" element={<ProtectedAdminRoles allowed={[1, 2, 3]}><ArDetail /></ProtectedAdminRoles>} />
             <Route
               path="voucher-management/:voucherId"
               element={<ProtectedAdminRoles allowed={[1, 2, 3]}><VoucherManagement /></ProtectedAdminRoles>}
