@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
-  arApi, MODE_LABELS, PAYMENT_LABELS, PageHeader, ConfirmDialog, ErrorState, peso, formatArNo, formatDate, errorText, useIntentKey,
+  arApi, MODE_LABELS, PAYMENT_LABELS, PageHeader, ConfirmDialog, ErrorState, PartChip, peso, formatArNo, formatDate, errorText, useIntentKey,
   BTN_SUCCESS, BTN_SECONDARY, FOCUS_RING, MONEY, AR_NO,
 } from './arShared';
 
@@ -134,6 +134,8 @@ export default function ArApprovals() {
                 <tr key={r.id} className="portal-zebra-row">
                   <td className="px-4 py-3">
                     <Link to={`/admin/ar/${r.id}`} className={`portal-gold-text ${AR_NO} rounded font-semibold hover:underline ${FOCUS_RING}`}>{formatArNo(r.ar_no)}</Link>
+                    {/* Parts of one order are approved one by one; the label keeps them recognisable as a set. */}
+                    {r.split_count ? <span className="mt-1 block"><PartChip part={r.split_part} count={r.split_count} /></span> : null}
                     {r.release_error && <p className="portal-danger-text mt-1 max-w-xs text-xs">Last attempt failed: {r.release_error}</p>}
                   </td>
                   <td className="portal-card-text px-4 py-3 whitespace-nowrap">{formatDate(r.created_at)}</td>

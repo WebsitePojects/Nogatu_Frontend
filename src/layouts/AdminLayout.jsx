@@ -147,10 +147,12 @@ export default function AdminLayout() {
 
   const showSupportBadge = canSeeSupport && !onSupportPage && supportUnread > 0;
 
-  /* AR approvals badge (Super Admin only). Convenience only: fails silently, hidden at 0.
-     Fetched on mount, then every minute while the tab is visible, on returning to the tab, and when
-     leaving the approvals page (where the count changes). Not on every navigation. */
+  /* AR badges (Super Admin only): ARs awaiting approval, and ARs a cashier flagged for review.
+     Convenience only: fail silently, hidden at 0. Fetched on mount, then every minute while the tab is
+     visible, on returning to the tab, and when leaving a page where they change (approvals, an AR's
+     detail page). Not on every navigation. */
   const [pendingApprovals, setPendingApprovals] = useState(0);
+  const [openFlags, setOpenFlags] = useState(0);
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
@@ -161,6 +163,9 @@ export default function AdminLayout() {
     if (rights !== 1) return;
     api.get('/admin/ar/receipts', { params: { status: 'pending_approval', limit: 1 } })
       .then((res) => { if (mountedRef.current) setPendingApprovals(Number(res.data?.total || 0)); })
+      .catch(() => { /* a badge must never raise an error toast */ });
+    api.get('/admin/ar/receipts', { params: { flagged: '1', limit: 1 } })
+      .then((res) => { if (mountedRef.current) setOpenFlags(Number(res.data?.total || 0)); })
       .catch(() => { /* a badge must never raise an error toast */ });
   }, [rights]);
 
@@ -180,9 +185,15 @@ export default function AdminLayout() {
   useEffect(() => {
     const prev = prevPathRef.current;
     prevPathRef.current = location.pathname;
-    const APPROVALS = '/admin/ar/approvals';
-    if (prev.startsWith(APPROVALS) && !location.pathname.startsWith(APPROVALS)) refreshApprovals();
+    const changesCounts = (path) => path.startsWith('/admin/ar/approvals') || /^\/admin\/ar\/\d+/.test(path);
+    if (prev !== location.pathname && changesCounts(prev)) refreshApprovals();
   }, [location.pathname, refreshApprovals]);
+
+  const arBadge = (to) => {
+    if (to === '/admin/ar/approvals' && pendingApprovals > 0) return { count: pendingApprovals, label: 'awaiting approval' };
+    if (to === '/admin/ar' && openFlags > 0) return { count: openFlags, label: 'flagged for review' };
+    return null;
+  };
 
   /* Role-filter sidebar */
   const filteredGroups = useMemo(() => NAV_GROUPS
@@ -289,7 +300,7 @@ export default function AdminLayout() {
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const active = isNavItemActive(item.to, location.pathname);
-                  const approvalBadge = item.to === '/admin/ar/approvals' && pendingApprovals > 0;
+                  const badge = arBadge(item.to);
                   return (
                     <Link key={item.to} to={item.to}
                       onClick={() => setSidebarOpen(false)}
@@ -297,10 +308,10 @@ export default function AdminLayout() {
                       className={`nav-item${active ? ' active' : ''}`}>
                       <item.icon className="size-[18px] flex-shrink-0" />
                       {item.label}
-                      {approvalBadge && (
+                      {badge && (
                         <span className="portal-accent-chip ml-auto min-w-[22px] rounded-full px-1.5 text-center text-[11px] font-bold leading-5 tabular-nums"
-                          aria-label={`${pendingApprovals} awaiting approval`}>
-                          {pendingApprovals > 99 ? '99+' : pendingApprovals}
+                          aria-label={`${badge.count} ${badge.label}`}>
+                          {badge.count > 99 ? '99+' : badge.count}
                         </span>
                       )}
                     </Link>
@@ -454,9 +465,15 @@ export default function AdminLayout() {
           {manageItems.map(item => (
             <button key={item.to} type="button"
               onClick={() => { navigate(item.to); setActiveDrawer(null); }}
-              className={`drawer-nav-tile ${isItemActive(item.to) ? 'active' : ''}`}>
+              className={`drawer-nav-tile relative ${isItemActive(item.to) ? 'active' : ''}`}>
               <item.icon className="size-[22px] flex-shrink-0" />
               <span>{item.label}</span>
+              {arBadge(item.to) && (
+                <span className="portal-accent-chip absolute right-2 top-2 min-w-[22px] rounded-full px-1.5 text-center text-[11px] font-bold leading-5 tabular-nums"
+                  aria-label={`${arBadge(item.to).count} ${arBadge(item.to).label}`}>
+                  {arBadge(item.to).count > 99 ? '99+' : arBadge(item.to).count}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -484,9 +501,15 @@ export default function AdminLayout() {
           {financeItems.map(item => (
             <button key={item.to} type="button"
               onClick={() => { navigate(item.to); setActiveDrawer(null); }}
-              className={`drawer-nav-tile ${isItemActive(item.to) ? 'active' : ''}`}>
+              className={`drawer-nav-tile relative ${isItemActive(item.to) ? 'active' : ''}`}>
               <item.icon className="size-[22px] flex-shrink-0" />
               <span>{item.label}</span>
+              {arBadge(item.to) && (
+                <span className="portal-accent-chip absolute right-2 top-2 min-w-[22px] rounded-full px-1.5 text-center text-[11px] font-bold leading-5 tabular-nums"
+                  aria-label={`${arBadge(item.to).count} ${arBadge(item.to).label}`}>
+                  {arBadge(item.to).count > 99 ? '99+' : arBadge(item.to).count}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -514,9 +537,15 @@ export default function AdminLayout() {
           {arItems.map(item => (
             <button key={item.to} type="button"
               onClick={() => { navigate(item.to); setActiveDrawer(null); }}
-              className={`drawer-nav-tile ${isItemActive(item.to) ? 'active' : ''}`}>
+              className={`drawer-nav-tile relative ${isItemActive(item.to) ? 'active' : ''}`}>
               <item.icon className="size-[22px] flex-shrink-0" />
               <span>{item.label}</span>
+              {arBadge(item.to) && (
+                <span className="portal-accent-chip absolute right-2 top-2 min-w-[22px] rounded-full px-1.5 text-center text-[11px] font-bold leading-5 tabular-nums"
+                  aria-label={`${arBadge(item.to).count} ${arBadge(item.to).label}`}>
+                  {arBadge(item.to).count > 99 ? '99+' : arBadge(item.to).count}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -544,9 +573,15 @@ export default function AdminLayout() {
           {moreItems.map(item => (
             <button key={item.to} type="button"
               onClick={() => { navigate(item.to); setActiveDrawer(null); }}
-              className={`drawer-nav-tile ${isItemActive(item.to) ? 'active' : ''}`}>
+              className={`drawer-nav-tile relative ${isItemActive(item.to) ? 'active' : ''}`}>
               <item.icon className="size-[22px] flex-shrink-0" />
               <span>{item.label}</span>
+              {arBadge(item.to) && (
+                <span className="portal-accent-chip absolute right-2 top-2 min-w-[22px] rounded-full px-1.5 text-center text-[11px] font-bold leading-5 tabular-nums"
+                  aria-label={`${arBadge(item.to).count} ${arBadge(item.to).label}`}>
+                  {arBadge(item.to).count > 99 ? '99+' : arBadge(item.to).count}
+                </span>
+              )}
             </button>
           ))}
         </div>

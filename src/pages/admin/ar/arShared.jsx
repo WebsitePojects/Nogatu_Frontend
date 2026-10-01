@@ -39,6 +39,55 @@ export const formatDate = (value) => {
 
 export const errorText = (err, fallback) => err?.response?.data?.error || fallback;
 
+// Mirrors services/ar/arPricing.js for previews only; the server enforces both limits.
+export const MAX_CODES_PER_AR = 500;
+export const MAX_SPLIT_PARTS = 10;
+
+/**
+ * The split the server makes for a big order (arPricing.js splitOrder): merge by product, ascending
+ * product order, fill each part to 500 codes before starting the next. One product may span parts.
+ */
+export function planSplit(lines) {
+  const merged = new Map();
+  for (const { producttype, qty } of lines) merged.set(producttype, (merged.get(producttype) || 0) + qty);
+  const parts = [];
+  let current = [];
+  let room = MAX_CODES_PER_AR;
+  for (const [producttype, qty] of [...merged].sort((a, b) => a[0] - b[0])) {
+    let left = qty;
+    while (left > 0) {
+      if (room === 0) { parts.push(current); current = []; room = MAX_CODES_PER_AR; }
+      const take = Math.min(left, room);
+      current.push({ producttype, qty: take });
+      left -= take;
+      room -= take;
+    }
+  }
+  if (current.length) parts.push(current);
+  return parts;
+}
+
+// "300 gold", "300x gold", "300 x gold", "300*gold" | "gold 300", "gold x300", "gold x 300", "gold*300".
+// The x must be followed by a space (or be a *), so a name such as "Xtra" is never read as a multiplier.
+const QTY_FIRST = /^(\d+)\s*(?:[x*]\s+|\*|\s+)(\S.*)$/i;
+// Lazy name: "gold x 300" must read as gold, not "gold x".
+const QTY_LAST = /^(.*?\S)\s*(?:\b[x*]\s*|\s)(\d+)$/i;
+
+/**
+ * Reads a quantity typed together with an item name. Returns every reading (qty first, qty last) so
+ * the caller can keep the one whose name matches a product: "6 in 1 coffee 2" is ambiguous until
+ * the price list says which name exists. Plain text returns [] and keeps Enter's add-one behaviour.
+ */
+export function parseQuickAdd(text) {
+  const s = String(text || '').trim();
+  const readings = [];
+  const first = s.match(QTY_FIRST);
+  if (first) readings.push({ qty: Number(first[1]), term: first[2].trim() });
+  const last = s.match(QTY_LAST);
+  if (last) readings.push({ qty: Number(last[2]), term: last[1].trim() });
+  return readings.filter((r) => Number.isSafeInteger(r.qty) && r.qty >= 1 && r.term);
+}
+
 /*
  * Shared control styles so every AR screen looks and behaves the same.
  * Primary = gold-btn (as Manage Codes' Search), secondary = portal-muted-button, plus danger/success.
@@ -118,6 +167,16 @@ const STATUS_STYLE = {
   void: { label: 'Void', className: 'portal-danger-chip' },
 };
 
+/** "Part 2 of 3" label for one AR of a split order; nothing for a normal AR. */
+export function PartChip({ part, count, short = false }) {
+  if (!part || !count) return null;
+  return (
+    <span className="portal-info-chip rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
+      {short ? `Part ${part}/${count}` : `Part ${part} of ${count}`}
+    </span>
+  );
+}
+
 export function StatusChip({ status, legacy = false }) {
   const s = STATUS_STYLE[status] || { label: status, className: 'portal-info-chip' };
   return (
@@ -192,6 +251,8 @@ export const arApi = {
   create: (body, key) => api.post('/admin/ar/receipts', body, { headers: { 'Idempotency-Key': key } }).then((r) => r.data),
   approve: (id, key) => api.post(`/admin/ar/receipts/${id}/approve`, {}, { headers: { 'Idempotency-Key': key } }).then((r) => r.data),
   void: (id, reason, key) => api.post(`/admin/ar/receipts/${id}/void`, { reason }, { headers: { 'Idempotency-Key': key } }).then((r) => r.data),
+  flag: (id, reason, key) => api.post(`/admin/ar/receipts/${id}/flag`, { reason }, { headers: { 'Idempotency-Key': key } }).then((r) => r.data),
+  resolveFlag: (id, body, key) => api.post(`/admin/ar/receipts/${id}/flag/resolve`, body, { headers: { 'Idempotency-Key': key } }).then((r) => r.data),
   print: (id) => api.post(`/admin/ar/receipts/${id}/print`).then((r) => r.data),
   legacy: (body, key) => api.post('/admin/ar/legacy', body, { headers: { 'Idempotency-Key': key } }).then((r) => r.data),
   sequence: () => api.get('/admin/ar/sequence').then((r) => r.data),
@@ -210,7 +271,7 @@ export const arApi = {
  * Callers pass inline arrows for onCancel, so the latest props live in refs and the effect depends on
  * `open` only: focus moves to the confirm button on the open transition, never again while typing.
  */
-export function ConfirmDialog({ open, title, children, confirmLabel, confirmClass = BTN_PRIMARY, busy, onConfirm, onCancel }) {
+export function ConfirmDialog({ open, title, children, confirmLabel, confirmClass = BTN_PRIMARY, busy, confirmDisabled = false, onConfirm, onCancel }) {
   const confirmRef = useRef(null);
   const busyRef = useRef(busy);
   const cancelRef = useRef(onCancel);
@@ -231,7 +292,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, confirmClas
         <div className="portal-modal-text mt-3 space-y-2 text-sm">{children}</div>
         <div className="mt-6 flex justify-end gap-2">
           <button type="button" className={BTN_SECONDARY} onClick={onCancel} disabled={busy}>Cancel</button>
-          <button ref={confirmRef} type="button" className={confirmClass} onClick={onConfirm} disabled={busy} aria-busy={busy}>
+          <button ref={confirmRef} type="button" className={confirmClass} onClick={onConfirm} disabled={busy || confirmDisabled} aria-busy={busy}>
             {busy ? 'Working...' : confirmLabel}
           </button>
         </div>

@@ -1,13 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { HiOutlineArrowLeft, HiOutlinePrinter, HiOutlinePlus } from 'react-icons/hi';
+import { HiOutlineArrowLeft, HiOutlinePrinter, HiOutlinePlus, HiOutlineFlag } from 'react-icons/hi';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
-  arApi, MODE_LABELS, PAYMENT_LABELS, STOCKIST_LABELS, PageHeader, StatusChip, ConfirmDialog, ErrorState,
+  arApi, MODE_LABELS, PAYMENT_LABELS, STOCKIST_LABELS, PageHeader, StatusChip, PartChip, ConfirmDialog, ErrorState,
   peso, formatArNo, formatDate, errorText, useIntentKey,
   BTN_PRIMARY, BTN_SECONDARY, BTN_DANGER, FOCUS_RING, MONEY, AR_NO,
 } from './arShared';
+
+/*
+ * The four write actions on this page share one dialog. `field` is what the dialog asks for, and the
+ * text is required for every one of them: a void, a flag and a decision all need a reason on record.
+ */
+const ACTIONS = {
+  void: { title: 'Void AR', confirm: 'Void AR', field: 'Reason', max: 255, danger: true, done: 'AR voided' },
+  flag: { title: 'Flag a mistake on AR', confirm: 'Flag for review', field: 'What is wrong?', max: 500, danger: false, done: 'Flagged. A Super Admin will review it.' },
+  keep: { title: 'Keep AR as is', confirm: 'Keep and close flag', field: 'Note', max: 500, danger: false, done: 'Flag closed. The AR stays as it is.' },
+  resolveVoid: { title: 'Void flagged AR', confirm: 'Void AR', field: 'Reason', max: 255, danger: true, done: 'AR voided and flag closed' },
+};
 
 /*
  * Print layout lives in a plain <style> block so it works with any printer the browser can reach.
@@ -28,8 +39,8 @@ export default function ArDetail() {
   const rights = Number(admin?.rights || 0);
   const [ar, setAr] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [voidOpen, setVoidOpen] = useState(false);
-  const [voidReason, setVoidReason] = useState('');
+  const [dialog, setDialog] = useState(null); // a key of ACTIONS while a dialog is open
+  const [dialogText, setDialogText] = useState('');
   const [busy, setBusy] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -73,18 +84,29 @@ export default function ArDetail() {
     setTimeout(() => { window.print(); style.remove(); }, 50);
   }
 
-  async function doVoid() {
-    if (busyRef.current || !voidReason.trim()) return;
+  function openDialog(kind) {
+    setDialogText('');
+    setDialog(kind);
+  }
+
+  async function runAction() {
+    const text = dialogText.trim();
+    if (busyRef.current || !dialog || !text) return;
     busyRef.current = true;
     setBusy(true);
+    const key = intent.keyFor({ id, dialog, text });
     try {
-      await arApi.void(id, voidReason.trim(), intent.keyFor({ id, voidReason: voidReason.trim() }));
+      if (dialog === 'void') await arApi.void(id, text, key);
+      else if (dialog === 'flag') await arApi.flag(id, text, key);
+      else await arApi.resolveFlag(id, { resolution: dialog === 'keep' ? 'kept' : 'voided', note: text }, key);
       intent.reset();
-      toast.success('AR voided');
-      setVoidOpen(false);
+      toast.success(ACTIONS[dialog].done);
+      setDialog(null);
       await load();
     } catch (err) {
-      toast.error(errorText(err, 'Could not void this AR'));
+      toast.error(errorText(err, 'That did not go through'));
+      // Someone else changed the AR (already flagged, already resolved, already void): show what is true now.
+      if (err?.response?.status === 409) { setDialog(null); await load(); }
     } finally {
       busyRef.current = false;
       setBusy(false);
@@ -96,11 +118,19 @@ export default function ArDetail() {
   if (!ar) return <p className="portal-danger-text p-6 text-sm">AR not found.</p>;
 
   // The admin session exposes username (not the numeric id); the server re-checks ownership by id.
-  const canVoid = ar.status === 'pending_approval' && (rights === 1 || (rights === 2 && ar.prepared_by === admin?.username));
+  // Super Admin may void any AR that is not already void; a cashier only a pending AR they prepared.
+  const canVoid = ar.status !== 'void'
+    && (rights === 1 || (rights === 2 && ar.status === 'pending_approval' && ar.prepared_by === admin?.username));
+  const openFlag = ar.open_flag;
+  const pastFlags = (ar.flags || []).filter((f) => !f.is_open);
+  const codesReleased = Number(ar.codes_released || 0);
   const isReprint = Number(ar.print_count) > 1;
   const canSell = rights === 1 || rights === 2;
   // BOD (rights 3) is read-only, and printing writes the print counter.
   const canPrint = canSell;
+  // A finished sale cannot be edited; flagging puts the mistake in front of a Super Admin instead.
+  const canFlag = canSell && ar.status === 'completed' && !openFlag;
+  const action = dialog ? ACTIONS[dialog] : null;
 
   return (
     <div>
@@ -108,7 +138,10 @@ export default function ArDetail() {
       <Link to="/admin/ar" className={`portal-gold-text -ml-1 mb-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-1 text-sm font-semibold hover:underline ${FOCUS_RING}`}>
         <HiOutlineArrowLeft aria-hidden="true" /> All ARs
       </Link>
-      <PageHeader title={<>AR <span className={AR_NO}>{formatArNo(ar.ar_no)}</span></>} subtitle={`${ar.center_name} - ${MODE_LABELS[ar.mode]}`}>
+      <PageHeader
+        title={<span className="inline-flex flex-wrap items-center gap-2">AR <span className={AR_NO}>{formatArNo(ar.ar_no)}</span><PartChip part={ar.split_part} count={ar.split_count} /></span>}
+        subtitle={`${ar.center_name} - ${MODE_LABELS[ar.mode]}`}
+      >
         {canPrint && (
           <>
             <button type="button" onClick={() => print('A4')} disabled={printing} aria-busy={printing} className={BTN_SECONDARY}>
@@ -119,8 +152,13 @@ export default function ArDetail() {
             </button>
           </>
         )}
+        {canFlag && (
+          <button type="button" onClick={() => openDialog('flag')} className={BTN_SECONDARY}>
+            <HiOutlineFlag aria-hidden="true" /> Flag a mistake
+          </button>
+        )}
         {canVoid && (
-          <button type="button" onClick={() => setVoidOpen(true)} className={BTN_DANGER}>Void</button>
+          <button type="button" onClick={() => openDialog('void')} className={BTN_DANGER}>Void</button>
         )}
         {canSell && (
           <Link to="/admin/ar/new" className={BTN_PRIMARY}>
@@ -128,6 +166,33 @@ export default function ArDetail() {
           </Link>
         )}
       </PageHeader>
+
+      {ar.parts?.length > 1 && (
+        <nav aria-label="Parts of this order" className="mb-5 flex flex-wrap items-center gap-2 text-sm">
+          <span className="portal-card-muted">This order was saved as {ar.parts.length} ARs:</span>
+          {ar.parts.map((p) => (Number(p.id) === Number(ar.id)
+            ? <span key={p.id} aria-current="page" className={`portal-accent-chip rounded-full px-3 py-1 font-semibold ${AR_NO}`}>{formatArNo(p.ar_no)}</span>
+            : (
+              <Link key={p.id} to={`/admin/ar/${p.id}`} className={`portal-muted-button rounded-full px-3 py-1 font-semibold hover:underline ${AR_NO} ${FOCUS_RING}`}>
+                {formatArNo(p.ar_no)}
+              </Link>
+            )))}
+        </nav>
+      )}
+
+      {openFlag && (
+        <div className="portal-warning-chip mb-5 rounded-xl p-4 text-sm" role="status">
+          <p className="flex items-center gap-2 font-semibold"><HiOutlineFlag aria-hidden="true" /> Flagged for review</p>
+          <p className="mt-1">{openFlag.reason}</p>
+          <p className="mt-1 text-xs opacity-80">Flagged by {openFlag.raised_by} on {formatDate(openFlag.raised_at)}. Nothing on this AR has been changed.</p>
+          {rights === 1 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" onClick={() => openDialog('keep')} className={BTN_SECONDARY}>Keep as is</button>
+              <button type="button" onClick={() => openDialog('resolveVoid')} className={BTN_DANGER}>Void AR</button>
+            </div>
+          )}
+        </div>
+      )}
 
       {ar.status === 'pending_approval' && (
         <div className="portal-info-box mb-5 rounded-xl p-4 text-sm">
@@ -202,19 +267,58 @@ export default function ArDetail() {
         {ar.notes && <p className="portal-card-muted mt-3 text-xs">Notes: {ar.notes}</p>}
       </div>
 
+      {pastFlags.length > 0 && (
+        <section className="glass-card mt-5 rounded-2xl p-5" aria-labelledby="ar-flag-history">
+          <h2 id="ar-flag-history" className="portal-card-title mb-3 font-semibold">Flag history</h2>
+          <ul className="space-y-3 text-sm">
+            {pastFlags.map((f) => (
+              <li key={f.id} className="portal-row-divider border-b pb-3 last:border-b-0 last:pb-0">
+                <p className="portal-card-text">{f.reason}</p>
+                <p className="portal-card-muted mt-0.5 text-xs">Flagged by {f.raised_by} on {formatDate(f.raised_at)}</p>
+                <p className="portal-card-muted mt-0.5 text-xs">
+                  <span className={f.resolution === 'voided' ? 'portal-danger-text font-semibold' : 'portal-success-text font-semibold'}>
+                    {f.resolution === 'voided' ? 'Voided' : 'Kept as is'}
+                  </span>
+                  {' '}by {f.resolved_by} on {formatDate(f.resolved_at)}{f.resolution_note ? `: ${f.resolution_note}` : ''}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <ConfirmDialog
-        open={voidOpen}
-        title={`Void AR ${formatArNo(ar.ar_no)}?`}
-        confirmLabel="Void AR"
-        confirmClass={BTN_DANGER}
+        open={Boolean(action)}
+        title={action ? `${action.title} ${formatArNo(ar.ar_no)}?` : ''}
+        confirmLabel={action?.confirm}
+        confirmClass={action?.danger ? BTN_DANGER : BTN_PRIMARY}
         busy={busy}
-        onCancel={() => setVoidOpen(false)}
-        onConfirm={doVoid}
+        confirmDisabled={!dialogText.trim()}
+        onCancel={() => setDialog(null)}
+        onConfirm={runAction}
       >
-        <p>No codes have been released for this AR. Voiding it cancels the receipt; the number stays used and is shown as void in reports.</p>
-        <label className="label mt-3 block" htmlFor="void-reason">Reason <span className="portal-required">*</span></label>
-        <input id="void-reason" className="glass-input mt-1.5 w-full rounded-xl px-4 py-2.5 text-sm" value={voidReason}
-          onChange={(e) => setVoidReason(e.target.value)} maxLength={255} placeholder="e.g. wrong buyer" disabled={busy} />
+        {(dialog === 'void' || dialog === 'resolveVoid') && (
+          ar.status === 'pending_approval'
+            ? <p>No codes have been released for this AR. Voiding it cancels the receipt; the number stays used and is shown as void in reports.</p>
+            : codesReleased > 0
+              ? (
+                <p className="portal-danger-text font-semibold">
+                  {codesReleased} code{codesReleased === 1 ? '' : 's'} already released stay with {ar.recipient_username}. Voiding only removes this AR from
+                  reports; it does not take the codes back.
+                </p>
+              )
+              : <p>This AR is complete. Voiding removes it from reports; the number stays used and is shown as void.</p>
+        )}
+        {dialog === 'flag' && <p>This changes nothing on the AR. It puts the AR in front of a Super Admin, who decides whether to void it or keep it.</p>}
+        {dialog === 'keep' && <p>The AR stays exactly as it is and the flag is closed. The note is kept with the flag.</p>}
+        {action && (
+          <>
+            <label className="label mt-3 block" htmlFor="ar-action-text">{action.field} <span className="portal-required">*</span></label>
+            <textarea id="ar-action-text" rows={3} className="glass-input mt-1.5 w-full rounded-xl px-4 py-2.5 text-sm" value={dialogText}
+              onChange={(e) => setDialogText(e.target.value)} maxLength={action.max} disabled={busy}
+              placeholder={dialog === 'flag' ? 'e.g. quantity should have been 2, not 3' : ''} />
+          </>
+        )}
       </ConfirmDialog>
     </div>
   );

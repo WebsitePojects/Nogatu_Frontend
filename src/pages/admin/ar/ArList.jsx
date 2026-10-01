@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { HiOutlinePlus, HiOutlineSearch } from 'react-icons/hi';
+import { HiOutlinePlus, HiOutlineSearch, HiOutlineFlag } from 'react-icons/hi';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
-  arApi, MODE_LABELS, PageHeader, ErrorState, StatusChip, FilterPill, Pagination, peso, formatArNo, formatDate, errorText,
+  arApi, MODE_LABELS, PageHeader, ErrorState, StatusChip, PartChip, FilterPill, Pagination, peso, formatArNo, formatDate, errorText,
   BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, MONEY, AR_NO,
 } from './arShared';
 
 const PAGE = 50;
-const BLANK = { status: '', search: '', from: '', to: '' };
+const BLANK = { status: '', search: '', from: '', to: '', flagged: '' };
 const STATUS_FILTERS = [
   ['', 'All'],
   ['pending_approval', 'Awaiting approval'],
@@ -30,6 +30,7 @@ export default function ArList() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [pendingCount, setPendingCount] = useState(0);
+  const [flaggedCount, setFlaggedCount] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -51,15 +52,19 @@ export default function ArList() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Super Admin nudge: how many ARs are waiting. Silent on failure; it is a convenience, not data.
+  // Super Admin nudges: ARs waiting for approval and ARs flagged for review. Silent on failure; they
+  // are a convenience, not data. Re-read after every list load so resolving a flag clears its nudge.
   useEffect(() => {
     if (!isSuper) return undefined;
     let alive = true;
     arApi.receipts({ status: 'pending_approval', limit: 1 })
       .then((res) => { if (alive) setPendingCount(Number(res.total || 0)); })
       .catch(() => {});
+    arApi.receipts({ flagged: '1', limit: 1 })
+      .then((res) => { if (alive) setFlaggedCount(Number(res.total || 0)); })
+      .catch(() => {});
     return () => { alive = false; };
-  }, [isSuper]);
+  }, [isSuper, data]);
 
   function applyFilters(next) {
     setOffset(0);
@@ -96,6 +101,16 @@ export default function ArList() {
         </div>
       )}
 
+      {isSuper && flaggedCount > 0 && applied.flagged !== '1' && (
+        <div className="portal-warning-chip mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl p-3 text-sm" role="status">
+          <span className="flex items-center gap-2 font-semibold">
+            <HiOutlineFlag aria-hidden="true" />
+            {flaggedCount} AR{flaggedCount === 1 ? ' was' : 's were'} flagged by a cashier and need{flaggedCount === 1 ? 's' : ''} your decision
+          </span>
+          <button type="button" className={BTN_PRIMARY} onClick={() => applyFilters({ ...BLANK, flagged: '1' })}>Show flagged</button>
+        </div>
+      )}
+
       <form onSubmit={apply} className="glass-card mb-5 space-y-4 rounded-2xl p-4">
         <div>
           <label className="label" htmlFor="ar-search">Search</label>
@@ -113,6 +128,10 @@ export default function ArList() {
               {label}
             </FilterPill>
           ))}
+          <FilterPill active={filters.flagged === '1'} disabled={loading}
+            onClick={() => applyFilters({ ...filters, flagged: filters.flagged === '1' ? '' : '1' })}>
+            <span className="inline-flex items-center gap-1.5"><HiOutlineFlag aria-hidden="true" /> Flagged</span>
+          </FilterPill>
         </div>
 
         <div className="flex flex-wrap items-end gap-3">
@@ -171,13 +190,21 @@ export default function ArList() {
                     className={`portal-gold-text ${AR_NO} rounded font-semibold underline-offset-2 hover:underline ${FOCUS_RING}`}>
                     {formatArNo(r.ar_no)}
                   </Link>
+                  {r.split_count ? <span className="mt-1 block"><PartChip part={r.split_part} count={r.split_count} short /></span> : null}
                 </td>
                 <td className="portal-card-text px-4 py-3 whitespace-nowrap">{r.is_legacy ? String(r.business_date).slice(0, 10) : formatDate(r.created_at)}</td>
                 <td className="portal-card-text px-4 py-3">{r.buyer_name}{r.buyer_username ? <span className="portal-card-muted"> ({r.buyer_username})</span> : null}</td>
                 <td className="portal-card-text px-4 py-3">{MODE_LABELS[r.mode]}</td>
                 <td className="portal-card-text px-4 py-3">{r.center_name}</td>
                 <td className={`portal-card-title px-4 py-3 text-right font-semibold ${MONEY}`}>{peso(r.total)}</td>
-                <td className="px-4 py-3"><StatusChip status={r.status} legacy={Boolean(r.is_legacy)} /></td>
+                <td className="px-4 py-3">
+                  <StatusChip status={r.status} legacy={Boolean(r.is_legacy)} />
+                  {r.flag_reason && (
+                    <span title={r.flag_reason} className="portal-warning-chip mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
+                      <HiOutlineFlag aria-hidden="true" /> Flagged<span className="sr-only">: {r.flag_reason}</span>
+                    </span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
