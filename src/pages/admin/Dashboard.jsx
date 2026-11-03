@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
-import { HiOutlineUsers, HiOutlineCash, HiOutlineShoppingCart, HiOutlineSparkles, HiOutlineClock, HiOutlineBadgeCheck, HiOutlineReceiptTax, HiOutlineCalendar } from 'react-icons/hi';
+import { HiOutlineUsers, HiOutlineCash, HiOutlineShoppingCart, HiOutlineSparkles, HiOutlineClock, HiOutlineBadgeCheck, HiOutlineReceiptTax, HiOutlineCalendar, HiOutlineCreditCard } from 'react-icons/hi';
 
 const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -99,6 +99,19 @@ export default function AdminDashboard() {
       accentClass: 'bg-indigo-100/90 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-200',
       link: '/admin/accounts?monitorRange=month',
     },
+    {
+      label: 'Total Cash Balance',
+      // An older API omits the field; show a dash, never a confident zero.
+      value: data.totalCashBalance == null ? '\u2014' : `\u20B1${fmt(data.totalCashBalance)}`,
+      sub: data.membersWithCashBalance == null
+        ? 'Not available yet'
+        : `In ${Number(data.membersWithCashBalance).toLocaleString('en-US')} member wallets`,
+      icon: HiOutlineCreditCard,
+      iconGradient: 'linear-gradient(135deg, #065f46, #10b981)',
+      iconShadow: '0 10px 24px rgba(5,150,105,0.3)',
+      accentClass: 'bg-green-100/90 text-green-800 dark:bg-green-500/20 dark:text-green-200',
+      link: null,
+    },
   ];
 
   return (
@@ -128,7 +141,7 @@ export default function AdminDashboard() {
         {cards.map((card, i) => (
           <div
             key={i}
-            className="glass-card rounded-2xl p-6 group cursor-pointer hover:ring-1 hover:ring-amber-400/30 motion-safe:transition-all"
+            className={`glass-card rounded-2xl p-6 group motion-safe:transition-all ${card.link ? 'cursor-pointer hover:ring-1 hover:ring-amber-400/30' : ''}`}
             onClick={() => card.link && navigate(card.link)}
           >
             <div className="flex items-center justify-between mb-5">
